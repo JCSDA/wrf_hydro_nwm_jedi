@@ -1,0 +1,31 @@
+# Needed for TestGeometry
+Geometry:
+
+# + needed for TestState
+StateTest:
+  norm-file: 0.0
+  tolerance: 1.0e-12
+  date: 2018-04-15T00:00:00Z
+  StateGenerate:
+  StateFile:
+  norm-gen: 0.0
+
+# + needed for TestModel  
+Model:
+  name: WRF_HYDRO_NWM-JEDI
+
+ModelBias:
+
+State:
+
+ModelTest:
+  fclength:  P1D
+  finalnorm: 0.0
+  tolerance: 1e-12
+  testreforecast: true
+
+# + needed for TestInterface
+Variables:
+  variables: [ 'sea_surface_temperature']
+
+TestDate: 2018-04-15T00:00:00Z

@@ -1,0 +1,23 @@
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_hofx3d.x
+#                         SOURCES HofX3D.cc
+#                         LIBS    wrf_hydro_nwm-jedi )
+
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_forecast.x
+#                        SOURCES Forecast.cc
+#                        LIBS    wrf_hydro_nwm-jedi )
+
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_hofx.x
+#                        SOURCES HofX.cc
+#                        LIBS    wrf_hydro_nwm-jedi )
+
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_letkf.x
+#                        SOURCES LETKF.cc
+#                        LIBS    wrf_hydro_nwm-jedi )
+
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_staticbinit.x
+#                         SOURCES StaticBInit.cc
+#                         LIBS    wrf_hydro_nwm-jedi )
+
+# ecbuild_add_executable( TARGET  wrf_hydro_nwm-jedi_var.x
+#                         SOURCES Var.cc
+#                         LIBS    wrf_hydro_nwm-jedi )

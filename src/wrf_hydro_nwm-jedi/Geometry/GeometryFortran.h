@@ -1,0 +1,25 @@
+/*
+ * (C) Copyright 2019-2019 UCAR
+ *
+ * This software is licensed under the terms of the Apache Licence Version 2.0
+ * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+#ifndef WRF_HYDRO_NWM-JEDI_GEOMETRY_GEOMETRYFORTRAN_H_
+#define WRF_HYDRO_NWM-JEDI_GEOMETRY_GEOMETRYFORTRAN_H_
+
+#include "eckit/config/Configuration.h"
+
+namespace wrf_hydro_nwm-jedi {
+
+  typedef int F90geom;
+
+  extern "C" {
+    void wrf_hydro_nwm-jedi_geometry_setup_f90(F90geom &,
+                                    const eckit::Configuration * const *);
+    void wrf_hydro_nwm-jedi_geometry_clone_f90(F90geom &, const F90geom &);
+    void wrf_hydro_nwm-jedi_geometry_delete_f90(F90geom &);
+  }
+}  // namespace wrf_hydro_nwm-jedi
+
+#endif  // WRF_HYDRO_NWM-JEDI_GEOMETRY_GEOMETRYFORTRAN_H_
