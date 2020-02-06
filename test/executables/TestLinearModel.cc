@@ -8,13 +8,13 @@
  * does it submit to any jurisdiction.
  */
 
-#include "wrf_hydro_nwm-jedi/Traits.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/runs/Run.h"
 #include "test/interface/LinearModel.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  test::LinearModel<wrf_hydro_nwm-jedi::Traits> tests;
+  test::LinearModel<wrf_hydro_nwm_jedi::Traits> tests;
   run.execute(tests);
   return 0;
 }

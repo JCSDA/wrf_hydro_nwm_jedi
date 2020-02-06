@@ -5,13 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Traits.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/runs/Run.h"
 #include "oops/runs/StaticBInit.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  oops::StaticBInit<wrf_hydro_nwm-jedi::Traits> bmat;
+  oops::StaticBInit<wrf_hydro_nwm_jedi::Traits> bmat;
   run.execute(bmat);
   return 0;
 }
