@@ -92,7 +92,7 @@ endforeach()
 ################################################################################
 # Sources
 ################################################################################
-include( wrf_hydro_nwm_jedi_compiler_flags )
+include( wrf_hydro_nwm-jedi_compiler_flags )
 include_directories( ${WRF_HYDRO_NWM_JEDI_INCLUDE_DIRS} ${WRF_HYDRO_NWM_JEDI_EXTRA_INCLUDE_DIRS} )
 
 add_subdirectory( src )
