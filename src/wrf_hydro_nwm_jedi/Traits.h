@@ -5,20 +5,20 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_TRAITS_H_
-#define WRF_HYDRO_NWM-JEDI_TRAITS_H_
+#ifndef WRF_HYDRO_NWM_JEDI_TRAITS_H_
+#define WRF_HYDRO_NWM_JEDI_TRAITS_H_
 
 #include <string>
 
-// #include "wrf_hydro_nwm-jedi/Covariance/Covariance.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-// #include "wrf_hydro_nwm-jedi/GeometryIterator/GeometryIterator.h"
-// #include "wrf_hydro_nwm-jedi/GetValuesTraj/GetValuesTraj.h"
-// #include "wrf_hydro_nwm-jedi/Increment/Increment.h"
-// #include "wrf_hydro_nwm-jedi/ModelAux/ModelAuxCovariance.h"
-// #include "wrf_hydro_nwm-jedi/ModelAux/ModelAuxControl.h"
-// #include "wrf_hydro_nwm-jedi/ModelAux/ModelAuxIncrement.h"
-// #include "wrf_hydro_nwm-jedi/State/State.h"
+// #include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+// #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
+// #include "wrf_hydro_nwm_jedi/GetValuesTraj/GetValuesTraj.h"
+// #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+// #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
+// #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
+// #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxIncrement.h"
+// #include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "ioda/ObsSpace.h"
 #include "ioda/ObsVector.h"
@@ -31,24 +31,24 @@
 #include "ufo/ObsDiagnostics.h"
 #include "ufo/ObsOperator.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   struct Traits{
-    static std::string name() {return "wrf_hydro_nwm-jedi";}
-    static std::string nameCovar() {return "wrf_hydro_nwm-jediCovar";}
-    static std::string nameCovar4D() {return "wrf_hydro_nwm-jediCovar";}
+    static std::string name() {return "wrf_hydro_nwm_jedi";}
+    static std::string nameCovar() {return "wrf_hydro_nwm_jediCovar";}
+    static std::string nameCovar4D() {return "wrf_hydro_nwm_jediCovar";}
 
-    // Interfaces that wrf_hydro_nwm-jedi has to implement
+    // Interfaces that wrf_hydro_nwm_jedi has to implement
     // ---------------------------------------------------
-    // typedef wrf_hydro_nwm-jedi::Covariance          Covariance;
-    typedef wrf_hydro_nwm-jedi::Geometry            Geometry;
-    // typedef wrf_hydro_nwm-jedi::GeometryIterator    GeometryIterator;
-    // typedef wrf_hydro_nwm-jedi::GetValuesTraj       InterpolatorTraj;
-    // typedef wrf_hydro_nwm-jedi::Increment           Increment;
-    // typedef wrf_hydro_nwm-jedi::State               State;
-    // typedef wrf_hydro_nwm-jedi::ModelAuxCovariance  ModelAuxCovariance;
-    // typedef wrf_hydro_nwm-jedi::ModelAuxControl     ModelAuxControl;
-    // typedef wrf_hydro_nwm-jedi::ModelAuxIncrement   ModelAuxIncrement;
+    // typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
+    typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
+    // typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
+    // typedef wrf_hydro_nwm_jedi::GetValuesTraj       InterpolatorTraj;
+    // typedef wrf_hydro_nwm_jedi::Increment           Increment;
+    // typedef wrf_hydro_nwm_jedi::State               State;
+    // typedef wrf_hydro_nwm_jedi::ModelAuxCovariance  ModelAuxCovariance;
+    // typedef wrf_hydro_nwm_jedi::ModelAuxControl     ModelAuxControl;
+    // typedef wrf_hydro_nwm_jedi::ModelAuxIncrement   ModelAuxIncrement;
 
     // Interfaces that are already provided by JEDI
     typedef ufo::GeoVaLs              GeoVaLs;
@@ -62,6 +62,6 @@ namespace wrf_hydro_nwm-jedi {
     typedef ioda::ObsVector           ObsVector;
     template <typename DATA> using ObsDataVector = ioda::ObsDataVector<DATA>;
   };
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_TRAITS_H_
+#endif  // WRF_HYDRO_NWM_JEDI_TRAITS_H_

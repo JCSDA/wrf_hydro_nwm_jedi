@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-// #include "wrf_hydro_nwm-jedi/GeometryIterator/GeometryIterator.h"
-#include "wrf_hydro_nwm-jedi/Geometry/GeometryFortran.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+// #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
+#include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -21,20 +21,20 @@ namespace wrf_hydro_nwm-jedi {
                      const eckit::mpi::Comm & comm)
     : comm_(comm) {
     const eckit::Configuration * configc = &conf;
-    wrf_hydro_nwm-jedi_geometry_setup_f90(keyGeom_, &configc);
+    wrf_hydro_nwm_jedi_geometry_setup_f90(keyGeom_, &configc);
   }
 
 // ----------------------------------------------------------------------------
 
   Geometry::Geometry(const Geometry & other)
     : comm_(other.comm_) {
-    wrf_hydro_nwm-jedi_geometry_clone_f90(keyGeom_, other.keyGeom_);
+    wrf_hydro_nwm_jedi_geometry_clone_f90(keyGeom_, other.keyGeom_);
   }
 
 // ----------------------------------------------------------------------------
 
   Geometry::~Geometry() {
-    wrf_hydro_nwm-jedi_geometry_delete_f90(keyGeom_);
+    wrf_hydro_nwm_jedi_geometry_delete_f90(keyGeom_);
   }
 
 // ----------------------------------------------------------------------------
@@ -65,4 +65,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
