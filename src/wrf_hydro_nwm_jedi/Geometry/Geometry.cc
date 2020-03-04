@@ -40,8 +40,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Geometry::print(std::ostream & os) const {
-    util::abor1_cpp("Geometry::print() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Geometry::print() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     os << "Geometry: "
        << "(TODO, print diagnostic info about the geometry here)"
        << std::endl;
