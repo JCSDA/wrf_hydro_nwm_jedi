@@ -51,7 +51,7 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  boost::shared_ptr<const Geometry> Fields::geometry() const {
+  std::shared_ptr<const Geometry> Fields::geometry() const {
     return geom_;
   }
 

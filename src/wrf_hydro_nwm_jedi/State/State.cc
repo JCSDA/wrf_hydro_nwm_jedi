@@ -24,30 +24,35 @@ namespace wrf_hydro_nwm_jedi {
   State::State(const Geometry & geom, const oops::Variables & vars,
                const eckit::Configuration & conf)
     : fields_(new Fields(geom, vars, conf)) {
-    util::abor1_cpp("State::State() needs to be implemented.",
-                    __FILE__, __LINE__);
+
+    oops::Log::trace() << "State::State create from analytical or"
+      " from file." << std::endl;
+
+    
+    // util::abor1_cpp("State::State() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State::State(const Geometry &, const State &) {
-    util::abor1_cpp("State::State() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::State() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
-    util::abor1_cpp("State::State() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::State() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State::~State() {
-    util::abor1_cpp("State::~State() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::~State() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -55,8 +60,8 @@ namespace wrf_hydro_nwm_jedi {
   void State::getValues(const ufo::Locations & locs,
                         const oops::Variables & vars,
                         ufo::GeoVaLs & geovals) const {
-    util::abor1_cpp("State::getValues() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::getValues() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -65,8 +70,8 @@ namespace wrf_hydro_nwm_jedi {
                  const oops::Variables & vars,
                  ufo::GeoVaLs & geovals,
                  GetValuesTraj & traj) const {
-    util::abor1_cpp("State::getValues() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::getValues() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -78,15 +83,15 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void State::write(const eckit::Configuration & conf) const {
-    util::abor1_cpp("State::write() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::write() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State & State::operator=(const State & rhs) {
-    util::abor1_cpp("State::operator= needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::operator= needs to be implemented.",
+    //                 __FILE__, __LINE__);
     return *this;
   }
 
@@ -94,23 +99,23 @@ namespace wrf_hydro_nwm_jedi {
 
   State & State::operator+=(const Increment & dx)
   {
-    util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
+    //                 __FILE__, __LINE__);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   void State::zero() {
-    util::abor1_cpp("State::zero() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::zero() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void State::accumul(const double &, const State &) {
-    util::abor1_cpp("State::accumul() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("State::accumul() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------

@@ -75,7 +75,6 @@ namespace wrf_hydro_nwm_jedi {
 
    private:
     void print(std::ostream &) const;
-
     std::unique_ptr<Fields> fields_;
   };
 }  // namespace wrf_hydro_nwm_jedi
