@@ -8,8 +8,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # Covariance/Covariance.cc
 
   # # Fields
-  # Fields/Fields.h
-  # Fields/Fields.cc
+  Fields/Fields.h
+  Fields/Fields.cc
   
   # Geometry  
   Geometry/Geometry.h  
@@ -43,8 +43,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # ModelAux/ModelAuxCovariance.cc
   
   # # State
-  # State/State.h
-  # State/State.cc
+  State/State.h
+  State/State.cc
   )
 
 

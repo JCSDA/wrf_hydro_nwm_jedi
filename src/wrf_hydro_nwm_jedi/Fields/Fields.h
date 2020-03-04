@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_FIELDS_FIELDS_H_
-#define WRF_HYDRO_NWM-JEDI_FIELDS_FIELDS_H_
+#ifndef WRF_HYDRO_NWM_JEDI_FIELDS_FIELDS_H_
+#define WRF_HYDRO_NWM_JEDI_FIELDS_FIELDS_H_
 
 #include <ostream>
 #include <string>
@@ -24,13 +24,13 @@ namespace eckit {
 namespace oops {
   class Variables;
 }
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Geometry;
 }
 
 // ----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // Fields class
   class Fields : public util::Printable,
@@ -56,6 +56,6 @@ namespace wrf_hydro_nwm-jedi {
     util::DateTime time_;
   };
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_FIELDS_FIELDS_H_
+#endif  // WRF_HYDRO_NWM_JEDI_FIELDS_FIELDS_H_

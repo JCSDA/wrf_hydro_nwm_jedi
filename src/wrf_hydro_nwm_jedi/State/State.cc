@@ -5,9 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Fields/Fields.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "eckit/config/Configuration.h"
 
@@ -17,7 +17,7 @@
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -133,4 +133,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

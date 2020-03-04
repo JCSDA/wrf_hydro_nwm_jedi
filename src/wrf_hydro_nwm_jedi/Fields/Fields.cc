@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Fields/Fields.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -57,4 +57,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
