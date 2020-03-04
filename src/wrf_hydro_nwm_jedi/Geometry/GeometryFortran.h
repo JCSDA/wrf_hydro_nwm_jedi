@@ -19,6 +19,7 @@ namespace wrf_hydro_nwm_jedi {
                                     const eckit::Configuration * const *);
     void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &);
     void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &);
+    void wrf_hydro_nwm_jedi_geometry_info_f90(F90geom, float *dx, float *dy);
   }
 }  // namespace wrf_hydro_nwm_jedi
 
