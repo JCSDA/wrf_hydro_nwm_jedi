@@ -32,9 +32,14 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self
   type(fckit_configuration),  intent(in) :: f_conf
   character(512) :: wrfinput_flnm
+  character(len=:), allocatable :: str
   integer :: ierr,ncid
 
-  wrfinput_flnm = '/home/alex/Downloads/JEDI/src/build/wrf_hydro_jedi/test/testinput/wrfinput.nc'
+  !wrfinput_flnm = '/home/alex/Downloads/JEDI/src/build/wrf_hydro_jedi/test/testinput/wrfinput.nc'
+  call f_conf%get_or_die("input_file",str)
+  wrfinput_flnm = str
+  write(*,*) 'Input file for Geometry: ',wrfinput_flnm
+  deallocate(str)
 
   self%dx = 1
   ierr = 0
