@@ -73,4 +73,17 @@ end subroutine c_wrf_hydro_nwm_jedi_geometry_delete
 
 !------------------------------------------------------------------------------
 
+subroutine c_wrf_hydro_nwm_jedi_geometry_info(c_key_self,dx,dy) bind(c,name='wrf_hydro_nwm_jedi_geometry_info_f90')
+  integer(c_int), value, intent(in) :: c_key_self
+  real(c_float), intent(out) :: dx,dy
+
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: self
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self , self)
+  call self%get_info(dx,dy)
+
+end subroutine c_wrf_hydro_nwm_jedi_geometry_info
+
+!------------------------------------------------------------------------------
+
 end module
