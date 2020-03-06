@@ -54,9 +54,9 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%dx)
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%dy)
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "west_east", self%npx)
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "south_north", self%npy)
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "soil_layers_stag", self%npz)
+  ierr = nf90_inq_dimid(ncid,"west_east", self%npx)
+  ierr = nf90_inq_dimid(ncid,"south_north", self%npy)
+  ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
   
   if(ierr /= 0) then
      write(*,*) ierr
