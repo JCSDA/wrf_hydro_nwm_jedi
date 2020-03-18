@@ -14,8 +14,9 @@ type :: wrf_hydro_nwm_jedi_geometry
    integer :: ix, iy !unsused
    integer :: xstart, ystart !unsused
    integer :: xend, yend !unsused
-   integer :: npx, npy, npz
-   real :: dx, dy
+   integer :: idim, jdim, npz
+   real    :: dx, dy
+   real, allocatable :: xlat(:,:), xlong(:,:)
  contains
    procedure :: init   => wrf_hydro_nwm_jedi_geometry_init
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
@@ -54,9 +55,13 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%dx)
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%dy)
-  ierr = nf90_inq_dimid(ncid,"west_east", self%npx)
-  ierr = nf90_inq_dimid(ncid,"south_north", self%npy)
+  ierr = nf90_inq_dimid(ncid,"west_east", self%jdim)
+  ierr = nf90_inq_dimid(ncid,"south_north", self%idim)
   ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
+
+  allocate(self%xlat(self%idim, self%jdim), self%xlong(self%idim, self%jdim))
+  call get_2d("XLAT", ncid, self%xlat, self%idim, self%jdim)
+  call get_2d("XLONG", ncid, self%xlong, self%idim, self%jdim)
   
   if(ierr /= 0) then
      write(*,*) ierr
@@ -73,8 +78,8 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
 
   self%dx = other%dx
   self%dy = other%dy
-  self%npx = other%npx
-  self%npy = other%npy
+  self%idim = other%idim
+  self%jdim = other%jdim
   self%npz = other%npz
   
 end subroutine
@@ -88,19 +93,88 @@ end subroutine
 
 !------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,npx_,npy_,npz_)
+subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,idim_,jdim_,npz_)
   class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self
   real, intent(out) :: dx_,dy_
-  integer, intent(out) :: npx_,npy_,npz_
+  integer, intent(out) :: idim_,jdim_,npz_
 
   dx_ = self%dx
   dy_ = self%dy
-  npx_ = self%npx
-  npy_ = self%npy
+  idim_ = self%idim
+  jdim_ = self%jdim
   npz_ = self%npz  
 
 end subroutine wrf_hydro_nwm_jedi_geometry_get_info
 
 !------------------------------------------------------------------------------
+
+!Subroutine copied from module_wrfinputfile.F
+subroutine get_2d(name, ncid, array, idim, jdim)
+  !
+  ! From the NetCDF unit <ncid>, read the variable named <name> with  
+  ! dimensions <idim> and <jdim>, filling the pre-dimensioned array <array>
+  !
+  implicit none
+  character(len=*),           intent(in)  :: name
+  integer,                    intent(in)  :: ncid
+  integer,                    intent(in)  :: idim
+  integer,                    intent(in)  :: jdim
+  real, dimension(idim,jdim), intent(out) :: array
+  ! Local:
+  integer                                 :: ierr
+  integer                                 :: varid
+
+  ierr = nf90_inq_varid(ncid,  name,  varid)
+  ! If the variable is "XLAT", and "XLAT" is not found, look for "XLAT_M"
+  ! If the variable is "XLAT_M", and "XLAT_M" is not found, look for "XLAT"
+  ! If the variable is "XLONG", and "XLONG" is not found, look for "XLONG_M"
+  ! If the variable is "XLONG_M", and "XLONG_M" is not found, look for "XLONG"
+  if (name == "XLAT") then
+     if (ierr /= 0) then
+        ierr = nf90_inq_varid(ncid,  "XLAT_M",  varid)
+     endif
+  else if (name == "XLAT_M") then
+     if (ierr /= 0) then
+        ierr = nf90_inq_varid(ncid,  "XLAT",  varid)
+     endif
+  else  if (name == "XLONG") then
+     if (ierr /= 0) then
+        ierr = nf90_inq_varid(ncid,  "XLONG_M",  varid)
+     endif
+  else if (name == "XLONG_M") then
+     if (ierr /= 0) then
+        ierr = nf90_inq_varid(ncid,  "XLONG",  varid)
+     endif
+  endif
+  call error_handler(ierr, "STOP:  READ_WRFINPUT: Problem finding variable '"//trim(name)//"' in wrfinput file.")
+
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, "STOP:  READ_WRFINPUT:  Problem retrieving variable '"//trim(name)//"' from wrfinput file.")
+
+end subroutine get_2d
+
+subroutine error_handler(status, failure, success)
+  !
+  ! Check the error flag from a NetCDF function call, and print appropriate
+  ! error message.
+  !
+  implicit none
+  integer,                    intent(in) :: status
+  character(len=*), optional, intent(in) :: failure
+  character(len=*), optional, intent(in) :: success
+  
+  if (status .ne. NF90_NOERR) then
+     if (present(failure)) then
+        write(*,'(/," ***** ", A)') failure
+     endif
+     write(*,'(" ***** ",A,/)') nf90_strerror(status)
+     stop 'FATAL ERROR: In module_wrfinputfile.F -- Stopped'
+  endif
+  
+  if (present(success)) then
+     write(*,'(A)') success
+  endif
+  
+end subroutine error_handler
 
 end module
