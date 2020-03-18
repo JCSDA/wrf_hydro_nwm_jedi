@@ -35,7 +35,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   type(fckit_configuration),  intent(in) :: f_conf
   character(512) :: wrfinput_flnm
   character(len=:), allocatable :: str
-  integer :: ierr,ncid
+  integer :: ierr,ncid,dimid
 
   call f_conf%get_or_die("input_file",str)
   wrfinput_flnm = str
@@ -55,13 +55,26 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%dx)
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%dy)
-  ierr = nf90_inq_dimid(ncid,"west_east", self%jdim)
-  ierr = nf90_inq_dimid(ncid,"south_north", self%idim)
+
+  ierr = nf90_inq_dimid(ncid, "west_east", dimid)
+  call error_handler(ierr, "STOP:  Problem finding west_east dimension")
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%idim)
+  call error_handler(ierr, "STOP:  Problem finding west_east dimension")
+
+  ierr = nf90_inq_dimid(ncid, "south_north", dimid)
+  call error_handler(ierr, "STOP:  Problem finding south_north dimension")
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%jdim)
+  call error_handler(ierr, "STOP:  Problem finding south_north dimension")
+  
   ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
 
   allocate(self%xlat(self%idim, self%jdim), self%xlong(self%idim, self%jdim))
   call get_2d("XLAT", ncid, self%xlat, self%idim, self%jdim)
   call get_2d("XLONG", ncid, self%xlong, self%idim, self%jdim)
+
+  write(*,*) "idim, jdim: ", self%idim, self%jdim
+  write(*,*) "Latitude test: ", self%xlat(10,10)
+  write(*,*) "Longitude test: ", self%xlong(10,10)
   
   if(ierr /= 0) then
      write(*,*) ierr
@@ -88,6 +101,8 @@ end subroutine
 
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
+
+  !deallocate(self%xlat, self%xlong)
 
 end subroutine
 
