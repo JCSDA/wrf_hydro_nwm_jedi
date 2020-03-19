@@ -22,6 +22,7 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete
    procedure :: get_info => wrf_hydro_nwm_jedi_geometry_get_info
+   procedure :: coo_to_grid => wrf_hydro_nwm_jedi_geometry_coo_to_grid
 end type wrf_hydro_nwm_jedi_geometry
 
 !------------------------------------------------------------------------------
@@ -87,7 +88,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
     write(*,*) "lat long requested: ",lat,long
     
-    call coo_to_grid(self, lat, long, x, y)
+    call wrf_hydro_nwm_jedi_geometry_coo_to_grid(self, lat, long, x, y)
 
     write(*,*) "X found: ",x," Y found: ", y
 
@@ -97,7 +98,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
-subroutine coo_to_grid(self, lat, long, x, y)
+subroutine wrf_hydro_nwm_jedi_geometry_coo_to_grid(self, lat, long, x, y)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
   real, intent(in) :: lat, long
   real,dimension(2) :: minimum
@@ -115,7 +116,6 @@ subroutine coo_to_grid(self, lat, long, x, y)
   l2_norm = sqrt( diff_long**2 + diff_lat**2 )
 
   minimum = minloc(l2_norm)
-  write(*,*) Minimum
 
   x = minimum(2); y = minimum(1)
 
@@ -123,7 +123,7 @@ subroutine coo_to_grid(self, lat, long, x, y)
   deallocate(diff_lat)
   deallocate(diff_long)
   
-end subroutine coo_to_grid
+end subroutine wrf_hydro_nwm_jedi_geometry_coo_to_grid
 
 !------------------------------------------------------------------------------
 

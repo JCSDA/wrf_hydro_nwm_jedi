@@ -73,6 +73,20 @@ end subroutine c_wrf_hydro_nwm_jedi_geometry_delete
 
 !------------------------------------------------------------------------------
 
+subroutine c_wrf_hydro_nwm_jedi_geometry_coo_to_grid(c_key_self,lat,long,x,y) bind(c,name='wrf_hydro_nwm_jedi_geometry_coo_to_grid_f90')
+  integer(c_int), value, intent(in) :: c_key_self
+  real(c_float), intent(in) :: lat,long
+  integer(c_int), intent(out) :: x,y
+
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: self
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self , self)
+  call self%coo_to_grid(lat,long,x,y)
+
+end subroutine c_wrf_hydro_nwm_jedi_geometry_coo_to_grid
+
+!------------------------------------------------------------------------------
+
 subroutine c_wrf_hydro_nwm_jedi_geometry_info(c_key_self,dx,dy,npx,npy,npz) bind(c,name='wrf_hydro_nwm_jedi_geometry_info_f90')
   integer(c_int), value, intent(in) :: c_key_self
   real(c_float), intent(out) :: dx,dy
