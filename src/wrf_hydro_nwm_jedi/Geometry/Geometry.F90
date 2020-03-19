@@ -115,6 +115,7 @@ subroutine coo_to_grid(self, lat, long, x, y)
   l2_norm = sqrt( diff_long**2 + diff_lat**2 )
 
   minimum = minloc(l2_norm)
+  write(*,*) Minimum
 
   x = minimum(2); y = minimum(1)
 
@@ -143,7 +144,7 @@ end subroutine
 !------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
-  class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
+  class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self
 
   deallocate(self%xlat)
   deallocate(self%xlong)
