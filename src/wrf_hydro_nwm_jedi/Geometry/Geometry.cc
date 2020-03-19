@@ -41,12 +41,13 @@ namespace wrf_hydro_nwm_jedi {
 
   void Geometry::print(std::ostream & os) const {
     float dx,dy;
+    int npx,npy,npz;
     // util::abor1_cpp("Geometry::print() needs to be implemented.",
     //                 __FILE__, __LINE__);
     os << "Geometry: "
        << "(TODO, print diagnostic info about the geometry here)"
        << std::endl;
-    wrf_hydro_nwm_jedi_geometry_info_f90 (keyGeom_, &dx, &dy);
+    wrf_hydro_nwm_jedi_geometry_info_f90 (keyGeom_, &dx, &dy, &npx, &npy, &npz);
     os << "dx = " << dx << ", dy = " << dy << std::endl;
   }
 

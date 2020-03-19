@@ -1,5 +1,6 @@
 # Needed for TestGeometry
 Geometry:
+  input_file: Data/wrf_hydro_nwm_files/wrfinput.nc
 
 # + needed for TestState
 StateTest:
