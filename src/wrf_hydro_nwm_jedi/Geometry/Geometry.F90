@@ -71,17 +71,58 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   allocate(self%xlat(self%idim, self%jdim), self%xlong(self%idim, self%jdim))
   call get_2d("XLAT", ncid, self%xlat, self%idim, self%jdim)
   call get_2d("XLONG", ncid, self%xlong, self%idim, self%jdim)
-
-  write(*,*) "idim, jdim: ", self%idim, self%jdim
-  write(*,*) "Latitude test: ", self%xlat(10,10)
-  write(*,*) "Longitude test: ", self%xlong(10,10)
   
   if(ierr /= 0) then
      write(*,*) ierr
      call abor1_ftn("ERROR: dx and/or dy need by Geometry not found")
   end if
+
+  ! For testing purposes
+  block 
+    integer:: x,y
+    real :: lat, long
+
+    lat = self%xlat(10,10)
+    long = self%xlong(12,12)
+
+    write(*,*) "lat long requested: ",lat,long
+    
+    call coo_to_grid(self, lat, long, x, y)
+
+    write(*,*) "X found: ",x," Y found: ", y
+
+    write(*,*) "Value in those positions: lat:",self%xlat(y,x)," long:", self%xlong(y,x)
+
+  end block
   
-end subroutine
+end subroutine wrf_hydro_nwm_jedi_geometry_init
+
+subroutine coo_to_grid(self, lat, long, x, y)
+  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
+  real, intent(in) :: lat, long
+  real,dimension(2) :: minimum
+  real, allocatable :: diff_lat(:,:), diff_long(:,:), l2_norm(:,:)
+  integer, intent(out) :: x, y
+  integer :: i, j
+
+  allocate(diff_lat, source=self%xlat)
+  allocate(diff_long, source=self%xlong)
+  allocate(l2_norm, source=self%xlong)
+  
+  diff_lat = diff_lat - lat
+  diff_long = diff_long - long
+
+  l2_norm = sqrt( diff_long**2 + diff_lat**2 )
+
+  minimum = minloc(l2_norm)
+
+  x = minimum(2); y = minimum(1)
+
+  deallocate(l2_norm)
+  deallocate(diff_lat)
+  deallocate(diff_long)
+  
+end subroutine coo_to_grid
 
 !------------------------------------------------------------------------------
 
@@ -94,6 +135,8 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   self%idim = other%idim
   self%jdim = other%jdim
   self%npz = other%npz
+  allocate(self%xlat, source = other%xlat) 
+  allocate(self%xlong, source = other%xlong)
   
 end subroutine
   
@@ -102,7 +145,8 @@ end subroutine
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
 
-  !deallocate(self%xlat, self%xlong)
+  deallocate(self%xlat)
+  deallocate(self%xlong)
 
 end subroutine
 
