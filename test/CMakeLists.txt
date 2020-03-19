@@ -1,10 +1,12 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
+  Data/wrf_hydro_nwm_files/wrfinput.nc
   )
 
 
 # link the input files for the tests
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/wrf_hydro_nwm_files)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
