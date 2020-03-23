@@ -14,7 +14,7 @@ type :: wrf_hydro_nwm_jedi_geometry
    integer :: ix, iy !unsused
    integer :: xstart, ystart !unsused
    integer :: xend, yend !unsused
-   integer :: idim, jdim, npz
+   integer :: dim1_len, dim2_len, npz
    real    :: dx, dy
    real, allocatable :: xlat(:,:), xlong(:,:)
  contains
@@ -22,7 +22,7 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete
    procedure :: get_info => wrf_hydro_nwm_jedi_geometry_get_info
-   procedure :: coo_to_grid => wrf_hydro_nwm_jedi_geometry_coo_to_grid
+   procedure :: get_nn => wrf_hydro_nwm_jedi_geometry_get_nn
 end type wrf_hydro_nwm_jedi_geometry
 
 !------------------------------------------------------------------------------
@@ -59,52 +59,33 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ierr = nf90_inq_dimid(ncid, "west_east", dimid)
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%idim)
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim1_len)
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
 
   ierr = nf90_inq_dimid(ncid, "south_north", dimid)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%jdim)
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim2_len)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
   
   ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
 
-  allocate(self%xlat(self%idim, self%jdim), self%xlong(self%idim, self%jdim))
-  call get_2d("XLAT", ncid, self%xlat, self%idim, self%jdim)
-  call get_2d("XLONG", ncid, self%xlong, self%idim, self%jdim)
+  allocate(self%xlat(self%dim1_len, self%dim2_len), self%xlong(self%dim1_len, self%dim2_len))
+  call get_2d("XLAT", ncid, self%xlat, self%dim1_len, self%dim2_len)
+  call get_2d("XLONG", ncid, self%xlong, self%dim1_len, self%dim2_len)
   
   if(ierr /= 0) then
      write(*,*) ierr
      call abor1_ftn("ERROR: dx and/or dy need by Geometry not found")
   end if
-
-  ! For testing purposes
-  block 
-    integer:: x,y
-    real :: lat, long
-
-    lat = self%xlat(10,10)
-    long = self%xlong(12,12)
-
-    write(*,*) "lat long requested: ",lat,long
-    
-    call wrf_hydro_nwm_jedi_geometry_coo_to_grid(self, lat, long, x, y)
-
-    write(*,*) "X found: ",x," Y found: ", y
-
-    write(*,*) "Value in those positions: lat:",self%xlat(y,x)," long:", self%xlong(y,x)
-
-  end block
   
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
-subroutine wrf_hydro_nwm_jedi_geometry_coo_to_grid(self, lat, long, x, y)
+subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, long, dim1_idx, dim2_idx)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
   real, intent(in) :: lat, long
   real,dimension(2) :: minimum
   real, allocatable :: diff_lat(:,:), diff_long(:,:), l2_norm(:,:)
-  integer, intent(out) :: x, y
-  integer :: i, j
+  integer, intent(out) :: dim1_idx, dim2_idx
 
   allocate(diff_lat, source=self%xlat)
   allocate(diff_long, source=self%xlong)
@@ -117,13 +98,13 @@ subroutine wrf_hydro_nwm_jedi_geometry_coo_to_grid(self, lat, long, x, y)
 
   minimum = minloc(l2_norm)
 
-  x = minimum(2); y = minimum(1)
+  dim1_idx = minimum(1); dim2_idx = minimum(2)
 
   deallocate(l2_norm)
   deallocate(diff_lat)
   deallocate(diff_long)
   
-end subroutine wrf_hydro_nwm_jedi_geometry_coo_to_grid
+end subroutine wrf_hydro_nwm_jedi_geometry_get_nn
 
 !------------------------------------------------------------------------------
 
@@ -133,8 +114,8 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
 
   self%dx = other%dx
   self%dy = other%dy
-  self%idim = other%idim
-  self%jdim = other%jdim
+  self%dim1_len = other%dim1_len
+  self%dim2_len = other%dim2_len
   self%npz = other%npz
   allocate(self%xlat, source = other%xlat) 
   allocate(self%xlong, source = other%xlong)
@@ -153,15 +134,15 @@ end subroutine
 
 !------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,idim_,jdim_,npz_)
+subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,dim1_len,dim2_len,npz_)
   class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self
   real, intent(out) :: dx_,dy_
-  integer, intent(out) :: idim_,jdim_,npz_
+  integer, intent(out) :: dim1_len,dim2_len,npz_
 
   dx_ = self%dx
   dy_ = self%dy
-  idim_ = self%idim
-  jdim_ = self%jdim
+  dim1_len = self%dim1_len
+  dim2_len = self%dim2_len
   npz_ = self%npz  
 
 end subroutine wrf_hydro_nwm_jedi_geometry_get_info
