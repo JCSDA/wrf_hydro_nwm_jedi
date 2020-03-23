@@ -48,6 +48,7 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   State/State.cc
   State/State_utils.F90
   State/State.interface.F90
+  State/StateFortran.h
   State/State.F90
   )
 
