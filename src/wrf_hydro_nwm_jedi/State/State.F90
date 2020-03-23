@@ -11,26 +11,28 @@ use datetime_mod
 use fckit_mpi_module
 use oops_variables_mod
 
-use fv3jedi_field_mod
-use fv3jedi_constants_mod,       only: rad2deg, constoz
-use fv3jedi_geom_mod,            only: fv3jedi_geom
-use fv3jedi_increment_utils_mod, only: fv3jedi_increment
-use fv3jedi_interpolation_mod,   only: field2field_interp
-use fv3jedi_kinds_mod,           only: kind_real
+use wrf_hydro_nwm_jedi_field_mod
+! use fv3jedi_constants_mod,       only: rad2deg, constoz
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
+! use fv3jedi_interpolation_mod,   only: field2field_interp
+! use fv3jedi_kinds_mod,           only: kind_real
+use iso_c_binding, only : c_double
 !use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
 !use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
 use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state
-use fv3jedi_getvalues_mod,       only: getvalues
+!use fv3jedi_getvalues_mod,       only: getvalues
 
-use wind_vt_mod, only: a2d
+!use wind_vt_mod, only: a2d
 
-use mpp_domains_mod,             only: east, north, center
+!use mpp_domains_mod,             only: east, north, center
 
 implicit none
 private
-public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy, add_incr, &
-          read_file, write_file, gpnorm, rms, &
-          change_resol, getvalues, analytic_IC, state_print
+public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
+     !add_incr, &
+     read_file, &! write_file, gpnorm, rms, &
+     change_resol !getvalues, analytic_IC, state_print
 
 ! ------------------------------------------------------------------------------
 
@@ -42,7 +44,7 @@ subroutine create(self, geom, vars)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-type(wrf_hydro_nwm_jedi_geom),   intent(in)    :: geom
+type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
 type(oops_variables), intent(in)    :: vars
 
 integer :: var, vcount, nlev
@@ -69,7 +71,7 @@ do var = 1, vars%nvars()
        vcount=vcount+1;
        call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
             short_name = vars%variable(var), long_name = 'eastward_wind_on_native_D-Grid', &
-            fv3jedi_name = 'snliq', units = 'm', staggerloc = north )
+            fv3jedi_name = 'snliq', units = 'm')!, staggerloc = north )
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
@@ -506,43 +508,43 @@ do var = 1, vars%nvars()
    end select
 enddo
 
-if (vcount .ne. self%nf) &
-call abor1_ftn("fv3jedi_state_mod create: vcount does not equal self%nf")
+! if (vcount .ne. self%nf) &
+! call abor1_ftn("fv3jedi_state_mod create: vcount does not equal self%nf")
 
-self%hydrostatic = .true.
-if (has_field(self%fields, 'delz') .and. has_field(self%fields, 'w')) self%hydrostatic = .false.
+! self%hydrostatic = .true.
+! if (has_field(self%fields, 'delz') .and. has_field(self%fields, 'w')) self%hydrostatic = .false.
 
-! Initialize all arrays to zero
-call zeros(self)
+! ! Initialize all arrays to zero
+! call zeros(self)
 
-! Copy some geometry for convenience
-self%isc    = geom%isc
-self%iec    = geom%iec
-self%jsc    = geom%jsc
-self%jec    = geom%jec
-self%npx    = geom%npx
-self%npy    = geom%npy
-self%npz    = geom%npz
-self%ntile  = geom%ntile
-self%ntiles = geom%ntiles
+! ! Copy some geometry for convenience
+! self%isc    = geom%isc
+! self%iec    = geom%iec
+! self%jsc    = geom%jsc
+! self%jec    = geom%jec
+! self%npx    = geom%npx
+! self%npy    = geom%npy
+! self%npz    = geom%npz
+! self%ntile  = geom%ntile
+! self%ntiles = geom%ntiles
 
-! Pointer to fv3jedi communicator
-self%f_comm = geom%f_comm
+! ! Pointer to fv3jedi communicator
+! self%f_comm = geom%f_comm
 
-! Check winds
-if (has_field(self%fields, 'ua') .and. .not.has_field(self%fields, 'va')) &
-call abor1_ftn("fv3jedi_state_mod create: found A-Grid u but not v")
-if (.not.has_field(self%fields, 'ua') .and. has_field(self%fields, 'va')) &
-call abor1_ftn("fv3jedi_state_mod create: found A-Grid v but not u")
-if (has_field(self%fields, 'ud') .and. .not.has_field(self%fields, 'vd')) &
-call abor1_ftn("fv3jedi_state_mod create: found D-Grid u but not v")
-if (.not.has_field(self%fields, 'ud') .and. has_field(self%fields, 'vd')) &
-call abor1_ftn("fv3jedi_state_mod create: found D-Grid v but not u")
+! ! Check winds
+! if (has_field(self%fields, 'ua') .and. .not.has_field(self%fields, 'va')) &
+! call abor1_ftn("fv3jedi_state_mod create: found A-Grid u but not v")
+! if (.not.has_field(self%fields, 'ua') .and. has_field(self%fields, 'va')) &
+! call abor1_ftn("fv3jedi_state_mod create: found A-Grid v but not u")
+! if (has_field(self%fields, 'ud') .and. .not.has_field(self%fields, 'vd')) &
+! call abor1_ftn("fv3jedi_state_mod create: found D-Grid u but not v")
+! if (.not.has_field(self%fields, 'ud') .and. has_field(self%fields, 'vd')) &
+! call abor1_ftn("fv3jedi_state_mod create: found D-Grid v but not u")
 
-self%have_agrid = .false.
-self%have_dgrid = .false.
-if (has_field(self%fields, 'ua')) self%have_agrid = .true.
-if (has_field(self%fields, 'ud')) self%have_dgrid = .true.
+! self%have_agrid = .false.
+! self%have_dgrid = .false.
+! if (has_field(self%fields, 'ua')) self%have_agrid = .true.
+! if (has_field(self%fields, 'ud')) self%have_dgrid = .true.
 
 end subroutine create
 
@@ -551,7 +553,7 @@ end subroutine create
 subroutine delete(self)
 
 implicit none
-! type(fv3jedi_state), intent(inout) :: self
+type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 ! integer :: var
 
 ! do var = 1, self%nf
@@ -566,7 +568,7 @@ end subroutine delete
 subroutine zeros(self)
 
 implicit none
-! type(fv3jedi_state), intent(inout) :: self
+type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 ! integer :: var
 
 ! do var = 1, self%nf
@@ -580,12 +582,12 @@ end subroutine zeros
 subroutine copy(self,rhs)
 
 implicit none
-! type(fv3jedi_state), intent(inout) :: self
-! type(fv3jedi_state), intent(in)    :: rhs
+type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
 
 ! integer :: var
 
-! call checksame(self%fields,rhs%fields,"fv3jedi_state_mod.copy")
+! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.copy")
 
 ! do var = 1, self%nf
 !   self%fields(var) = rhs%fields(var)
@@ -601,13 +603,13 @@ end subroutine copy
 subroutine axpy(self,zz,rhs)
 
 implicit none
-! type(fv3jedi_state),  intent(inout) :: self
-! real(kind=kind_real), intent(in)    :: zz
-! type(fv3jedi_state),  intent(in)    :: rhs
+type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
+real(kind=c_double), intent(in)    :: zz
+type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
 
 ! integer :: var
 
-! call checksame(self%fields,rhs%fields,"fv3jedi_state_mod.axpy")
+! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.axpy")
 
 ! do var = 1, self%nf
 !   self%fields(var)%array = self%fields(var)%array + zz * rhs%fields(var)%array
@@ -617,11 +619,11 @@ end subroutine axpy
 
 ! ------------------------------------------------------------------------------
 
-subroutine add_incr(geom,self,rhs)
+!subroutine add_incr(geom,self,rhs)
 
-implicit none
-! type(fv3jedi_geom),      intent(inout) :: geom
-! type(fv3jedi_state),     intent(inout) :: self
+!implicit none
+! type(wrf_hydro_nwm_jedi_geometry),      intent(inout) :: geom
+! type(wrf_hydro_nwm_jedi_state),     intent(inout) :: self
 ! type(fv3jedi_increment), intent(in)    :: rhs
 
 ! integer :: var,i,j,k
@@ -771,31 +773,31 @@ implicit none
 
 !     !Print message warning about negative tracer removal
 !     if (found_neg .and. self%f_comm%rank() == 0) print*, &
-!              'fv3jedi_state_mod.add_incr: Removed negative values for '&
+!              'wrf_hydro_nwm_jedi_state_mod.add_incr: Removed negative values for '&
 !              //trim(self%fields(var)%fv3jedi_name)
 
 !   endif
 
 ! enddo
 
-end subroutine add_incr
+!end subroutine add_incr
 
 ! ------------------------------------------------------------------------------
 
 subroutine change_resol(self,geom,rhs,geom_rhs)
 
 implicit none
-! type(fv3jedi_state), intent(inout) :: self
-! type(fv3jedi_geom),  intent(inout) :: geom
-! type(fv3jedi_state), intent(in)    :: rhs
-! type(fv3jedi_geom),  intent(inout) :: geom_rhs
+type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom
+type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
+type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom_rhs
 
 ! ! Interpolation
 ! integer :: var
 ! type(field2field_interp) :: interp
 ! logical :: integer_interp = .false.
 
-! call checksame(self%fields,rhs%fields,"fv3jedi_state_mod.change_resol")
+! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.change_resol")
 
 ! if ((rhs%iec-rhs%isc+1)-(self%iec-self%isc+1) == 0) then
 
@@ -843,24 +845,24 @@ end subroutine change_resol
 !! \date May, 2018: Added dcmip-test-3-1
 !! \date June, 2018: Added dcmip-test-4-0
 !!
-!! \warning This routine initializes the fv3jedi_state object.  However, since the fv_atmos_type
-!! component of fv3jedi_state is a subset of the corresponding object in the fv3 model,
+!! \warning This routine initializes the wrf_hydro_nwm_jedi_state object.  However, since the fv_atmos_type
+!! component of wrf_hydro_nwm_jedi_state is a subset of the corresponding object in the fv3 model,
 !! this initialization routine is not sufficient to comprehensively define the full fv3 state.
 !! So, this intitialization can be used for interpolation and other tests within JEDI but it is
 !! cannot currently be used to initiate a forecast with gfs.
 !!
-!! \warning This routine does not initialize the fv3jedi_interp member of the fv3jedi_state object
+!! \warning This routine does not initialize the fv3jedi_interp member of the wrf_hydro_nwm_jedi_state object
 !!
 !! \warning Though an input state file is not required for these analytic initialization routines,
 !! some grid information (in particular the hybrid vertical grid coefficients ak and bk)
 !! is still read in from an input file when creating the geometry object that is a required
-!! member of fv3jedi_state; see c_fv3jedi_geo_setup() in fv3jedi_geom_mod.F90.
+!! member of wrf_hydro_nwm_jedi_state; see c_fv3jedi_geo_setup() in wrf_hydro_nwm_jedi_geometry_mod.F90.
 !!
 !! \warning It's unclear whether the pt member of the fv_atmos_type structure is potential temperature
 !! or temperature.  This routine assumes the latter.  If this is not correct, then we will need to
 !! implement a conversion
 !!
-subroutine analytic_IC(self, geom, c_conf, vdate)
+!subroutine analytic_IC(self, geom, c_conf, vdate)
 
   ! use fv3jedi_kinds_mod
   ! use iso_c_binding
@@ -878,8 +880,8 @@ subroutine analytic_IC(self, geom, c_conf, vdate)
 
   ! implicit none
 
-  ! type(fv3jedi_state), intent(inout) :: self    !< State
-  ! type(fv3jedi_geom),  intent(inout) :: geom    !< Geometry
+  ! type(wrf_hydro_nwm_jedi_state), intent(inout) :: self    !< State
+  ! type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom    !< Geometry
   ! type(c_ptr), intent(in)            :: c_conf  !< Configuration
   ! type(datetime), intent(inout)      :: vdate   !< DateTime
 
@@ -921,7 +923,7 @@ subroutine analytic_IC(self, geom, c_conf, vdate)
   !    deallocate(str)
   ! EndIf
 
-  ! call log%warning("fv3jedi_state:analytic_init: "//IC)
+  ! call log%warning("wrf_hydro_nwm_jedi_state:analytic_init: "//IC)
   ! call f_conf%get_or_die("date",str)
   ! sdate = str
   ! deallocate(str)
@@ -1128,11 +1130,11 @@ subroutine analytic_IC(self, geom, c_conf, vdate)
 
   !    Case Default
 
-  !       call abor1_ftn("fv3jedi_state analytic_IC: provide analytic_init")
+  !       call abor1_ftn("wrf_hydro_nwm_jedi_state analytic_IC: provide analytic_init")
 
   !    End Select int_option
 
-end subroutine analytic_IC
+!end subroutine analytic_IC
 
 ! ------------------------------------------------------------------------------
 
@@ -1141,8 +1143,8 @@ use string_utils
 
 implicit none
 
-type(fv3jedi_geom),  intent(inout) :: geom     !< Geometry
-type(fv3jedi_state), intent(inout) :: self     !< State
+type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom     !< Geometry
+type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
 type(c_ptr),         intent(in)    :: c_conf   !< Configuration
 type(datetime),      intent(inout) :: vdate    !< DateTime
 
@@ -1167,26 +1169,26 @@ deallocate(str)
 
 if (trim(filetype) == 'gfs') then
 
-  call gfs%setup(f_conf)
-  call gfs%read_meta(geom, vdate, self%calendar_type, self%date_init)
-  call gfs%read_fields(geom, self%fields)
+!  call gfs%setup(f_conf)
+!  call gfs%read_meta(geom, vdate, self%calendar_type, self%date_init)
+!  call gfs%read_fields(geom, self%fields)
 
   flipvert = 0
   if (f_conf%has("flip_vertically")) then
      call f_conf%get_or_die("flip_vertically",flipvert)
   endif
-  if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
+ ! if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
 
 elseif (trim(filetype) == 'geos') then
 
-  call geos%setup(geom, self%fields, vdate, 'read', f_conf)
-  call geos%read_meta(geom, vdate, self%calendar_type, self%date_init)
-  call geos%read_fields(geom, self%fields)
-  call geos%delete()
+  ! call geos%setup(geom, self%fields, vdate, 'read', f_conf)
+  ! call geos%read_meta(geom, vdate, self%calendar_type, self%date_init)
+  ! call geos%read_fields(geom, self%fields)
+  ! call geos%delete()
 
 else
 
-  call abor1_ftn("fv3jedi_state_mod.read: restart type not supported")
+  call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.read: restart type not supported")
 
 endif
 
@@ -1194,68 +1196,68 @@ end subroutine read_file
 
 ! ------------------------------------------------------------------------------
 
-subroutine write_file(geom, self, c_conf, vdate)
+! subroutine write_file(geom, self, c_conf, vdate)
 
-  use fv3jedi_io_latlon_mod
+!   use fv3jedi_io_latlon_mod
 
-  implicit none
+!   implicit none
 
-  type(fv3jedi_geom),  intent(inout) :: geom     !< Geometry
-  type(fv3jedi_state), intent(inout) :: self     !< State
-  type(c_ptr),         intent(in)    :: c_conf   !< Configuration
-  type(datetime),      intent(inout) :: vdate    !< DateTime
+!   type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom     !< Geometry
+!   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
+!   type(c_ptr),         intent(in)    :: c_conf   !< Configuration
+!   type(datetime),      intent(inout) :: vdate    !< DateTime
 
-  type(fv3jedi_io_gfs)  :: gfs
-  type(fv3jedi_io_geos) :: geos
+!   ! type(fv3jedi_io_gfs)  :: gfs
+!   ! type(fv3jedi_io_geos) :: geos
 
-  character(len=10) :: filetype
-  integer :: flipvert
-  type(fckit_configuration) :: f_conf
-  character(len=:), allocatable :: str
-
-
-  ! Fortran configuration
-  ! ---------------------
-  f_conf = fckit_configuration(c_conf)
+!   character(len=10) :: filetype
+!   integer :: flipvert
+!   type(fckit_configuration) :: f_conf
+!   character(len=:), allocatable :: str
 
 
-  call f_conf%get_or_die("filetype",str)
-  filetype = str
-  deallocate(str)
+!   ! Fortran configuration
+!   ! ---------------------
+!   f_conf = fckit_configuration(c_conf)
 
-  if (trim(filetype) == 'gfs') then
 
-    flipvert = 0
-    if (f_conf%has("flip_vertically")) then
-      call f_conf%get_or_die("flip_vertically",flipvert)
-    endif
-    if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
+!   call f_conf%get_or_die("filetype",str)
+!   filetype = str
+!   deallocate(str)
 
-    call gfs%setup(f_conf)
-    call gfs%write_all(geom, self%fields, vdate, self%calendar_type, self%date_init)
+!   if (trim(filetype) == 'gfs') then
 
-    if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
+!     flipvert = 0
+!     if (f_conf%has("flip_vertically")) then
+!       call f_conf%get_or_die("flip_vertically",flipvert)
+!     endif
+!     if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
 
-  elseif (trim(filetype) == 'geos') then
+!     call gfs%setup(f_conf)
+!     call gfs%write_all(geom, self%fields, vdate, self%calendar_type, self%date_init)
 
-    call geos%setup(geom, self%fields, vdate, 'write', f_conf)
-    call geos%write_all(geom, self%fields, vdate)
-    call geos%delete()
+!     if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
 
-  else
+!   elseif (trim(filetype) == 'geos') then
 
-     call abor1_ftn("fv3jedi_state_mod.write: restart type not supported")
+!     call geos%setup(geom, self%fields, vdate, 'write', f_conf)
+!     call geos%write_all(geom, self%fields, vdate)
+!     call geos%delete()
 
-  endif
+!   else
 
-end subroutine write_file
+!      call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.write: restart type not supported")
+
+!   endif
+
+! end subroutine write_file
 
 ! ------------------------------------------------------------------------------
 
 subroutine state_print(self)
 
-! implicit none
-! type(fv3jedi_state), intent(in) :: self
+ implicit none
+ type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
 ! call fields_print(self%nf, self%fields, "State", self%f_comm) 
 
@@ -1265,13 +1267,13 @@ end subroutine state_print
 
 subroutine gpnorm(self, nf, pstat)
 
-! implicit none
-! type(fv3jedi_state),  intent(in)    :: self
-! integer,              intent(in)    :: nf
-! real(kind=kind_real), intent(inout) :: pstat(3, nf)
+ implicit none
+ type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
+ integer,              intent(in)    :: nf
+ real(kind=c_double), intent(inout) :: pstat(3, nf)
 
 ! if (nf .ne. self%nf) then
-!   call abor1_ftn("fv3jedi_state: gpnorm | nf passed in does not match expeted nf")
+!   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
 ! endif
 
 ! call fields_gpnorm(nf, self%fields, pstat, self%f_comm)
@@ -1282,9 +1284,9 @@ end subroutine gpnorm
 
 subroutine rms(self, prms)
 
-! implicit none
-! type(fv3jedi_state),  intent(in)  :: self
-! real(kind=kind_real), intent(out) :: prms
+implicit none
+type(wrf_hydro_nwm_jedi_state),  intent(in)  :: self
+real(kind=c_double), intent(out) :: prms
 
 ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
 

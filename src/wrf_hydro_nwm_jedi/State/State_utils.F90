@@ -7,13 +7,13 @@
 
 module wrf_hydro_nwm_jedi_state_utils_mod
 
-use fv3jedi_kinds_mod
-use fv3jedi_field_mod, only: fv3jedi_field
+!use fv3jedi_kinds_mod
+use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_field
 use fckit_mpi_module, only: fckit_mpi_comm
 
 implicit none
 private
-public fv3jedi_state, fv3jedi_state_registry
+public wrf_hydro_nwm_jedi_state, wrf_hydro_nwm_jedi_state_registry
 
 !> Fortran derived type to hold FV3JEDI state
 type :: wrf_hydro_nwm_jedi_state
@@ -29,7 +29,7 @@ type :: wrf_hydro_nwm_jedi_state
   logical :: have_dgrid
 
   type(fckit_mpi_comm) :: f_comm
-  type(fv3jedi_field), allocatable :: fields(:)
+  type(wrf_hydro_nwm_jedi_field), allocatable :: fields(:)
 
 end type wrf_hydro_nwm_jedi_state
 

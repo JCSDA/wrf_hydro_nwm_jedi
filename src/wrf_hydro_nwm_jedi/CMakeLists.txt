@@ -6,10 +6,6 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # # Covariance
   # Covariance/Covariance.h
   # Covariance/Covariance.cc
-
-  # # Fields
-  Fields/Fields.h
-  Fields/Fields.cc
   
   # Geometry  
   Geometry/Geometry.h  
@@ -17,6 +13,11 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Geometry/GeometryFortran.h
   Geometry/Geometry.interface.F90
   Geometry/Geometry.F90
+
+  # # Fields
+  Fields/Fields.h
+  Fields/Fields.cc
+  Fields/Fields.F90
 
   # # GeometryIterator
   # GeometryIterator/GeometryIterator.h
