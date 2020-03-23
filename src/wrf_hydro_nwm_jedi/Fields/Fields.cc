@@ -20,8 +20,8 @@ namespace wrf_hydro_nwm_jedi {
   Fields::Fields(const Geometry & geom, const oops::Variables & vars,
                const eckit::Configuration & conf)
     : geom_(new Geometry(geom)) {
-    util::abor1_cpp("Fields::Fields() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Fields::Fields() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     // time_ = util::DateTime("2018-04-15T00:00:00Z");
   }
 

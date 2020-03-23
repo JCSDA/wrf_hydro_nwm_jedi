@@ -45,7 +45,7 @@ namespace wrf_hydro_nwm_jedi {
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;
     // GeometryIterator end() const;
-    F90geom & toFortran() {return keyGeom_;}
+    const F90geom & toFortran() const {return keyGeom_;}
 
    private:
     void print(std::ostream &) const;

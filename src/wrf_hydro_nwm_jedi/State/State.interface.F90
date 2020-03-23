@@ -146,7 +146,7 @@ end subroutine wrf_hydro_nwm_jedi_state_axpy_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_state_change_resol_c(c_key_state,c_key_geom,c_key_rhs,c_key_geom_rhs) bind(c,name='wrf_hydro_nwm_jedi_state_change_resol_f90')
+!subroutine wrf_hydro_nwm_jedi_state_change_resol_c(c_key_state,c_key_geom,c_key_rhs,c_key_geom_rhs) bind(c,name='wrf_hydro_nwm_jedi_state_change_resol_f90')
 
 ! implicit none
 ! integer(c_int), intent(in) :: c_key_state
@@ -164,7 +164,7 @@ subroutine wrf_hydro_nwm_jedi_state_change_resol_c(c_key_state,c_key_geom,c_key_
 
 ! call change_resol(state,geom,rhs,geom_rhs)
 
-end subroutine wrf_hydro_nwm_jedi_state_change_resol_c
+!end subroutine wrf_hydro_nwm_jedi_state_change_resol_c
 
 ! ------------------------------------------------------------------------------
 
