@@ -20,6 +20,7 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &);
     void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &);
     void wrf_hydro_nwm_jedi_geometry_info_f90(F90geom, float *, float *, int *, int *, int *);
+    void wrf_hydro_nwm_jedi_geometry_coo_to_grid_f90(F90geom, float, float, int, int);
   }
 }  // namespace wrf_hydro_nwm_jedi
 
