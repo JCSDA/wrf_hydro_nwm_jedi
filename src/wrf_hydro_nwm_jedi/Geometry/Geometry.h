@@ -16,6 +16,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
+
 // forward declarations
 namespace eckit {
   class Configuration;
@@ -43,11 +45,12 @@ namespace wrf_hydro_nwm_jedi {
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;
     // GeometryIterator end() const;
+    F90geom & toFortran() {return keyGeom_;}
 
    private:
     void print(std::ostream &) const;
 
-    int keyGeom_;
+    F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
   };
 }  // namespace wrf_hydro_nwm_jedi

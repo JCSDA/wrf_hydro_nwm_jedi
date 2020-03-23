@@ -28,7 +28,25 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State::State create from analytical or"
       " from file." << std::endl;
 
+    oops::Variables lvars;
+    if (conf.has("variables")) {
+      oops::Variables lvars(conf);
+      this->vars_ = lvars;
+    } else {
+      this->vars_ = vars;
+    }
+
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom_->toFortran(), vars_);
     
+    // Analytical or read from file
+    // if (conf.has("analytic_init")) {
+    //   this->analytic_init(conf, geom);
+    // } else {
+    this->read(conf);
+      //}
+    
+    oops::Log::trace() << "State::State create from analytical or"
+      " from file done." << std::endl;
     // util::abor1_cpp("State::State() needs to be implemented.",
     //                 __FILE__, __LINE__);
   }
@@ -85,6 +103,16 @@ namespace wrf_hydro_nwm_jedi {
   void State::write(const eckit::Configuration & conf) const {
     // util::abor1_cpp("State::write() needs to be implemented.",
     //                 __FILE__, __LINE__);
+  }
+  
+// ----------------------------------------------------------------------------
+
+  void State::read(const eckit::Configuration & config) {
+    oops::Log::trace() << "State read starting" << std::endl;
+    const eckit::Configuration * conf = &config;
+    util::DateTime * dtp = &time_;
+    wrf_hydro_nwm_jedi_state_read_file_f90(geom_->toFortran(), keyState_, &conf, &dtp);
+    oops::Log::trace() << "State read done" << std::endl;
   }
 
 // ----------------------------------------------------------------------------

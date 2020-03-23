@@ -28,7 +28,7 @@ use mpp_domains_mod,             only: east, north, center
 
 implicit none
 private
-public :: fv3jedi_state, create, delete, zeros, copy, axpy, add_incr, &
+public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy, add_incr, &
           read_file, write_file, gpnorm, rms, &
           change_resol, getvalues, analytic_IC, state_print
 

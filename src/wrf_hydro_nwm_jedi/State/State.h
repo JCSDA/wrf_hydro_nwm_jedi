@@ -18,6 +18,11 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "oops/base/Variables.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+//#include "fv3jedi/Increment/Increment.h"
+//#include "wrf_hydro_nwm_jedi/State/State.interface.h"
+
 // forward declarations
 namespace eckit {
   class Configuration;
@@ -34,6 +39,7 @@ namespace wrf_hydro_nwm_jedi {
   class GetValuesTraj;
   class Geometry;
   class Increment;
+  typedef int F90state;
 }
 
 // ----------------------------------------------------------------------------
@@ -73,9 +79,15 @@ namespace wrf_hydro_nwm_jedi {
     void zero();
     void accumul(const double &, const State &);
 
+    int & toFortran() {return keyState_;}
+
    private:
     void print(std::ostream &) const;
+    F90state keyState_;
     std::unique_ptr<Fields> fields_;
+    std::shared_ptr<const Geometry> geom_;
+    oops::Variables vars_;
+    util::DateTime time_;
   };
 }  // namespace wrf_hydro_nwm_jedi
 
