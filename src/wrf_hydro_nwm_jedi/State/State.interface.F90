@@ -28,7 +28,7 @@ use ufo_geovals_mod_c, only: ufo_geovals_registry
 !use fv3jedi_getvalues_traj_mod, only: fv3jedi_getvalues_traj, fv3jedi_getvalues_traj_registry
 
 private
-public :: fv3jedi_state_registry
+public :: wrf_hydro_nwm_jedi_state_registry
 
 ! ------------------------------------------------------------------------------
 
