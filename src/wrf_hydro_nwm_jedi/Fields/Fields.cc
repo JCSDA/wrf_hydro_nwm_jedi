@@ -28,8 +28,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Fields::~Fields() {
-    util::abor1_cpp("Fields::~Fields() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Fields::~Fields() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -44,8 +44,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   double Fields::norm() const {
-    util::abor1_cpp("Fields::norm() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Fields::norm() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     return 0.0;
   }
 

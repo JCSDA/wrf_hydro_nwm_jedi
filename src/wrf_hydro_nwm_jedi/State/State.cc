@@ -43,7 +43,7 @@ namespace wrf_hydro_nwm_jedi {
     // if (conf.has("analytic_init")) {
     //   this->analytic_init(conf, geom);
     // } else {
-    this->read(conf);
+    //this->read(conf); TO BE UNCOMMENTED
       //}
     
     oops::Log::trace() << "State::State create from analytical or"
