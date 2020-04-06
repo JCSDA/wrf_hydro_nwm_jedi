@@ -22,7 +22,7 @@ namespace wrf_hydro_nwm_jedi {
     : geom_(new Geometry(geom)) {
     // util::abor1_cpp("Fields::Fields() needs to be implemented.",
     //                 __FILE__, __LINE__);
-    // time_ = util::DateTime("2018-04-15T00:00:00Z");
+    time_ = util::DateTime("2018-04-15T00:00:00Z");
   }
 
 // ----------------------------------------------------------------------------
