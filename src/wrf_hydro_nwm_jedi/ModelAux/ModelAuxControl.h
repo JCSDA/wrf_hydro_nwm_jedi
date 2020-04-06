@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCONTROL_H_
-#define WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCONTROL_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_
 
 #include <ostream>
 #include <string>
@@ -18,13 +18,13 @@
 namespace eckit {
   class Configuration;
 }
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Geometry;
 }
 
 //-----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // ModelAuxControl class
   class ModelAuxControl : public util::Printable,
@@ -40,5 +40,5 @@ namespace wrf_hydro_nwm-jedi {
    private:
     void print(std::ostream & os) const;
   };
-}  // namespace wrf_hydro_nwm-jedi
-#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCONTROL_H_
+}  // namespace wrf_hydro_nwm_jedi
+#endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_

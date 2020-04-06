@@ -36,8 +36,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # Model/Model.cc
 
   # # ModelAux
-  # ModelAux/ModelAuxControl.h
-  # ModelAux/ModelAuxControl.cc
+  ModelAux/ModelAuxControl.h
+  ModelAux/ModelAuxControl.cc
   # ModelAux/ModelAuxIncrement.h
   # ModelAux/ModelAuxIncrement.cc
   # ModelAux/ModelAuxCovariance.h

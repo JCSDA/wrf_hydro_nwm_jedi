@@ -30,11 +30,11 @@ ecbuild_add_test(
   ARGS    testinput/interface.yml
   LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_modelauxcontrol
-#   SOURCES executables/TestModelAuxControl.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_modelauxcontrol
+  SOURCES executables/TestModelAuxControl.cc
+  ARGS    testinput/interface.yml
+  LIBS    wrf_hydro_nwm_jedi )
 
 # ecbuild_add_test(
 #   TARGET  test_wrf_hydro_nwm_jedi_model
