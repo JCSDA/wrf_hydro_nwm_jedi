@@ -70,8 +70,8 @@ do var = 1, vars%nvars()
      case("SNLIQ")
        vcount=vcount+1;
        call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
-            short_name = vars%variable(var), long_name = 'eastward_wind_on_native_D-Grid', &
-            fv3jedi_name = 'snliq', units = 'm')!, staggerloc = north )
+            short_name = vars%variable(var), long_name = 'snow_liquid_content', &
+            wrf_hydro_nwm_name = 'snliq', units = 'm')
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
@@ -593,8 +593,8 @@ type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
 !   self%fields(var) = rhs%fields(var)
 ! enddo
 
-! self%calendar_type = rhs%calendar_type
-! self%date_init = rhs%date_init
+self%calendar_type = rhs%calendar_type
+self%date_init = rhs%date_init
 
 end subroutine copy
 

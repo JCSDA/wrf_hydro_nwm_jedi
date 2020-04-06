@@ -36,12 +36,13 @@ type :: wrf_hydro_nwm_jedi_field
  character(len=32) :: units = "null"        !Units for the field
  logical :: tracer = .false.
  !integer :: staggerloc   !Middle, corners, east, south, etc
- integer :: isc, iec, jsc, jec, npz
+ integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
  real(kind=c_double), allocatable :: array(:,:,:)
  logical :: integerfield = .false.
  contains
   procedure :: allocate_field
   procedure :: equals
+  procedure :: copy => field_copy
   generic :: assignment(=) => equals
   procedure :: deallocate_field
 endtype wrf_hydro_nwm_jedi_field
@@ -52,24 +53,22 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine allocate_field(self,isc,jsc,npz,short_name,long_name,&
-                          fv3jedi_name,units,tracer,integerfield)
+subroutine allocate_field(self,dim1_len,dim2_len,dim3_len,short_name,long_name,&
+                          wrf_hydro_nwm_name,units,tracer,integerfield)
 
 implicit none
 class(wrf_hydro_nwm_jedi_field), target,  intent(inout) :: self
-integer,                       intent(in)    :: isc,jsc,npz
+integer,                       intent(in)    :: dim1_len,dim2_len,dim3_len
 character(len=*),              intent(in)    :: short_name
 character(len=*),              intent(in)    :: long_name
-character(len=*),              intent(in)    :: fv3jedi_name
+character(len=*),              intent(in)    :: wrf_hydro_nwm_name
 character(len=*),              intent(in)    :: units
 logical, optional,             intent(in)    :: tracer
 logical, optional,             intent(in)    :: integerfield
 
-! self%isc = isc
-! self%iec = iec
-! self%jsc = jsc
-! self%jec = jec
-! self%npz = npz
+self%dim1_len = dim1_len
+self%dim2_len = dim2_len
+self%dim3_len = dim3_len
 
 ! if (len(fv3jedi_name) > 10) &
 ! call abor1_ftn("fv3jedi_field_mod.allocate_field: fv3jedi_name should not be longer than ten characters")
@@ -120,6 +119,17 @@ class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
 ! self%lalloc = .false.
 
 end subroutine deallocate_field
+
+! --------------------------------------------------------------------------------------------------
+
+subroutine field_copy(self, rhs)
+  implicit none
+  class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_field),  intent(in)    :: rhs
+
+  
+  
+end subroutine field_copy
 
 ! --------------------------------------------------------------------------------------------------
 

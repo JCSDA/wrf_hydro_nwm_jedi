@@ -94,12 +94,12 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_rhs
 
-! type(wrf_hydro_nwm_jedi_state), pointer :: self
-! type(wrf_hydro_nwm_jedi_state), pointer :: rhs
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_rhs,rhs)
+type(wrf_hydro_nwm_jedi_state), pointer :: self
+type(wrf_hydro_nwm_jedi_state), pointer :: rhs
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_rhs,rhs)
 
-! call copy(self, rhs)
+call copy(self, rhs)
 
 end subroutine wrf_hydro_nwm_jedi_state_copy_c
 

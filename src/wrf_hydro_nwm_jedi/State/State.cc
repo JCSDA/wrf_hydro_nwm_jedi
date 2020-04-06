@@ -119,8 +119,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   State & State::operator=(const State & rhs) {
-    // util::abor1_cpp("State::operator= needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
+    time_ = rhs.time_;
     return *this;
   }
 
