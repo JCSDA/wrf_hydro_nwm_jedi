@@ -23,9 +23,13 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # GeometryIterator/GeometryIterator.h
   # GeometryIterator/GeometryIterator.cc
 
-  # GetValuesTraj
+  # GetValues
   GetValues/GetValues.h
   GetValues/GetValues.cc
+
+  # VariableChanges
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h
 
   # # GetValuesTraj
   # GetValuesTraj/GetValuesTraj.h
