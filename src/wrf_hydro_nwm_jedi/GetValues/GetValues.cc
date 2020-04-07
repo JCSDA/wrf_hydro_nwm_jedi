@@ -7,7 +7,7 @@
 
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
 
-namespace fv3jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // -------------------------------------------------------------------------------------------------
 
