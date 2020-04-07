@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef FV3JEDI_UTILITIES_INTERFACE_H_
-#define FV3JEDI_UTILITIES_INTERFACE_H_
+#ifndef WRF_HYDRO_NWM_JEDI_UTILITIES_INTERFACE_H_
+#define WRF_HYDRO_NWM_JEDI_UTILITIES_INTERFACE_H_
 
 // Forward declarations
 namespace eckit {
@@ -18,7 +18,7 @@ namespace util {
   class Duration;
 }
 
-namespace fv3jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // Geometry key type
 typedef int F90geom;
@@ -58,5 +58,5 @@ typedef int F90inc;
 typedef int F90getvalues;
 typedef int F90lineargetvalues;
 
-}  // namespace fv3jedi
-#endif  // FV3JEDI_UTILITIES_INTERFACE_H_
+}  // namespace wrf_hydro_nwm_jedi
+#endif  // WRF_HYDRO_NWM_JEDI_UTILITIES_INTERFACE_H_
