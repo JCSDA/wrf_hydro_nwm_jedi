@@ -6,14 +6,14 @@
  */
 
 #include "wrf_hydro_nwm_jedi/Traits.h"
-#include "oops/runs/HofX3D.h"
+#include "oops/runs/HofXNoModel.h"
 #include "oops/runs/Run.h"
 #include "ufo/instantiateObsFilterFactory.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<wrf_hydro_nwm_jedi::Traits>();
-  oops::HofX3D<wrf_hydro_nwm_jedi::Traits> hofx;
+  oops::HofXNoModel<wrf_hydro_nwm_jedi::Traits> hofx;
   run.execute(hofx);
   return 0;
 }
