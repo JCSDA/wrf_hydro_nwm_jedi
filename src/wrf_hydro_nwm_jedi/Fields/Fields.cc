@@ -20,16 +20,16 @@ namespace wrf_hydro_nwm_jedi {
   Fields::Fields(const Geometry & geom, const oops::Variables & vars,
                const eckit::Configuration & conf)
     : geom_(new Geometry(geom)) {
-    util::abor1_cpp("Fields::Fields() needs to be implemented.",
-                    __FILE__, __LINE__);
-    // time_ = util::DateTime("2018-04-15T00:00:00Z");
+
+    //State previously read in analytic_init, should we read it from file?
+    time_ = util::DateTime("2018-04-15T00:00:00Z");
   }
 
 // ----------------------------------------------------------------------------
 
   Fields::~Fields() {
-    util::abor1_cpp("Fields::~Fields() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Fields::~Fields() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -44,14 +44,14 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   double Fields::norm() const {
-    util::abor1_cpp("Fields::norm() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Fields::norm() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     return 0.0;
   }
 
 // ----------------------------------------------------------------------------
 
-  boost::shared_ptr<const Geometry> Fields::geometry() const {
+  std::shared_ptr<const Geometry> Fields::geometry() const {
     return geom_;
   }
 

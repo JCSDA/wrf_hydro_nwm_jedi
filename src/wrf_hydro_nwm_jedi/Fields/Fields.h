@@ -11,7 +11,7 @@
 #include <ostream>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+//#include <boost/shared_ptr.hpp>
 
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
@@ -47,12 +47,11 @@ namespace wrf_hydro_nwm_jedi {
 
     double norm() const;
 
-    boost::shared_ptr<const Geometry> geometry() const;
+    std::shared_ptr<const Geometry> geometry() const;
 
    private:
     void print(std::ostream &) const;
-
-    boost::shared_ptr<const Geometry> geom_;
+    std::shared_ptr<const Geometry> geom_;
     util::DateTime time_;
   };
 

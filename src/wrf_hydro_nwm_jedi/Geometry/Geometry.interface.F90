@@ -11,7 +11,7 @@ use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 
 implicit none
-private
+public
 
 ! Setup the C/Fortran interface registry
 #define LISTED_TYPE wrf_hydro_nwm_jedi_geometry
