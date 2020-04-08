@@ -37,6 +37,8 @@ namespace wrf_hydro_nwm_jedi {
       this->vars_ = vars;
     }
 
+    std::cout << "Vars: " << this->vars_<<std::endl; 
+
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
     
     // Analytical or read from file

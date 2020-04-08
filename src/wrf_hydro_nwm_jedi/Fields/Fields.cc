@@ -22,7 +22,20 @@ namespace wrf_hydro_nwm_jedi {
     : geom_(new Geometry(geom)) {
 
     //State previously read in analytic_init, should we read it from file?
-    time_ = util::DateTime("2018-04-15T00:00:00Z");
+    if(conf.has("date"))
+      {
+	std::cout << "Supposed to read from file"<<std::endl;
+	// eckit::LocalConfiguration conf(geom_->getAtmConf());
+	// std::vector<eckit::LocalConfiguration> conf;
+	// std::string current_date;
+	// statetestconf.get("date", current_date);
+	// time_ = util::DateTime(current_date);
+      }
+    else
+      {
+	std::cout << "Time statically configured"<<std::endl;
+	time_ = util::DateTime("2018-04-15T00:00:00Z");
+      }
   }
 
 // ----------------------------------------------------------------------------
