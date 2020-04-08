@@ -67,11 +67,11 @@ do var = 1, vars%nvars()
      ! GEOS and GFS restart and history files. E.g. U for GEOS, u for GFS and ud for history.
      ! Within fv3-jedi variables can be accessed using the fv3jedi_name.
 
-     case("SNLIQ")
-       vcount=vcount+1;
-       call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
-            short_name = vars%variable(var), long_name = 'snow_liquid_content', &
-            wrf_hydro_nwm_name = 'snliq', units = 'm')
+   case("SNLIQ")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
+           short_name = vars%variable(var), long_name = 'snow_liquid_content', &
+           wrf_hydro_nwm_name = 'snliq', units = 'm')
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
@@ -256,11 +256,11 @@ subroutine zeros(self)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-! integer :: var
+integer :: var
 
-! do var = 1, self%nf
-!   self%fields(var)%array = 0.0_kind_real
-! enddo
+do var = 1, self%nf
+  self%fields(var)%array = 0.d0
+enddo
 
 end subroutine zeros
 
@@ -835,9 +835,6 @@ type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
 type(c_ptr),         intent(in)    :: c_conf   !< Configuration
 type(datetime),      intent(inout) :: vdate    !< DateTime
 
-! type(fv3jedi_io_gfs)  :: gfs
-! type(fv3jedi_io_geos) :: geos
-
 character(len=10) :: filetype
 character(len=255) :: filename
 integer :: flipvert
@@ -849,10 +846,9 @@ character(len=:), allocatable :: str
 ! ---------------------
 f_conf = fckit_configuration(c_conf)
 
-call f_conf%get_or_die("filetype",str)
-filetype = str
+call f_conf%get_or_die("model_filename",str)
+filename = str
 deallocate(str)
-
 
 if (trim(filetype) == 'gfs') then
 

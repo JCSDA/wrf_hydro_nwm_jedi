@@ -180,6 +180,8 @@ type(wrf_hydro_nwm_jedi_state), pointer :: state
 type(datetime) :: fdate
 type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
 
+write(*,*) "Key_geom from read_file state",c_key_geom
+
 call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
 call wrf_hydro_nwm_jedi_state_registry%get(c_key_state,state)
 call c_f_datetime(c_dt, fdate)

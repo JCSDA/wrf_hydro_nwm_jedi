@@ -85,7 +85,6 @@ namespace wrf_hydro_nwm_jedi {
     boost::shared_ptr<const Geometry> geometry() const {return geom_;}
     
     const F90state & toFortran() {return keyState_;}
-
    private:
     void print(std::ostream &) const;
     F90state keyState_;

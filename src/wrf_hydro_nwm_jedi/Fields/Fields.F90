@@ -31,7 +31,7 @@ public :: wrf_hydro_nwm_jedi_field, &
 type :: wrf_hydro_nwm_jedi_field
  logical :: lalloc = .false.
  character(len=32) :: short_name = "null"   !Short name (to match file name)
- character(len=10) :: wrf_hydro_nwm_jedi_name = "null" !Common name
+ character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
  character(len=64) :: long_name = "null"    !More descriptive name
  character(len=32) :: units = "null"        !Units for the field
  logical :: tracer = .false.
@@ -70,26 +70,16 @@ self%dim1_len = dim1_len
 self%dim2_len = dim2_len
 self%dim3_len = dim3_len
 
-! if (len(fv3jedi_name) > 10) &
-! call abor1_ftn("fv3jedi_field_mod.allocate_field: fv3jedi_name should not be longer than ten characters")
-
-! if(.not.self%lalloc) then
-
-!   if (staggerloc == center) then
-!     allocate(self%array(self%isc:self%iec,self%jsc:self%jec,1:self%npz))
-!   elseif (staggerloc == north) then
-!     allocate(self%array(self%isc:self%iec,self%jsc:self%jec+1,1:self%npz))
-!   elseif (staggerloc == east) then
-!     allocate(self%array(self%isc:self%iec+1,self%jsc:self%jec,1:self%npz))
-!   endif
-
-! endif
-
-! self%lalloc = .true.
+if(.not.allocated(self%array)) then
+   allocate( self%array(dim1_len, dim2_len, dim3_len) )
+   self%lalloc = .true.
+else
+   call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+end if
 
 ! self%short_name   = trim(short_name)
 ! self%long_name    = trim(long_name)
-! self%fv3jedi_name = trim(fv3jedi_name)
+self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
 ! self%units        = trim(units)
 ! self%staggerloc   = staggerloc
 
@@ -115,8 +105,8 @@ subroutine deallocate_field(self)
 implicit none
 class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
 
-! if(self%lalloc) deallocate(self%array)
-! self%lalloc = .false.
+if(self%lalloc) deallocate(self%array)
+self%lalloc = .false.
 
 end subroutine deallocate_field
 

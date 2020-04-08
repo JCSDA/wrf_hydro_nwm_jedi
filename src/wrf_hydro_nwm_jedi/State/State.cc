@@ -37,15 +37,13 @@ namespace wrf_hydro_nwm_jedi {
       this->vars_ = vars;
     }
 
-    std::cout << "Vars: " << this->vars_<<std::endl; 
-
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
     
     // Analytical or read from file
     // if (conf.has("analytic_init")) {
     //   this->analytic_init(conf, geom);
     // } else {
-    //this->read(conf); TO BE UNCOMMENTED
+    this->read(conf);
       //}
     
     oops::Log::trace() << "State::State create from analytical or"
@@ -114,7 +112,7 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State read starting" << std::endl;
     const eckit::Configuration * conf = &config;
     util::DateTime * dtp = &time_;
-    wrf_hydro_nwm_jedi_state_read_file_f90(geom_->toFortran(), keyState_, &conf, &dtp);
+    wrf_hydro_nwm_jedi_state_read_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
     oops::Log::trace() << "State read done" << std::endl;
   }
 
