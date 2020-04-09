@@ -45,8 +45,7 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Fields::print(std::ostream & os) const {
-    // util::abor1_cpp("Fields::print() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    
     os << "(TODO, print diagnostic info about the fields here)"
        << std::endl;
   }

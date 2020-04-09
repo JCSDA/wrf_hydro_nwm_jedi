@@ -32,7 +32,7 @@ private
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      !add_incr, &
      read_file, &! write_file, gpnorm, rms, &
-     change_resol !getvalues, analytic_IC, state_print
+     change_resol, state_print !getvalues, analytic_IC, state_print
 
 ! ------------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ do var = 1, vars%nvars()
 
    case("SNLIQ")
       vcount=vcount+1;
-      call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%npz,geom%dim2_len, &
            short_name = vars%variable(var), long_name = 'snow_liquid_content', &
            wrf_hydro_nwm_name = 'snliq', units = 'm')
      ! case("vd","v","V")
@@ -850,6 +850,12 @@ call f_conf%get_or_die("model_filename",str)
 filename = str
 deallocate(str)
 
+!SNLIQ(Time, south_north, snow_layers, west_east)
+
+! self%fields(1)%
+
+! call get_from_restart_3d(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array  )
+ 
 ! if (trim(filetype) == 'gfs') then
 
 !  call gfs%setup(f_conf)
@@ -942,7 +948,8 @@ subroutine state_print(self)
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
-! call fields_print(self%nf, self%fields, "State", self%f_comm) 
+ write(*,*) "Calling fields_print from state_print"
+ call fields_print(self%nf, self%fields, "State", self%f_comm)
 
 end subroutine state_print
 
@@ -976,5 +983,51 @@ real(kind=c_double), intent(out) :: prms
 end subroutine rms
 
 ! ------------------------------------------------------------------------------
+
+! subroutine get_from_restart_3d(parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+!     implicit none
+!     integer,                            intent(in) :: parallel_xstart
+!     integer,                            intent(in) :: parallel_xend
+!     integer,                            intent(in) :: subwindow_xstart
+!     integer,                            intent(in) :: ixfull
+!     integer,                            intent(in) :: jxfull
+!     character(len=*),                   intent(in)  :: name
+!     real,             dimension(:,:,:), intent(out) :: array
+!     integer,          optional,         intent(out) :: return_error
+!     integer :: ierr
+!     integer :: ncid
+!     integer :: varid
+!     integer, dimension(4) :: nstart
+!     integer, dimension(4) :: ncount
+! #ifdef _PARALLEL_
+!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+! #else
+!     ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+! #endif
+!     call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
+!     nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
+!     ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
+!     if (present(return_error)) then
+!        ierr = nf90_inq_varid(ncid, name, varid)
+!        if (ierr == NF90_NOERR) then
+!           return_error = 0
+!           call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
+!           ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+!           call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+!        else
+!           return_error = 1
+!           write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
+!        endif
+!     else
+!        ierr = nf90_inq_varid(ncid, name, varid)
+!        call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
+!        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+!        call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+!     endif
+!     ierr = nf90_close(ncid)
+!     call error_handler(ierr, "Problem closing restart file")
+    
+!   end subroutine get_from_restart_3d
+
 
 end module wrf_hydro_nwm_jedi_state_mod

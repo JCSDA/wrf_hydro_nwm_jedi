@@ -78,7 +78,7 @@ else
 end if
 
 ! self%short_name   = trim(short_name)
-! self%long_name    = trim(long_name)
+self%long_name    = trim(long_name)
 self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
 ! self%units        = trim(units)
 ! self%staggerloc   = staggerloc
@@ -344,6 +344,14 @@ subroutine fields_print(nf, fields, name, f_comm)
   type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
   character(len=*),     intent(in)    :: name
   type(fckit_mpi_comm), intent(in)    :: f_comm
+
+  integer :: i
+
+  do i = 1, nf
+     write(*,*) fields(i)%wrf_hydro_nwm_name
+     write(*,*) "First element", fields(i)%array(0,0,0)
+     write(*,*) "------"
+  end do
 
 ! integer :: var
 ! real(kind=kind_real) :: tmp(3), pstat(3), gs3, gs3g

@@ -265,9 +265,9 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 type(wrf_hydro_nwm_jedi_state), pointer :: self
 
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
 
-! call state_print(self)
+call state_print(self)
 
 end subroutine wrf_hydro_nwm_jedi_state_print_c
 
