@@ -5,24 +5,24 @@ Geometry:
 Forecasts:
   variables: [SNLIQ]
   state:
-  - date: 2018-04-15T00:00:00Z
+  - date: 2017-01-01T00:00:00Z
     read_from_file: 1
     basename: ./INPUT/
-    model_filename: RESTART
+    model_filename: RESTART.2017011000_DOMAIN1
 
 Assimilation Window:
-  window_begin: 2018-04-14T00:00:00Z
+  window_begin: 2017-01-01T00:00:00Z
   window_length: P2D
 
 Observations:
   ObsTypes:
 
   - ObsSpace:
-      name: SeaSurfaceTemp
-      ObsDataOut: {obsfile: ./Data/sst.out.nc}
-      ObsDataIn:  {obsfile: ./Data/sst.nc}
+      name: SnowLiquidContent
+      ObsDataOut: {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/RESTART.2017011000_DOMAIN1.out.nc}
+      ObsDataIn:  {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/RESTART.2017011000_DOMAIN1.nc}
       simulate:
-        variables: [sea_surface_temperature]
+        variables: [SNLIQ]
     ObsOperator:
       name: Identity
     Covariance:
