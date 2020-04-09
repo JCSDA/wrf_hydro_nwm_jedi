@@ -8,12 +8,15 @@ StateTest:
   tolerance: 1.0e-12
   date: 2018-04-15T00:00:00Z
   StateGenerate:
+    model_filename: RESTART
   StateFile:
+    model_filename: RESTART
   norm-gen: 0.0
 
 # + needed for TestModel  
 Model:
   name: WRF_HYDRO_NWM_JEDI
+  model_filename: RESTART
 
 ModelBias:
 

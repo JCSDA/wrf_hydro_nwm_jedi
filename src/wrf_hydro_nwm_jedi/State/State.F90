@@ -850,30 +850,30 @@ call f_conf%get_or_die("model_filename",str)
 filename = str
 deallocate(str)
 
-if (trim(filetype) == 'gfs') then
+! if (trim(filetype) == 'gfs') then
 
 !  call gfs%setup(f_conf)
 !  call gfs%read_meta(geom, vdate, self%calendar_type, self%date_init)
 !  call gfs%read_fields(geom, self%fields)
 
-  flipvert = 0
-  if (f_conf%has("flip_vertically")) then
-     call f_conf%get_or_die("flip_vertically",flipvert)
-  endif
- ! if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
+  ! flipvert = 0
+!   if (f_conf%has("flip_vertically")) then
+!      call f_conf%get_or_die("flip_vertically",flipvert)
+!   endif
+!  ! if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
 
-elseif (trim(filetype) == 'geos') then
+! elseif (trim(filetype) == 'geos') then
 
   ! call geos%setup(geom, self%fields, vdate, 'read', f_conf)
   ! call geos%read_meta(geom, vdate, self%calendar_type, self%date_init)
   ! call geos%read_fields(geom, self%fields)
   ! call geos%delete()
 
-else
+! else
 
-  call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.read: restart type not supported")
+!   call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.read: restart type not supported")
 
-endif
+! endif
 
 end subroutine read_file
 
