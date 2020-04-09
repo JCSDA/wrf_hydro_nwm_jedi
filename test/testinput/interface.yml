@@ -16,7 +16,6 @@ StateTest:
 # + needed for TestModel  
 Model:
   name: WRF_HYDRO_NWM_JEDI
-  model_filename: RESTART
 
 ModelBias:
 
