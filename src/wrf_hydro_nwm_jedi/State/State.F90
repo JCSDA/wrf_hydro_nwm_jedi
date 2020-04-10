@@ -13,16 +13,16 @@ use oops_variables_mod
 
 use wrf_hydro_nwm_jedi_field_mod
 ! use fv3jedi_constants_mod,       only: rad2deg, constoz
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
 ! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
 ! use fv3jedi_interpolation_mod,   only: field2field_interp
 ! use fv3jedi_kinds_mod,           only: kind_real
-use iso_c_binding, only : c_double
+use iso_c_binding, only : c_float
 !use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
 !use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
 use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state
 !use fv3jedi_getvalues_mod,       only: getvalues
-
+use netcdf
 !use wind_vt_mod, only: a2d
 
 !use mpp_domains_mod,             only: east, north, center
@@ -69,7 +69,7 @@ do var = 1, vars%nvars()
 
    case("SNLIQ")
       vcount=vcount+1;
-      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%npz,geom%dim2_len, &
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%snow_layers, geom%dim2_len, &
            short_name = vars%variable(var), long_name = 'snow_liquid_content', &
            wrf_hydro_nwm_name = 'snliq', units = 'm')
      ! case("vd","v","V")
@@ -291,7 +291,7 @@ subroutine axpy(self,zz,rhs)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-real(kind=c_double), intent(in)    :: zz
+real(kind=c_float), intent(in)    :: zz
 type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
 
 ! integer :: var
@@ -841,6 +841,7 @@ integer :: flipvert
 type(fckit_configuration) :: f_conf
 character(len=:), allocatable :: str
 
+integer :: ixfull,jxfull
 
 ! Fortran configuration
 ! ---------------------
@@ -852,9 +853,10 @@ deallocate(str)
 
 !SNLIQ(Time, south_north, snow_layers, west_east)
 
-! self%fields(1)%
+ixfull = geom%xend-geom%xstart+1
+jxfull = geom%yend-geom%ystart+1
 
-! call get_from_restart_3d(xstart, xend, xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array  )
+call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
  
 ! if (trim(filetype) == 'gfs') then
 
@@ -960,7 +962,7 @@ subroutine gpnorm(self, nf, pstat)
  implicit none
  type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
  integer,              intent(in)    :: nf
- real(kind=c_double), intent(inout) :: pstat(3, nf)
+ real(kind=c_float), intent(inout) :: pstat(3, nf)
 
 ! if (nf .ne. self%nf) then
 !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
@@ -976,7 +978,7 @@ subroutine rms(self, prms)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state),  intent(in)  :: self
-real(kind=c_double), intent(out) :: prms
+real(kind=c_float), intent(out) :: prms
 
 ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
 
@@ -984,50 +986,53 @@ end subroutine rms
 
 ! ------------------------------------------------------------------------------
 
-! subroutine get_from_restart_3d(parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
-!     implicit none
-!     integer,                            intent(in) :: parallel_xstart
-!     integer,                            intent(in) :: parallel_xend
-!     integer,                            intent(in) :: subwindow_xstart
-!     integer,                            intent(in) :: ixfull
-!     integer,                            intent(in) :: jxfull
-!     character(len=*),                   intent(in)  :: name
-!     real,             dimension(:,:,:), intent(out) :: array
-!     integer,          optional,         intent(out) :: return_error
-!     integer :: ierr
-!     integer :: ncid
-!     integer :: varid
-!     integer, dimension(4) :: nstart
-!     integer, dimension(4) :: ncount
-! #ifdef _PARALLEL_
-!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-! #else
-!     ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-! #endif
-!     call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
-!     nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
-!     ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
-!     if (present(return_error)) then
-!        ierr = nf90_inq_varid(ncid, name, varid)
-!        if (ierr == NF90_NOERR) then
-!           return_error = 0
-!           call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
-!           ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-!           call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-!        else
-!           return_error = 1
-!           write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
-!        endif
-!     else
-!        ierr = nf90_inq_varid(ncid, name, varid)
-!        call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
-!        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-!        call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-!     endif
-!     ierr = nf90_close(ncid)
-!     call error_handler(ierr, "Problem closing restart file")
+subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+  implicit none
+    character(len=*), intent(in) :: restart_filename_remember
+    integer,                            intent(in) :: parallel_xstart
+    integer,                            intent(in) :: parallel_xend
+    integer,                            intent(in) :: subwindow_xstart
+    integer,                            intent(in) :: ixfull
+    integer,                            intent(in) :: jxfull
+    character(len=*),                   intent(in)  :: name
+    real(kind=c_float),             dimension(:,:,:), intent(out) :: array
+    integer,          optional,         intent(out) :: return_error
+    integer :: ierr
+    integer :: ncid
+    integer :: varid
+    integer, dimension(4) :: nstart
+    integer, dimension(4) :: ncount
+#ifdef _PARALLEL_
+    ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+#else
+    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+#endif
+    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
+    ! nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
+    nstart = (/1, 1, 1, 1/)
+    ! ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
+    ncount = (/size(array,1), size(array,2), size(array,3), 1/)
+    if (present(return_error)) then
+       ierr = nf90_inq_varid(ncid, name, varid)
+       if (ierr == NF90_NOERR) then
+          return_error = 0
+          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
+          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+       else
+          return_error = 1
+          write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
+       endif
+    else
+       ierr = nf90_inq_varid(ncid, name, varid)
+       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
+       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+    endif
+    ierr = nf90_close(ncid)
+    call error_handler(ierr, "Problem closing restart file")
     
-!   end subroutine get_from_restart_3d
+  end subroutine get_from_restart_3d
 
 
 end module wrf_hydro_nwm_jedi_state_mod

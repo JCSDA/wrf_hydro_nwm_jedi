@@ -8,7 +8,7 @@ Forecasts:
   - date: 2017-01-01T00:00:00Z
     read_from_file: 1
     basename: ./INPUT/
-    model_filename: RESTART.2017011000_DOMAIN1
+    model_filename: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/RESTART.2017011000_DOMAIN1
 
 Assimilation Window:
   window_begin: 2017-01-01T00:00:00Z

@@ -5,7 +5,7 @@
 
 module wrf_hydro_nwm_jedi_field_mod
 
-  use iso_c_binding, only: c_int, c_double
+  use iso_c_binding, only: c_int, c_float
   use fckit_mpi_module
   use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 !use fv3jedi_kinds_mod, only: kind_real
@@ -37,7 +37,7 @@ type :: wrf_hydro_nwm_jedi_field
  logical :: tracer = .false.
  !integer :: staggerloc   !Middle, corners, east, south, etc
  integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
- real(kind=c_double), allocatable :: array(:,:,:)
+ real(kind=c_float), allocatable :: array(:,:,:)
  logical :: integerfield = .false.
  contains
   procedure :: allocate_field
@@ -166,7 +166,7 @@ subroutine allocate_copy_field_array(fields, fv3jedi_name, field_array)
 
 type(wrf_hydro_nwm_jedi_field),               intent(in)  :: fields(:)
 character(len=*),                  intent(in)  :: fv3jedi_name
-real(kind=c_double), allocatable, intent(out) :: field_array(:,:,:)
+real(kind=c_float), allocatable, intent(out) :: field_array(:,:,:)
 
 ! integer :: var
 ! logical :: found
@@ -194,7 +194,7 @@ subroutine copy_field_array(fields, fv3jedi_name, field_array)
 
 type(wrf_hydro_nwm_jedi_field),  intent(in)  :: fields(:)
 character(len=*),     intent(in)  :: fv3jedi_name
-real(kind=c_double), intent(out) :: field_array(:,:,:)
+real(kind=c_float), intent(out) :: field_array(:,:,:)
 
 ! integer :: var
 ! logical :: found
@@ -246,7 +246,7 @@ subroutine pointer_field_array(fields, fv3jedi_name, array_pointer)
 
 type(wrf_hydro_nwm_jedi_field), target,   intent(in)    :: fields(:)
 character(len=*),              intent(in)    :: fv3jedi_name
-real(kind=c_double), pointer, intent(out)   :: array_pointer(:,:,:)
+real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
 
 ! integer :: var
 ! logical :: found
@@ -274,7 +274,7 @@ subroutine fields_rms(nf,fields,rms, f_comm)
 implicit none
 integer,              intent(in)    :: nf
 type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-real(kind=c_double), intent(inout) :: rms
+real(kind=c_float), intent(inout) :: rms
 type(fckit_mpi_comm), intent(in)    :: f_comm
 
 ! integer :: i, j, k, ii, iisum, var
@@ -311,7 +311,7 @@ subroutine fields_gpnorm(nf, fields, pstat, f_comm)
 implicit none
 integer,              intent(in)    :: nf
 type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-real(kind=c_double), intent(inout) :: pstat(3, nf)
+real(kind=c_float), intent(inout) :: pstat(3, nf)
 type(fckit_mpi_comm), intent(in)    :: f_comm
 
 ! integer :: var
