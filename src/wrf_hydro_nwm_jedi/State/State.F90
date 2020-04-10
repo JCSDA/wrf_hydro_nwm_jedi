@@ -857,6 +857,8 @@ ixfull = geom%xend-geom%xstart+1
 jxfull = geom%yend-geom%ystart+1
 
 call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
+
+write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
  
 ! if (trim(filetype) == 'gfs') then
 
@@ -1002,16 +1004,14 @@ subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, paral
     integer :: varid
     integer, dimension(4) :: nstart
     integer, dimension(4) :: ncount
-#ifdef _PARALLEL_
-    ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-#else
+! #ifdef _PARALLEL_
+!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+! #else
     ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-#endif
+    !#endif
     call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
-    ! nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
-    nstart = (/1, 1, 1, 1/)
-    ! ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
-    ncount = (/size(array,1), size(array,2), size(array,3), 1/)
+    nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
+    ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
     if (present(return_error)) then
        ierr = nf90_inq_varid(ncid, name, varid)
        if (ierr == NF90_NOERR) then

@@ -349,7 +349,7 @@ subroutine fields_print(nf, fields, name, f_comm)
 
   do i = 1, nf
      write(*,*) fields(i)%wrf_hydro_nwm_name
-     write(*,*) "First element", fields(i)%array(0,0,0)
+     write(*,*) "From Fields.F90: first column:", fields(i)%array(:,1,1)
      write(*,*) "------"
   end do
 
