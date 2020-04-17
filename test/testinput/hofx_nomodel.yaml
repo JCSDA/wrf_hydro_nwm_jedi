@@ -12,15 +12,15 @@ Forecasts:
 
 Assimilation Window:
   window_begin: 2017-01-01T00:00:00Z
-  window_length: P2D
+  window_length: P1D
 
 Observations:
   ObsTypes:
 
   - ObsSpace:
       name: SnowLiquidContent
-      ObsDataOut: {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/RESTART.2017011000_DOMAIN1.out.nc}
-      ObsDataIn:  {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/RESTART.2017011000_DOMAIN1.nc}
+      ObsDataOut: {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/nwm_osse_ioda.out.nc}
+      ObsDataIn:  {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc}
       simulate:
         variables: [SNLIQ]
     ObsOperator:
