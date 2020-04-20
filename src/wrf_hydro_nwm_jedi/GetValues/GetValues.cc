@@ -13,7 +13,10 @@ namespace wrf_hydro_nwm_jedi {
 
 GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs) : locs_(locs),
   geom_(new Geometry(geom)), model2geovals_() {
-  // oops::Log::trace() << "GetValues::GetValues starting" << std::endl;
+  oops::Log::trace() << "GetValues::GetValues starting" << std::endl;
+
+  util::abor1_cpp("GetValues::GetValues() needs to be implemented.",
+		  __FILE__, __LINE__);
 
   // // Create the variable change object
   // {
@@ -34,7 +37,7 @@ GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs) : locs_
 // -------------------------------------------------------------------------------------------------
 
 GetValues::~GetValues() {
-  // oops::Log::trace() << "GetValues::~GetValues starting" << std::endl;
+  oops::Log::trace() << "GetValues::~GetValues starting" << std::endl;
   // fv3jedi_getvalues_delete_f90(keyGetValues_);
   // oops::Log::trace() << "GetValues::~GetValues done" << std::endl;
 }
