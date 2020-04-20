@@ -3,7 +3,7 @@ Geometry:
   input_file: /home/alex/Downloads/wrf_hydro_nwm-jedi/test/Data/wrf_hydro_nwm_files/wrfinput.nc
 
 Forecasts:
-  variables: [SNLIQ]
+  variables: [SNEQV]
   state:
   - date: 2017-01-01T00:00:00Z
     read_from_file: 1
@@ -16,13 +16,13 @@ Assimilation Window:
 
 Observations:
   ObsTypes:
-
+# SNEQV = SNLIQ + SNICE
   - ObsSpace:
-      name: SnowLiquidContent
+      name: SnowWaterEquivalent
       ObsDataOut: {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/nwm_osse_ioda.out.nc}
       ObsDataIn:  {obsfile: /home/alex/Downloads/wrf_hydro_nwm-jedi-build/wrf_hydro_nwm_jedi/test/Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc}
       simulate:
-        variables: [SNLIQ]
+        variables: [swe]
     ObsOperator:
       name: Identity
     Covariance:

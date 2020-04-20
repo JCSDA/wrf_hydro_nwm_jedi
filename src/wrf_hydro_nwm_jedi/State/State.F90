@@ -67,11 +67,16 @@ do var = 1, vars%nvars()
      ! GEOS and GFS restart and history files. E.g. U for GEOS, u for GFS and ud for history.
      ! Within fv3-jedi variables can be accessed using the fv3jedi_name.
 
-   case("SNLIQ")
+   ! case("SNLIQ")
+   !    vcount=vcount+1;
+   !    call self%fields(vcount)%allocate_field(geom%dim1_len, geom%snow_layers, geom%dim2_len, &
+   !         short_name = vars%variable(var), long_name = 'snow_liquid_content', &
+   !         wrf_hydro_nwm_name = 'snliq', units = 'm')
+   case("SNEQV")
       vcount=vcount+1;
-      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%snow_layers, geom%dim2_len, &
-           short_name = vars%variable(var), long_name = 'snow_liquid_content', &
-           wrf_hydro_nwm_name = 'snliq', units = 'm')
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'snow_water_equivalent', &
+           wrf_hydro_nwm_name = 'sneqv', units = 'm')
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
@@ -856,35 +861,14 @@ deallocate(str)
 ixfull = geom%xend-geom%xstart+1
 jxfull = geom%yend-geom%ystart+1
 
-call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
+!call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
+
+!write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
+ 
+call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNEQV", self%fields(1)%array(:,:,1))
 
 write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
- 
-! if (trim(filetype) == 'gfs') then
-
-!  call gfs%setup(f_conf)
-!  call gfs%read_meta(geom, vdate, self%calendar_type, self%date_init)
-!  call gfs%read_fields(geom, self%fields)
-
-  ! flipvert = 0
-!   if (f_conf%has("flip_vertically")) then
-!      call f_conf%get_or_die("flip_vertically",flipvert)
-!   endif
-!  ! if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
-
-! elseif (trim(filetype) == 'geos') then
-
-  ! call geos%setup(geom, self%fields, vdate, 'read', f_conf)
-  ! call geos%read_meta(geom, vdate, self%calendar_type, self%date_init)
-  ! call geos%read_fields(geom, self%fields)
-  ! call geos%delete()
-
-! else
-
-!   call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.read: restart type not supported")
-
-! endif
-
+  
 end subroutine read_file
 
 ! ------------------------------------------------------------------------------
@@ -1033,6 +1017,56 @@ subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, paral
     call error_handler(ierr, "Problem closing restart file")
     
   end subroutine get_from_restart_3d
+
+  subroutine get_from_restart_2d_float(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+    implicit none
+    character(len=*), intent(in) :: restart_filename_remember
+    integer,                            intent(in) :: parallel_xstart
+    integer,                            intent(in) :: parallel_xend
+    integer,                            intent(in) :: subwindow_xstart
+    integer,                            intent(in) :: ixfull
+    integer,                            intent(in) :: jxfull
+    character(len=*),                   intent(in)  :: name
+    real,             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array
+    integer,          optional,         intent(out) :: return_error
+    integer :: ierr
+    integer :: ncid
+    integer :: varid
+    integer, dimension(4) :: nstart
+    integer, dimension(4) :: ncount
+    integer :: rank
+! #ifdef _PARALLEL_
+!     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+!     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+! #else
+    rank = 0
+    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+!#endif
+    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
+    nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
+    ncount = (/ parallel_xend-parallel_xstart+1,   jxfull,  1, -99999 /)
+    if (present(return_error)) then
+       ierr = nf90_inq_varid(ncid, name, varid)
+       if (ierr == NF90_NOERR) then
+          return_error = 0
+          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
+          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+       else
+          return_error = 1
+          if (rank == 0) write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
+       endif
+    else
+       ierr = nf90_inq_varid(ncid, name, varid)
+       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
+       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+    endif
+    ierr = nf90_close(ncid)
+    call error_handler(ierr, "Problem closing restart file")
+    
+  end subroutine get_from_restart_2d_float
 
 
 end module wrf_hydro_nwm_jedi_state_mod

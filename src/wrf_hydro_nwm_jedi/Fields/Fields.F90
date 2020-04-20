@@ -35,6 +35,7 @@ type :: wrf_hydro_nwm_jedi_field
  character(len=64) :: long_name = "null"    !More descriptive name
  character(len=32) :: units = "null"        !Units for the field
  logical :: tracer = .false.
+ logical :: is_2D = .false.
  !integer :: staggerloc   !Middle, corners, east, south, etc
  integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
  real(kind=c_float), allocatable :: array(:,:,:)
@@ -76,6 +77,8 @@ if(.not.allocated(self%array)) then
 else
    call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
 end if
+
+if(dim3_len == 1) self%is_2D = .true.
 
 ! self%short_name   = trim(short_name)
 self%long_name    = trim(long_name)
