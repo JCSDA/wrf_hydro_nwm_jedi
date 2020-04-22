@@ -47,11 +47,11 @@ namespace wrf_hydro_nwm_jedi {
 
     double norm() const;
 
-    std::shared_ptr<const Geometry> geometry() const;
+    boost::shared_ptr<const Geometry> geometry() const;
 
    private:
     void print(std::ostream &) const;
-    std::shared_ptr<const Geometry> geom_;
+    boost::shared_ptr<const Geometry> geom_;
     util::DateTime time_;
   };
 

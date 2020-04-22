@@ -218,10 +218,10 @@ end subroutine copy_field_array
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine pointer_field(fields, fv3jedi_name, field_pointer)
+subroutine pointer_field(fields, wrf_hydro_nwm_jedi_name, field_pointer)
 
 type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
-character(len=*),             intent(in)  :: fv3jedi_name
+character(len=*),             intent(in)  :: wrf_hydro_nwm_jedi_name
 type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
 
 ! integer :: var
@@ -245,10 +245,10 @@ end subroutine pointer_field
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine pointer_field_array(fields, fv3jedi_name, array_pointer)
+subroutine pointer_field_array(fields, wrf_hydro_nwm_jedi_name, array_pointer)
 
 type(wrf_hydro_nwm_jedi_field), target,   intent(in)    :: fields(:)
-character(len=*),              intent(in)    :: fv3jedi_name
+character(len=*),              intent(in)    :: wrf_hydro_nwm_jedi_name
 real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
 
 ! integer :: var

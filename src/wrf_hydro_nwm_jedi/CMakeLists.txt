@@ -26,6 +26,7 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # GetValues
   GetValues/GetValues.h
   GetValues/GetValues.cc
+  GetValues/GetValues.F90
 
   # VariableChanges
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
