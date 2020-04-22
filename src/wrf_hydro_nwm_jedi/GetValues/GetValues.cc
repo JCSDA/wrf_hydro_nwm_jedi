@@ -29,8 +29,8 @@ GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs) : locs_
   // // Call GetValues consructor
   // {
   // util::Timer timergv(classname(), "GetValues");
-  // fv3jedi_getvalues_create_f90(keyGetValues_, geom.toFortran(), locs_.toFortran());
-  // oops::Log::trace() << "GetValues::GetValues done" << std::endl;
+  wrf_hydro_nwm_jedi_getvalues_create_f90(keyGetValues_, geom.toFortran(), locs_.toFortran());
+  oops::Log::trace() << "GetValues::GetValues done" << std::endl;
   // }
 }
 
