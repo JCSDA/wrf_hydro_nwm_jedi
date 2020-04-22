@@ -166,6 +166,10 @@ namespace wrf_hydro_nwm_jedi {
     return fields_->norm();
   }
 
+  boost::shared_ptr<const Geometry> State::geometry() const {
+    return fields_->geometry();
+  }
+
 // ----------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi

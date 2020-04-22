@@ -82,7 +82,7 @@ namespace wrf_hydro_nwm_jedi {
     void accumul(const double &, const State &);
     void read(const eckit::Configuration &);
 
-    boost::shared_ptr<const Geometry> geometry() const {return geom_;}
+    boost::shared_ptr<const Geometry> geometry() const;// {return fields_->geometry();}
     
     const F90state & toFortran() {return keyState_;}
    private:
