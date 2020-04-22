@@ -22,13 +22,13 @@ namespace wrf_hydro_nwm_jedi {
 
 extern "C" {
 
-  /* void fv3jedi_getvalues_create_f90(F90getvalues &, const F90geom &, const F90locs &); */
+  void wrf_hydro_nwm_jedi_getvalues_create_f90(F90getvalues &, const F90geom &, const F90locs &);
 
-  /* void fv3jedi_getvalues_delete_f90(F90getvalues &); */
+  void wrf_hydro_nwm_jedi_getvalues_delete_f90(F90getvalues &);
 
-  /* void fv3jedi_getvalues_fill_geovals_f90(const F90getvalues &, const F90geom &, const F90state &, */
-  /*                                         const util::DateTime **, const util::DateTime **, */
-  /*                                         const F90locs &, const F90goms &); */
+  void wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(const F90getvalues &, const F90geom &, const F90state &,
+                                          const util::DateTime **, const util::DateTime **,
+                                          const F90locs &, const F90goms &);
 
 };  // extern "C"
 

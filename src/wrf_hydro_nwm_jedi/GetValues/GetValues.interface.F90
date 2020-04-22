@@ -5,7 +5,7 @@
 
 ! --------------------------------------------------------------------------------------------------
 
-module fv3jedi_getvalues_interface_mod
+module wrf_hydro_nwm_jedi_getvalues_interface_mod
 
 ! Intrinsic
 use iso_c_binding
@@ -22,25 +22,25 @@ use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 
 ! self dependency
-use fv3jedi_getvalues_mod, only: fv3jedi_getvalues
+use wrf_hydro_nwm_jedi_getvalues_mod, only: wrf_hydro_nwm_jedi_getvalues
 
-! fv3jedi dependencies
-use fv3jedi_geom_interface_mod,  only: fv3jedi_geom_registry
-use fv3jedi_geom_mod,            only: fv3jedi_geom
-use fv3jedi_kinds_mod,           only: kind_real
-use fv3jedi_state_interface_mod, only: fv3jedi_state_registry
-use fv3jedi_state_mod,           only: fv3jedi_state
+! wrf_hydro_nwm_jedi dependencies
+use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
+use wrf_hydro_nwm_jedi_geometry_mod,            only: wrf_hydro_nwm_jedi_geometry
+!use wrf_hydro_nwm_jedi_kinds_mod,           only: kind_real
+use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state_registry
+use wrf_hydro_nwm_jedi_state_mod,           only: wrf_hydro_nwm_jedi_state
 
 implicit none
 private
-public :: fv3jedi_getvalues_registry
+public :: wrf_hydro_nwm_jedi_getvalues_registry
 
 ! --------------------------------------------------------------------------------------------------
 
 !> Linked list interface
-#define LISTED_TYPE fv3jedi_getvalues
+#define LISTED_TYPE wrf_hydro_nwm_jedi_getvalues
 #include "oops/util/linkedList_i.f"
-type(registry_t) :: fv3jedi_getvalues_registry
+type(registry_t) :: wrf_hydro_nwm_jedi_getvalues_registry
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -53,55 +53,55 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fv3jedi_getvalues_create_c(c_key_self, c_key_geom, c_key_locs) &
-           bind (c, name='fv3jedi_getvalues_create_f90')
+subroutine wrf_hydro_nwm_jedi_getvalues_create_c(c_key_self, c_key_geom, c_key_locs) &
+           bind (c, name='wrf_hydro_nwm_jedi_getvalues_create_f90')
 
 integer(c_int),     intent(inout) :: c_key_self      !< Key to self
 integer(c_int),     intent(in)    :: c_key_geom      !< Key to geometry
 integer(c_int),     intent(in)    :: c_key_locs      !< Key to observation locations
 
-type(fv3jedi_getvalues), pointer :: self
-type(fv3jedi_geom),      pointer :: geom
+type(wrf_hydro_nwm_jedi_getvalues), pointer :: self
+type(wrf_hydro_nwm_jedi_geometry),      pointer :: geom
 type(ufo_locs),          pointer :: locs
 
 ! Create object
-call fv3jedi_getvalues_registry%init()
-call fv3jedi_getvalues_registry%add(c_key_self)
-call fv3jedi_getvalues_registry%get(c_key_self, self)
+call wrf_hydro_nwm_jedi_getvalues_registry%init()
+call wrf_hydro_nwm_jedi_getvalues_registry%add(c_key_self)
+call wrf_hydro_nwm_jedi_getvalues_registry%get(c_key_self, self)
 
 ! Others
-call fv3jedi_geom_registry%get(c_key_geom, geom)
+call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
 call ufo_locs_registry%get(c_key_locs, locs)
 
 ! Call method
 call self%create(geom, locs)
 
-end subroutine fv3jedi_getvalues_create_c
+end subroutine wrf_hydro_nwm_jedi_getvalues_create_c
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fv3jedi_getvalues_delete_c(c_key_self) bind (c, name='fv3jedi_getvalues_delete_f90')
+subroutine wrf_hydro_nwm_jedi_getvalues_delete_c(c_key_self) bind (c, name='wrf_hydro_nwm_jedi_getvalues_delete_f90')
 
 integer(c_int), intent(inout) :: c_key_self !< Key to self
 
-type(fv3jedi_getvalues), pointer :: self
+type(wrf_hydro_nwm_jedi_getvalues), pointer :: self
 
 ! Get object
-call fv3jedi_getvalues_registry%get(c_key_self, self)
+call wrf_hydro_nwm_jedi_getvalues_registry%get(c_key_self, self)
 
 ! Call method
 call self%delete()
 
 ! Remove object
-call fv3jedi_getvalues_registry%remove(c_key_self)
+call wrf_hydro_nwm_jedi_getvalues_registry%remove(c_key_self)
 
-end subroutine fv3jedi_getvalues_delete_c
+end subroutine wrf_hydro_nwm_jedi_getvalues_delete_c
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fv3jedi_getvalues_fill_geovals_c(c_key_self, c_key_geom, c_key_state, c_t1, c_t2, &
+subroutine wrf_hydro_nwm_jedi_getvalues_fill_geovals_c(c_key_self, c_key_geom, c_key_state, c_t1, c_t2, &
                                             c_key_locs, c_key_geovals) &
-           bind (c, name='fv3jedi_getvalues_fill_geovals_f90')
+           bind (c, name='wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90')
 
 integer(c_int), intent(in) :: c_key_self
 integer(c_int), intent(in) :: c_key_geom
@@ -111,18 +111,18 @@ type(c_ptr),    intent(in) :: c_t2
 integer(c_int), intent(in) :: c_key_locs
 integer(c_int), intent(in) :: c_key_geovals
 
-type(fv3jedi_getvalues), pointer :: self
-type(fv3jedi_geom),      pointer :: geom
-type(fv3jedi_state),     pointer :: state
+type(wrf_hydro_nwm_jedi_getvalues), pointer :: self
+type(wrf_hydro_nwm_jedi_geometry),      pointer :: geom
+type(wrf_hydro_nwm_jedi_state),     pointer :: state
 type(datetime)                   :: t1
 type(datetime)                   :: t2
 type(ufo_locs),          pointer :: locs
 type(ufo_geovals),       pointer :: geovals
 
 ! Get objects
-call fv3jedi_getvalues_registry%get(c_key_self, self)
-call fv3jedi_geom_registry%get(c_key_geom, geom)
-call fv3jedi_state_registry%get(c_key_state, state)
+call wrf_hydro_nwm_jedi_getvalues_registry%get(c_key_self, self)
+call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
 call c_f_datetime(c_t1, t1)
 call c_f_datetime(c_t2, t2)
 call ufo_locs_registry%get(c_key_locs, locs)
@@ -131,8 +131,8 @@ call ufo_geovals_registry%get(c_key_geovals, geovals)
 ! Call method
 call self%fill_geovals(geom, state%fields, t1, t2, locs, geovals)
 
-end subroutine fv3jedi_getvalues_fill_geovals_c
+end subroutine wrf_hydro_nwm_jedi_getvalues_fill_geovals_c
 
 ! --------------------------------------------------------------------------------------------------
 
-end module fv3jedi_getvalues_interface_mod
+end module wrf_hydro_nwm_jedi_getvalues_interface_mod
