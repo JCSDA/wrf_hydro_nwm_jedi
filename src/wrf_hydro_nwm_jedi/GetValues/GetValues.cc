@@ -15,8 +15,8 @@ GetValues::GetValues(const Geometry & geom, const ufo::Locations & locs) : locs_
   geom_(new Geometry(geom)), model2geovals_() {
   oops::Log::trace() << "GetValues::GetValues starting" << std::endl;
 
-  util::abor1_cpp("GetValues::GetValues() needs to be implemented.",
-		  __FILE__, __LINE__);
+  // util::abor1_cpp("GetValues::GetValues() needs to be implemented.",
+  // 		  __FILE__, __LINE__);
 
   // // Create the variable change object
   // {
@@ -47,8 +47,19 @@ GetValues::~GetValues() {
 void GetValues::fillGeoVaLs(const State & state, const util::DateTime & t1,
                             const util::DateTime & t2, ufo::GeoVaLs & geovals) const {
   oops::Log::trace() << "GetValues::fillGeovals starting" << std::endl;
-  // const util::DateTime * t1p = &t1;
-  // const util::DateTime * t2p = &t2;
+
+  // util::abor1_cpp("GetValues::fillGeoVaLs() needs to be implemented.",
+  // 		  __FILE__, __LINE__);
+  
+  const util::DateTime * t1p = &t1;
+  const util::DateTime * t2p = &t2;
+
+  wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_,
+  						state.geometry()->toFortran(),
+  						state.toFortran(),
+  						&t1p, &t2p,
+  						locs_.toFortran(),
+  						geovals.toFortran());
 
   // // Create state with geovals variables
   // State stategeovalvars(*geom_, geovals.getVars(), state.validTime());
