@@ -76,7 +76,7 @@ do var = 1, vars%nvars()
       vcount=vcount+1;
       call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
            short_name = vars%variable(var), long_name = 'snow_water_equivalent', &
-           wrf_hydro_nwm_name = 'sneqv', units = 'm')
+           wrf_hydro_nwm_name = 'SNEQV', units = 'm')
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &

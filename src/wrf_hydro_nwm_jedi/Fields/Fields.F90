@@ -257,28 +257,28 @@ end subroutine copy_field_array
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine pointer_field(fields, wrf_hydro_nwm_jedi_name, field_pointer)
+subroutine pointer_field(fields, wrf_hydro_nwm_name, field_pointer)
 
 type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
-character(len=*),             intent(in)  :: wrf_hydro_nwm_jedi_name
+character(len=*),             intent(in)  :: wrf_hydro_nwm_name
 type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
 
 integer :: var
 logical :: found
 
-! if(associated(field_pointer)) nullify(field_pointer)
+if(associated(field_pointer)) nullify(field_pointer)
 
-! found = .false.
-! do var = 1,size(fields)
-!   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
-!     field_pointer => fields(var)
-!     found = .true.
-!     exit
-!   endif
-! enddo
+found = .false.
+do var = 1,size(fields)
+  if ( trim(fields(var)%wrf_hydro_nwm_name) == trim(wrf_hydro_nwm_name)) then
+    field_pointer => fields(var)
+    found = .true.
+    exit
+  endif
+enddo
 
-! if (.not.found) call abor1_ftn("fv3jedi_field.pointer_field: field "&
-!                                 //trim(fv3jedi_name)//" not found in fields")
+if (.not.found) call abor1_ftn("wrf_hydro_field.pointer_field: field "&
+                                //trim(wrf_hydro_nwm_name)//" not found in fields")
 
 end subroutine pointer_field
 
