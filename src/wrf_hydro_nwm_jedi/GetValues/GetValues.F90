@@ -20,7 +20,7 @@ use ufo_geovals_mod,                only: ufo_geovals
 ! fv3jedi uses
 !use fv3jedi_constants_mod,          only: rad2deg
 !use fv3jedi_bump_mod,               only: bump_init, bump_apply
-use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_field, pointer_field
+use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_field, pointer_field, long_name_to_wrf_hydro_name
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 !use fv3jedi_interpolation_mod,      only: unsinterp_integer_apply, unsinterp_nearest_apply
 !use fv3jedi_kinds_mod,              only: kind_real
@@ -113,7 +113,7 @@ type(ufo_geovals),            intent(inout) :: geovals
 
 integer :: gv, n, ji, jj, jlev
 type(wrf_hydro_nwm_jedi_field), pointer :: field
-character(len=255) :: wrf_hydro_nwm_jedi_name
+character(len=255) :: wrf_hydro_nwm_name
 logical, allocatable :: time_mask(:)
 real(kind=c_float), allocatable :: field_us(:)
 real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
@@ -127,26 +127,29 @@ call ufo_locs_time_mask(locs, t1, t2, time_mask)
 ! ----------------
 if (.not. geovals%linit) then
   do gv = 1, geovals%nvar
-    geovals%geovals(gv)%nval = 1!fields(gv)%npz
+    geovals%geovals(gv)%nval = fields(gv)%dim3_len
     allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
     geovals%geovals(gv)%vals = 0.0
   enddo
 endif
 geovals%linit = .true.
 
+self%ngrid = 1
 
 ! ! Loop over GeoVaLs
 ! ! -----------------
  allocate(field_us(self%ngrid))
- allocate(geovals_all(locs%nlocs, self%npz+1))
+ ! allocate(geovals_all(locs%nlocs, self%npz+1))
+ allocate(geovals_all(locs%nlocs, 1+1))
  allocate(geovals_tmp(locs%nlocs))
 
 do gv = 1, geovals%nvar
 
 !   ! Get GeoVaLs field
 !   ! -----------------
-!   call long_name_to_fv3jedi_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_jedi_name)
-   call pointer_field(fields, wrf_hydro_nwm_jedi_name, field)
+   call long_name_to_wrf_hydro_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_name)
+   
+   call pointer_field(fields, wrf_hydro_nwm_name, field)
 
 !   ! Interpolation
 !   ! -------------

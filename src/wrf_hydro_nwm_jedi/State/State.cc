@@ -55,16 +55,16 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   State::State(const Geometry &, const State &) {
-    // util::abor1_cpp("State::State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::State() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
-    // util::abor1_cpp("State::State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::State() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------

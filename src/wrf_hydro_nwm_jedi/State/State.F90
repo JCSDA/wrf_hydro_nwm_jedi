@@ -277,13 +277,15 @@ implicit none
 type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
 
-! integer :: var
+integer :: var
 
 ! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.copy")
 
-! do var = 1, self%nf
-!   self%fields(var) = rhs%fields(var)
-! enddo
+write(*,*) "Copying field self%nf= ",self%nf
+
+do var = 1, self%nf
+  self%fields(var) = rhs%fields(var)
+enddo
 
 self%calendar_type = rhs%calendar_type
 self%date_init = rhs%date_init

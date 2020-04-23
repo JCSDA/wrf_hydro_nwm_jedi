@@ -15,17 +15,18 @@ module wrf_hydro_nwm_jedi_field_mod
 
 private
 public :: wrf_hydro_nwm_jedi_field, &
-          has_field, &
-          pointer_field, &
-          pointer_field_array, &
-          copy_field_array, &
-          allocate_copy_field_array, &
-          fields_rms, &
-          fields_gpnorm, &
-          fields_print, &
-          checksame, &
-          flip_array_vertical, &
-          copy_subset
+     has_field, &
+     long_name_to_wrf_hydro_name, &
+     pointer_field, &
+     pointer_field_array, &
+     copy_field_array, &
+     allocate_copy_field_array, &
+     fields_rms, &
+     fields_gpnorm, &
+     fields_print, &
+     checksame, &
+     flip_array_vertical, &
+     copy_subset
 
 !Field type
 type :: wrf_hydro_nwm_jedi_field
@@ -80,10 +81,11 @@ end if
 
 if(dim3_len == 1) self%is_2D = .true.
 
-! self%short_name   = trim(short_name)
+self%short_name   = trim(short_name)
 self%long_name    = trim(long_name)
 self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
-! self%units        = trim(units)
+self%units        = trim(units)
+
 ! self%staggerloc   = staggerloc
 
 ! if (present(tracer)) then
@@ -193,6 +195,43 @@ end subroutine allocate_copy_field_array
 
 ! --------------------------------------------------------------------------------------------------
 
+subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
+
+type(wrf_hydro_nwm_jedi_field), intent(in)  :: fields(:)
+character(len=*),    intent(in)  :: long_name
+character(len=*),    intent(out) :: wrf_hydro_nwm_name
+
+integer :: n
+
+select case (long_name)
+case ("swe")
+   wrf_hydro_nwm_name = "SNEQV"
+case default
+   wrf_hydro_nwm_name = "null"   
+end select
+
+! do n = 1, size(fields)
+!   if (trim(long_name) == trim(fields(n)%long_name)) then
+!     wrf_hydro_nwm_name = trim(fields(n)%wrf_hydro_nwm_name)
+!     return
+!   endif
+! enddo
+
+! ! Try with increment_of_ prepended to long_name
+! do n = 1, size(fields)
+!    if ("increment_of_"//trim(long_name) == trim(fields(n)%long_name)) then
+!       wrf_hydro_nwm_name = trim(fields(n)%wrf_hydro_nwm_name)
+!       return
+!    endif
+! enddo
+
+! call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
+!                " not found in fields.")
+
+end subroutine long_name_to_wrf_hydro_name
+
+! --------------------------------------------------------------------------------------------------
+
 subroutine copy_field_array(fields, fv3jedi_name, field_array)
 
 type(wrf_hydro_nwm_jedi_field),  intent(in)  :: fields(:)
@@ -224,8 +263,8 @@ type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
 character(len=*),             intent(in)  :: wrf_hydro_nwm_jedi_name
 type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
 
-! integer :: var
-! logical :: found
+integer :: var
+logical :: found
 
 ! if(associated(field_pointer)) nullify(field_pointer)
 
