@@ -125,32 +125,32 @@ call ufo_locs_time_mask(locs, t1, t2, time_mask)
 
 ! Allocate geovals
 ! ----------------
-! if (.not. geovals%linit) then
-!   do gv = 1, geovals%nvar
-!     geovals%geovals(gv)%nval = fields(gv)%npz
-!     allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
-!     geovals%geovals(gv)%vals = 0.0_kind_real
-!   enddo
-! endif
-! geovals%linit = .true.
+if (.not. geovals%linit) then
+  do gv = 1, geovals%nvar
+    geovals%geovals(gv)%nval = 1!fields(gv)%npz
+    allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
+    geovals%geovals(gv)%vals = 0.0
+  enddo
+endif
+geovals%linit = .true.
 
 
 ! ! Loop over GeoVaLs
 ! ! -----------------
-! allocate(field_us(self%ngrid))
-! allocate(geovals_all(locs%nlocs, self%npz+1))
-! allocate(geovals_tmp(locs%nlocs))
+ allocate(field_us(self%ngrid))
+ allocate(geovals_all(locs%nlocs, self%npz+1))
+ allocate(geovals_tmp(locs%nlocs))
 
-! do gv = 1, geovals%nvar
+do gv = 1, geovals%nvar
 
 !   ! Get GeoVaLs field
 !   ! -----------------
 !   call long_name_to_fv3jedi_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_jedi_name)
-!   call pointer_field(fields, wrf_hydro_nwm_jedi_name, field)
+   call pointer_field(fields, wrf_hydro_nwm_jedi_name, field)
 
 !   ! Interpolation
 !   ! -------------
-!   geovals_all = 0.0_kind_real
+   geovals_all = 0.0
 
   ! Can optionally interpolate real valued magnitude fields with bump
   ! -----------------------------------------------------------------
@@ -189,16 +189,15 @@ call ufo_locs_time_mask(locs, t1, t2, time_mask)
 
   ! Fill GeoVaLs relevant to this window
   ! ------------------------------------
-!   do n = 1,locs%nlocs
-!     if (time_mask(n)) geovals%geovals(gv)%vals(1:field%npz, n) = geovals_all(n, 1:field%npz)
-!   enddo
+  do n = 1,locs%nlocs
+    if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
+  enddo
+ enddo
 
-! enddo
-
-! deallocate(field_us)
-! deallocate(geovals_all)
-! deallocate(geovals_tmp)
-! deallocate(time_mask)
+ deallocate(field_us)
+ deallocate(geovals_all)
+ deallocate(geovals_tmp)
+ deallocate(time_mask)
 
 end subroutine fill_geovals
 
