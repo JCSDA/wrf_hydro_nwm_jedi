@@ -111,10 +111,11 @@ type(datetime),               intent(in)    :: t2
 type(ufo_locs),               intent(in)    :: locs
 type(ufo_geovals),            intent(inout) :: geovals
 
-integer :: gv, n, ji, jj, jlev
+integer :: gv, n, i, idx_1, idx_2
 type(wrf_hydro_nwm_jedi_field), pointer :: field
 character(len=10) :: wrf_hydro_nwm_name
 logical, allocatable :: time_mask(:)
+real(kind=c_float) :: lat, long
 real(kind=c_float), allocatable :: field_us(:)
 real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
 
@@ -154,8 +155,17 @@ do gv = 1, geovals%nvar
 !   ! Interpolation
 !   ! -------------
    geovals_all = 0.0
+   geovals_tmp = 0.0
+   ! Work on geovals_tmp
 
-   geovals_all(1:locs%nlocs, jlev) = geovals_tmp(1:locs%nlocs)   
+   do i = 1, locs%nlocs
+      lat = locs%lat(i)
+      long = locs%lon(i)
+      call geom%get_nn(lat, long, idx_1, idx_2)
+      geovals_tmp(i) = field%array(idx_1, idx_2, 1)
+   end do
+
+   geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)   
 
   ! Can optionally interpolate real valued magnitude fields with bump
   ! -----------------------------------------------------------------
