@@ -867,7 +867,7 @@ jxfull = geom%yend-geom%ystart+1
 
 !write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
  
-call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNEQV", self%fields(1)%array(:,:,1))
+call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNEQV", self%fields(1)%array)
 
 write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
   
@@ -1047,7 +1047,7 @@ subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, paral
 !#endif
     call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
     nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
-    ncount = (/ parallel_xend-parallel_xstart+1,   jxfull,  1, -99999 /)
+    ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
     if (present(return_error)) then
        ierr = nf90_inq_varid(ncid, name, varid)
        if (ierr == NF90_NOERR) then

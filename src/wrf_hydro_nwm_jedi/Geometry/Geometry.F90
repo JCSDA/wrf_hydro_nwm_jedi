@@ -125,6 +125,10 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   self%dim2_len = other%dim2_len
   self%npz = other%npz
   self%snow_layers = other%snow_layers
+  self%xstart = other%xstart
+  self%ystart = other%ystart
+  self%xend = other%xend
+  self%yend = other%yend
   allocate(self%xlat, source = other%xlat) 
   allocate(self%xlong, source = other%xlong)
   
