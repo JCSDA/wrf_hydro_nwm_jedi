@@ -11,7 +11,7 @@
 #include <ostream>
 #include <string>
 
-//#include <boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
