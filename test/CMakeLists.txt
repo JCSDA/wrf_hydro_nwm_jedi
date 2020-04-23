@@ -1,5 +1,6 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
+  testinput/hofx_nomodel.yaml
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
