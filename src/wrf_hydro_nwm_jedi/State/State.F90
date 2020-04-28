@@ -76,7 +76,13 @@ do var = 1, vars%nvars()
       vcount=vcount+1;
       call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
            short_name = vars%variable(var), long_name = 'snow_water_equivalent', &
-           wrf_hydro_nwm_name = 'SNEQV', units = 'm')
+           wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+   case("SNOWH")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'snow_depth', &
+           wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+
      ! case("vd","v","V")
     !    vcount=vcount+1;
     !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
@@ -848,7 +854,7 @@ integer :: flipvert
 type(fckit_configuration) :: f_conf
 character(len=:), allocatable :: str
 
-integer :: ixfull,jxfull
+integer :: ixfull, jxfull, var
 
 ! Fortran configuration
 ! ---------------------
@@ -866,11 +872,13 @@ jxfull = geom%yend-geom%ystart+1
 !call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
 
 !write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
- 
-call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNEQV", self%fields(1)%array)
 
-write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
-  
+ do var = 1, self%nf
+       call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, self%fields(var)%wrf_hydro_nwm_name, self%fields(var)%array)
+
+      write(*,*) "Print first column from State ",self%fields(var)%array(:,1,1)
+enddo
+
 end subroutine read_file
 
 ! ------------------------------------------------------------------------------
