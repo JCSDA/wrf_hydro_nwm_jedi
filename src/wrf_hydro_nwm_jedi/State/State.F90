@@ -82,6 +82,11 @@ do var = 1, vars%nvars()
       call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
            short_name = vars%variable(var), long_name = 'snow_depth', &
            wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+   case("LAI")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'leaf_area', &
+           wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
 
      ! case("vd","v","V")
     !    vcount=vcount+1;

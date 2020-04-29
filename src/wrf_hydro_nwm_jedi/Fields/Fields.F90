@@ -208,6 +208,8 @@ case ("swe")
    wrf_hydro_nwm_name = "SNEQV"
 case ("snow_depth")
    wrf_hydro_nwm_name = "SNOWH"
+case ("Leaf_area")
+   wrf_hydro_nwm_name = "LAI"
 case default
    wrf_hydro_nwm_name = "null"   
 end select
