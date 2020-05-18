@@ -130,23 +130,23 @@ namespace wrf_hydro_nwm_jedi {
 
   State & State::operator+=(const Increment & dx)
   {
-    // util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
+                    __FILE__, __LINE__);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   void State::zero() {
-    // util::abor1_cpp("State::zero() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::zero() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void State::accumul(const double &, const State &) {
-    // util::abor1_cpp("State::accumul() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::accumul() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
