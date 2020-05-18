@@ -881,7 +881,7 @@ jxfull = geom%yend-geom%ystart+1
  do var = 1, self%nf
        call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, self%fields(var)%wrf_hydro_nwm_name, self%fields(var)%array)
 
-      write(*,*) "Print first column from State ",self%fields(var)%array(:,1,1)
+      ! write(*,*) "Print first column from State ",self%fields(var)%array(:,1,1)
 enddo
 
 end subroutine read_file

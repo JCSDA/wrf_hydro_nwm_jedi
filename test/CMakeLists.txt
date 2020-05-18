@@ -80,3 +80,10 @@ ecbuild_add_test(
 #   SOURCES executables/TestGeometryIterator.cc
 #   ARGS    testinput/interface.yml
 #   LIBS    wrf_hydro_nwm_jedi )  
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
+   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
+   MPI          1 )
