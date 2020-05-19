@@ -97,15 +97,21 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void State::print(std::ostream & os) const {
-    wrf_hydro_nwm_jedi_state_print_f90(keyState_);
-    //os << fields_->;
+    //wrf_hydro_nwm_jedi_state_print_f90(keyState_);
+    int const nf = 1;
+    float pstat[2][nf];
+    wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
+    //os << fields_->fields_print();
+    os << std::endl;
+    os << "Mean SNEQV: " << pstat[0][0] << std::endl;
+    os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;    
   }
 
 // ----------------------------------------------------------------------------
 
   void State::write(const eckit::Configuration & conf) const {
-    // util::abor1_cpp("State::write() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::write() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
   
 // ----------------------------------------------------------------------------

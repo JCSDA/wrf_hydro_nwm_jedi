@@ -5,7 +5,7 @@
 
 module wrf_hydro_nwm_jedi_field_mod
 
-  use iso_c_binding, only: c_int, c_float
+  use iso_c_binding, only: c_int, c_float,c_double
   use fckit_mpi_module
   use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 !use fv3jedi_kinds_mod, only: kind_real
@@ -26,7 +26,8 @@ public :: wrf_hydro_nwm_jedi_field, &
      fields_print, &
      checksame, &
      flip_array_vertical, &
-     copy_subset
+     copy_subset, &
+     mean_stddev
 
 !Field type
 type :: wrf_hydro_nwm_jedi_field
@@ -47,6 +48,7 @@ type :: wrf_hydro_nwm_jedi_field
   procedure :: copy => field_copy
   generic :: assignment(=) => equals
   procedure :: deallocate_field
+  procedure :: mean_stddev
 endtype wrf_hydro_nwm_jedi_field
 
 ! --------------------------------------------------------------------------------------------------
@@ -312,6 +314,36 @@ real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
 !                                 //trim(fv3jedi_name)//" not found in fields")
 
 end subroutine pointer_field_array
+
+! --------------------------------------------------------------------------------------------------
+
+subroutine mean_stddev(self,mean,stddev)
+  implicit none
+  class(wrf_hydro_nwm_jedi_field), target,  intent(in) :: self
+  real(c_float),intent(inout) :: mean,stddev
+  real(c_double) :: tmp
+  integer :: n, i, j
+
+  n = size(self%array,1)*size(self%array,2)
+
+  tmp = 0.d0
+  tmp = sum(self%array(:,:,1))
+  tmp = tmp/n
+
+  mean = real(tmp,kind=c_float)
+
+  tmp = 0.0
+  
+  !Computing stddev
+  do i=1,size(self%array,1)
+     do j=1,size(self%array,2)
+        tmp = tmp + (self%array(i,j,1) - mean)**2
+     end do
+  end do
+  tmp = tmp / n
+  stddev = real(tmp,kind=c_float)
+  
+end subroutine mean_stddev
 
 ! --------------------------------------------------------------------------------------------------
 

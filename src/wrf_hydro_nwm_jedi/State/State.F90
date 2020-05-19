@@ -31,7 +31,7 @@ implicit none
 private
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      !add_incr, &
-     read_file, &! write_file, gpnorm, rms, &
+     read_file, get_mean_stddev, &! write_file, gpnorm, rms, &
      change_resol, state_print !getvalues, analytic_IC, state_print
 
 ! ------------------------------------------------------------------------------
@@ -62,16 +62,6 @@ allocate(self%fields(self%nf))
 vcount = 0
 do var = 1, vars%nvars()
    select case (trim(vars%variable(var)))
-
-     ! In the below the variable names are designed to cover the potential names encountered in
-     ! GEOS and GFS restart and history files. E.g. U for GEOS, u for GFS and ud for history.
-     ! Within fv3-jedi variables can be accessed using the fv3jedi_name.
-
-   ! case("SNLIQ")
-   !    vcount=vcount+1;
-   !    call self%fields(vcount)%allocate_field(geom%dim1_len, geom%snow_layers, geom%dim2_len, &
-   !         short_name = vars%variable(var), long_name = 'snow_liquid_content', &
-   !         wrf_hydro_nwm_name = 'snliq', units = 'm')
    case("SNEQV")
       vcount=vcount+1;
       call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
@@ -88,166 +78,11 @@ do var = 1, vars%nvars()
            short_name = vars%variable(var), long_name = 'leaf_area', &
            wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
 
-     ! case("vd","v","V")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'northward_wind_on_native_D-Grid', &
-    !         fv3jedi_name = 'vd', units = 'm s-1', staggerloc = east )
-    !  case("vfrac")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'vfrac', &
-    !         fv3jedi_name = 'vfrac', units = 'none', staggerloc = center)
-    !  case("stc","soilt")
-    !    vcount=vcount+1;
-    !    if (trim(vars%variable(var)) == "soilt") then
-    !      nlev = 1 !geos
-    !    else
-    !      nlev = 4 !gfs
-    !    endif
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,nlev, &
-    !         short_name = vars%variable(var), long_name = 'stc', &
-    !         fv3jedi_name = 'stc', units = 'none', staggerloc = center)
-    !  case("smc","soilm")
-    !    vcount=vcount+1;
-    !    if (trim(vars%variable(var)) == "soilm") then
-    !      nlev = 1 !geos
-    !    else
-    !      nlev = 4 !gfs
-    !    endif
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,nlev, &
-    !         short_name = vars%variable(var), long_name = 'smc', &
-    !         fv3jedi_name = 'smc', units = 'none', staggerloc = center)
-    !  case("snwdph")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'snwdph', &
-    !         fv3jedi_name = 'snwdph', units = 'none', staggerloc = center)
-    !  case("u_srf","u10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'u_srf', &
-    !         fv3jedi_name = 'u_srf', units = 'none', staggerloc = center)
-    !  case("v_srf","v10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'v_srf', &
-    !         fv3jedi_name = 'v_srf', units = 'none', staggerloc = center)
-    !  case("f10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'f10m', &
-    !         fv3jedi_name = 'f10m', units = 'none', staggerloc = center)
-    !  case("sss")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'sea surface salinity', &
-    !         fv3jedi_name = 'sss', units = 'psu', staggerloc = center)
-    !  !TL/AD trajectory
-    !  case("qls")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'initial_mass_fraction_of_large_scale_cloud_condensate', &
-    !         fv3jedi_name = 'qls', units = 'kg kg-1', staggerloc = center)
-    !  case("qcn")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'initial_mass_fraction_of_convective_cloud_condensate', &
-    !         fv3jedi_name = 'qcn', units = 'kg kg-1', staggerloc = center)
-    !  case("cfcn")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'convective_cloud_area_fraction', &
-    !         fv3jedi_name = 'cfcn', units = '1', staggerloc = center)
-    !  case("frocean")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_ocean', &
-    !         fv3jedi_name = 'frocean', units = '1', staggerloc = center)
-    !  case("frland")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_land', &
-    !         fv3jedi_name = 'frland', units = '1', staggerloc = center)
-    !  case("frlandice")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_landice', &
-    !         fv3jedi_name = 'frlandice', units = '1', staggerloc = center)
-    !  case("frlake")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_lake', &
-    !         fv3jedi_name = 'frlake', units = '1', staggerloc = center)
-    !  case("frseaice")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_ice', &
-    !         fv3jedi_name = 'frseaice', units = '1', staggerloc = center)
-    !  case("varflt")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'isotropic_variance_of_filtered_topography', &
-    !         fv3jedi_name = 'varflt', units = 'm+2', staggerloc = center)
-    !  case("ustar")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_velocity_scale', &
-    !         fv3jedi_name = 'ustar', units = 'm s-1', staggerloc = center)
-    !  case("bstar")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_bouyancy_scale', &
-    !         fv3jedi_name = 'bstar', units = 'm s-2', staggerloc = center)
-    !  case("zpbl")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'planetary_boundary_layer_height', &
-    !         fv3jedi_name = 'zpbl', units = 'm', staggerloc = center)
-
      !Not found
      case default
        call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))
    end select
 enddo
-
-! if (vcount .ne. self%nf) &
-! call abor1_ftn("fv3jedi_state_mod create: vcount does not equal self%nf")
-
-! self%hydrostatic = .true.
-! if (has_field(self%fields, 'delz') .and. has_field(self%fields, 'w')) self%hydrostatic = .false.
-
-! ! Initialize all arrays to zero
-! call zeros(self)
-
-! ! Copy some geometry for convenience
-! self%isc    = geom%isc
-! self%iec    = geom%iec
-! self%jsc    = geom%jsc
-! self%jec    = geom%jec
-! self%npx    = geom%npx
-! self%npy    = geom%npy
-! self%npz    = geom%npz
-! self%ntile  = geom%ntile
-! self%ntiles = geom%ntiles
-
-! ! Pointer to fv3jedi communicator
-! self%f_comm = geom%f_comm
-
-! ! Check winds
-! if (has_field(self%fields, 'ua') .and. .not.has_field(self%fields, 'va')) &
-! call abor1_ftn("fv3jedi_state_mod create: found A-Grid u but not v")
-! if (.not.has_field(self%fields, 'ua') .and. has_field(self%fields, 'va')) &
-! call abor1_ftn("fv3jedi_state_mod create: found A-Grid v but not u")
-! if (has_field(self%fields, 'ud') .and. .not.has_field(self%fields, 'vd')) &
-! call abor1_ftn("fv3jedi_state_mod create: found D-Grid u but not v")
-! if (.not.has_field(self%fields, 'ud') .and. has_field(self%fields, 'vd')) &
-! call abor1_ftn("fv3jedi_state_mod create: found D-Grid v but not u")
-
-! self%have_agrid = .false.
-! self%have_dgrid = .false.
-! if (has_field(self%fields, 'ua')) self%have_agrid = .true.
-! if (has_field(self%fields, 'ud')) self%have_dgrid = .true.
 
 end subroutine create
 
@@ -951,10 +786,25 @@ subroutine state_print(self)
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
- write(*,*) "Calling fields_print from state_print"
- call fields_print(self%nf, self%fields, "State", self%f_comm)
+ call fields_print(self%nf, self%fields, "SNEQV", self%f_comm)
 
 end subroutine state_print
+
+! ------------------------------------------------------------------------------
+
+subroutine get_mean_stddev(self,nf,pstat)
+
+ implicit none
+ type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+ integer :: nf
+ real(kind=c_float), intent(inout) ::  pstat(2,nf)
+
+ pstat(1,1) = 0.0
+ pstat(2,1) = 0.0
+
+ call self%fields(1)%mean_stddev(pstat(1,1),pstat(2,1))
+
+end subroutine get_mean_stddev
 
 ! ------------------------------------------------------------------------------
 

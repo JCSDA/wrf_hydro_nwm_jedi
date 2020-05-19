@@ -273,6 +273,22 @@ end subroutine wrf_hydro_nwm_jedi_state_print_c
 
 ! ------------------------------------------------------------------------------
 
+subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c(c_key_self,nf,pstat) bind(c,name='wrf_hydro_nwm_jedi_state_get_mean_stddev_f90')
+
+implicit none
+integer(c_int), intent(in) :: c_key_self
+type(wrf_hydro_nwm_jedi_state), pointer :: self
+integer(c_int), intent(in) :: nf
+real(c_float), intent(inout) :: pstat(2,nf)
+
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
+
+call get_mean_stddev(self,nf,pstat)
+
+end subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c
+
+! ------------------------------------------------------------------------------
+
 subroutine wrf_hydro_nwm_jedi_state_rms_c(c_key_state, prms) bind(c,name='wrf_hydro_nwm_jedi_state_rms_f90')
 
 implicit none

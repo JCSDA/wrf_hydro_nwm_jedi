@@ -33,6 +33,7 @@ namespace wrf_hydro_nwm_jedi {
 	std::cout << "Time statically configured"<<std::endl;
 	time_ = util::DateTime("2018-04-15T00:00:00Z");
       }
+    //Fields should be create here.
   }
 
 // ----------------------------------------------------------------------------
