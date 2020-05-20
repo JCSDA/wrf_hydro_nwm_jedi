@@ -797,13 +797,14 @@ subroutine get_mean_stddev(self,nf,pstat)
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
  integer :: nf
- real(kind=c_float), intent(inout) ::  pstat(2,nf)
+ real(kind=c_float), intent(inout) ::  pstat(3,nf)
 
  pstat(1,1) = 0.0
  pstat(2,1) = 0.0
+ pstat(3,1) = 0.0
 
- call self%fields(1)%mean_stddev(pstat(1,1),pstat(2,1))
-
+ call self%fields(1)%mean_stddev(pstat(1,1),pstat(2,1),pstat(3,1))
+ 
 end subroutine get_mean_stddev
 
 ! ------------------------------------------------------------------------------

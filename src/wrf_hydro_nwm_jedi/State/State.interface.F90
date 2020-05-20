@@ -279,7 +279,7 @@ implicit none
 integer(c_int), intent(in) :: c_key_self
 type(wrf_hydro_nwm_jedi_state), pointer :: self
 integer(c_int), intent(in) :: nf
-real(c_float), intent(inout) :: pstat(2,nf)
+real(c_float), intent(inout) :: pstat(3,nf)
 
 call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
 

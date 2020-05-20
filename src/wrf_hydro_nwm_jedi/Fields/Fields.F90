@@ -317,10 +317,10 @@ end subroutine pointer_field_array
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine mean_stddev(self,mean,stddev)
+subroutine mean_stddev(self,mean,stddev,rms)
   implicit none
   class(wrf_hydro_nwm_jedi_field), target,  intent(in) :: self
-  real(c_float),intent(inout) :: mean,stddev
+  real(c_float),intent(inout) :: mean,stddev,rms
   real(c_double) :: tmp
   integer :: n, i, j
 
@@ -332,7 +332,7 @@ subroutine mean_stddev(self,mean,stddev)
 
   mean = real(tmp,kind=c_float)
 
-  tmp = 0.0
+  tmp = 0.d0
   
   !Computing stddev
   do i=1,size(self%array,1)
@@ -342,6 +342,18 @@ subroutine mean_stddev(self,mean,stddev)
   end do
   tmp = tmp / n
   stddev = real(tmp,kind=c_float)
+
+  tmp = 0.d0
+
+  do i = 1,size(self%array,1)
+     do j = 1,size(self%array,2)
+        tmp = tmp + self%array(i,j,1)**2
+     enddo
+  enddo
+
+  tmp = sqrt(tmp/real(n,kind=c_double))
+
+  rms = real(tmp,kind=c_float)
   
 end subroutine mean_stddev
 

@@ -99,12 +99,13 @@ namespace wrf_hydro_nwm_jedi {
   void State::print(std::ostream & os) const {
     //wrf_hydro_nwm_jedi_state_print_f90(keyState_);
     int const nf = 1;
-    float pstat[2][nf];
+    float pstat[3][nf];
     wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
-    //os << fields_->fields_print();
+    //fields_->fields_print(os);
     os << std::endl;
     os << "Mean SNEQV: " << pstat[0][0] << std::endl;
-    os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;    
+    os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
+    os << "RMS SNEQV: " << pstat[2][0] << std::endl;
   }
 
 // ----------------------------------------------------------------------------
