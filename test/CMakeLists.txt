@@ -1,6 +1,7 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
   testinput/hofx_nomodel.yaml
+  testoutput/hofx_nomodel_identity.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
@@ -84,7 +85,11 @@ ecbuild_add_test(
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity
-   TYPE         EXE
-   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
-   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
-   MPI          1 )
+   #TYPE         EXE
+   TYPE		 SCRIPT
+   COMMAND	 "${CMAKE_BINARY_DIR}/bin/compare.sh"
+   ARGS         "${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run"
+   		testoutput/hofx_nomodel_identity.ref)
+#   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
+#   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
+#   MPI          1 )
