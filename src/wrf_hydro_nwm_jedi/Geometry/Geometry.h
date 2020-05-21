@@ -49,7 +49,7 @@ namespace wrf_hydro_nwm_jedi {
 
    private:
     void print(std::ostream &) const;
-
+    Geometry & operator=(const Geometry &);
     F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
   };

@@ -21,8 +21,19 @@ namespace wrf_hydro_nwm_jedi {
                const eckit::Configuration & conf)
     : geom_(new Geometry(geom)) {
 
-    //State previously read in analytic_init, should we read it from file?
-    time_ = util::DateTime("2018-04-15T00:00:00Z");
+    if(conf.has("date"))
+      {
+	std::cout << "Supposed to read from file"<<std::endl;
+	std::string current_date;
+	conf.get("date", current_date);
+	time_ = util::DateTime(current_date);
+      }
+    else
+      {
+	std::cout << "Time statically configured"<<std::endl;
+	time_ = util::DateTime("2018-04-15T00:00:00Z");
+      }
+    //Fields should be create here.
   }
 
 // ----------------------------------------------------------------------------
@@ -35,8 +46,7 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Fields::print(std::ostream & os) const {
-    util::abor1_cpp("Fields::print() needs to be implemented.",
-                    __FILE__, __LINE__);
+    
     os << "(TODO, print diagnostic info about the fields here)"
        << std::endl;
   }
@@ -51,7 +61,7 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  std::shared_ptr<const Geometry> Fields::geometry() const {
+  boost::shared_ptr<const Geometry> Fields::geometry() const {
     return geom_;
   }
 

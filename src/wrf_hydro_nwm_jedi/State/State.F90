@@ -13,16 +13,16 @@ use oops_variables_mod
 
 use wrf_hydro_nwm_jedi_field_mod
 ! use fv3jedi_constants_mod,       only: rad2deg, constoz
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
 ! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
 ! use fv3jedi_interpolation_mod,   only: field2field_interp
 ! use fv3jedi_kinds_mod,           only: kind_real
-use iso_c_binding, only : c_double
+use iso_c_binding, only : c_float
 !use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
 !use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
 use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state
 !use fv3jedi_getvalues_mod,       only: getvalues
-
+use netcdf
 !use wind_vt_mod, only: a2d
 
 !use mpp_domains_mod,             only: east, north, center
@@ -31,8 +31,8 @@ implicit none
 private
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      !add_incr, &
-     read_file, &! write_file, gpnorm, rms, &
-     change_resol !getvalues, analytic_IC, state_print
+     read_file, get_mean_stddev, &! write_file, gpnorm, rms, &
+     change_resol, state_print !getvalues, analytic_IC, state_print
 
 ! ------------------------------------------------------------------------------
 
@@ -62,489 +62,27 @@ allocate(self%fields(self%nf))
 vcount = 0
 do var = 1, vars%nvars()
    select case (trim(vars%variable(var)))
+   case("SNEQV")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'snow_water_equivalent', &
+           wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+   case("SNOWH")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'snow_depth', &
+           wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+   case("LAI")
+      vcount=vcount+1;
+      call self%fields(vcount)%allocate_field(geom%dim1_len, geom%dim2_len, 1, &
+           short_name = vars%variable(var), long_name = 'leaf_area', &
+           wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
 
-     ! In the below the variable names are designed to cover the potential names encountered in
-     ! GEOS and GFS restart and history files. E.g. U for GEOS, u for GFS and ud for history.
-     ! Within fv3-jedi variables can be accessed using the fv3jedi_name.
-
-     case("SNLIQ")
-       vcount=vcount+1;
-       call self%fields(vcount)%allocate_field(geom%dim1_len,geom%dim2_len,geom%npz, &
-            short_name = vars%variable(var), long_name = 'snow_liquid_content', &
-            wrf_hydro_nwm_name = 'snliq', units = 'm')
-     ! case("vd","v","V")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'northward_wind_on_native_D-Grid', &
-    !         fv3jedi_name = 'vd', units = 'm s-1', staggerloc = east )
-    !  case("ua")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'eastward_wind', &
-    !         fv3jedi_name = 'ua', units = 'm s-1', staggerloc = center)
-    !  case("va")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'northward_wind', &
-    !         fv3jedi_name = 'va', units = 'm s-1', staggerloc = center )
-    !  case("t","T")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'air_temperature', &
-    !         fv3jedi_name = 't', units = 'K', staggerloc = center)
-    !  case("tv","TV")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'virtual_temperature', &
-    !         fv3jedi_name = 'tv', units = 'K', staggerloc = center)
-    !  case("pt","PT")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'potential_temperature', &
-    !         fv3jedi_name = 'pt', units = 'K', staggerloc = center)
-    !  case("delp","DELP")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'pressure_thickness', &
-    !         fv3jedi_name = 'delp', units = 'Pa', staggerloc = center)
-    !  case("pkz","PKZ")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'pressure_to_kappa', &
-    !         fv3jedi_name = 'pkz', units = 'Pa', staggerloc = center)
-    !  case("pe","PE")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz+1, &
-    !         short_name = vars%variable(var), long_name = 'pressure', &
-    !         fv3jedi_name = 'pe', units = 'Pa', staggerloc = center)
-    !  case("ps")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_pressure', &
-    !         fv3jedi_name = 'ps', units = 'Pa', staggerloc = center)
-    !  case("q","sphum","Q")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'specific_humidity', &
-    !         fv3jedi_name = 'q', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("rh","RH")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'relative_humidity', &
-    !         fv3jedi_name = 'rh', units = '1', staggerloc = center, tracer = .true.)
-    !  case("qi","ice_wat")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'cloud_liquid_ice', &
-    !         fv3jedi_name = 'qi', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("ql","liq_wat")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'cloud_liquid_ice_water', &
-    !         fv3jedi_name = 'ql', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("qils","QILS")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'mass_fraction_of_large_scale_cloud_ice_water', &
-    !         fv3jedi_name = 'qils', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-
-
-    !  case("qlls","QLLS")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'mass_fraction_of_large_scale_cloud_liquid_water', &
-    !         fv3jedi_name = 'qlls', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("qicn","QICN")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'mass_fraction_of_convective_cloud_ice_water', &
-    !         fv3jedi_name = 'qicn', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("qlcn","QLCN")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'mass_fraction_of_convective_cloud_liquid_water', &
-    !         fv3jedi_name = 'qlcn', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("qicnf","QICNF")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !          short_name = vars%variable(var), long_name = 'fraction_of_large_scale_cloud_ice_water_in_total', &
-    !          fv3jedi_name = 'qicnf', units = '1', staggerloc = center, tracer = .true.)
-    !  case("qilsf","QILSF")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !          short_name = vars%variable(var), long_name = 'fraction_of_large_scale_cloud_ice_water_in_total', &
-    !          fv3jedi_name = 'qilsf', units = '1', staggerloc = center, tracer = .true.)
-    !  case("qs","snowwat")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'snow_water', &
-    !         fv3jedi_name = 'qs', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("qr","rainwat")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'rain_water', &
-    !         fv3jedi_name = 'qr', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("graupel")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'graupel', &
-    !         fv3jedi_name = 'graupel', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("cld_amt")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'cld_amt', &
-    !         fv3jedi_name = 'cld_amt', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("o3","o3mr")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'ozone_mass_mixing_ratio', &
-    !         fv3jedi_name = 'o3', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("ox","OX")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'odd_oxygen_mixing_ratio', &
-    !         fv3jedi_name = 'ox', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    !  case("w","W")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'vertical_wind', &
-    !         fv3jedi_name = 'w', units = 'm s-1', staggerloc = center)
-    !  case("delz","DZ")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'layer_thickness', &
-    !         fv3jedi_name = 'delz', units = 'm', staggerloc = center)
-    !  case("phis","PHIS")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_geopotential_height', &
-    !         fv3jedi_name = 'phis', units = 'm', staggerloc = center)
-    !  case("psi")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'stream_function', &
-    !         fv3jedi_name = 'psi', units = 'm+2 s', staggerloc = center)
-    !  case("chi")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'velocity_potential', &
-    !         fv3jedi_name = 'chi', units = 'm+2 s', staggerloc = center)
-    !  case("vort")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'vorticity', &
-    !         fv3jedi_name = 'vort', units = 'm+2 s', staggerloc = center)
-    !  case("divg")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'divergence', &
-    !         fv3jedi_name = 'divg', units = 'm+2 s', staggerloc = center)
-    !  !CRTM
-    !  case("slmsk")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'slmsk', &
-    !         fv3jedi_name = 'slmsk', units = 'none', staggerloc = center)
-    !  case("sheleg")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'sheleg', &
-    !         fv3jedi_name = 'sheleg', units = 'none', staggerloc = center)
-    !  case("tsea","ts")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'tsea', &
-    !         fv3jedi_name = 'tsea', units = 'none', staggerloc = center)
-    !  case("vtype")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'vtype', &
-    !         fv3jedi_name = 'vtype', units = 'none', staggerloc = center, integerfield = .true.)
-    !  case("stype")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'stype', &
-    !         fv3jedi_name = 'stype', units = 'none', staggerloc = center, integerfield = .true.)
-    !  case("vfrac")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'vfrac', &
-    !         fv3jedi_name = 'vfrac', units = 'none', staggerloc = center)
-    !  case("stc","soilt")
-    !    vcount=vcount+1;
-    !    if (trim(vars%variable(var)) == "soilt") then
-    !      nlev = 1 !geos
-    !    else
-    !      nlev = 4 !gfs
-    !    endif
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,nlev, &
-    !         short_name = vars%variable(var), long_name = 'stc', &
-    !         fv3jedi_name = 'stc', units = 'none', staggerloc = center)
-    !  case("smc","soilm")
-    !    vcount=vcount+1;
-    !    if (trim(vars%variable(var)) == "soilm") then
-    !      nlev = 1 !geos
-    !    else
-    !      nlev = 4 !gfs
-    !    endif
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,nlev, &
-    !         short_name = vars%variable(var), long_name = 'smc', &
-    !         fv3jedi_name = 'smc', units = 'none', staggerloc = center)
-    !  case("snwdph")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'snwdph', &
-    !         fv3jedi_name = 'snwdph', units = 'none', staggerloc = center)
-    !  case("u_srf","u10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'u_srf', &
-    !         fv3jedi_name = 'u_srf', units = 'none', staggerloc = center)
-    !  case("v_srf","v10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'v_srf', &
-    !         fv3jedi_name = 'v_srf', units = 'none', staggerloc = center)
-    !  case("f10m")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'f10m', &
-    !         fv3jedi_name = 'f10m', units = 'none', staggerloc = center)
-    !  case("sss")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'sea surface salinity', &
-    !         fv3jedi_name = 'sss', units = 'psu', staggerloc = center)
-    !  !TL/AD trajectory
-    !  case("qls")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'initial_mass_fraction_of_large_scale_cloud_condensate', &
-    !         fv3jedi_name = 'qls', units = 'kg kg-1', staggerloc = center)
-    !  case("qcn")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'initial_mass_fraction_of_convective_cloud_condensate', &
-    !         fv3jedi_name = 'qcn', units = 'kg kg-1', staggerloc = center)
-    !  case("cfcn")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !         short_name = vars%variable(var), long_name = 'convective_cloud_area_fraction', &
-    !         fv3jedi_name = 'cfcn', units = '1', staggerloc = center)
-    !  case("frocean")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_ocean', &
-    !         fv3jedi_name = 'frocean', units = '1', staggerloc = center)
-    !  case("frland")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_land', &
-    !         fv3jedi_name = 'frland', units = '1', staggerloc = center)
-    !  case("frlandice")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_landice', &
-    !         fv3jedi_name = 'frlandice', units = '1', staggerloc = center)
-    !  case("frlake")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_lake', &
-    !         fv3jedi_name = 'frlake', units = '1', staggerloc = center)
-    !  case("frseaice")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'fraction_of_ice', &
-    !         fv3jedi_name = 'frseaice', units = '1', staggerloc = center)
-    !  case("varflt")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'isotropic_variance_of_filtered_topography', &
-    !         fv3jedi_name = 'varflt', units = 'm+2', staggerloc = center)
-    !  case("ustar")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_velocity_scale', &
-    !         fv3jedi_name = 'ustar', units = 'm s-1', staggerloc = center)
-    !  case("bstar")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_bouyancy_scale', &
-    !         fv3jedi_name = 'bstar', units = 'm s-2', staggerloc = center)
-    !  case("zpbl")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'planetary_boundary_layer_height', &
-    !         fv3jedi_name = 'zpbl', units = 'm', staggerloc = center)
-    !  case("cm")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_exchange_coefficient_for_momentum', &
-    !         fv3jedi_name = 'cm', units = 'kg m-2 s-1', staggerloc = center)
-    !  case("ct")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_exchange_coefficient_for_heat', &
-    !         fv3jedi_name = 'ct', units = 'kg m-2 s-1', staggerloc = center)
-    !  case("cq")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_exchange_coefficient_for_moisture', &
-    !         fv3jedi_name = 'cq', units = 'kg m-2 s-1', staggerloc = center)
-    !  case("kcbl")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'KCBL_before_moist', &
-    !         fv3jedi_name = 'kcbl', units = '1', staggerloc = center)
-    !  case("tsm")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'surface_temp_before_moist', &
-    !         fv3jedi_name = 'tsm', units = 'K', staggerloc = center)
-    !  case("khl")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'lower_index_where_Kh_greater_than_2', &
-    !         fv3jedi_name = 'khl', units = '1', staggerloc = center)
-    !  case("khu")
-    !    vcount=vcount+1;
-    !    call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,1, &
-    !         short_name = vars%variable(var), long_name = 'upper_index_where_Kh_greater_than_2', &
-    !         fv3jedi_name = 'khu', units = '1', staggerloc = center)
-    ! !Aerosols
-    ! case("du001","DU001","dust1")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_dust001_in_air', &
-    !        fv3jedi_name = 'du001', units = 'kg kg-1', staggerloc = center,tracer = .true.)
-    ! case("du002","DU002","dust2")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_dust002_in_air', &
-    !        fv3jedi_name = 'du002', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("du003","DU003","dust3")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_dust003_in_air', &
-    !        fv3jedi_name = 'du003', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("du004","DU004","dust4")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_dust004_in_air', &
-    !        fv3jedi_name = 'du004', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("du005","DU005","dust5")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_dust005_in_air', &
-    !        fv3jedi_name = 'du005', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ss001","SS001","seas1")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sea_salt001_in_air', &
-    !        fv3jedi_name = 'ss001', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ss002","SS002","seas2")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sea_salt002_in_air', &
-    !        fv3jedi_name = 'ss002', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ss003","SS003","seas3")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sea_salt003_in_air', &
-    !        fv3jedi_name = 'ss003', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ss004","SS004","seas4")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sea_salt004_in_air', &
-    !        fv3jedi_name = 'ss004', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ss005","SS005","seas5")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sea_salt005_in_air', &
-    !        fv3jedi_name = 'ss005', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("bcphobic","BCPHOBIC","bc1")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_hydrophobic_black_carbon_in_air', &
-    !        fv3jedi_name = 'bcphobic', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("bcphilic","BCPHILIC","bc2")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_hydrophilic_black_carbon_in_air', &
-    !        fv3jedi_name = 'bcphilic', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ocphobic","OCPHOBIC","oc1")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_hydrophobic_organic_carbon_in_air', &
-    !        fv3jedi_name = 'ocphobic', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("ocphilic","OCPHILIC","oc2")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_hydrophilic_organic_carbon_in_air', &
-    !        fv3jedi_name = 'ocphilic', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("no3an1","NO3AN1")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_nitrate001_in_air', &
-    !        fv3jedi_name = 'no3an1', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("no3an2","NO3AN2")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_nitrate002_in_air', &
-    !        fv3jedi_name = 'no3an2', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("no3an3","NO3AN3")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_nitrate003_in_air', &
-    !        fv3jedi_name = 'no3an3', units = 'kg kg-1', staggerloc = center, tracer = .true.)
-    ! case("so4","SO4","sulf")
-    !   vcount=vcount+1;
-    !   call self%fields(vcount)%allocate_field(geom%isc,geom%iec,geom%jsc,geom%jec,geom%npz, &
-    !        short_name = vars%variable(var), long_name = 'mass_fraction_of_sulfate_in_air', &
-    !        fv3jedi_name = 'so4', units = 'kg kg-1', staggerloc = center, tracer = .true.)
      !Not found
      case default
        call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))
    end select
 enddo
-
-! if (vcount .ne. self%nf) &
-! call abor1_ftn("fv3jedi_state_mod create: vcount does not equal self%nf")
-
-! self%hydrostatic = .true.
-! if (has_field(self%fields, 'delz') .and. has_field(self%fields, 'w')) self%hydrostatic = .false.
-
-! ! Initialize all arrays to zero
-! call zeros(self)
-
-! ! Copy some geometry for convenience
-! self%isc    = geom%isc
-! self%iec    = geom%iec
-! self%jsc    = geom%jsc
-! self%jec    = geom%jec
-! self%npx    = geom%npx
-! self%npy    = geom%npy
-! self%npz    = geom%npz
-! self%ntile  = geom%ntile
-! self%ntiles = geom%ntiles
-
-! ! Pointer to fv3jedi communicator
-! self%f_comm = geom%f_comm
-
-! ! Check winds
-! if (has_field(self%fields, 'ua') .and. .not.has_field(self%fields, 'va')) &
-! call abor1_ftn("fv3jedi_state_mod create: found A-Grid u but not v")
-! if (.not.has_field(self%fields, 'ua') .and. has_field(self%fields, 'va')) &
-! call abor1_ftn("fv3jedi_state_mod create: found A-Grid v but not u")
-! if (has_field(self%fields, 'ud') .and. .not.has_field(self%fields, 'vd')) &
-! call abor1_ftn("fv3jedi_state_mod create: found D-Grid u but not v")
-! if (.not.has_field(self%fields, 'ud') .and. has_field(self%fields, 'vd')) &
-! call abor1_ftn("fv3jedi_state_mod create: found D-Grid v but not u")
-
-! self%have_agrid = .false.
-! self%have_dgrid = .false.
-! if (has_field(self%fields, 'ua')) self%have_agrid = .true.
-! if (has_field(self%fields, 'ud')) self%have_dgrid = .true.
 
 end subroutine create
 
@@ -569,11 +107,11 @@ subroutine zeros(self)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-! integer :: var
+integer :: var
 
-! do var = 1, self%nf
-!   self%fields(var)%array = 0.0_kind_real
-! enddo
+do var = 1, self%nf
+  self%fields(var)%array = 0.d0
+enddo
 
 end subroutine zeros
 
@@ -585,13 +123,15 @@ implicit none
 type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
 
-! integer :: var
+integer :: var
 
 ! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.copy")
 
-! do var = 1, self%nf
-!   self%fields(var) = rhs%fields(var)
-! enddo
+write(*,*) "Copying field self%nf= ",self%nf
+
+do var = 1, self%nf
+  self%fields(var) = rhs%fields(var)
+enddo
 
 self%calendar_type = rhs%calendar_type
 self%date_init = rhs%date_init
@@ -604,7 +144,7 @@ subroutine axpy(self,zz,rhs)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-real(kind=c_double), intent(in)    :: zz
+real(kind=c_float), intent(in)    :: zz
 type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
 
 ! integer :: var
@@ -1148,49 +688,36 @@ type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
 type(c_ptr),         intent(in)    :: c_conf   !< Configuration
 type(datetime),      intent(inout) :: vdate    !< DateTime
 
-! type(fv3jedi_io_gfs)  :: gfs
-! type(fv3jedi_io_geos) :: geos
-
 character(len=10) :: filetype
 character(len=255) :: filename
 integer :: flipvert
 type(fckit_configuration) :: f_conf
 character(len=:), allocatable :: str
 
+integer :: ixfull, jxfull, var
 
 ! Fortran configuration
 ! ---------------------
 f_conf = fckit_configuration(c_conf)
 
-call f_conf%get_or_die("filetype",str)
-filetype = str
+call f_conf%get_or_die("model_filename",str)
+filename = str
 deallocate(str)
 
+!SNLIQ(Time, south_north, snow_layers, west_east)
 
-if (trim(filetype) == 'gfs') then
+ixfull = geom%xend-geom%xstart+1
+jxfull = geom%yend-geom%ystart+1
 
-!  call gfs%setup(f_conf)
-!  call gfs%read_meta(geom, vdate, self%calendar_type, self%date_init)
-!  call gfs%read_fields(geom, self%fields)
+!call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
 
-  flipvert = 0
-  if (f_conf%has("flip_vertically")) then
-     call f_conf%get_or_die("flip_vertically",flipvert)
-  endif
- ! if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
+!write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
 
-elseif (trim(filetype) == 'geos') then
+ do var = 1, self%nf
+       call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, self%fields(var)%wrf_hydro_nwm_name, self%fields(var)%array)
 
-  ! call geos%setup(geom, self%fields, vdate, 'read', f_conf)
-  ! call geos%read_meta(geom, vdate, self%calendar_type, self%date_init)
-  ! call geos%read_fields(geom, self%fields)
-  ! call geos%delete()
-
-else
-
-  call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.read: restart type not supported")
-
-endif
+      ! write(*,*) "Print first column from State ",self%fields(var)%array(:,1,1)
+enddo
 
 end subroutine read_file
 
@@ -1259,9 +786,26 @@ subroutine state_print(self)
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
-! call fields_print(self%nf, self%fields, "State", self%f_comm) 
+ call fields_print(self%nf, self%fields, "SNEQV", self%f_comm)
 
 end subroutine state_print
+
+! ------------------------------------------------------------------------------
+
+subroutine get_mean_stddev(self,nf,pstat)
+
+ implicit none
+ type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+ integer :: nf
+ real(kind=c_float), intent(inout) ::  pstat(3,nf)
+
+ pstat(1,1) = 0.0
+ pstat(2,1) = 0.0
+ pstat(3,1) = 0.0
+
+ call self%fields(1)%mean_stddev(pstat(1,1),pstat(2,1),pstat(3,1))
+ 
+end subroutine get_mean_stddev
 
 ! ------------------------------------------------------------------------------
 
@@ -1270,7 +814,7 @@ subroutine gpnorm(self, nf, pstat)
  implicit none
  type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
  integer,              intent(in)    :: nf
- real(kind=c_double), intent(inout) :: pstat(3, nf)
+ real(kind=c_float), intent(inout) :: pstat(3, nf)
 
 ! if (nf .ne. self%nf) then
 !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
@@ -1286,12 +830,109 @@ subroutine rms(self, prms)
 
 implicit none
 type(wrf_hydro_nwm_jedi_state),  intent(in)  :: self
-real(kind=c_double), intent(out) :: prms
+real(kind=c_float), intent(out) :: prms
 
 ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
 
 end subroutine rms
 
 ! ------------------------------------------------------------------------------
+
+subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+  implicit none
+    character(len=*), intent(in) :: restart_filename_remember
+    integer,                            intent(in) :: parallel_xstart
+    integer,                            intent(in) :: parallel_xend
+    integer,                            intent(in) :: subwindow_xstart
+    integer,                            intent(in) :: ixfull
+    integer,                            intent(in) :: jxfull
+    character(len=*),                   intent(in)  :: name
+    real(kind=c_float),             dimension(:,:,:), intent(out) :: array
+    integer,          optional,         intent(out) :: return_error
+    integer :: ierr
+    integer :: ncid
+    integer :: varid
+    integer, dimension(4) :: nstart
+    integer, dimension(4) :: ncount
+! #ifdef _PARALLEL_
+!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+! #else
+    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+    !#endif
+    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
+    nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
+    ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
+    if (present(return_error)) then
+       ierr = nf90_inq_varid(ncid, name, varid)
+       if (ierr == NF90_NOERR) then
+          return_error = 0
+          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
+          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+       else
+          return_error = 1
+          write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
+       endif
+    else
+       ierr = nf90_inq_varid(ncid, name, varid)
+       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
+       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+    endif
+    ierr = nf90_close(ncid)
+    call error_handler(ierr, "Problem closing restart file")
+    
+  end subroutine get_from_restart_3d
+
+  subroutine get_from_restart_2d_float(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+    implicit none
+    character(len=*), intent(in) :: restart_filename_remember
+    integer,                            intent(in) :: parallel_xstart
+    integer,                            intent(in) :: parallel_xend
+    integer,                            intent(in) :: subwindow_xstart
+    integer,                            intent(in) :: ixfull
+    integer,                            intent(in) :: jxfull
+    character(len=*),                   intent(in)  :: name
+    real,             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array
+    integer,          optional,         intent(out) :: return_error
+    integer :: ierr
+    integer :: ncid
+    integer :: varid
+    integer, dimension(4) :: nstart
+    integer, dimension(4) :: ncount
+    integer :: rank
+! #ifdef _PARALLEL_
+!     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+!     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+! #else
+    rank = 0
+    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+!#endif
+    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
+    nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
+    ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
+    if (present(return_error)) then
+       ierr = nf90_inq_varid(ncid, name, varid)
+       if (ierr == NF90_NOERR) then
+          return_error = 0
+          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
+          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+       else
+          return_error = 1
+          if (rank == 0) write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
+       endif
+    else
+       ierr = nf90_inq_varid(ncid, name, varid)
+       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
+       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
+    endif
+    ierr = nf90_close(ncid)
+    call error_handler(ierr, "Problem closing restart file")
+    
+  end subroutine get_from_restart_2d_float
+
 
 end module wrf_hydro_nwm_jedi_state_mod

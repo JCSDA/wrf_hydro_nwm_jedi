@@ -43,7 +43,7 @@ namespace wrf_hydro_nwm_jedi {
     // if (conf.has("analytic_init")) {
     //   this->analytic_init(conf, geom);
     // } else {
-    //this->read(conf); TO BE UNCOMMENTED
+    this->read(conf);
       //}
     
     oops::Log::trace() << "State::State create from analytical or"
@@ -55,16 +55,17 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   State::State(const Geometry &, const State &) {
-    // util::abor1_cpp("State::State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::State() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
-    // util::abor1_cpp("State::State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
   }
 
 // ----------------------------------------------------------------------------
@@ -96,14 +97,22 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void State::print(std::ostream & os) const {
-    os << *fields_;
+    //wrf_hydro_nwm_jedi_state_print_f90(keyState_);
+    int const nf = 1;
+    float pstat[3][nf];
+    wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
+    //fields_->fields_print(os);
+    os << std::endl;
+    os << "Mean SNEQV: " << pstat[0][0] << std::endl;
+    os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
+    os << "RMS SNEQV: " << pstat[2][0] << std::endl;
   }
 
 // ----------------------------------------------------------------------------
 
   void State::write(const eckit::Configuration & conf) const {
-    // util::abor1_cpp("State::write() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::write() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
   
 // ----------------------------------------------------------------------------
@@ -112,7 +121,7 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State read starting" << std::endl;
     const eckit::Configuration * conf = &config;
     util::DateTime * dtp = &time_;
-    wrf_hydro_nwm_jedi_state_read_file_f90(geom_->toFortran(), keyState_, &conf, &dtp);
+    wrf_hydro_nwm_jedi_state_read_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
     oops::Log::trace() << "State read done" << std::endl;
   }
 
@@ -128,23 +137,23 @@ namespace wrf_hydro_nwm_jedi {
 
   State & State::operator+=(const Increment & dx)
   {
-    // util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
+                    __FILE__, __LINE__);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   void State::zero() {
-    // util::abor1_cpp("State::zero() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::zero() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void State::accumul(const double &, const State &) {
-    // util::abor1_cpp("State::accumul() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    util::abor1_cpp("State::accumul() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
@@ -163,6 +172,10 @@ namespace wrf_hydro_nwm_jedi {
 
   double State::norm() const {
     return fields_->norm();
+  }
+
+  boost::shared_ptr<const Geometry> State::geometry() const {
+    return fields_->geometry();
   }
 
 // ----------------------------------------------------------------------------

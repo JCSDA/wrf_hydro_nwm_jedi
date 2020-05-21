@@ -6,15 +6,15 @@ use netcdf
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_geometry
+public :: wrf_hydro_nwm_jedi_geometry, error_handler
 
 !------------------------------------------------------------------------------
 
 type :: wrf_hydro_nwm_jedi_geometry
    integer :: ix, iy !unsused
-   integer :: xstart, ystart !unsused
-   integer :: xend, yend !unsused
-   integer :: dim1_len, dim2_len, npz
+   integer :: xstart, ystart
+   integer :: xend, yend ! same as dim1_len and dim2_len
+   integer :: dim1_len, dim2_len, npz, snow_layers
    real    :: dx, dy
    real, allocatable :: xlat(:,:), xlong(:,:)
  contains
@@ -43,6 +43,10 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   write(*,*) 'Input file for Geometry: ',wrfinput_flnm
   deallocate(str)
 
+  self%xstart = 1
+  self%ystart = 1
+  self%snow_layers = 3
+
   self%dx = 1
   ierr = 0
   write(*,*) 'Reading from NETCDF file the Geometry'
@@ -60,12 +64,15 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   ierr = nf90_inq_dimid(ncid, "west_east", dimid)
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
   ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim1_len)
+
+  self%xend = self%dim1_len
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
 
   ierr = nf90_inq_dimid(ncid, "south_north", dimid)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
   ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim2_len)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
+  self%yend = self%dim2_len
   
   ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
 
@@ -117,6 +124,11 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   self%dim1_len = other%dim1_len
   self%dim2_len = other%dim2_len
   self%npz = other%npz
+  self%snow_layers = other%snow_layers
+  self%xstart = other%xstart
+  self%ystart = other%ystart
+  self%xend = other%xend
+  self%yend = other%yend
   allocate(self%xlat, source = other%xlat) 
   allocate(self%xlong, source = other%xlong)
   

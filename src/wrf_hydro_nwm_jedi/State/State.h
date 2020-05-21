@@ -12,6 +12,9 @@
 #include <ostream>
 #include <string>
 
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "eckit/mpi/Comm.h"
 
 #include "oops/util/DateTime.h"
@@ -80,15 +83,15 @@ namespace wrf_hydro_nwm_jedi {
     void accumul(const double &, const State &);
     void read(const eckit::Configuration &);
 
-    std::shared_ptr<const Geometry> geometry() const {return geom_;}
+    boost::shared_ptr<const Geometry> geometry() const;// {return fields_->geometry();}
     
-    const F90state & toFortran() {return keyState_;}
-
+    /* F90state & toFortran() {return keyState_;} */
+    const F90state & toFortran() const {return keyState_;}
    private:
     void print(std::ostream &) const;
     F90state keyState_;
-    std::unique_ptr<Fields> fields_;
-    std::shared_ptr<const Geometry> geom_;
+    boost::scoped_ptr<Fields> fields_;
+    boost::shared_ptr<const Geometry> geom_;
     oops::Variables vars_;
     util::DateTime time_;
   };

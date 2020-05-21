@@ -1,11 +1,16 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
+  testinput/hofx_nomodel.yaml
+  testoutput/hofx_nomodel_identity.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
+  Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   )
 
 
 # link the input files for the tests
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/wrf_hydro_nwm_files)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -77,3 +82,14 @@ ecbuild_add_test(
 #   SOURCES executables/TestGeometryIterator.cc
 #   ARGS    testinput/interface.yml
 #   LIBS    wrf_hydro_nwm_jedi )  
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity
+   #TYPE         EXE
+   TYPE		 SCRIPT
+   COMMAND	 "${CMAKE_BINARY_DIR}/bin/compare.sh"
+   ARGS         "${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run"
+   		testoutput/hofx_nomodel_identity.ref)
+#   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
+#   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
+#   MPI          1 )
