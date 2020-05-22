@@ -34,6 +34,7 @@ namespace wrf_hydro_nwm_jedi {
 	time_ = util::DateTime("2018-04-15T00:00:00Z");
       }
     //Fields should be create here.
+    
   }
 
 // ----------------------------------------------------------------------------

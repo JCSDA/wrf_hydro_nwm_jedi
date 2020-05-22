@@ -8,12 +8,65 @@ module wrf_hydro_nwm_jedi_field_mod
   use iso_c_binding, only: c_int, c_float,c_double
   use fckit_mpi_module
   use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+  use oops_variables_mod
 !use fv3jedi_kinds_mod, only: kind_real
 !use mpp_domains_mod,   only: east, north, center
 
   implicit none
 
-private
+  private
+
+  type, abstract :: base_field
+     character(len=32) :: short_name = "null"   !Short name (to match file name)
+     character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
+     character(len=64) :: long_name = "null"    !More descriptive name
+     character(len=32) :: units = "null"        !Units for the field
+     logical :: tracer = .false.
+   contains
+     procedure (print_field_interface), pass(self), deferred :: print_field
+     procedure (read_file_interface), pass(self), deferred :: read_file
+  end type base_field
+
+  abstract interface
+     subroutine print_field_interface(self)
+       import base_field
+       class(base_field), intent(in) :: self
+     end subroutine print_field_interface
+
+     subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
+       import base_field
+       class(base_field), intent(in) :: self
+       character(len=*), intent(in) :: filename
+       integer, intent(in) :: xstart, xend, ystart, yend
+     end subroutine read_file_interface
+  end interface
+
+  type, extends(base_field) :: field_2d
+     integer :: dim1_len, dim2_len
+     real(c_float),allocatable :: array(:,:)
+   contains
+     procedure, pass(self) :: print_field => print_field_2d
+     procedure, pass(self) :: read_file => read_file_2d
+     procedure, pass(self) :: fill => fill_field_2d
+     !    Destructor
+     ! final :: destroy_field_2d
+  end type field_2d
+
+  type, extends(base_field) :: field_3d
+     integer :: dim1_len, dim2_len, dim3_len
+     real(c_float), allocatable :: array(:,:,:)
+   contains
+     procedure, pass(self) :: print_field => print_field_3d
+     procedure, pass(self) :: read_file => read_file_3d
+     procedure, pass(self) :: fill => fill_field_3d
+     !    Destructor
+     ! final :: destroy_field_3d
+  end type field_3d
+
+  type elem_field
+     class(base_field), allocatable :: field
+  end type elem_field
+  
 public :: wrf_hydro_nwm_jedi_field, &
      has_field, &
      long_name_to_wrf_hydro_name, &
@@ -29,31 +82,183 @@ public :: wrf_hydro_nwm_jedi_field, &
      copy_subset, &
      mean_stddev
 
-!Field type
-type :: wrf_hydro_nwm_jedi_field
- logical :: lalloc = .false.
- character(len=32) :: short_name = "null"   !Short name (to match file name)
- character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
- character(len=64) :: long_name = "null"    !More descriptive name
- character(len=32) :: units = "null"        !Units for the field
- logical :: tracer = .false.
- logical :: is_2D = .false.
- !integer :: staggerloc   !Middle, corners, east, south, etc
- integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
- real(kind=c_float), allocatable :: array(:,:,:)
- logical :: integerfield = .false.
- contains
-  procedure :: allocate_field
-  procedure :: equals
-  procedure :: copy => field_copy
-  generic :: assignment(=) => equals
-  procedure :: deallocate_field
-  procedure :: mean_stddev
-endtype wrf_hydro_nwm_jedi_field
+!Field type mirror of C class
+type :: wrf_hydro_nwm_jedi_fields
+   integer :: nf
+ ! integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
+ ! real(kind=c_float), allocatable :: array(:,:,:)
+   ! logical :: integerfield = .false.
+   type(elem_field), allocatable :: fields(:)
+contains
+  ! procedure :: create
+  ! procedure :: allocate_field
+  ! procedure :: equals
+  ! procedure :: copy => field_copy
+  ! generic :: assignment(=) => equals
+  ! procedure :: deallocate_field
+  ! procedure :: mean_stddev
+endtype wrf_hydro_nwm_jedi_fields
 
 ! --------------------------------------------------------------------------------------------------
 
 contains
+
+  subroutine create(self, geom, vars)
+    implicit none
+    type(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+    type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
+    type(oops_variables), intent(in)    :: vars
+
+    class(field_2d), allocatable :: tmp_2d_field
+    class(field_3d), allocatable :: tmp_3d_field
+    
+    integer :: var, vcount, nlev
+
+    ! Total fields
+    ! ------------
+    self%nf = vars%nvars()
+
+    ! Allocate fields structure
+    ! -------------------------
+    allocate(self%fields(self%nf))
+
+    vcount = 0
+    do var = 1, self%nf
+       select case (trim(vars%variable(var)))
+       case("SNEQV")
+          vcount=vcount+1;
+
+          allocate(tmp_2d_field)
+          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+               short_name = vars%variable(var), &
+               long_name = 'snow_water_equivalent', &
+               wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+          allocate(self%fields(vcount)%field, mold = tmp_2d_field)
+          deallocate(tmp_2d_field)
+
+       case("SNOWH")
+          vcount=vcount+1;
+
+          allocate(tmp_2d_field)
+          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+               short_name = vars%variable(var), &
+               long_name = 'snow_depth', &
+               wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+          allocate(self%fields(vcount)%field, mold = tmp_2d_field)
+          deallocate(tmp_2d_field)
+
+       case("LAI")
+          vcount=vcount+1;
+          
+          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+               short_name = vars%variable(var),&
+               long_name = 'leaf_area', &
+               wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
+
+          allocate(self%fields(vcount)%field, mold = tmp_2d_field)
+          deallocate(tmp_2d_field)
+
+       case("SNLIQ")
+          vcount=vcount+1;
+          
+          call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
+               short_name = vars%variable(var),&
+               long_name = 'snow_liquid', &
+               wrf_hydro_nwm_name = 'SNLIQ', units = 'liter') !unit invented
+
+          allocate(self%fields(vcount)%field, mold = tmp_3d_field)
+          deallocate(tmp_3d_field)
+
+       case default
+          call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))          
+       end select
+    end do
+
+  end subroutine create
+
+  subroutine fill_2d_field(self,dim1_len,dim2_len,short_name,long_name,&
+       wrf_hydro_nwm_name,units,tracer)
+    implicit none
+
+    class(field_2d),intent(in) :: self
+    integer, intent(in)    :: dim1_len, dim2_len
+    character(len=*),              intent(in)    :: short_name
+    character(len=*),              intent(in)    :: long_name
+    character(len=*),              intent(in)    :: wrf_hydro_nwm_name
+    character(len=*),              intent(in)    :: units
+    logical, optional,             intent(in)    :: tracer
+
+    self%dim1_len = dim1_len
+    self%dim2_len = dim2_len
+
+    if(.not.allocated(self%array)) then
+       allocate( self%array(dim1_len, dim2_len) )
+    else
+       call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+    end if
+
+    self%short_name   = trim(short_name)
+    self%long_name    = trim(long_name)
+    self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+    self%units        = trim(units)
+    
+  end subroutine fill_2d_field
+
+  subroutine fill_3d_field(self,dim1_len,dim2_len,dim3_len,short_name,long_name,&
+       wrf_hydro_nwm_name,units,tracer)
+    implicit none
+    
+    class(field_3d),intent(in) :: self
+    integer, intent(in)    :: dim1_len, dim2_len, dim3_len
+    character(len=*),              intent(in)    :: short_name
+    character(len=*),              intent(in)    :: long_name
+    character(len=*),              intent(in)    :: wrf_hydro_nwm_name
+    character(len=*),              intent(in)    :: units
+    logical, optional,             intent(in)    :: tracer
+
+    self%dim1_len = dim1_len
+    self%dim2_len = dim2_len
+    self%dim3_len = dim3_len
+    
+    if(.not.allocated(self%array)) then
+       allocate( self%array(dim1_len, dim2_len, dim3_len) )
+    else
+       call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+    end if
+
+    self%short_name   = trim(short_name)
+    self%long_name    = trim(long_name)
+    self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+    self%units        = trim(units)
+    
+  end subroutine fill_3d_field
+
+  subroutine read_file_2d(self,filename,xstart,xend,ystart,yend)
+    class(field_2d),intent(in) :: self
+    character(len=*), intent(in) :: filename
+    integer, intent(in) :: xstart, xend, ystart, yend
+    integer :: ixfull, jxfull
+
+    ixfull = xend-xstart+1
+    jxfull = yend-ystart+1
+
+    call get_from_restart_2d_float(filename, xstart, xend, xstart, ixfull, jxfull, self%wrf_hydro_nwm_name, self%array)
+    
+  end subroutine read_file_2d
+
+  subroutine read_file_3d(self,filename,xstart,xend)
+    class(field_3d),intent(in) :: self
+    character(len=*), intent(in) :: filename
+    integer, intent(in) :: xstart, xend, ystart, yend
+    integer :: ixfull, jxfull
+
+    ixfull = xend-xstart+1
+    jxfull = yend-ystart+1
+
+    call get_from_restart_3d(filename, xstart, xend, xstart, ixfull, jxfull, self%wrf_hydro_nwm_name, self%array)
+    
+  end subroutine read_file_3d
+
 
 ! --------------------------------------------------------------------------------------------------
 
