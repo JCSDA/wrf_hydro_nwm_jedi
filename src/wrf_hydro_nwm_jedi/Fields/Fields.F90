@@ -112,6 +112,7 @@ type :: wrf_hydro_nwm_jedi_fields
 contains
   procedure :: create
   procedure :: search_field
+  procedure :: print_all_fields
   ! procedure :: allocate_field
   ! procedure :: equals
   ! procedure :: copy => field_copy
@@ -134,6 +135,8 @@ contains
     class(field_3d), allocatable :: tmp_3d_field
     
     integer :: var, vcount, nlev
+
+    write(*,*) 'Creating fields'
 
     ! Total fields
     ! ------------
@@ -450,13 +453,25 @@ contains
     class(base_field), pointer, intent(out) :: field_pointer
 
     integer :: n
-
+    character(len=255) :: wrf_hydro_nwm_name
+    
     field_pointer => null()
 
-    !linear search    
+    !Mapping between wrf_hydro variable name and obs name
+    select case (long_name)
+    case ("swe")
+       wrf_hydro_nwm_name = "SNEQV"
+    case ("snow_depth")
+       wrf_hydro_nwm_name = "SNOWH"
+    case ("leaf_area")
+       wrf_hydro_nwm_name = "LAI"
+    case default
+       wrf_hydro_nwm_name = "null"   
+    end select
+    
+    !linear search
     do n = 1, size(self%fields)
-       if (trim(long_name) == trim(self%fields(n)%field%long_name)) then
-          !wrf_hydro_nwm_name = trim(fields(n)%wrf_hydro_nwm_name)
+       if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then
           field_pointer => self%fields(n)%field
           return
        endif
@@ -468,6 +483,17 @@ contains
   end subroutine search_field
 
   ! --------------------------------------------------------------------------------------------------
+
+  subroutine print_all_fields(self)
+    implicit none
+    class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
+    integer :: f
+
+    do f = 1,size(self%fields)
+       call self%fields(f)%field%print_field()
+    end do
+    
+  end subroutine print_all_fields
 
 ! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 
@@ -703,7 +729,7 @@ subroutine print_field_2d(self)
   implicit none
   class(field_2d),intent(in) :: self
 
-  write(*,*) 'Printing', self%long_name
+  write(*,*) 'Printing ', self%long_name
   
 end subroutine print_field_2d
 
@@ -711,7 +737,7 @@ subroutine print_field_3d(self)
   implicit none
   class(field_3d),intent(in) :: self
 
-  write(*,*) 'Printing', self%long_name
+  write(*,*) 'Printing ', self%long_name
   
 end subroutine print_field_3d
 

@@ -437,7 +437,8 @@ subroutine state_print(self)
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
-! call fields_print(self%nf, self%fields, "SNEQV", self%f_comm)
+ ! call fields_print(self%nf, self%fields, "SNEQV", self%f_comm)
+ call self%fields_obj%print_all_fields()
 
 end subroutine state_print
 
