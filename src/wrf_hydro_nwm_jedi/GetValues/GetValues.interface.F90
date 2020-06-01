@@ -129,7 +129,7 @@ call ufo_locs_registry%get(c_key_locs, locs)
 call ufo_geovals_registry%get(c_key_geovals, geovals)
 
 ! Call method
-call self%fill_geovals(geom, state%fields, t1, t2, locs, geovals)
+call self%fill_geovals(geom, state%fields_obj, t1, t2, locs, geovals)
 
 end subroutine wrf_hydro_nwm_jedi_getvalues_fill_geovals_c
 

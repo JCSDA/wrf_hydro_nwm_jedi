@@ -37,7 +37,8 @@ namespace wrf_hydro_nwm_jedi {
       this->vars_ = vars;
     }
 
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_,
+					fields_->geometry()->toFortran(), vars_);
     
     // Analytical or read from file
     // if (conf.has("analytic_init")) {

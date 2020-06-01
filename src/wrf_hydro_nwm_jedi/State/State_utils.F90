@@ -8,7 +8,7 @@
 module wrf_hydro_nwm_jedi_state_utils_mod
 
 !use fv3jedi_kinds_mod
-use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_field
+use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_fields
 use fckit_mpi_module, only: fckit_mpi_comm
 
 implicit none
@@ -29,7 +29,7 @@ type :: wrf_hydro_nwm_jedi_state
   logical :: have_dgrid
 
   type(fckit_mpi_comm) :: f_comm
-  type(wrf_hydro_nwm_jedi_field), allocatable :: fields(:)
+  type(wrf_hydro_nwm_jedi_fields) :: fields_obj
 
 end type wrf_hydro_nwm_jedi_state
 

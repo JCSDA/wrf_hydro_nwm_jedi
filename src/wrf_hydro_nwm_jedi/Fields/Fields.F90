@@ -15,7 +15,11 @@ module wrf_hydro_nwm_jedi_field_mod
 
   implicit none
 
-  private
+  public
+  
+  type :: coords
+     integer :: dim_1, dim_2, dim_3
+  end type coords
 
   type, abstract :: base_field
      character(len=32) :: short_name = "null"   !Short name (to match file name)
@@ -26,6 +30,7 @@ module wrf_hydro_nwm_jedi_field_mod
    contains
      procedure (print_field_interface), pass(self), deferred :: print_field
      procedure (read_file_interface), pass(self), deferred :: read_file
+     procedure (get_value_field_interface), pass(self), deferred :: get_value
   end type base_field
 
   abstract interface
@@ -40,6 +45,14 @@ module wrf_hydro_nwm_jedi_field_mod
        character(len=*), intent(in) :: filename
        integer, intent(in) :: xstart, xend, ystart, yend
      end subroutine read_file_interface
+
+     function get_value_field_interface(self,coo) result(val)
+       use iso_c_binding, only : c_float
+       import base_field, coords
+       class(base_field), intent(in) :: self
+       type(coords), intent(in) :: coo
+       real(kind=c_float) :: val
+     end function get_value_field_interface
   end interface
 
   type, extends(base_field) :: field_2d
@@ -48,6 +61,7 @@ module wrf_hydro_nwm_jedi_field_mod
    contains
      procedure, pass(self) :: print_field => print_field_2d
      procedure, pass(self) :: read_file => read_file_2d
+     procedure, pass(self) :: get_value => get_value_2d
      procedure, pass(self) :: fill => fill_field_2d
      !    Destructor
      ! final :: destroy_field_2d
@@ -59,16 +73,21 @@ module wrf_hydro_nwm_jedi_field_mod
    contains
      procedure, pass(self) :: print_field => print_field_3d
      procedure, pass(self) :: read_file => read_file_3d
+     procedure, pass(self) :: get_value => get_value_3d
      procedure, pass(self) :: fill => fill_field_3d
      !    Destructor
      ! final :: destroy_field_3d
   end type field_3d
 
+  !The function of this element is twofold:
+  ! 1) It allows one to create an array of base class object
+  ! 2) It makes it possible to organize the element data structures
+  ! other than simple arrays (e.g. binary search tree, hash tables, etc...)
   type elem_field
      class(base_field), allocatable :: field
   end type elem_field
   
-public :: wrf_hydro_nwm_jedi_field, &
+public :: wrf_hydro_nwm_jedi_fields!, &
      ! has_field, &
      ! long_name_to_wrf_hydro_name, &
      ! pointer_field, &
@@ -81,7 +100,7 @@ public :: wrf_hydro_nwm_jedi_field, &
      ! checksame, &
      ! flip_array_vertical, &
      ! copy_subset, &
-     mean_stddev
+!     mean_stddev
 
 !Field type mirror of C class
 type :: wrf_hydro_nwm_jedi_fields
@@ -91,14 +110,15 @@ type :: wrf_hydro_nwm_jedi_fields
    ! logical :: integerfield = .false.
    type(elem_field), allocatable :: fields(:)
 contains
-  ! procedure :: create
+  procedure :: create
+  procedure :: search_field
   ! procedure :: allocate_field
   ! procedure :: equals
   ! procedure :: copy => field_copy
   ! generic :: assignment(=) => equals
   ! procedure :: deallocate_field
   ! procedure :: mean_stddev
-endtype wrf_hydro_nwm_jedi_fields
+end type wrf_hydro_nwm_jedi_fields
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -106,7 +126,7 @@ contains
 
   subroutine create(self, geom, vars)
     implicit none
-    type(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+    class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
     type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
     type(oops_variables), intent(in)    :: vars
 
@@ -260,9 +280,30 @@ contains
     
   end subroutine read_file_3d
 
-
 ! --------------------------------------------------------------------------------------------------
+  
+  function get_value_2d(self,coo) result(val)
+    class(field_2d), intent(in) :: self
+    type(coords), intent(in) :: coo
+    real(c_float) :: val
 
+    val = self%array(coo%dim_1,coo%dim_2)
+    
+  end function get_value_2d
+
+  ! --------------------------------------------------------------------------------------------------
+
+  function get_value_3d(self,coo) result(val)
+    class(field_3d), intent(in) :: self
+    type(coords), intent(in) :: coo
+    real(c_float) :: val
+
+    val = self%array(coo%dim_1,coo%dim_2,coo%dim_3)
+    
+  end function get_value_3d
+
+  ! --------------------------------------------------------------------------------------------------
+  
 ! subroutine allocate_field(self,dim1_len,dim2_len,dim3_len,short_name,long_name,&
 !                           wrf_hydro_nwm_name,units,tracer,integerfield)
 
@@ -313,114 +354,139 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine deallocate_field(self)
+! subroutine deallocate_field(self)
+
+! ! implicit none
+! ! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+
+! ! if(self%lalloc) deallocate(self%array)
+! ! self%lalloc = .false.
+
+! end subroutine deallocate_field
+
+! --------------------------------------------------------------------------------------------------
+
+! subroutine field_copy(self, rhs)
+!   implicit none
+!   ! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+!   ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: rhs
+
+  
+  
+! end subroutine field_copy
+
+! --------------------------------------------------------------------------------------------------
+
+! subroutine equals(self,rhs)
 
 ! implicit none
-! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+! ! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+! ! type (wrf_hydro_nwm_jedi_field), intent(in)    :: rhs
 
-! if(self%lalloc) deallocate(self%array)
-! self%lalloc = .false.
+! ! call self%allocate_field( rhs%isc,rhs%iec,rhs%jsc,rhs%jec,rhs%npz, &
+! !                           short_name=rhs%short_name, &
+! !                           long_name=rhs%long_name, &
+! !                           fv3jedi_name=rhs%fv3jedi_name, &
+! !                           units=rhs%units, &
+! !                           staggerloc=rhs%staggerloc, &
+! !                           tracer = rhs%tracer)
 
-end subroutine deallocate_field
+! ! self%array = rhs%array
 
-! --------------------------------------------------------------------------------------------------
-
-subroutine field_copy(self, rhs)
-  implicit none
-  ! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
-  ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: rhs
-
-  
-  
-end subroutine field_copy
+! end subroutine equals
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine equals(self,rhs)
+! logical function has_field(fields, fv3jedi_name)
 
-implicit none
-! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
-! type (wrf_hydro_nwm_jedi_field), intent(in)    :: rhs
+! ! type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
+! ! character(len=*),             intent(in)  :: fv3jedi_name
 
-! call self%allocate_field( rhs%isc,rhs%iec,rhs%jsc,rhs%jec,rhs%npz, &
-!                           short_name=rhs%short_name, &
-!                           long_name=rhs%long_name, &
-!                           fv3jedi_name=rhs%fv3jedi_name, &
-!                           units=rhs%units, &
-!                           staggerloc=rhs%staggerloc, &
-!                           tracer = rhs%tracer)
+! ! integer :: var
 
-! self%array = rhs%array
+! ! has_field = .false.
+! ! do var = 1, size(fields)
+! !   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
+! !     has_field = .true.
+! !     exit
+! !   endif
+! ! enddo
 
-end subroutine equals
-
-! --------------------------------------------------------------------------------------------------
-
-logical function has_field(fields, fv3jedi_name)
-
-! type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
-! character(len=*),             intent(in)  :: fv3jedi_name
-
-! integer :: var
-
-! has_field = .false.
-! do var = 1, size(fields)
-!   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
-!     has_field = .true.
-!     exit
-!   endif
-! enddo
-
-end function has_field
+! end function has_field
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine allocate_copy_field_array(fields, fv3jedi_name, field_array)
+! subroutine allocate_copy_field_array(fields, fv3jedi_name, field_array)
 
-! type(wrf_hydro_nwm_jedi_field),               intent(in)  :: fields(:)
-! character(len=*),                  intent(in)  :: fv3jedi_name
-! real(kind=c_float), allocatable, intent(out) :: field_array(:,:,:)
+! ! type(wrf_hydro_nwm_jedi_field),               intent(in)  :: fields(:)
+! ! character(len=*),                  intent(in)  :: fv3jedi_name
+! ! real(kind=c_float), allocatable, intent(out) :: field_array(:,:,:)
 
-! integer :: var
-! logical :: found
+! ! integer :: var
+! ! logical :: found
 
-! if(allocated(field_array)) deallocate(field_array)
+! ! if(allocated(field_array)) deallocate(field_array)
 
-! found = .false.
-! do var = 1,size(fields)
-!   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
-!     allocate(field_array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,fields(var)%npz))
-!     field_array = fields(var)%array
-!     found = .true.
-!     exit
-!   endif
-! enddo
+! ! found = .false.
+! ! do var = 1,size(fields)
+! !   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
+! !     allocate(field_array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,fields(var)%npz))
+! !     field_array = fields(var)%array
+! !     found = .true.
+! !     exit
+! !   endif
+! ! enddo
 
-! if (.not.found) call abor1_ftn("fv3jedi_field.allocate_copy_field_array: field "&
-!                                 //trim(fv3jedi_name)//" not found in fields")
+! ! if (.not.found) call abor1_ftn("fv3jedi_field.allocate_copy_field_array: field "&
+! !                                 //trim(fv3jedi_name)//" not found in fields")
 
-end subroutine allocate_copy_field_array
+! end subroutine allocate_copy_field_array
 
-! --------------------------------------------------------------------------------------------------
+  ! --------------------------------------------------------------------------------------------------
+  ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_filed routines
+  subroutine search_field(self,long_name,field_pointer)
+    class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
+    character(len=*),    intent(in)  :: long_name
+    class(base_field), pointer, intent(out) :: field_pointer
 
-subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
+    integer :: n
 
-! type(wrf_hydro_nwm_jedi_field), intent(in)  :: fields(:)
-! character(len=*),    intent(in)  :: long_name
-! character(len=*),    intent(out) :: wrf_hydro_nwm_name
+    field_pointer => null()
 
-! integer :: n
+    !linear search    
+    do n = 1, size(self%fields)
+       if (trim(long_name) == trim(self%fields(n)%field%long_name)) then
+          !wrf_hydro_nwm_name = trim(fields(n)%wrf_hydro_nwm_name)
+          field_pointer => self%fields(n)%field
+          return
+       endif
+    enddo
+    
+    call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
+         " not found in fields.")
+    
+  end subroutine search_field
 
-! select case (long_name)
-! case ("swe")
-!    wrf_hydro_nwm_name = "SNEQV"
-! case ("snow_depth")
-!    wrf_hydro_nwm_name = "SNOWH"
-! case ("leaf_area")
-!    wrf_hydro_nwm_name = "LAI"
-! case default
-!    wrf_hydro_nwm_name = "null"   
-! end select
+  ! --------------------------------------------------------------------------------------------------
+
+! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
+
+!   type(elem_field), intent(in)  :: fields(:)
+!   character(len=*),    intent(in)  :: long_name
+!   character(len=*),    intent(out) :: wrf_hydro_nwm_name
+
+!   integer :: n
+
+  ! select case (long_name)
+  ! case ("swe")
+  !    wrf_hydro_nwm_name = "SNEQV"
+  ! case ("snow_depth")
+  !    wrf_hydro_nwm_name = "SNOWH"
+  ! case ("leaf_area")
+  !    wrf_hydro_nwm_name = "LAI"
+  ! case default
+  !    wrf_hydro_nwm_name = "null"   
+  ! end select
 
 ! do n = 1, size(fields)
 !   if (trim(long_name) == trim(fields(n)%long_name)) then
@@ -438,198 +504,198 @@ subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 ! enddo
 
 ! call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
-!                " not found in fields.")
+!      " not found in fields.")
 
-end subroutine long_name_to_wrf_hydro_name
-
-! --------------------------------------------------------------------------------------------------
-
-subroutine copy_field_array(fields, fv3jedi_name, field_array)
-
-! type(wrf_hydro_nwm_jedi_field),  intent(in)  :: fields(:)
-! character(len=*),     intent(in)  :: fv3jedi_name
-! real(kind=c_float), intent(out) :: field_array(:,:,:)
-
-! integer :: var
-! logical :: found
-
-! found = .false.
-! do var = 1,size(fields)
-!   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
-!     field_array = fields(var)%array
-!     found = .true.
-!     exit
-!   endif
-! enddo
-
-! if (.not.found) call abor1_ftn("fv3jedi_field.copy_field_array: field "&
-!                                 //trim(fv3jedi_name)//" not found in fields")
-
-end subroutine copy_field_array
+! end subroutine long_name_to_wrf_hydro_name
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine pointer_field(fields, wrf_hydro_nwm_name, field_pointer)
+! subroutine copy_field_array(fields, fv3jedi_name, field_array)
 
-! type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
-! character(len=*),             intent(in)  :: wrf_hydro_nwm_name
-! type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
+! ! type(wrf_hydro_nwm_jedi_field),  intent(in)  :: fields(:)
+! ! character(len=*),     intent(in)  :: fv3jedi_name
+! ! real(kind=c_float), intent(out) :: field_array(:,:,:)
 
-! integer :: var
-! logical :: found
+! ! integer :: var
+! ! logical :: found
 
-! if(associated(field_pointer)) nullify(field_pointer)
+! ! found = .false.
+! ! do var = 1,size(fields)
+! !   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
+! !     field_array = fields(var)%array
+! !     found = .true.
+! !     exit
+! !   endif
+! ! enddo
 
-! found = .false.
-! do var = 1,size(fields)
-!   if ( trim(fields(var)%wrf_hydro_nwm_name) == trim(wrf_hydro_nwm_name)) then
-!     field_pointer => fields(var)
-!     found = .true.
-!     exit
-!   endif
-! enddo
+! ! if (.not.found) call abor1_ftn("fv3jedi_field.copy_field_array: field "&
+! !                                 //trim(fv3jedi_name)//" not found in fields")
 
-! if (.not.found) call abor1_ftn("wrf_hydro_field.pointer_field: field "&
-!                                 //trim(wrf_hydro_nwm_name)//" not found in fields")
-
-end subroutine pointer_field
+! end subroutine copy_field_array
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine pointer_field_array(fields, wrf_hydro_nwm_jedi_name, array_pointer)
+! subroutine pointer_field(fields, wrf_hydro_nwm_name, field_pointer)
 
-! type(wrf_hydro_nwm_jedi_field), target,   intent(in)    :: fields(:)
-! character(len=*),              intent(in)    :: wrf_hydro_nwm_jedi_name
-! real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
+! ! type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
+! ! character(len=*),             intent(in)  :: wrf_hydro_nwm_name
+! ! type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
 
-! integer :: var
-! logical :: found
+! ! integer :: var
+! ! logical :: found
 
-! if(associated(array_pointer)) nullify(array_pointer)
+! ! if(associated(field_pointer)) nullify(field_pointer)
 
-! found = .false.
-! do var = 1,size(fields)
-!   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
-!     array_pointer => fields(var)%array
-!     found = .true.
-!     exit
-!   endif
-! enddo
+! ! found = .false.
+! ! do var = 1,size(fields)
+! !   if ( trim(fields(var)%wrf_hydro_nwm_name) == trim(wrf_hydro_nwm_name)) then
+! !     field_pointer => fields(var)
+! !     found = .true.
+! !     exit
+! !   endif
+! ! enddo
 
-! if (.not.found) call abor1_ftn("fv3jedi_field.pointer_field_array: field "&
-!                                 //trim(fv3jedi_name)//" not found in fields")
+! ! if (.not.found) call abor1_ftn("wrf_hydro_field.pointer_field: field "&
+! !                                 //trim(wrf_hydro_nwm_name)//" not found in fields")
 
-end subroutine pointer_field_array
+! end subroutine pointer_field
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine mean_stddev(self,mean,stddev,rms)
-  implicit none
-  ! class(wrf_hydro_nwm_jedi_field), target,  intent(in) :: self
-  ! real(c_float),intent(inout) :: mean,stddev,rms
-  ! real(c_double) :: tmp
-  ! integer :: n, i, j
+! subroutine pointer_field_array(fields, wrf_hydro_nwm_jedi_name, array_pointer)
 
-  ! n = size(self%array,1)*size(self%array,2)
+! ! type(wrf_hydro_nwm_jedi_field), target,   intent(in)    :: fields(:)
+! ! character(len=*),              intent(in)    :: wrf_hydro_nwm_jedi_name
+! ! real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
 
-  ! tmp = 0.d0
-  ! tmp = sum(self%array(:,:,1))
-  ! tmp = tmp/n
+! ! integer :: var
+! ! logical :: found
 
-  ! mean = real(tmp,kind=c_float)
+! ! if(associated(array_pointer)) nullify(array_pointer)
 
-  ! tmp = 0.d0
+! ! found = .false.
+! ! do var = 1,size(fields)
+! !   if ( trim(fields(var)%fv3jedi_name) == trim(fv3jedi_name)) then
+! !     array_pointer => fields(var)%array
+! !     found = .true.
+! !     exit
+! !   endif
+! ! enddo
+
+! ! if (.not.found) call abor1_ftn("fv3jedi_field.pointer_field_array: field "&
+! !                                 //trim(fv3jedi_name)//" not found in fields")
+
+! end subroutine pointer_field_array
+
+! --------------------------------------------------------------------------------------------------
+
+! subroutine mean_stddev(self,mean,stddev,rms)
+!   implicit none
+!   ! class(wrf_hydro_nwm_jedi_field), target,  intent(in) :: self
+!   ! real(c_float),intent(inout) :: mean,stddev,rms
+!   ! real(c_double) :: tmp
+!   ! integer :: n, i, j
+
+!   ! n = size(self%array,1)*size(self%array,2)
+
+!   ! tmp = 0.d0
+!   ! tmp = sum(self%array(:,:,1))
+!   ! tmp = tmp/n
+
+!   ! mean = real(tmp,kind=c_float)
+
+!   ! tmp = 0.d0
   
-  ! !Computing stddev
-  ! do i=1,size(self%array,1)
-  !    do j=1,size(self%array,2)
-  !       tmp = tmp + (self%array(i,j,1) - mean)**2
-  !    end do
-  ! end do
-  ! tmp = tmp / n
-  ! stddev = real(tmp,kind=c_float)
+!   ! !Computing stddev
+!   ! do i=1,size(self%array,1)
+!   !    do j=1,size(self%array,2)
+!   !       tmp = tmp + (self%array(i,j,1) - mean)**2
+!   !    end do
+!   ! end do
+!   ! tmp = tmp / n
+!   ! stddev = real(tmp,kind=c_float)
 
-  ! tmp = 0.d0
+!   ! tmp = 0.d0
 
-  ! do i = 1,size(self%array,1)
-  !    do j = 1,size(self%array,2)
-  !       tmp = tmp + self%array(i,j,1)**2
-  !    enddo
-  ! enddo
+!   ! do i = 1,size(self%array,1)
+!   !    do j = 1,size(self%array,2)
+!   !       tmp = tmp + self%array(i,j,1)**2
+!   !    enddo
+!   ! enddo
 
-  ! tmp = sqrt(tmp/real(n,kind=c_double))
+!   ! tmp = sqrt(tmp/real(n,kind=c_double))
 
-  ! rms = real(tmp,kind=c_float)
+!   ! rms = real(tmp,kind=c_float)
   
-end subroutine mean_stddev
+! end subroutine mean_stddev
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fields_rms(nf,fields,rms, f_comm)
+! subroutine fields_rms(nf,fields,rms, f_comm)
 
-! implicit none
-! integer,              intent(in)    :: nf
-! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-! real(kind=c_float), intent(inout) :: rms
-! type(fckit_mpi_comm), intent(in)    :: f_comm
+! ! implicit none
+! ! integer,              intent(in)    :: nf
+! ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
+! ! real(kind=c_float), intent(inout) :: rms
+! ! type(fckit_mpi_comm), intent(in)    :: f_comm
 
-! integer :: i, j, k, ii, iisum, var
-! real(kind=kind_real) :: zz
+! ! integer :: i, j, k, ii, iisum, var
+! ! real(kind=kind_real) :: zz
 
-! zz = 0.0_kind_real
-! ii = 0
+! ! zz = 0.0_kind_real
+! ! ii = 0
 
-! do var = 1,nf
+! ! do var = 1,nf
 
-!   do k = 1,fields(var)%npz
-!     do j = fields(var)%jsc,fields(var)%jec
-!       do i = fields(var)%isc,fields(var)%iec
-!         zz = zz + fields(var)%array(i,j,k)**2
-!         ii = ii + 1
-!       enddo
-!     enddo
-!   enddo
+! !   do k = 1,fields(var)%npz
+! !     do j = fields(var)%jsc,fields(var)%jec
+! !       do i = fields(var)%isc,fields(var)%iec
+! !         zz = zz + fields(var)%array(i,j,k)**2
+! !         ii = ii + 1
+! !       enddo
+! !     enddo
+! !   enddo
 
-! enddo
+! ! enddo
 
-! !Get global values
-! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
-! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
+! ! !Get global values
+! ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+! ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 
-! rms = sqrt(rms/real(iisum,kind_real))
+! ! rms = sqrt(rms/real(iisum,kind_real))
 
-end subroutine fields_rms
+! end subroutine fields_rms
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fields_gpnorm(nf, fields, pstat, f_comm)
+! subroutine fields_gpnorm(nf, fields, pstat, f_comm)
 
-! implicit none
-! integer,              intent(in)    :: nf
-! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-! real(kind=c_float), intent(inout) :: pstat(3, nf)
-! type(fckit_mpi_comm), intent(in)    :: f_comm
+! ! implicit none
+! ! integer,              intent(in)    :: nf
+! ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
+! ! real(kind=c_float), intent(inout) :: pstat(3, nf)
+! ! type(fckit_mpi_comm), intent(in)    :: f_comm
 
-! integer :: var
-! real(kind=kind_real) :: tmp(3),  gs3, gs3g
+! ! integer :: var
+! ! real(kind=kind_real) :: tmp(3),  gs3, gs3g
 
-! do var = 1,nf
+! ! do var = 1,nf
 
-!   gs3 = real((fields(var)%iec-fields(var)%isc+1)*(fields(var)%jec-fields(var)%jsc+1)*fields(var)%npz, kind_real)
-!   call f_comm%allreduce(gs3,gs3g,fckit_mpi_sum())
+! !   gs3 = real((fields(var)%iec-fields(var)%isc+1)*(fields(var)%jec-fields(var)%jsc+1)*fields(var)%npz, kind_real)
+! !   call f_comm%allreduce(gs3,gs3g,fckit_mpi_sum())
 
-!   tmp(1) = minval(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz))
-!   tmp(2) = maxval(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz))
-!   tmp(3) =    sum(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz)**2)
+! !   tmp(1) = minval(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz))
+! !   tmp(2) = maxval(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz))
+! !   tmp(3) =    sum(fields(var)%array(fields(var)%isc:fields(var)%iec,fields(var)%jsc:fields(var)%jec,1:fields(var)%npz)**2)
 
-!   call f_comm%allreduce(tmp(1),pstat(1,var),fckit_mpi_min())
-!   call f_comm%allreduce(tmp(2),pstat(2,var),fckit_mpi_max())
-!   call f_comm%allreduce(tmp(3),pstat(3,var),fckit_mpi_sum())
-!   pstat(3,var) = sqrt(pstat(3,var)/gs3g)
+! !   call f_comm%allreduce(tmp(1),pstat(1,var),fckit_mpi_min())
+! !   call f_comm%allreduce(tmp(2),pstat(2,var),fckit_mpi_max())
+! !   call f_comm%allreduce(tmp(3),pstat(3,var),fckit_mpi_sum())
+! !   pstat(3,var) = sqrt(pstat(3,var)/gs3g)
 
-! enddo
+! ! enddo
 
-end subroutine fields_gpnorm
+! end subroutine fields_gpnorm
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -649,21 +715,21 @@ subroutine print_field_3d(self)
   
 end subroutine print_field_3d
 
-subroutine fields_print(nf, fields, name, f_comm)
+! subroutine fields_print(nf, fields, name, f_comm)
 
-  implicit none
-  integer,              intent(in)    :: nf
-  type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-  character(len=*),     intent(in)    :: name
-  type(fckit_mpi_comm), intent(in)    :: f_comm
+  ! implicit none
+  ! integer,              intent(in)    :: nf
+  ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
+  ! character(len=*),     intent(in)    :: name
+  ! type(fckit_mpi_comm), intent(in)    :: f_comm
 
-  integer :: i
+  ! integer :: i
 
-  do i = 1, nf
-     write(*,*) fields(i)%wrf_hydro_nwm_name
-     write(*,*) "From Fields.F90: first column:", fields(i)%array(:,1,1)
-     write(*,*) "------"
-  end do
+  ! do i = 1, nf
+  !    write(*,*) fields(i)%wrf_hydro_nwm_name
+  !    write(*,*) "From Fields.F90: first column:", fields(i)%array(:,1,1)
+  !    write(*,*) "------"
+  ! end do
 
 ! integer :: var
 ! real(kind=kind_real) :: tmp(3), pstat(3), gs3, gs3g
@@ -711,16 +777,16 @@ subroutine fields_print(nf, fields, name, f_comm)
 ! if (f_comm%rank() == 0) &
 !   write(*,"(A70)") "---------------------------------------------------------------------"
 
-end subroutine fields_print
+!end subroutine fields_print
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine checksame(self,other,method)
+! subroutine checksame(self,other,method)
 
-implicit none
-type(wrf_hydro_nwm_jedi_field), intent(in) :: self(:)
-type(wrf_hydro_nwm_jedi_field), intent(in) :: other(:)
-character(len=*),    intent(in) :: method
+! implicit none
+! type(wrf_hydro_nwm_jedi_field), intent(in) :: self(:)
+! type(wrf_hydro_nwm_jedi_field), intent(in) :: other(:)
+! character(len=*),    intent(in) :: method
 
 ! integer :: var
 
@@ -735,15 +801,15 @@ character(len=*),    intent(in) :: method
 !   endif
 ! enddo
 
-end subroutine checksame
+!end subroutine checksame
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine flip_array_vertical(nf,fields)
+! subroutine flip_array_vertical(nf,fields)
 
-implicit none
-integer,             intent(in)    :: nf
-type(wrf_hydro_nwm_jedi_field), intent(inout) :: fields(nf)
+! implicit none
+! integer,             intent(in)    :: nf
+! type(wrf_hydro_nwm_jedi_field), intent(inout) :: fields(nf)
 
 ! integer :: n, lev_in, lev_out
 ! real(kind=kind_real), allocatable :: array_tmp(:,:,:)
@@ -775,16 +841,16 @@ type(wrf_hydro_nwm_jedi_field), intent(inout) :: fields(nf)
 
 ! enddo
 
-end subroutine flip_array_vertical
+!end subroutine flip_array_vertical
 
 ! ------------------------------------------------------------------------------
 
-subroutine copy_subset(rhs,lhs,not_copied)
+! subroutine copy_subset(rhs,lhs,not_copied)
 
-implicit none
-type(wrf_hydro_nwm_jedi_field),        intent(in)    :: rhs(:)
-type(wrf_hydro_nwm_jedi_field),        intent(inout) :: lhs(:)
-character(len=10), allocatable, optional, intent(out)   :: not_copied(:)
+! implicit none
+! type(wrf_hydro_nwm_jedi_field),        intent(in)    :: rhs(:)
+! type(wrf_hydro_nwm_jedi_field),        intent(inout) :: lhs(:)
+! character(len=10), allocatable, optional, intent(out)   :: not_copied(:)
 
 ! integer :: var
 ! character(len=10) :: not_copied_(10000)
@@ -807,7 +873,7 @@ character(len=10), allocatable, optional, intent(out)   :: not_copied(:)
 !   not_copied(1:num_not_copied) = not_copied_(1:num_not_copied)
 ! endif
 
-end subroutine copy_subset
+!end subroutine copy_subset
 
 
 subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
