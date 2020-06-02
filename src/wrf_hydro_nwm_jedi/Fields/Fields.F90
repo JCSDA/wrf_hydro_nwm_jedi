@@ -7,7 +7,7 @@ module wrf_hydro_nwm_jedi_field_mod
 
   use iso_c_binding, only: c_int, c_float,c_double
   use fckit_mpi_module
-  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
+  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler, indices
   use oops_variables_mod
   use netcdf
 !use fv3jedi_kinds_mod, only: kind_real
@@ -16,10 +16,6 @@ module wrf_hydro_nwm_jedi_field_mod
   implicit none
 
   public
-  
-  type :: coords
-     integer :: dim_1, dim_2, dim_3
-  end type coords
 
   type, abstract :: base_field
      character(len=32) :: short_name = "null"   !Short name (to match file name)
@@ -46,11 +42,11 @@ module wrf_hydro_nwm_jedi_field_mod
        integer, intent(in) :: xstart, xend, ystart, yend
      end subroutine read_file_interface
 
-     function get_value_field_interface(self,coo) result(val)
+     function get_value_field_interface(self,ind) result(val)
        use iso_c_binding, only : c_float
-       import base_field, coords
+       import base_field, indices
        class(base_field), intent(in) :: self
-       type(coords), intent(in) :: coo
+       type(indices), intent(in) :: ind
        real(kind=c_float) :: val
      end function get_value_field_interface
   end interface
@@ -157,6 +153,7 @@ contains
                short_name = vars%variable(var), &
                long_name = 'snow_water_equivalent', &
                wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+
           allocate(self%fields(vcount)%field, source = tmp_2d_field)
           deallocate(tmp_2d_field)
 
@@ -168,6 +165,7 @@ contains
                short_name = vars%variable(var), &
                long_name = 'snow_depth', &
                wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+          
           allocate(self%fields(vcount)%field, source = tmp_2d_field)
           deallocate(tmp_2d_field)
 
@@ -285,23 +283,23 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
   
-  function get_value_2d(self,coo) result(val)
+  function get_value_2d(self,ind) result(val)
     class(field_2d), intent(in) :: self
-    type(coords), intent(in) :: coo
+    type(indices), intent(in) :: ind
     real(c_float) :: val
 
-    val = self%array(coo%dim_1,coo%dim_2)
+    val = self%array(ind%ind_1,ind%ind_2)
     
   end function get_value_2d
 
   ! --------------------------------------------------------------------------------------------------
 
-  function get_value_3d(self,coo) result(val)
+  function get_value_3d(self,ind) result(val)
     class(field_3d), intent(in) :: self
-    type(coords), intent(in) :: coo
+    type(indices), intent(in) :: ind
     real(c_float) :: val
 
-    val = self%array(coo%dim_1,coo%dim_2,coo%dim_3)
+    val = self%array(ind%ind_1,ind%ind_2,ind%ind_3)
     
   end function get_value_3d
 
@@ -446,7 +444,7 @@ contains
 ! end subroutine allocate_copy_field_array
 
   ! --------------------------------------------------------------------------------------------------
-  ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_filed routines
+  ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
   subroutine search_field(self,long_name,field_pointer)
     class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
     character(len=*),    intent(in)  :: long_name
@@ -466,7 +464,7 @@ contains
     case ("leaf_area")
        wrf_hydro_nwm_name = "LAI"
     case default
-       wrf_hydro_nwm_name = "null"   
+       wrf_hydro_nwm_name = "null"
     end select
     
     !linear search

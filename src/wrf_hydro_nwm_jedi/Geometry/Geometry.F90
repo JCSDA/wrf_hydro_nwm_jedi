@@ -1,12 +1,12 @@
 module wrf_hydro_nwm_jedi_geometry_mod
 
-use fckit_configuration_module, only: fckit_configuration
+  use fckit_configuration_module, only: fckit_configuration
 use netcdf
 
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_geometry, error_handler
+public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
 
 !------------------------------------------------------------------------------
 
@@ -24,6 +24,11 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: get_info => wrf_hydro_nwm_jedi_geometry_get_info
    procedure :: get_nn => wrf_hydro_nwm_jedi_geometry_get_nn
 end type wrf_hydro_nwm_jedi_geometry
+
+    ! This should go into Utilities
+  type :: indices
+     integer :: ind_1, ind_2, ind_3
+  end type indices
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -87,12 +92,12 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
-subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, long, dim1_idx, dim2_idx)
+subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, long, ind)!dim1_idx, dim2_idx)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
   real, intent(in) :: lat, long
   real,dimension(2) :: minimum
   real, allocatable :: diff_lat(:,:), diff_long(:,:), l2_norm(:,:)
-  integer, intent(out) :: dim1_idx, dim2_idx
+  type(indices), intent(out) :: ind
 
   allocate(diff_lat, source=self%xlat)
   allocate(diff_long, source=self%xlong)
@@ -105,7 +110,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, long, dim1_idx, dim2_id
 
   minimum = minloc(l2_norm)
 
-  dim1_idx = minimum(1); dim2_idx = minimum(2)
+  ind%ind_1 = minimum(1); ind%ind_2 = minimum(2)
 
   deallocate(l2_norm)
   deallocate(diff_lat)
