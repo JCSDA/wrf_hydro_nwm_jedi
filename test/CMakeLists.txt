@@ -81,15 +81,20 @@ ecbuild_add_test(
 #   TARGET  test_wrf_hydro_nwm_jedi_geometryiterator
 #   SOURCES executables/TestGeometryIterator.cc
 #   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )  
+#   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity
-   #TYPE         EXE
-   TYPE		 SCRIPT
-   COMMAND	 "${CMAKE_BINARY_DIR}/bin/compare.sh"
-   ARGS         "${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run"
-   		testoutput/hofx_nomodel_identity.ref)
+   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_exe
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
+   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
+   MPI          1 )
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_cmp
+   TYPE		SCRIPT
+   COMMAND	"${CMAKE_BINARY_DIR}/bin/compare.sh"
+   ARGS         testoutput/hofx_nomodel_identity.run testoutput/hofx_nomodel_identity.ref)
 #   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
 #   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
 #   MPI          1 )

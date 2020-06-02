@@ -1,11 +1,11 @@
-testoutput/hofx_nomodel_identity.run:Test     : Initial state: 
-testoutput/hofx_nomodel_identity.run:Test     : Mean SNEQV: 122.327
-testoutput/hofx_nomodel_identity.run:Test     : Std.dev SNEQV: 1850.28
-testoutput/hofx_nomodel_identity.run:Test     : RMS SNEQV: 129.669
-testoutput/hofx_nomodel_identity.run:Test     : Final state: 
-testoutput/hofx_nomodel_identity.run:Test     : Mean SNEQV: 122.327
-testoutput/hofx_nomodel_identity.run:Test     : Std.dev SNEQV: 1850.28
-testoutput/hofx_nomodel_identity.run:Test     : RMS SNEQV: 129.669
-testoutput/hofx_nomodel_identity.run:Test     : H(x): 
-testoutput/hofx_nomodel_identity.run:Test     : SnowWaterEquivalent nobs= 720 Min=60.5652, Max=271.791, RMS=129.669
-testoutput/hofx_nomodel_identity.run:Test     : End H(x)
+Test     : Initial state: 
+Test     : Mean SNEQV: 122.327
+Test     : Std.dev SNEQV: 1850.28
+Test     : RMS SNEQV: 129.669
+Test     : Final state: 
+Test     : Mean SNEQV: 122.327
+Test     : Std.dev SNEQV: 1850.28
+Test     : RMS SNEQV: 129.669
+Test     : H(x): 
+Test     : SnowWaterEquivalent nobs= 720 Min=60.5652, Max=271.791, RMS=129.669
+Test     : End H(x)
