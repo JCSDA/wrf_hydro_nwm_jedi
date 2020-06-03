@@ -53,12 +53,14 @@ module wrf_hydro_nwm_jedi_field_mod
 
   type, extends(base_field) :: field_2d
      integer :: dim1_len, dim2_len
-     real(c_float),allocatable :: array(:,:)
+     real(c_float), allocatable :: array(:,:)
    contains
      procedure, pass(self) :: print_field => print_field_2d
      procedure, pass(self) :: read_file => read_file_2d
      procedure, pass(self) :: get_value => get_value_2d
      procedure, pass(self) :: fill => fill_field_2d
+     !procedure, pass(self) :: mean_stddev
+     procedure, pass(self) :: rms => field_rms_2d
      !    Destructor
      ! final :: destroy_field_2d
   end type field_2d
@@ -71,6 +73,7 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure, pass(self) :: read_file => read_file_3d
      procedure, pass(self) :: get_value => get_value_3d
      procedure, pass(self) :: fill => fill_field_3d
+     procedure, pass(self) :: rms => field_rms_3d
      !    Destructor
      ! final :: destroy_field_3d
   end type field_3d
@@ -181,7 +184,7 @@ contains
 
        case("SNLIQ")
           vcount=vcount+1;
-          
+          !MIDDLE DIMENSION HARDCODED
           call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
                short_name = vars%variable(var),&
                long_name = 'snow_liquid', &
@@ -669,40 +672,60 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-! subroutine fields_rms(nf,fields,rms, f_comm)
+function field_rms_2d(self) result(rms)
+  implicit none
+  class(field_2d),  intent(in) :: self
+  real(kind=c_float) :: rms
+  !type(fckit_mpi_comm), intent(in)    :: f_comm
+  
+  integer :: i, j, ii
+  real(kind=c_float) :: zz
+  
+  zz = 0.0
+  ii = 0
+  
+  do j = 1,self%dim2_len
+     do i = 1,self%dim1_len
+        zz = zz + self%array(i,j)**2
+        ii = ii + 1 !unnecessary
+     enddo
+  enddo
 
-! ! implicit none
-! ! integer,              intent(in)    :: nf
-! ! type(wrf_hydro_nwm_jedi_field),  intent(in)    :: fields(nf)
-! ! real(kind=c_float), intent(inout) :: rms
-! ! type(fckit_mpi_comm), intent(in)    :: f_comm
+! !Get global values
+! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 
-! ! integer :: i, j, k, ii, iisum, var
-! ! real(kind=kind_real) :: zz
+  rms = sqrt(zz/real(ii,c_float))
 
-! ! zz = 0.0_kind_real
-! ! ii = 0
+end function field_rms_2d
 
-! ! do var = 1,nf
+function field_rms_3d(self) result(rms)
+  implicit none
+  class(field_3d),  intent(in) :: self
+  real(kind=c_float) :: rms
+  !type(fckit_mpi_comm), intent(in)    :: f_comm
+  
+  integer :: i, j, k, ii
+  real(kind=c_float) :: zz
+  
+  zz = 0.0
+  ii = 0
 
-! !   do k = 1,fields(var)%npz
-! !     do j = fields(var)%jsc,fields(var)%jec
-! !       do i = fields(var)%isc,fields(var)%iec
-! !         zz = zz + fields(var)%array(i,j,k)**2
-! !         ii = ii + 1
-! !       enddo
-! !     enddo
-! !   enddo
+  do k = 1,self%dim2_len
+     do j = 1, 3!HARDCODED
+        do i = 1,self%dim1_len
+           zz = zz + self%array(i,j,k)**2
+           ii = ii + 1 !unnecessary
+        enddo
+     enddo
+  end do
+! !Get global values
+! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 
-! ! enddo
+  rms = sqrt(zz/real(ii,c_float))
 
-! ! !Get global values
-! ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
-! ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
-
-! ! rms = sqrt(rms/real(iisum,kind_real))
-
-! end subroutine fields_rms
+end function field_rms_3d
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -741,7 +764,7 @@ subroutine print_field_2d(self)
   implicit none
   class(field_2d),intent(in) :: self
 
-  write(*,"(A1)") 'Test     : Printing ', self%long_name
+  write(*,*) 'Printing ', self%long_name
   
 end subroutine print_field_2d
 
