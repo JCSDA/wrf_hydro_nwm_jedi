@@ -83,7 +83,7 @@ module wrf_hydro_nwm_jedi_field_mod
      class(base_field), allocatable :: field
   end type elem_field
   
-public :: wrf_hydro_nwm_jedi_fields!, &
+public :: wrf_hydro_nwm_jedi_fields, checksame!, &
      ! has_field, &
      ! long_name_to_wrf_hydro_name, &
      ! pointer_field, &
@@ -108,6 +108,7 @@ type :: wrf_hydro_nwm_jedi_fields
 contains
   procedure :: create
   procedure :: search_field
+  procedure :: read_fields_from_file
   procedure :: print_all_fields
   ! procedure :: allocate_field
   ! procedure :: equals
@@ -131,8 +132,6 @@ contains
     class(field_3d), allocatable :: tmp_3d_field
     
     integer :: var, vcount, nlev
-
-    write(*,*) 'Creating fields'
 
     ! Total fields
     ! ------------
@@ -482,6 +481,21 @@ contains
 
   ! --------------------------------------------------------------------------------------------------
 
+  subroutine read_fields_from_file(self,filename,xstart,xend,ystart,yend)
+    class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
+    character(len=*),    intent(in)  :: filename
+    integer, intent(in) :: xstart, xend, ystart, yend
+    
+    integer :: n
+
+    do n = 1, size(self%fields)
+       call self%fields(n)%field%read_file(filename,xstart,xend,ystart,yend)
+    enddo
+    
+  end subroutine read_fields_from_file
+
+  ! --------------------------------------------------------------------------------------------------
+  
   subroutine print_all_fields(self)
     implicit none
     class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
@@ -727,7 +741,7 @@ subroutine print_field_2d(self)
   implicit none
   class(field_2d),intent(in) :: self
 
-  write(*,*) 'Printing ', self%long_name
+  write(*,"(A1)") 'Test     : Printing ', self%long_name
   
 end subroutine print_field_2d
 
@@ -735,7 +749,7 @@ subroutine print_field_3d(self)
   implicit none
   class(field_3d),intent(in) :: self
 
-  write(*,*) 'Printing ', self%long_name
+  write(*,"(A70)") 'Printing ', self%long_name
   
 end subroutine print_field_3d
 
@@ -805,27 +819,27 @@ end subroutine print_field_3d
 
 ! --------------------------------------------------------------------------------------------------
 
-! subroutine checksame(self,other,method)
+subroutine checksame(self,other,method)
 
-! implicit none
-! type(wrf_hydro_nwm_jedi_field), intent(in) :: self(:)
-! type(wrf_hydro_nwm_jedi_field), intent(in) :: other(:)
-! character(len=*),    intent(in) :: method
+implicit none
+type(wrf_hydro_nwm_jedi_fields), intent(in) :: self
+type(wrf_hydro_nwm_jedi_fields), intent(in) :: other
+character(len=*),    intent(in) :: method
 
-! integer :: var
+integer :: var
 
-! if (size(self) .ne. size(other)) then
-!   call abor1_ftn(trim(method)//"(checksame): Different number of fields")
-! endif
+if (size(self%fields) .ne. size(other%fields)) then
+  call abor1_ftn(trim(method)//"(checksame): Different number of fields")
+endif
 
-! do var = 1,size(self)
-!   if (self(var)%fv3jedi_name .ne. other(var)%fv3jedi_name) then
-!       call abor1_ftn(trim(method)//"(checksame): field "//trim(self(var)%fv3jedi_name)//&
-!                      " not in the equivalent position in the right hand side")
-!   endif
-! enddo
+do var = 1,size(self%fields)
+  if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
+     call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
+                     " not in the equivalent position in the right hand side")
+  endif
+enddo
 
-!end subroutine checksame
+end subroutine checksame
 
 ! --------------------------------------------------------------------------------------------------
 

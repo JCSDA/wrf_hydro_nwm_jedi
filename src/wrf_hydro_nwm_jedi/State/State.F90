@@ -11,7 +11,7 @@ use datetime_mod
 use fckit_mpi_module
 use oops_variables_mod
 
-use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_fields
+use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_fields,checksame
 ! use fv3jedi_constants_mod,       only: rad2deg, constoz
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
 ! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
@@ -47,7 +47,8 @@ subroutine create(self, geom, vars)
   type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
   type(oops_variables), intent(in)    :: vars
-  
+
+  self%nf = vars%nvars()
   call self%fields_obj%create(geom,vars)
   
 end subroutine create
@@ -84,23 +85,21 @@ end subroutine zeros
 ! ------------------------------------------------------------------------------
 
 subroutine copy(self,rhs)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
 
-implicit none
-type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
+  integer :: var
 
-integer :: var
+  call checksame(self%fields_obj,rhs%fields_obj,"wrf_hydro_nwm_jedi_state_mod.copy")
+  
+  ! write(*,*) "Copying field self%nf= ",self%nf
 
-! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.copy")
+  ! Deep copy
+  self%fields_obj = rhs%fields_obj
 
-! write(*,*) "Copying field self%nf= ",self%nf
-
-! do var = 1, self%nf
-!   self%fields(var) = rhs%fields(var)
-! enddo
-
-! self%calendar_type = rhs%calendar_type
-! self%date_init = rhs%date_init
+  self%calendar_type = rhs%calendar_type
+  self%date_init = rhs%date_init
 
 end subroutine copy
 
@@ -330,45 +329,35 @@ end subroutine change_resol
 ! ------------------------------------------------------------------------------
 
 subroutine read_file(geom, self, c_conf, vdate)
-use string_utils
+  use string_utils
 
-implicit none
+  implicit none
 
-type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom     !< Geometry
-type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
-type(c_ptr),         intent(in)    :: c_conf   !< Configuration
-type(datetime),      intent(inout) :: vdate    !< DateTime
+  type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom     !< Geometry
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
+  type(c_ptr),         intent(in)    :: c_conf   !< Configuration
+  type(datetime),      intent(inout) :: vdate    !< DateTime
+  
+  character(len=10) :: filetype
+  character(len=255) :: filename
+  integer :: flipvert
+  type(fckit_configuration) :: f_conf
+  character(len=:), allocatable :: str
+  
+  integer :: ixfull, jxfull, var
+  
+  ! Fortran configuration
+  ! ---------------------
+  f_conf = fckit_configuration(c_conf)
+  
+  call f_conf%get_or_die("model_filename",str)
+  filename = str
+  deallocate(str)
+  
+  ! ixfull = geom%xend-geom%xstart+1
+  ! jxfull = geom%yend-geom%ystart+1
 
-character(len=10) :: filetype
-character(len=255) :: filename
-integer :: flipvert
-type(fckit_configuration) :: f_conf
-character(len=:), allocatable :: str
-
-integer :: ixfull, jxfull, var
-
-! Fortran configuration
-! ---------------------
-f_conf = fckit_configuration(c_conf)
-
-call f_conf%get_or_die("model_filename",str)
-filename = str
-deallocate(str)
-
-!SNLIQ(Time, south_north, snow_layers, west_east)
-
-ixfull = geom%xend-geom%xstart+1
-jxfull = geom%yend-geom%ystart+1
-
-!call get_from_restart_3d(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, "SNLIQ"   , self%fields(1)%array )
-
-!write(*,*) "Print first column from State ",self%fields(1)%array(:,1,1)
-
-!  do var = 1, self%nf
-!        call get_from_restart_2d_float(filename, geom%xstart, geom%xend, geom%xstart, ixfull, jxfull, self%fields(var)%wrf_hydro_nwm_name, self%fields(var)%array)
-
-!       ! write(*,*) "Print first column from State ",self%fields(var)%array(:,1,1)
-! enddo
+  call self%fields_obj%read_fields_from_file(filename,geom%xstart,geom%xend,geom%ystart,geom%yend)
 
 end subroutine read_file
 
