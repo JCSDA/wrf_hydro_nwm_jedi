@@ -60,7 +60,7 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure, pass(self) :: read_file => read_file_2d
      procedure, pass(self) :: get_value => get_value_2d
      procedure, pass(self) :: fill => fill_field_2d
-     !procedure, pass(self) :: mean_stddev
+     procedure, pass(self) :: mean_stddev => mean_stddev_2d
      procedure, pass(self) :: rms => field_rms_2d
      !    Destructor
      ! final :: destroy_field_2d
@@ -657,45 +657,33 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-! subroutine mean_stddev(self,mean,stddev,rms)
-!   implicit none
-!   ! class(wrf_hydro_nwm_jedi_field), target,  intent(in) :: self
-!   ! real(c_float),intent(inout) :: mean,stddev,rms
-!   ! real(c_double) :: tmp
-!   ! integer :: n, i, j
+subroutine mean_stddev_2d(self,mean,stddev)
+  implicit none
+  class(field_2d), target,  intent(in) :: self
+  real(c_float),intent(inout) :: mean,stddev
+  real(c_double) :: tmp
+  integer :: n, i, j
 
-!   ! n = size(self%array,1)*size(self%array,2)
+  n = size(self%array,1)*size(self%array,2)
 
-!   ! tmp = 0.d0
-!   ! tmp = sum(self%array(:,:,1))
-!   ! tmp = tmp/n
+  tmp = 0.d0
+  tmp = sum(self%array(:,:))
+  tmp = tmp/n
 
-!   ! mean = real(tmp,kind=c_float)
+  mean = real(tmp,kind=c_float)
 
-!   ! tmp = 0.d0
+  tmp = 0.d0
   
-!   ! !Computing stddev
-!   ! do i=1,size(self%array,1)
-!   !    do j=1,size(self%array,2)
-!   !       tmp = tmp + (self%array(i,j,1) - mean)**2
-!   !    end do
-!   ! end do
-!   ! tmp = tmp / n
-!   ! stddev = real(tmp,kind=c_float)
-
-!   ! tmp = 0.d0
-
-!   ! do i = 1,size(self%array,1)
-!   !    do j = 1,size(self%array,2)
-!   !       tmp = tmp + self%array(i,j,1)**2
-!   !    enddo
-!   ! enddo
-
-!   ! tmp = sqrt(tmp/real(n,kind=c_double))
-
-!   ! rms = real(tmp,kind=c_float)
+  !Computing stddev
+  do i=1,size(self%array,1)
+     do j=1,size(self%array,2)
+        tmp = tmp + (self%array(i,j) - mean)**2
+     end do
+  end do
+  tmp = tmp / n
+  stddev = real(tmp,kind=c_float)
   
-! end subroutine mean_stddev
+end subroutine mean_stddev_2d
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -788,15 +776,26 @@ end function field_rms_3d
 ! --------------------------------------------------------------------------------------------------
 
 subroutine print_field_2d(self,string)
-  use iso_c_binding, only : c_new_line
+  use iso_c_binding, only : c_new_line, c_float
   implicit none
   class(field_2d),intent(in) :: self
   integer :: str_len
   character(len=*),optional,intent(out) :: string
 
+  real(kind=c_float) :: mean,stddev
+  character(len=255) :: float_str1,float_str2,float_str3
+
+  call self%mean_stddev(mean,stddev)
+
+  write(float_str1,*) mean
+  write(float_str2,*) stddev
+  write(float_str3,*) self%rms()
+
   if(present(string)) then
      write(string,*) c_new_line//self%long_name //&
-          c_new_line//"RMS: ",self%rms()
+          c_new_line//'Mean: '//trim(float_str1) // &
+          c_new_line//'Std Dev: '//trim(float_str2) // &
+          c_new_line//'RMS: '//trim(float_str3)
   else
      write(*,*) 'Printing ', self%long_name
   end if
@@ -812,7 +811,7 @@ subroutine print_field_3d(self,string)
   if(present(string)) then
      write(string,*) c_new_line//'Printing 3d', self%long_name
   else
-     write(*,*) 'Printing ', self%long_name
+     write(*,*) 'Printing 3d', self%long_name
   end if
   
 end subroutine print_field_3d

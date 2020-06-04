@@ -422,7 +422,7 @@ end subroutine read_file
 ! ------------------------------------------------------------------------------
 
 subroutine state_print(self,string)
-  use iso_c_binding, only : c_null_char,c_new_line
+  use iso_c_binding, only : c_null_char
  implicit none
  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
  character(len=1,kind=c_char) :: string(8192)
