@@ -421,13 +421,22 @@ end subroutine read_file
 
 ! ------------------------------------------------------------------------------
 
-subroutine state_print(self)
-
+subroutine state_print(self,string)
+  use iso_c_binding, only : c_null_char,c_new_line
  implicit none
- type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+ type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+ character(len=1,kind=c_char) :: string(8192)
+ character(len=8192) :: tmp_str
+ integer :: s_len,i
+! call self%fields_obj%print_single_field("swe",tmp_str)
+ call self%fields_obj%print_all_fields(tmp_str)
 
- ! call fields_print(self%nf, self%fields, "SNEQV", self%f_comm)
- call self%fields_obj%print_all_fields()
+ s_len = len_trim(tmp_str)
+
+ do i = 1, s_len
+    string(i:i) = tmp_str(i:i)
+ end do
+ string(s_len+1) = c_null_char
 
 end subroutine state_print
 

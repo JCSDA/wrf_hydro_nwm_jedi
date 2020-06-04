@@ -45,7 +45,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Fields::print(std::ostream & os) const {
-    
+
+    os << "PRINTING FIELDS WITHIN FIELDS.CC" << std::endl;
     os << "(TODO, print diagnostic info about the fields here)"
        << std::endl;
   }

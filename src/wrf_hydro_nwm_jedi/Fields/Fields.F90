@@ -30,9 +30,10 @@ module wrf_hydro_nwm_jedi_field_mod
   end type base_field
 
   abstract interface
-     subroutine print_field_interface(self)
+     subroutine print_field_interface(self,string)
        import base_field
        class(base_field), intent(in) :: self
+       character(len=*),optional,intent(out) :: string
      end subroutine print_field_interface
 
      subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
@@ -112,6 +113,7 @@ contains
   procedure :: create
   procedure :: search_field
   procedure :: read_fields_from_file
+  procedure :: print_single_field
   procedure :: print_all_fields
   ! procedure :: allocate_field
   ! procedure :: equals
@@ -498,14 +500,39 @@ contains
   end subroutine read_fields_from_file
 
   ! --------------------------------------------------------------------------------------------------
+
+  subroutine print_single_field(self,long_name,string)
+    implicit none
+    class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+    character(len=*),    intent(in)  :: long_name
+    character(len=*),optional,intent(out)  :: string
+    class(base_field), pointer :: field_pointer
+
+    call self%search_field(long_name,field_pointer)
+
+    if(associated(field_pointer)) then
+       call field_pointer%print_field(string)
+    end if
+    
+  end subroutine print_single_field
   
-  subroutine print_all_fields(self)
+  subroutine print_all_fields(self,string)
+    use iso_c_binding, only : c_new_line
     implicit none
     class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
+    character(len=*),optional,intent(out)  :: string
     integer :: f
+    character(len=1024) :: local_str
 
+    string = ' '
+    
     do f = 1,size(self%fields)
-       call self%fields(f)%field%print_field()
+       if(present(string)) then
+          call self%fields(f)%field%print_field(local_str)
+          string = trim(string) // trim(local_str)
+       else
+          call self%fields(f)%field%print_field()
+       end if
     end do
     
   end subroutine print_all_fields
@@ -760,19 +787,33 @@ end function field_rms_3d
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine print_field_2d(self)
+subroutine print_field_2d(self,string)
+  use iso_c_binding, only : c_new_line
   implicit none
   class(field_2d),intent(in) :: self
+  integer :: str_len
+  character(len=*),optional,intent(out) :: string
 
-  write(*,*) 'Printing ', self%long_name
+  if(present(string)) then
+     write(string,*) c_new_line//self%long_name //&
+          c_new_line//"RMS: ",self%rms()
+  else
+     write(*,*) 'Printing ', self%long_name
+  end if
   
 end subroutine print_field_2d
 
-subroutine print_field_3d(self)
+subroutine print_field_3d(self,string)
+  use iso_c_binding, only : c_new_line
   implicit none
   class(field_3d),intent(in) :: self
+  character(len=*),optional,intent(out) :: string
 
-  write(*,"(A70)") 'Printing ', self%long_name
+  if(present(string)) then
+     write(string,*) c_new_line//'Printing 3d', self%long_name
+  else
+     write(*,*) 'Printing ', self%long_name
+  end if
   
 end subroutine print_field_3d
 
