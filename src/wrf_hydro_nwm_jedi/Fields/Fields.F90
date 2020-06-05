@@ -74,6 +74,7 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure, pass(self) :: read_file => read_file_3d
      procedure, pass(self) :: get_value => get_value_3d
      procedure, pass(self) :: fill => fill_field_3d
+     procedure, pass(self) :: mean_stddev => mean_stddev_3d
      procedure, pass(self) :: rms => field_rms_3d
      !    Destructor
      ! final :: destroy_field_3d
@@ -174,8 +175,9 @@ contains
           deallocate(tmp_2d_field)
 
        case("LAI")
-          vcount=vcount+1;
+          vcount=vcount+1
           
+          allocate(tmp_2d_field)          
           call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
                short_name = vars%variable(var),&
                long_name = 'leaf_area', &
@@ -185,7 +187,9 @@ contains
           deallocate(tmp_2d_field)
 
        case("SNLIQ")
-          vcount=vcount+1;
+          vcount=vcount+1
+          
+          allocate(tmp_3d_field)
           !MIDDLE DIMENSION HARDCODED
           call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
                short_name = vars%variable(var),&
@@ -195,6 +199,19 @@ contains
           allocate(self%fields(vcount)%field, source = tmp_3d_field)
           deallocate(tmp_3d_field)
 
+       case("SNICE")
+          vcount=vcount+1
+
+          allocate(tmp_3d_field)
+          !MIDDLE DIMENSION HARDCODED
+          call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
+               short_name = vars%variable(var),&
+               long_name = 'snow_ice', &
+               wrf_hydro_nwm_name = 'SNICE', units = 'liter') !unit invented
+          
+          allocate(self%fields(vcount)%field, source = tmp_3d_field)
+          deallocate(tmp_3d_field)
+          
        case default
           call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))          
        end select
@@ -230,11 +247,11 @@ contains
     
   end subroutine fill_field_2d
 
-  subroutine fill_field_3d(self,dim1_len,dim2_len,dim3_len,short_name,long_name,&
-       wrf_hydro_nwm_name,units,tracer)
+  subroutine fill_field_3d(self,dim1_len,dim2_len,dim3_len,short_name,&
+       long_name, wrf_hydro_nwm_name,units,tracer)
     implicit none
     
-    class(field_3d),intent(inout) :: self
+    class(field_3d), intent(inout) :: self
     integer, intent(in)    :: dim1_len, dim2_len, dim3_len
     character(len=*),              intent(in)    :: short_name
     character(len=*),              intent(in)    :: long_name
@@ -246,11 +263,11 @@ contains
     self%dim2_len = dim2_len
     self%dim3_len = dim3_len
     
-    if(.not.allocated(self%array)) then
+   if(.not.allocated(self%array)) then
        allocate( self%array(dim1_len, dim2_len, dim3_len) )
-    else
-       call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
-    end if
+   else
+      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+   end if
 
     self%short_name   = trim(short_name)
     self%long_name    = trim(long_name)
@@ -529,7 +546,7 @@ contains
     do f = 1,size(self%fields)
        if(present(string)) then
           call self%fields(f)%field%print_field(local_str)
-          string = trim(string) // trim(local_str)
+          string = trim(string) // trim(local_str) // c_new_line
        else
           call self%fields(f)%field%print_field()
        end if
@@ -687,6 +704,37 @@ end subroutine mean_stddev_2d
 
 ! --------------------------------------------------------------------------------------------------
 
+subroutine mean_stddev_3d(self,mean,stddev,zlayer)
+  implicit none
+  class(field_3d), target,  intent(in) :: self
+  real(c_float),intent(inout) :: mean,stddev
+  integer, intent(in) :: zlayer
+  real(c_double) :: tmp
+  integer :: n, i, j
+
+  n = size(self%array,1)*size(self%array,3)
+
+  tmp = 0.d0
+  tmp = sum(self%array(:,zlayer,:))
+  tmp = tmp/n
+
+  mean = real(tmp,kind=c_float)
+
+  tmp = 0.d0
+  
+  !Computing stddev
+  do i=1,size(self%array,1)
+     do j=1,size(self%array,2)
+        tmp = tmp + (self%array(i,zlayer,j) - mean)**2
+     end do
+  end do
+  tmp = tmp / n
+  stddev = real(tmp,kind=c_float)
+  
+end subroutine mean_stddev_3d
+
+! --------------------------------------------------------------------------------------------------
+
 function field_rms_2d(self) result(rms)
   implicit none
   class(field_2d),  intent(in) :: self
@@ -714,9 +762,10 @@ function field_rms_2d(self) result(rms)
 
 end function field_rms_2d
 
-function field_rms_3d(self) result(rms)
+function field_rms_3d(self,zlayer) result(rms)
   implicit none
   class(field_3d),  intent(in) :: self
+  integer, intent(in) :: zlayer
   real(kind=c_float) :: rms
   !type(fckit_mpi_comm), intent(in)    :: f_comm
   
@@ -727,11 +776,9 @@ function field_rms_3d(self) result(rms)
   ii = 0
 
   do k = 1,self%dim2_len
-     do j = 1, 3!HARDCODED
-        do i = 1,self%dim1_len
-           zz = zz + self%array(i,j,k)**2
-           ii = ii + 1 !unnecessary
-        enddo
+     do i = 1,self%dim1_len
+        zz = zz + self%array(i,zlayer,k)**2
+        ii = ii + 1 !unnecessary
      enddo
   end do
 ! !Get global values
@@ -808,11 +855,37 @@ subroutine print_field_3d(self,string)
   class(field_3d),intent(in) :: self
   character(len=*),optional,intent(out) :: string
 
+  integer :: z_layer
+  real(kind=c_float) :: mean,stddev
+  character(len=255) :: float_str1,float_str2,float_str3,zlayer_str
+
   if(present(string)) then
-     write(string,*) c_new_line//'Printing 3d', self%long_name
-  else
-     write(*,*) 'Printing 3d', self%long_name
+        write(string,*) c_new_line//self%long_name     
   end if
+  
+  do z_layer = 1, self%dim2_len !z is the 2nd dimension...
+
+     call self%mean_stddev(mean,stddev,z_layer)
+
+     float_str1 = ' '
+     float_str2 = ' '
+     float_str3 = ' '
+     zlayer_str = ' '
+     write(float_str1,*) mean
+     write(float_str2,*) stddev
+     write(float_str3,*) self%rms(z_layer)
+     write(zlayer_str,*) z_layer
+     
+     if(present(string)) then
+        string = trim(string) // c_new_line //&
+             'Z Layer: ' // trim(zlayer_str) //&
+          c_new_line//'Mean: '//trim(float_str1) // &
+          c_new_line//'Std Dev: '//trim(float_str2) // &
+          c_new_line//'RMS: '//trim(float_str3)
+     else
+        write(*,*) 'Printing 3d: ', self%long_name
+     end if
+  end do
   
 end subroutine print_field_3d
 
