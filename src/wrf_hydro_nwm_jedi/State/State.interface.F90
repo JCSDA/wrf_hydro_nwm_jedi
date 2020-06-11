@@ -10,7 +10,7 @@ module wrf_hydro_nwm_jedi_state_interface_mod
 !use fv3jedi_kinds_mod
 use datetime_mod
 use duration_mod
-use iso_c_binding, only: c_int, c_float, c_ptr
+use iso_c_binding, only: c_int, c_float, c_ptr, c_char
 use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
@@ -259,15 +259,16 @@ end subroutine wrf_hydro_nwm_jedi_state_gpnorm_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_state_print_c(c_key_self) bind(c,name='wrf_hydro_nwm_jedi_state_print_f90')
+subroutine wrf_hydro_nwm_jedi_state_print_c(c_key_self,string) bind(c,name='wrf_hydro_nwm_jedi_state_print_f90')
 
 implicit none
 integer(c_int), intent(in) :: c_key_self
+character(len=1,kind=c_char) :: string(8192)
 type(wrf_hydro_nwm_jedi_state), pointer :: self
 
 call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
 
-call state_print(self)
+call state_print(self,string)
 
 end subroutine wrf_hydro_nwm_jedi_state_print_c
 

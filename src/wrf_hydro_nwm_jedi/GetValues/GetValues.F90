@@ -20,8 +20,8 @@ use ufo_geovals_mod,                only: ufo_geovals
 ! fv3jedi uses
 !use fv3jedi_constants_mod,          only: rad2deg
 !use fv3jedi_bump_mod,               only: bump_init, bump_apply
-use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_field, pointer_field, long_name_to_wrf_hydro_name
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_fields,base_field
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, indices
 !use fv3jedi_interpolation_mod,      only: unsinterp_integer_apply, unsinterp_nearest_apply
 !use fv3jedi_kinds_mod,              only: kind_real
 use iso_c_binding, only: c_float
@@ -101,24 +101,24 @@ end subroutine delete
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine fill_geovals(self, geom, fields, t1, t2, locs, geovals)
+subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
 
 class(wrf_hydro_nwm_jedi_getvalues_base), intent(inout) :: self
 type(wrf_hydro_nwm_jedi_geometry),            intent(in)    :: geom
-type(wrf_hydro_nwm_jedi_field),          intent(in)    :: fields(:)
+type(wrf_hydro_nwm_jedi_fields),          intent(inout)    :: fields_obj
 type(datetime),               intent(in)    :: t1
 type(datetime),               intent(in)    :: t2
 type(ufo_locs),               intent(in)    :: locs
 type(ufo_geovals),            intent(inout) :: geovals
 
 integer :: gv, n, i, idx_1, idx_2
-type(wrf_hydro_nwm_jedi_field), pointer :: field
+class(base_field), pointer :: field
 character(len=10) :: wrf_hydro_nwm_name
 logical, allocatable :: time_mask(:)
 real(kind=c_float) :: lat, long
 real(kind=c_float), allocatable :: field_us(:)
 real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
-
+type(indices) :: ind
 ! Get mask for locations in this time window
 ! ------------------------------------------
 call ufo_locs_time_mask(locs, t1, t2, time_mask)
@@ -128,7 +128,7 @@ call ufo_locs_time_mask(locs, t1, t2, time_mask)
 ! ----------------
 if (.not. geovals%linit) then
   do gv = 1, geovals%nvar
-    geovals%geovals(gv)%nval = fields(gv)%dim3_len
+    geovals%geovals(gv)%nval = 1!fields(gv)%dim3_len
     allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
     geovals%geovals(gv)%vals = 0.0
   enddo
@@ -148,9 +148,11 @@ do gv = 1, geovals%nvar
 
 !   ! Get GeoVaLs field
 !   ! -----------------
-   call long_name_to_wrf_hydro_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_name)
+!   call long_name_to_wrf_hydro_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_name)
    
-   call pointer_field(fields, wrf_hydro_nwm_name, field)
+   !  call pointer_field(fields, wrf_hydro_nwm_name, field)
+
+   call fields_obj%search_field(trim(geovals%variables(gv)),field)
 
 !   ! Interpolation
 !   ! -------------
@@ -161,8 +163,10 @@ do gv = 1, geovals%nvar
    do i = 1, locs%nlocs
       lat = locs%lat(i)
       long = locs%lon(i)
-      call geom%get_nn(lat, long, idx_1, idx_2)
-      geovals_tmp(i) = field%array(idx_1, idx_2, 1)
+      call geom%get_nn(lat, long, ind)
+      ! coo%dim_1 = idx_1
+      ! coo%dim_2 = idx_2
+      geovals_tmp(i) = field%get_value(ind)!field%array(idx_1, idx_2, 1)
    end do
 
    geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)   
