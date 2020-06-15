@@ -27,7 +27,7 @@ namespace wrf_hydro_nwm_jedi {
                        const util::DateTime & vt) {
     // util::abor1_cpp("Increment::Increment() needs to be implemented.",
     //                 __FILE__, __LINE__);
-    wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom_->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
   }
 
 // ----------------------------------------------------------------------------

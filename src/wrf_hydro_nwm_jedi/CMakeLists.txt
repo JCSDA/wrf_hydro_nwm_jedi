@@ -38,10 +38,11 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # GetValuesTraj/GetValuesTraj.cc
   
   # # Increment
+  Increment/Increment.interface.F90
   Increment/Increment.h
   Increment/Increment.cc
   Increment/Increment_utils.F90
-  Increment/Increment.interface.F90
+  Increment/IncrementFortran.h
   Increment/Increment.F90
 
   # # Model

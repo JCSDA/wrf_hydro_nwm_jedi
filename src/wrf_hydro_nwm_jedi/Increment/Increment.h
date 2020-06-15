@@ -16,8 +16,12 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
+
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/IncrementFortran.h"
 
 // forward declarations
 namespace oops {
@@ -34,6 +38,7 @@ namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class GetValuesTraj;
   class State;
+  typedef int F90inc;
 }
 
 // ----------------------------------------------------------------------------
@@ -78,7 +83,7 @@ namespace wrf_hydro_nwm_jedi {
     const util::DateTime & validTime() const;
     util::DateTime & validTime();
     void updateTime(const util::Duration &);
-
+    
     // unstructured grid conversions
     void ug_coord(oops::UnstructuredGrid &) const;
     void field_to_ug(oops::UnstructuredGrid &, const int &) const;
@@ -90,10 +95,10 @@ namespace wrf_hydro_nwm_jedi {
 
     boost::shared_ptr<const Geometry> geometry() const;
 
-    int & toFortran() {return keyInc_;}
-    const int & toFortran() const {return keyInc_;}
+    F90inc & toFortran() {return keyInc_;}
+    const F90inc & toFortran() const {return keyInc_;}
 
-   private:
+  private:
     
     oops::Variables vars_;
     util::DateTime time_;
