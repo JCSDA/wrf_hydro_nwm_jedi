@@ -88,10 +88,16 @@ namespace wrf_hydro_nwm_jedi {
     /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
-
     boost::shared_ptr<const Geometry> geometry() const;
 
+    int & toFortran() {return keyInc_;}
+    const int & toFortran() const {return keyInc_;}
+
    private:
+    
+    oops::Variables vars_;
+    util::DateTime time_;
+    F90inc keyInc_;
     void print(std::ostream &) const;
     std::unique_ptr<Fields> fields_;
   };
