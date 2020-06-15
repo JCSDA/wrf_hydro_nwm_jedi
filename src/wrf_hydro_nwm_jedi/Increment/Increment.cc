@@ -7,18 +7,18 @@
 
 #include <vector>
 
-#include "wrf_hydro_nwm-jedi/Fields/Fields.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
-#include "oops/base/GridPoint.h"
+//#include "oops/base/GridPoint.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -210,15 +210,15 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-  oops::GridPoint Increment::getPoint(const GeometryIterator &) const {
-    util::abor1_cpp("Increment::getPoint() needs to be implemented.",
-                    __FILE__, __LINE__);
+  // oops::GridPoint Increment::getPoint(const GeometryIterator &) const {
+  //   util::abor1_cpp("Increment::getPoint() needs to be implemented.",
+  //                   __FILE__, __LINE__);
 
-    oops::Variables vars;
-    std::vector<double> vals;
-    std::vector<int> varlens;
-    return oops::GridPoint(vars, vals, varlens);
-  }
+  //   oops::Variables vars;
+  //   std::vector<double> vals;
+  //   std::vector<int> varlens;
+  //   return oops::GridPoint(vars, vals, varlens);
+  // }
 
 // ----------------------------------------------------------------------------
 
@@ -229,4 +229,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

@@ -38,8 +38,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # GetValuesTraj/GetValuesTraj.cc
   
   # # Increment
-  # Increment/Increment.h
-  # Increment/Increment.cc
+  Increment/Increment.h
+  Increment/Increment.cc
 
   # # Model
   # Model/Model.h

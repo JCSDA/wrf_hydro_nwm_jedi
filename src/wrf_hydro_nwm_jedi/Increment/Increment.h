@@ -8,8 +8,8 @@
  * does it submit to any jurisdiction.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
-#define WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
+#ifndef WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_
+#define WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_
 
 #include <memory>
 #include <ostream>
@@ -29,7 +29,7 @@ namespace ufo {
   class GeoVaLs;
   class Locations;
 }
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Fields;
   class Geometry;
   class GetValuesTraj;
@@ -38,7 +38,7 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // Increment class
   class Increment : public util::Printable {
@@ -85,7 +85,7 @@ namespace wrf_hydro_nwm-jedi {
     void field_from_ug(const oops::UnstructuredGrid &, const int &);
 
     // Iterator access
-    oops::GridPoint getPoint(const GeometryIterator &) const;
+    /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
 
@@ -95,6 +95,6 @@ namespace wrf_hydro_nwm-jedi {
     void print(std::ostream &) const;
     std::unique_ptr<Fields> fields_;
   };
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
+#endif  // WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_
