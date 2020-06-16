@@ -72,9 +72,9 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   State::~State() {
+    
     wrf_hydro_nwm_jedi_state_delete_f90(keyState_);
-    // util::abor1_cpp("State::~State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    
   }
 
 // ----------------------------------------------------------------------------
@@ -102,15 +102,7 @@ namespace wrf_hydro_nwm_jedi {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_,string);
     os << string;
-    delete(string);
-    // os << *fields_;
-    // int const nf = 1;
-    // float pstat[3][nf];
-    // wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
-    // os << std::endl;
-    // os << "Mean SNEQV: " << pstat[0][0] << std::endl;
-    // os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
-    // os << "RMS SNEQV: " << pstat[2][0] << std::endl;
+    delete[] string;
   }
 
 // ----------------------------------------------------------------------------
