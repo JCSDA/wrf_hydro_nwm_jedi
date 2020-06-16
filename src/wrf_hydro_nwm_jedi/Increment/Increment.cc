@@ -24,7 +24,8 @@ namespace wrf_hydro_nwm_jedi {
 
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
-                       const util::DateTime & vt) {
+                       const util::DateTime & vt)
+    : fields_(new Fields(geom, vars, vt)){
     // util::abor1_cpp("Increment::Increment() needs to be implemented.",
     //                 __FILE__, __LINE__);
     wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);

@@ -40,6 +40,10 @@ namespace wrf_hydro_nwm_jedi {
 
     Fields(const Geometry &, const oops::Variables &,
            const eckit::Configuration &);
+
+    Fields(const Geometry & geom, const oops::Variables & vars,
+	   const util::DateTime & vt);
+    
     ~Fields();
 
     const util::DateTime & time() const { return time_; }

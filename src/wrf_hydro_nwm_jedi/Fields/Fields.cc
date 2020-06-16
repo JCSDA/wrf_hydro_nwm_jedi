@@ -35,6 +35,14 @@ namespace wrf_hydro_nwm_jedi {
       }
   }
 
+  Fields::Fields(const Geometry & geom, const oops::Variables & vars,
+		 const util::DateTime & vt)
+    : geom_(new Geometry(geom)) {
+
+    time_ = vt;
+
+  }
+
 // ----------------------------------------------------------------------------
 
   Fields::~Fields() {
