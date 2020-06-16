@@ -120,7 +120,7 @@ contains
   ! procedure :: equals
   ! procedure :: copy => field_copy
   ! generic :: assignment(=) => equals
-  ! procedure :: deallocate_field
+  procedure :: deallocate_field
   ! procedure :: mean_stddev
 end type wrf_hydro_nwm_jedi_fields
 
@@ -376,15 +376,16 @@ contains
 
 ! --------------------------------------------------------------------------------------------------
 
-! subroutine deallocate_field(self)
+subroutine deallocate_field(self)
 
-! ! implicit none
-! ! class(wrf_hydro_nwm_jedi_field), intent(inout) :: self
+implicit none
+class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
 
-! ! if(self%lalloc) deallocate(self%array)
-! ! self%lalloc = .false.
+write(*,*) "Deallocating fields"
+if(allocated(self%fields)) deallocate(self%fields)
+! self%lalloc = .false.
 
-! end subroutine deallocate_field
+end subroutine deallocate_field
 
 ! --------------------------------------------------------------------------------------------------
 

@@ -72,6 +72,7 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   State::~State() {
+    wrf_hydro_nwm_jedi_state_delete_f90(keyState_);
     // util::abor1_cpp("State::~State() needs to be implemented.",
     //                 __FILE__, __LINE__);
   }

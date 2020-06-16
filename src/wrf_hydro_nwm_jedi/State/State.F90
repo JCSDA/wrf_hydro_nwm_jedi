@@ -56,15 +56,10 @@ end subroutine create
 ! ------------------------------------------------------------------------------
 
 subroutine delete(self)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 
-implicit none
-type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-! integer :: var
-
-! do var = 1, self%nf
-!   call self%fields(var)%deallocate_field()
-! enddo
-! deallocate(self%fields)
+  call self%fields_obj%deallocate_field()
 
 end subroutine delete
 

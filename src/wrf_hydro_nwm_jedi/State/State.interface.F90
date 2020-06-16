@@ -65,11 +65,11 @@ implicit none
 integer(c_int), intent(inout) :: c_key_self
 type(wrf_hydro_nwm_jedi_state), pointer :: self
 
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
+call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
 
-! call delete(self)
+call delete(self)
 
-! call wrf_hydro_nwm_jedi_state_registry%remove(c_key_self)
+call wrf_hydro_nwm_jedi_state_registry%remove(c_key_self)
 
 end subroutine wrf_hydro_nwm_jedi_state_delete_c
 
