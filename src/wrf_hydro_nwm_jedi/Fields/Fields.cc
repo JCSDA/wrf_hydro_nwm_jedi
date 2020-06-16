@@ -35,6 +35,7 @@ namespace wrf_hydro_nwm_jedi {
       }
   }
 
+  // Used by Increment
   Fields::Fields(const Geometry & geom, const oops::Variables & vars,
 		 const util::DateTime & vt)
     : geom_(new Geometry(geom)) {
