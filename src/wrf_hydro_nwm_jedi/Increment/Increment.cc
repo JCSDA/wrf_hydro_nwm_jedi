@@ -256,4 +256,12 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
+  void Increment::accumul(const double & zz, const State & xx) {
+    //sw_increment_axpy_state_f90(keyInc_, zz, xx.toFortran());
+
+    util::abor1_cpp("Increment::accumul() needs to be implemented.",
+                    __FILE__, __LINE__);
+}
+// -----------------------------------------------------------------------------
+
 }  // namespace wrf_hydro_nwm_jedi

@@ -95,6 +95,8 @@ namespace wrf_hydro_nwm_jedi {
     /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
+    void accumul(const double &, const State &);
+    
     boost::shared_ptr<const Geometry> geometry() const;
 
     F90inc & toFortran() {return keyInc_;}

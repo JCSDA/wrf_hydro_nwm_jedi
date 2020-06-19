@@ -10,7 +10,23 @@
 
 #include <ostream>
 
+#include "oops/util/DateTime.h"
+#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
+
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+
+namespace ufo {
+  class GeoVaLs;
+  class Locations;
+}
+
+namespace wrf_hydro_nwm_jedi {
+  class Geometry;
+  class State;
+  class Increment;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -20,8 +36,20 @@ namespace wrf_hydro_nwm_jedi {
   class LinearGetValues : public util::Printable {
    public:
     LinearGetValues();
-    ~LinearGetValues();
-
+    LinearGetValues(const Geometry &, const ufo::Locations &);
+    virtual ~LinearGetValues();
+    void setTrajectory(const State & state,
+		       const util::DateTime & t1,
+		       const util::DateTime & t2,
+		       ufo::GeoVaLs & geovals);
+    void fillGeoVaLsTL(const Increment & inc,
+		       const util::DateTime & t1,
+		       const util::DateTime & t2,
+		       ufo::GeoVaLs & geovals) const;
+    void fillGeoVaLsAD(Increment & inc,
+		       const util::DateTime & t1,
+		       const util::DateTime & t2,
+		       const ufo::GeoVaLs & geovals) const;
    private:
     void print(std::ostream & os) const;
   };
