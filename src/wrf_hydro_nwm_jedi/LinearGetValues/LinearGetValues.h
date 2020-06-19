@@ -11,11 +11,12 @@
 #include <ostream>
 
 #include "oops/util/DateTime.h"
-#include "oops/base/Variables.h"
 #include "oops/util/Printable.h"
 
-#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "ufo/Locations.h"
+
+//#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+//#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
 namespace ufo {
   class GeoVaLs;
