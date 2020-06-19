@@ -8,17 +8,17 @@
 #include <ostream>
 #include <string>
 
-#include "wrf_hydro_nwm-jedi/Covariance/Covariance.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Increment/Increment.h"
-#include "wrf_hydro_nwm-jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -69,4 +69,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

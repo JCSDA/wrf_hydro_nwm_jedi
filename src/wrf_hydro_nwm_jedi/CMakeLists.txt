@@ -4,8 +4,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Traits.h
   
   # # Covariance
-  # Covariance/Covariance.h
-  # Covariance/Covariance.cc
+  Covariance/Covariance.h
+  Covariance/Covariance.cc
   
   # Geometry  
   Geometry/Geometry.h  
@@ -33,6 +33,10 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h
 
+  # # LinearGetValues
+  LinearGetValues/LinearGetValues.h
+  LinearGetValues/LinearGetValues.cc
+
   # # GetValuesTraj
   # GetValuesTraj/GetValuesTraj.h
   # GetValuesTraj/GetValuesTraj.cc
@@ -52,10 +56,10 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # # ModelAux
   ModelAux/ModelAuxControl.h
   ModelAux/ModelAuxControl.cc
-  # ModelAux/ModelAuxIncrement.h
-  # ModelAux/ModelAuxIncrement.cc
-  # ModelAux/ModelAuxCovariance.h
-  # ModelAux/ModelAuxCovariance.cc
+  ModelAux/ModelAuxIncrement.h
+  ModelAux/ModelAuxIncrement.cc
+  ModelAux/ModelAuxCovariance.h
+  ModelAux/ModelAuxCovariance.cc
   
   # # State
   State/State.h

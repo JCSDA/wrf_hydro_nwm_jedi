@@ -21,7 +21,7 @@
 namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
-
+  
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
                        const util::DateTime & vt)
@@ -34,6 +34,13 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Increment::Increment(const Increment & other, const bool copy) {
+    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+    //                  __FILE__, __LINE__);
+  }
+
+// ----------------------------------------------------------------------------
+
+  Increment::Increment(const Geometry &, Increment & other) {
     // util::abor1_cpp("Increment::Increment() needs to be implemented.",
     //                  __FILE__, __LINE__);
   }
@@ -65,9 +72,11 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  Increment & Increment::operator +=(const Increment &) {
+  Increment & Increment::operator +=(const Increment &other) {
     // util::abor1_cpp("Increment::operator+= needs to be implemented.",
     //                 __FILE__, __LINE__);
+    //    wrf_hydro_nwm_jedi_increment_plus_f90(keyInc__,other);
+    //fields_->add(other->fields_));
     // Needed by test
     return *this;
   }
@@ -106,6 +115,13 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 // ----------------------------------------------------------------------------
+
+  void Increment::zero(const util::DateTime & vt) {
+    // sw_increment_zero_f90(keyInc_);
+    time_ = vt;
+  }
+
+  // ----------------------------------------------------------------------------
 
   void Increment::diff(const State & x1, const State & x2) {
     util::abor1_cpp("Increment::diff() needs to be implemented.",

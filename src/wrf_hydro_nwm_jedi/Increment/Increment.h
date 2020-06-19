@@ -51,6 +51,7 @@ namespace wrf_hydro_nwm_jedi {
     // Constructor, destructor
     Increment(const Geometry &, const oops::Variables &,
               const util::DateTime &);
+    Increment(const Geometry &, Increment &);
     Increment(const Increment &, const bool);
     ~Increment();
 
@@ -65,6 +66,7 @@ namespace wrf_hydro_nwm_jedi {
     void axpy(const double &, const Increment &, const bool check = true);
     double dot_product_with(const Increment &) const;
     void zero();
+    void zero(const util::DateTime &);
     void diff(const State &, const State &);
     void schur_product_with(const Increment &);
 

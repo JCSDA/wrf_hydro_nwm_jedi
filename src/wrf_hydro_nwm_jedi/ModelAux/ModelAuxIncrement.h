@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXINCREMENT_H_
-#define WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXINCREMENT_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_INCREMENT_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_INCREMENT_H_
 
 #include <ostream>
 #include <string>
@@ -18,19 +18,20 @@
 namespace eckit {
   class Configuration;
 }
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Geometry;
+  class ModelAuxControl;
 }
 
 //-----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
-  // ModelAuxControl class
+  // ModelAuxIncrement class
   class ModelAuxIncrement : public util::Printable,
                             private util::ObjectCounter<ModelAuxIncrement> {
    public:
-    static const std::string classname() {return "wrf_hydro_nwm-jedi::ModelAuxIncrement";}
+    static const std::string classname() {return "wrf_hydro_nwm_jedi::ModelAuxIncrement";}
 
     ModelAuxIncrement(const ModelAuxIncrement &, const eckit::Configuration &);
     ModelAuxIncrement(const ModelAuxIncrement &, const bool);
@@ -38,6 +39,7 @@ namespace wrf_hydro_nwm-jedi {
     ~ModelAuxIncrement();
 
     // Linear algebra operators
+    void diff(const ModelAuxControl &, const ModelAuxControl &) {}
     void zero();
     ModelAuxIncrement & operator*=(const double);
     ModelAuxIncrement & operator+=(const ModelAuxIncrement &);
@@ -49,5 +51,5 @@ namespace wrf_hydro_nwm-jedi {
    private:
     void print(std::ostream &) const;
   };
-}  // namespace wrf_hydro_nwm-jedi
-#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXINCREMENT_H_
+}  // namespace wrf_hydro_nwm_jedi
+#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_INCREMENT_H_
