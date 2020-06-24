@@ -1,0 +1,101 @@
+cost_function:
+  cost_type: '3D-Var'
+  Jb:
+    Background:
+      state:
+      - date: '2010-01-01T00:05:00Z'
+        filename: 'Data/INPUTS/test.fc.2010-01-01T00:00:00Z.PT5M.nc'
+        variables: ['u', 'v', 'h']
+    Covariance:
+      covariance: 'SWstatic'
+      date: '2010-01-01T00:05:00Z'
+      unormfactor: 0.027
+      vnormfactor: 0.027
+      hnormfactor: 1.588
+      rad: 12
+  Jo:
+    ObsTypes:
+    - Covariance:
+        covariance: 'diagonal'
+      ObsOperator:
+        name: 'Identity'
+      ObsSpace:
+        ObsDataIn:
+          obsfile: 'Data/INPUTS/truth.uv.obs3d.nc'
+        ObsDataOut:
+          obsfile: 'Data/OUTPUTS/3dvar.uv.obs3d.nc'
+        name: 'Simulate'
+        simulate:
+          variables: ['u', 'v']
+    - Covariance:
+        covariance: 'diagonal'
+      ObsOperator:
+        name: 'Identity'
+      ObsSpace:
+        ObsDataIn:
+          obsfile: 'Data/INPUTS/truth.h.obs3d.nc'
+        ObsDataOut:
+          obsfile: 'Data/OUTPUTS/3dvar.h.obs3d.nc'
+        name: 'Simulate'
+        simulate:
+          variables: ['h']
+  varchange: 'Identity'
+  variables: ['u', 'v', 'h']
+  window_begin: '2010-01-01T00:04:48Z'
+  window_length: PT24S
+final:
+  diagnostics:
+    departures: 'oman'
+minimizer:
+  algorithm: 'DRIPCG'
+model:
+  name: 'SW'
+  tstep: PT12S
+  variables: ['u', 'v', 'h']
+output:
+  datadir: 'Data/OUTPUTS'
+  exp: '3dvar'
+  frequency: PT12S
+  type: 'an'
+resolution:
+  input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
+  # nx: 25
+  # ny: 25
+  # xmax: 100000.0
+  # ymax: 100000.0
+variational:
+  iteration:
+  - diagnostics:
+      departures: 'ombg'
+    gradient_norm_reduction: 1.0e-10
+    linearmodel:
+      trajectory:
+        tstep: PT12S
+      tstep: PT12S
+      varchange: 'Identity'
+      variables: ['u', 'v', 'h']
+      version: 'SWIdTLM'
+    ninner: 10
+    resolution:
+      nx: 25
+      ny: 25
+      xmax: 100000.0
+      ymax: 100000.0
+    test: 'on'
+  - diagnostics:
+      departures: 'ombg'
+    gradient_norm_reduction: 1.0e-10
+    linearmodel:
+      trajectory:
+        tstep: PT12S
+      tstep: PT12S
+      varchange: 'Identity'
+      variables: ['u', 'v', 'h']
+      version: 'SWIdTLM'
+    ninner: 10
+    resolution:
+      nx: 25
+      ny: 25
+      xmax: 100000.0
+      ymax: 100000.0
+    test: 'on'

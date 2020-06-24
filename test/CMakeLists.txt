@@ -1,6 +1,7 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
   testinput/hofx_nomodel.yaml
+  testinput/3dvar.yaml
   testoutput/hofx_nomodel_identity.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
