@@ -76,7 +76,8 @@ namespace wrf_hydro_nwm_jedi {
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
 
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
+    // wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
   }
 

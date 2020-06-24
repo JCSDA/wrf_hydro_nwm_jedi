@@ -55,6 +55,22 @@ end subroutine create
 
 ! ------------------------------------------------------------------------------
 
+! subroutine create_from_other(self, other)
+
+!   ! Passed variables
+!   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
+!   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
+
+!   ! Create new state from other state
+!   self = shallow_water_state_type(other%get_geometry())
+
+!   ! Initialize all arrays to zero
+!   !call zeros(self)
+
+! end subroutine create_from_other
+
+! ------------------------------------------------------------------------------
+
 subroutine delete(self)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self

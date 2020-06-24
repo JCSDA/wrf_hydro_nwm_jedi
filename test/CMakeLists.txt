@@ -1,5 +1,6 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
+  testinput/model.yaml
   testinput/hofx_nomodel.yaml
   testinput/3dvar.yaml
   testoutput/hofx_nomodel_identity.ref
@@ -45,7 +46,7 @@ ecbuild_add_test(
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_model
   SOURCES executables/TestModel.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/model.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(

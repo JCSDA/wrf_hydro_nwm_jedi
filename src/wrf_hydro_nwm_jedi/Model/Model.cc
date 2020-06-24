@@ -22,38 +22,39 @@ namespace wrf_hydro_nwm_jedi {
 
   Model::Model(const Geometry & geom, const eckit::Configuration & conf)
     : tstep_("PT1H"), geom_(new Geometry(geom)), vars_(conf) {
-    util::abor1_cpp("Model::Model() needs to be implemented.",
-                    __FILE__, __LINE__);
+    std::cout << "Creating model"<<std::endl;
+    // util::abor1_cpp("Model::Model() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     // NOTE: tstep_ should be set to the actual timestep
   }
 
 // ----------------------------------------------------------------------------
 
   Model::~Model() {
-    util::abor1_cpp("Model::~Model() needs to be implemented.",
-                __FILE__, __LINE__);
+    // util::abor1_cpp("Model::~Model() needs to be implemented.",
+    //             __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void Model::initialize(State & xx) const {
-    util::abor1_cpp("Model::initialize() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Model::initialize() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void Model::step(State & xx, const ModelAuxControl & xx_bias) const {
-    util::abor1_cpp("Model::step() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Model::step() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     xx.validTime() += tstep_;
   }
 
 // ----------------------------------------------------------------------------
 
   void Model::finalize(State & xx) const {
-    util::abor1_cpp("Model::finalize() needs to be implemented.",
-                     __FILE__, __LINE__);
+    // util::abor1_cpp("Model::finalize() needs to be implemented.",
+    //                  __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
