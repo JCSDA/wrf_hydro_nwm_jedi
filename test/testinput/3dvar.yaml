@@ -49,7 +49,7 @@ final:
 minimizer:
   algorithm: 'DRIPCG'
 model:
-  name: 'SW'
+  name: 'WRF_HYDRO_NWM_JEDI'
   tstep: PT12S
   variables: ['u', 'v', 'h']
 output:
@@ -82,20 +82,20 @@ variational:
       xmax: 100000.0
       ymax: 100000.0
     test: 'on'
-  - diagnostics:
-      departures: 'ombg'
-    gradient_norm_reduction: 1.0e-10
-    linearmodel:
-      trajectory:
-        tstep: PT12S
-      tstep: PT12S
-      varchange: 'Identity'
-      variables: ['u', 'v', 'h']
-      version: 'SWIdTLM'
-    ninner: 10
-    resolution:
-      nx: 25
-      ny: 25
-      xmax: 100000.0
-      ymax: 100000.0
-    test: 'on'
+  # - diagnostics:
+  #     departures: 'ombg'
+  #   gradient_norm_reduction: 1.0e-10
+  #   linearmodel:
+  #     trajectory:
+  #       tstep: PT12S
+  #     tstep: PT12S
+  #     varchange: 'Identity'
+  #     variables: ['u', 'v', 'h']
+  #     version: 'SWIdTLM'
+  #   ninner: 10
+  #   resolution:
+  #     nx: 25
+  #     ny: 25
+  #     xmax: 100000.0
+  #     ymax: 100000.0
+  #   test: 'on'

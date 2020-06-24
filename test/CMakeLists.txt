@@ -42,11 +42,11 @@ ecbuild_add_test(
   ARGS    testinput/interface.yml
   LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_model
-#   SOURCES executables/TestModel.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_model
+  SOURCES executables/TestModel.cc
+  ARGS    testinput/interface.yml
+  LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_increment

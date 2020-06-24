@@ -4,19 +4,19 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-#include "wrf_hydro_nwm-jedi/Traits.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Model/Model.h"
-#include "wrf_hydro_nwm-jedi/ModelAux/ModelAuxControl.h"
-#include "wrf_hydro_nwm-jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Model/Model.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  static oops::ModelMaker<Traits, Model> modelmaker_("WRF_HYDRO_NWM-JEDI");
+  static oops::ModelMaker<Traits, Model> modelmaker_("WRF_HYDRO_NWM_JEDI");
 
 // ----------------------------------------------------------------------------
 
@@ -68,4 +68,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

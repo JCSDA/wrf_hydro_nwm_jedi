@@ -49,9 +49,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Increment/IncrementFortran.h
   Increment/Increment.F90
 
-  # # Model
-  # Model/Model.h
-  # Model/Model.cc
+  # Model
+  Model/Model.h
+  Model/Model.cc
 
   # # ModelAux
   ModelAux/ModelAuxControl.h
