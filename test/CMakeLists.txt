@@ -53,29 +53,29 @@ ecbuild_add_test(
   ARGS    testinput/interface.yml
   LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_errorcovariance
-#   SOURCES executables/TestErrorCovariance.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_errorcovariance
+  SOURCES executables/TestErrorCovariance.cc
+  ARGS    testinput/interface.yml
+  LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_modelauxcovariance
-#   SOURCES executables/TestModelAuxCovariance.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_modelauxcovariance
+  SOURCES executables/TestModelAuxCovariance.cc
+  ARGS    testinput/interface.yml
+  LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_modelauxincrement
-#   SOURCES executables/TestModelAuxIncrement.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_modelauxincrement
+  SOURCES executables/TestModelAuxIncrement.cc
+  ARGS    testinput/interface.yml
+  LIBS    wrf_hydro_nwm_jedi )
 
 # ecbuild_add_test(
 #   TARGET  test_wrf_hydro_nwm_jedi_linearmodel
 #   SOURCES executables/TestLinearModel.cc
 #   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )  
+#   LIBS    wrf_hydro_nwm_jedi )
 
 # ecbuild_add_test(
 #   TARGET  test_wrf_hydro_nwm_jedi_geometryiterator
