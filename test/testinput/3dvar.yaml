@@ -5,14 +5,12 @@ cost_function:
       state:
       - date: '2010-01-01T00:05:00Z'
         filename: 'Data/INPUTS/test.fc.2010-01-01T00:00:00Z.PT5M.nc'
-        variables: ['u', 'v', 'h']
+        variables: ['SNEQV']
     Covariance:
-      covariance: 'SWstatic'
+      covariance: 'wrf_hydro_nwm_jediCovar'
       date: '2010-01-01T00:05:00Z'
-      unormfactor: 0.027
-      vnormfactor: 0.027
-      hnormfactor: 1.588
-      rad: 12
+      normfactor: 0.127
+      rad: 10
   Jo:
     ObsTypes:
     - Covariance:
@@ -26,21 +24,9 @@ cost_function:
           obsfile: 'Data/OUTPUTS/3dvar.uv.obs3d.nc'
         name: 'Simulate'
         simulate:
-          variables: ['u', 'v']
-    - Covariance:
-        covariance: 'diagonal'
-      ObsOperator:
-        name: 'Identity'
-      ObsSpace:
-        ObsDataIn:
-          obsfile: 'Data/INPUTS/truth.h.obs3d.nc'
-        ObsDataOut:
-          obsfile: 'Data/OUTPUTS/3dvar.h.obs3d.nc'
-        name: 'Simulate'
-        simulate:
-          variables: ['h']
+          variables: ['swe']
   varchange: 'Identity'
-  variables: ['u', 'v', 'h']
+  variables: ['swe']
   window_begin: '2010-01-01T00:04:48Z'
   window_length: PT24S
 final:

@@ -26,8 +26,10 @@ namespace wrf_hydro_nwm_jedi {
                          const oops::Variables & vars,
                          const eckit::Configuration & conf,
                          const State & x1, const State & x2) {
-    util::abor1_cpp("Covariance::Covariance() needs to be implemented.",
-                    __FILE__, __LINE__);
+    time_ = util::DateTime(conf.getString("date"));
+    const eckit::Configuration * configc = &conf;
+    wrf_hydro_nwm_jedi_b_setup_f90(keyFtnConfig_, &configc, resol.toFortran());
+    oops::Log::trace() << "Covariance created" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -40,8 +42,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Covariance::multiply(const Increment & dxin, Increment & dxout) const {
-    util::abor1_cpp("Covariance::multiply() needs to be implemented.",
-                    __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_b_mult_f90(keyFtnConfig_, dxin.toFortran(),
+				  dxout.toFortran());
   }
 
 // ----------------------------------------------------------------------------
