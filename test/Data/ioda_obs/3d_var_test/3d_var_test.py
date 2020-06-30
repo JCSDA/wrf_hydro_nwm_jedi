@@ -53,11 +53,12 @@ def kalman_eqn(x_b, B, H, R, y):
             np.matmul(T0, T1), T2))
     return(x_a)
 
+
 # This is the "modeled values" before adding the 5mm
 # to the obs
 x_b = (xr
-     .open_dataset(ioda_file)['swe@ObsValue']
-     .values)
+       .open_dataset(ioda_file)['swe@ObsValue']
+       .values)
 B = np.diag(x_b * .2)
 H = np.diag(np.ones(len(x_b)))
 
@@ -73,6 +74,6 @@ for pct_oev in [5, 10, 20, 40, 80]:
     x_a = kalman_eqn(x_b, B, H, R, y)
     ans_dict[str(pct_oev).zfill(2)] = x_a
 
-
+# quick look. could put these into the files as "answers"
 for key in ans_dict.keys():
     print(ans_dict[key][0:5])
