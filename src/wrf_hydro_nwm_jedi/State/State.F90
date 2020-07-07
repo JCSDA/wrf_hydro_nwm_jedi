@@ -368,7 +368,8 @@ subroutine read_file(geom, self, c_conf, vdate)
   ! ixfull = geom%xend-geom%xstart+1
   ! jxfull = geom%yend-geom%ystart+1
 
-  call self%fields_obj%read_fields_from_file(filename,geom%xstart,geom%xend,geom%ystart,geom%yend)
+  call self%fields_obj%read_fields_from_file( &
+       filename, geom%lsm%xstart, geom%lsm%xend, geom%lsm%ystart, geom%lsm%yend)
 
 end subroutine read_file
 

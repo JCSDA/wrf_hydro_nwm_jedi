@@ -53,7 +53,7 @@ module wrf_hydro_nwm_jedi_field_mod
   end interface
 
   type, extends(base_field) :: field_2d
-     integer :: dim1_len, dim2_len
+     integer :: xdim_len, ydim_len
      real(c_float), allocatable :: array(:,:)
    contains
      procedure, pass(self) :: print_field => print_field_2d
@@ -67,7 +67,7 @@ module wrf_hydro_nwm_jedi_field_mod
   end type field_2d
 
   type, extends(base_field) :: field_3d
-     integer :: dim1_len, dim2_len, dim3_len
+     integer :: xdim_len, ydim_len, dim3_len
      real(c_float), allocatable :: array(:,:,:)
    contains
      procedure, pass(self) :: print_field => print_field_3d
@@ -106,7 +106,7 @@ public :: wrf_hydro_nwm_jedi_fields, checksame!, &
 !Field type mirror of C class
 type :: wrf_hydro_nwm_jedi_fields
    integer :: nf
- ! integer :: dim1_len, dim2_len, dim3_len !refer to geometry and depth
+ ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
  ! real(kind=c_float), allocatable :: array(:,:,:)
    ! logical :: integerfield = .false.
    type(elem_field), allocatable :: fields(:)
@@ -154,7 +154,7 @@ contains
           vcount=vcount+1;
 
           allocate(tmp_2d_field)
-          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
                short_name = vars%variable(var), &
                long_name = 'snow_water_equivalent', &
                wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
@@ -166,7 +166,7 @@ contains
           vcount=vcount+1;
 
           allocate(tmp_2d_field)
-          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
                short_name = vars%variable(var), &
                long_name = 'snow_depth', &
                wrf_hydro_nwm_name = 'SNOWH', units = 'm')
@@ -178,7 +178,7 @@ contains
           vcount=vcount+1
           
           allocate(tmp_2d_field)          
-          call tmp_2d_field%fill(geom%dim1_len, geom%dim2_len, &
+          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
                short_name = vars%variable(var),&
                long_name = 'leaf_area', &
                wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
@@ -191,7 +191,7 @@ contains
           
           allocate(tmp_3d_field)
           !MIDDLE DIMENSION HARDCODED
-          call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
+          call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
                short_name = vars%variable(var),&
                long_name = 'snow_liquid', &
                wrf_hydro_nwm_name = 'SNLIQ', units = 'liter') !unit invented
@@ -204,7 +204,7 @@ contains
 
           allocate(tmp_3d_field)
           !MIDDLE DIMENSION HARDCODED
-          call tmp_3d_field%fill(geom%dim1_len, 3, geom%dim2_len, &
+          call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
                short_name = vars%variable(var),&
                long_name = 'snow_ice', &
                wrf_hydro_nwm_name = 'SNICE', units = 'liter') !unit invented
@@ -219,23 +219,23 @@ contains
 
   end subroutine create
 
-  subroutine fill_field_2d(self,dim1_len,dim2_len,short_name,long_name,&
+  subroutine fill_field_2d(self,xdim_len,ydim_len,short_name,long_name,&
        wrf_hydro_nwm_name,units,tracer)
     implicit none
 
     class(field_2d),intent(inout) :: self
-    integer, intent(in)    :: dim1_len, dim2_len
+    integer, intent(in)    :: xdim_len, ydim_len
     character(len=*),              intent(in)    :: short_name
     character(len=*),              intent(in)    :: long_name
     character(len=*),              intent(in)    :: wrf_hydro_nwm_name
     character(len=*),              intent(in)    :: units
     logical, optional,             intent(in)    :: tracer
 
-    self%dim1_len = dim1_len
-    self%dim2_len = dim2_len
+    self%xdim_len = xdim_len
+    self%ydim_len = ydim_len
 
     if(.not.allocated(self%array)) then
-       allocate( self%array(dim1_len, dim2_len) )
+       allocate( self%array(xdim_len, ydim_len) )
     else
        call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
     end if
@@ -247,24 +247,24 @@ contains
     
   end subroutine fill_field_2d
 
-  subroutine fill_field_3d(self,dim1_len,dim2_len,dim3_len,short_name,&
+  subroutine fill_field_3d(self,xdim_len,ydim_len,dim3_len,short_name,&
        long_name, wrf_hydro_nwm_name,units,tracer)
     implicit none
     
     class(field_3d), intent(inout) :: self
-    integer, intent(in)    :: dim1_len, dim2_len, dim3_len
+    integer, intent(in)    :: xdim_len, ydim_len, dim3_len
     character(len=*),              intent(in)    :: short_name
     character(len=*),              intent(in)    :: long_name
     character(len=*),              intent(in)    :: wrf_hydro_nwm_name
     character(len=*),              intent(in)    :: units
     logical, optional,             intent(in)    :: tracer
 
-    self%dim1_len = dim1_len
-    self%dim2_len = dim2_len
+    self%xdim_len = xdim_len
+    self%ydim_len = ydim_len
     self%dim3_len = dim3_len
     
    if(.not.allocated(self%array)) then
-       allocate( self%array(dim1_len, dim2_len, dim3_len) )
+       allocate( self%array(xdim_len, ydim_len, dim3_len) )
    else
       call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
    end if
@@ -326,12 +326,12 @@ contains
 
   ! --------------------------------------------------------------------------------------------------
   
-! subroutine allocate_field(self,dim1_len,dim2_len,dim3_len,short_name,long_name,&
+! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
 !                           wrf_hydro_nwm_name,units,tracer,integerfield)
 
 ! implicit none
 ! class(wrf_hydro_nwm_jedi_field), target,  intent(inout) :: self
-! integer,                       intent(in)    :: dim1_len,dim2_len,dim3_len
+! integer,                       intent(in)    :: xdim_len,ydim_len,dim3_len
 ! character(len=*),              intent(in)    :: short_name
 ! character(len=*),              intent(in)    :: long_name
 ! character(len=*),              intent(in)    :: wrf_hydro_nwm_name
@@ -339,12 +339,12 @@ contains
 ! logical, optional,             intent(in)    :: tracer
 ! logical, optional,             intent(in)    :: integerfield
 
-! self%dim1_len = dim1_len
-! self%dim2_len = dim2_len
+! self%xdim_len = xdim_len
+! self%ydim_len = ydim_len
 ! self%dim3_len = dim3_len
 
 ! if(.not.allocated(self%array)) then
-!    allocate( self%array(dim1_len, dim2_len, dim3_len) )
+!    allocate( self%array(xdim_len, ydim_len, dim3_len) )
 !    self%lalloc = .true.
 ! else
 !    call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
@@ -748,8 +748,8 @@ function field_rms_2d(self) result(rms)
   zz = 0.0
   ii = 0
   
-  do j = 1,self%dim2_len
-     do i = 1,self%dim1_len
+  do j = 1,self%ydim_len
+     do i = 1,self%xdim_len
         zz = zz + self%array(i,j)**2
         ii = ii + 1 !unnecessary
      enddo
@@ -776,8 +776,8 @@ function field_rms_3d(self,zlayer) result(rms)
   zz = 0.0
   ii = 0
 
-  do k = 1,self%dim2_len
-     do i = 1,self%dim1_len
+  do k = 1,self%ydim_len
+     do i = 1,self%xdim_len
         zz = zz + self%array(i,zlayer,k)**2
         ii = ii + 1 !unnecessary
      enddo
@@ -864,7 +864,7 @@ subroutine print_field_3d(self,string)
         write(string,*) c_new_line//self%long_name     
   end if
   
-  do z_layer = 1, self%dim2_len !z is the 2nd dimension...
+  do z_layer = 1, self%ydim_len  !z is the 2nd dimension...
 
      call self%mean_stddev(mean,stddev,z_layer)
 
