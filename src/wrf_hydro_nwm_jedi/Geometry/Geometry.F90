@@ -10,13 +10,25 @@ public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
 
 !------------------------------------------------------------------------------
 
-type :: wrf_hydro_nwm_jedi_geometry
-   integer :: ix, iy !unsused
+type wrf_hydro_nwm_lsm_geometry
    integer :: xstart, ystart
    integer :: xend, yend ! same as dim1_len and dim2_len
    integer :: dim1_len, dim2_len, npz, snow_layers
    real    :: dx, dy
    real, allocatable :: xlat(:,:), xlong(:,:)
+end type wrf_hydro_nwm_lsm_geometry
+
+type wrf_hydro_nwm_stream_geometry
+   integer :: xstart, xend
+   integer :: dim1_len
+   real    :: dx
+   real, allocatable :: lat(:), long(:)
+end type wrf_hydro_nwm_stream_geometry
+
+type :: wrf_hydro_nwm_jedi_geometry
+   ! integer :: ix, iy  ! unused
+   type(wrf_hydro_nwm_lsm_geometry) :: lsm
+   type(wrf_hydro_nwm_stream_geometry) :: stream
  contains
    procedure :: init   => wrf_hydro_nwm_jedi_geometry_init
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
@@ -25,10 +37,10 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: get_nn => wrf_hydro_nwm_jedi_geometry_get_nn
 end type wrf_hydro_nwm_jedi_geometry
 
-    ! This should go into Utilities
-  type :: indices
-     integer :: ind_1, ind_2, ind_3
-  end type indices
+! This should go into Utilities
+type :: indices
+   integer :: ind_1, ind_2, ind_3
+end type indices
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -45,14 +57,30 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   call f_conf%get_or_die("input_file",str)
   wrfinput_flnm = str
-  write(*,*) 'Input file for Geometry: ',wrfinput_flnm
+  write(*,*) 'Input file for Geometry: ', wrfinput_flnm
+  deallocate(str)
+  
+end subroutine wrf_hydro_nwm_jedi_geometry_init
+
+  
+subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
+  ! LSM component is not optional
+  class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self
+  type(fckit_configuration),  intent(in) :: f_conf
+  character(512) :: wrfinput_flnm
+  character(len=:), allocatable :: str
+  integer :: ierr,ncid,dimid
+
+  call f_conf%get_or_die("input_file",str)
+  wrfinput_flnm = str
+  write(*,*) 'Input file for Geometry: ', wrfinput_flnm
   deallocate(str)
 
-  self%xstart = 1
-  self%ystart = 1
-  self%snow_layers = 3
+  self%lsm%xstart = 1
+  self%lsm%ystart = 1
+  self%lsm%snow_layers = 3
 
-  self%dx = 1
+  self%lsm%dx = 1
   ierr = 0
   write(*,*) 'Reading from NETCDF file the Geometry'
 
@@ -63,27 +91,27 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
      call abor1_ftn("ERROR: wrfinput file needed by Geometry not found")
   end if
 
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%dx)
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%dy)
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%lsm%dx)
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%lsm%dy)
 
   ierr = nf90_inq_dimid(ncid, "west_east", dimid)
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim1_len)
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%lsm%dim1_len)
 
-  self%xend = self%dim1_len
+  self%xend = self%lsm%dim1_len
   call error_handler(ierr, "STOP:  Problem finding west_east dimension")
 
   ierr = nf90_inq_dimid(ncid, "south_north", dimid)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%dim2_len)
+  ierr = nf90_inquire_dimension(ncid, dimid, len=self%lsm%dim2_len)
   call error_handler(ierr, "STOP:  Problem finding south_north dimension")
-  self%yend = self%dim2_len
+  self%lsm%yend = self%lsm%dim2_len
   
-  ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%npz)
+  ierr = nf90_inq_dimid(ncid,"soil_layers_stag", self%lsm%npz)
 
-  allocate(self%xlat(self%dim1_len, self%dim2_len), self%xlong(self%dim1_len, self%dim2_len))
-  call get_2d("XLAT", ncid, self%xlat, self%dim1_len, self%dim2_len)
-  call get_2d("XLONG", ncid, self%xlong, self%dim1_len, self%dim2_len)
+  allocate(self%lsm%xlat(self%lsm%dim1_len, self%lsm%dim2_len), self%lsm%xlong(self%lsm%dim1_len, self%lsm%dim2_len))
+  call get_2d("XLAT", ncid, self%lsm%xlat, self%lsm%dim1_len, self%lsm%dim2_len)
+  call get_2d("XLONG", ncid, self%lsm%xlong, self%lsm%dim1_len, self%lsm%dim2_len)
   
   if(ierr /= 0) then
      write(*,*) ierr
@@ -99,9 +127,9 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, long, ind)!dim1_idx, di
   real, allocatable :: diff_lat(:,:), diff_long(:,:), l2_norm(:,:)
   type(indices), intent(out) :: ind
 
-  allocate(diff_lat, source=self%xlat)
-  allocate(diff_long, source=self%xlong)
-  allocate(l2_norm, source=self%xlong)
+  allocate(diff_lat, source=self%lsm%xlat)
+  allocate(diff_long, source=self%lsm%xlong)
+  allocate(l2_norm, source=self%lsm%xlong)
   
   diff_lat = diff_lat - lat
   diff_long = diff_long - long
@@ -124,18 +152,18 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other
 
-  self%dx = other%dx
-  self%dy = other%dy
-  self%dim1_len = other%dim1_len
-  self%dim2_len = other%dim2_len
-  self%npz = other%npz
-  self%snow_layers = other%snow_layers
-  self%xstart = other%xstart
-  self%ystart = other%ystart
-  self%xend = other%xend
-  self%yend = other%yend
-  allocate(self%xlat, source = other%xlat) 
-  allocate(self%xlong, source = other%xlong)
+  self%lsm%dx = other%dx
+  self%lsm%dy = other%dy
+  self%lsm%dim1_len = other%dim1_len
+  self%lsm%dim2_len = other%dim2_len
+  self%lsm%npz = other%npz
+  self%lsm%snow_layers = other%snow_layers
+  self%lsm%xstart = other%xstart
+  self%lsm%ystart = other%ystart
+  self%lsm%xend = other%xend
+  self%lsm%yend = other%yend
+  allocate(self%lsm%xlat, source = other%xlat) 
+  allocate(self%lsm%xlong, source = other%xlong)
   
 end subroutine
   
@@ -144,8 +172,8 @@ end subroutine
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self
 
-  deallocate(self%xlat)
-  deallocate(self%xlong)
+  deallocate(self%lsm%xlat)
+  deallocate(self%lsm%xlong)
 
 end subroutine
 
@@ -156,11 +184,11 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,dim1_len,dim2_len,n
   real, intent(out) :: dx_,dy_
   integer, intent(out) :: dim1_len,dim2_len,npz_
 
-  dx_ = self%dx
-  dy_ = self%dy
-  dim1_len = self%dim1_len
-  dim2_len = self%dim2_len
-  npz_ = self%npz  
+  dx_ = self%lsm%dx
+  dy_ = self%lsm%dy
+  dim1_len = self%lsm%dim1_len
+  dim2_len = self%lsm%dim2_len
+  npz_ = self%lsm%npz  
 
 end subroutine wrf_hydro_nwm_jedi_geometry_get_info
 
