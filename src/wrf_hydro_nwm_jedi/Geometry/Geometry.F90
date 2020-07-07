@@ -13,8 +13,9 @@ public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
 ! The dims are generically named: 1=x, 2=y, 3=z
 
 type wrf_hydro_nwm_lsm_geometry
-   integer :: xstart, ystart
-   integer :: xend, yend ! same as xdim_len and ydim_len
+   integer :: xstart, ystart, zstart
+   integer :: xend, yend, zend ! same as xdim_len and ydim_len? redundant?
+   ! why not zstart, zend?
    integer :: xdim_len, ydim_len, zdim_len
    integer :: n_snow_layers
    real    :: dx, dy
@@ -45,11 +46,11 @@ type :: indices
    integer :: ind_1, ind_2, ind_3
 end type indices
 
-!------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 contains
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+
 
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self
@@ -60,64 +61,74 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   ! Streamflow optional TODO JLM how to signal?  
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
-  
+
+subroutine get_geom_dim_len(ncid, meta_name, dim_len)
+  integer,          intent(in)  :: ncid
+  character(len=*), intent(in)  :: meta_name
+  integer,          intent(out) :: dim_len
+
+  integer :: ierr, dimid
+  character(len=512) :: dim_name
+
+  ! The metadata name / attribute reveals the actual variable name.
+  ! This provides a buffer against changes to the model files.
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, meta_name, dim_name)
+  call error_handler(ierr, &
+       "STOP:  Problem finding '"//trim(meta_name)//"' attribute")
+  ierr = nf90_inq_dimid(ncid, trim(dim_name), dimid)
+  call error_handler(ierr, &
+       "STOP:  Problem finding '"//trim(dim_name)//"' dimension")
+  ierr = nf90_inquire_dimension(ncid, dimid, len=dim_len)
+  call error_handler(ierr, &
+       "STOP:  Problem getting '"//trim(dim_name)//"' dimension length")
+end subroutine get_geom_dim_len
+
+
 subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
   ! LSM component is not optional
   class(wrf_hydro_nwm_jedi_geometry),   intent(inout) :: self
   type(fckit_configuration),  intent(in) :: f_conf
-  character(512) :: wrfinput_flnm
+  character(512) :: geometry_flnm
   character(len=:), allocatable :: str
   integer :: ierr, ncid, dimid
 
   call f_conf%get_or_die("input_file",str)
-  wrfinput_flnm = str
-  write(*,*) 'Input file for Geometry: ', wrfinput_flnm
+  geometry_flnm = str
   deallocate(str)
-
-  self%lsm%xstart = 1
-  self%lsm%ystart = 1
-  self%lsm%n_snow_layers = 3  ! This is max, hard-coded.
-
   ierr = 0
-  write(*,*) 'Reading from NETCDF file the Geometry'
-  ierr = nf90_open(wrfinput_flnm, NF90_NOWRITE, ncid)
+  write(*,*) "Reading geometry file: "//trim(geometry_flnm)//"'"
+  ierr = nf90_open(geometry_flnm, NF90_NOWRITE, ncid)
   if(ierr /= 0) then
      write(*,*) ierr
-     call abor1_ftn("ERROR: wrfinput file required by Geometry not found.")
+     call abor1_ftn( "ERROR: geometry file not found")
   end if
-  
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DX", self%lsm%dx)
+
+  ! Hard-coded values
+  self%lsm%xstart = 1
+  self%lsm%ystart = 1
+  self%lsm%zstart = 1
+  self%lsm%n_snow_layers = 3  ! This is max, hard-coded.
+
+  ! Metadata / atts
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "lsm_dx", self%lsm%dx)
   call error_handler(ierr, "STOP:  Problem finding DX attribute")
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, "DY", self%lsm%dy)
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "lsm_dy", self%lsm%dy)
   call error_handler(ierr, "STOP:  Problem finding DY attribute")  
 
-  ierr = nf90_inq_dimid(ncid, "west_east", dimid)
-  call error_handler(ierr, "STOP:  Problem finding west_east dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%lsm%xdim_len)
-  call error_handler(ierr, "STOP:  Problem getting west_east dimension length")
+  ! Dimension data
+  call get_geom_dim_len(ncid, "lsm_lon_dim_name", self%lsm%xdim_len)
   self%lsm%xend = self%lsm%xdim_len
-
-  ierr = nf90_inq_dimid(ncid, "south_north", dimid)
-  call error_handler(ierr, "STOP:  Problem finding south_north dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=self%lsm%ydim_len)
-  call error_handler(ierr, "STOP:  Problem getting south_north dimension length")
+  call get_geom_dim_len(ncid, "lsm_lat_dim_name", self%lsm%ydim_len)
   self%lsm%yend = self%lsm%ydim_len
+  call get_geom_dim_len(ncid, "lsm_z_dim_name", self%lsm%zdim_len)
+  self%lsm%zend = self%lsm%zdim_len
 
-  ! This is unused currently... 
-  ierr = nf90_inq_dimid(ncid, "soil_layers_stag", self%lsm%zdim_len)
-  call error_handler(ierr, "STOP:  Problem finding soil_layers_stag dimension")
-  
+  ! Positon data
   allocate( &
        self%lsm%lat(self%lsm%xdim_len, self%lsm%ydim_len), &
        self%lsm%lon(self%lsm%xdim_len, self%lsm%ydim_len))
-  
   call get_2d("XLAT", ncid, self%lsm%lat, self%lsm%xdim_len, self%lsm%ydim_len)
   call get_2d("XLONG", ncid, self%lsm%lon, self%lsm%xdim_len, self%lsm%ydim_len)
-  
-  if(ierr /= 0) then
-     write(*,*) ierr
-     call abor1_ftn("ERROR: dx and/or dy need by Geometry not found")
-  end if
 end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 
 
