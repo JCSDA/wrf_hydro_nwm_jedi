@@ -163,7 +163,7 @@ do gv = 1, geovals%nvar
    do i = 1, locs%nlocs
       lat = locs%lat(i)
       long = locs%lon(i)
-      call geom%get_nn(lat, long, ind)
+      call geom%get_lsm_nn(lat, long, ind)
       ! coo%dim_1 = idx_1
       ! coo%dim_2 = idx_2
       geovals_tmp(i) = field%get_value(ind)!field%array(idx_1, idx_2, 1)

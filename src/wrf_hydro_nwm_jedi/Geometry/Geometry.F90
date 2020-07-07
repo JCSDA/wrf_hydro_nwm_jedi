@@ -37,8 +37,8 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: init   => wrf_hydro_nwm_jedi_geometry_init
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete
-   procedure :: get_info => wrf_hydro_nwm_jedi_geometry_get_info
-   procedure :: get_nn => wrf_hydro_nwm_jedi_geometry_get_nn
+   procedure :: get_lsm_info => wrf_hydro_nwm_jedi_geometry_get_lsm_info
+   procedure :: get_lsm_nn => wrf_hydro_nwm_jedi_geometry_get_lsm_nn
 end type wrf_hydro_nwm_jedi_geometry
 
 ! This should go into Utilities
@@ -51,10 +51,10 @@ end type indices
 contains
 !------------------------------------------------------------------------------
 
-
+!> Initialize the geometry object
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
-  class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self
-  type(fckit_configuration),  intent(in) :: f_conf
+  class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self  !< the geom object
+  type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
 
   ! LSM init required
   call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
@@ -62,10 +62,43 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 
+!> Clone the geometry object
+subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
+  class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self  !< geom object
+  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other  !< the new geom object
+
+  self%lsm%dx = other%lsm%dx
+  self%lsm%dy = other%lsm%dy
+  self%lsm%xdim_len = other%lsm%xdim_len
+  self%lsm%ydim_len = other%lsm%ydim_len
+  self%lsm%zdim_len = other%lsm%zdim_len
+  self%lsm%n_snow_layers = other%lsm%n_snow_layers
+  self%lsm%xstart = other%lsm%xstart
+  self%lsm%ystart = other%lsm%ystart
+  self%lsm%xend = other%lsm%xend
+  self%lsm%yend = other%lsm%yend
+  allocate(self%lsm%lat, source = other%lsm%lat)
+  allocate(self%lsm%lon, source = other%lsm%lon)
+end subroutine wrf_hydro_nwm_jedi_geometry_clone
+
+
+!> Destroy the geometry object
+subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
+  class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self  !< geom object
+
+  deallocate(self%lsm%lat)
+  deallocate(self%lsm%lon)
+end subroutine wrf_hydro_nwm_jedi_geometry_delete
+
+
+! -----------------------------------------------------------------------------
+! Helper functions for file operations
+
+!> Helper function for reading geometry file
 subroutine get_geom_dim_len(ncid, meta_name, dim_len)
-  integer,          intent(in)  :: ncid
-  character(len=*), intent(in)  :: meta_name
-  integer,          intent(out) :: dim_len
+  integer,          intent(in)  :: ncid  !< the netcdf file id
+  character(len=*), intent(in)  :: meta_name  !< the meta name in file attrs
+  integer,          intent(out) :: dim_len  !< the dim length
 
   integer :: ierr, dimid
   character(len=512) :: dim_name
@@ -84,10 +117,15 @@ subroutine get_geom_dim_len(ncid, meta_name, dim_len)
 end subroutine get_geom_dim_len
 
 
+!-----------------------------------------------------------------------------
+! LSM Section
+
+!> Init the LSM geometry object
 subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
   ! LSM component is not optional
-  class(wrf_hydro_nwm_jedi_geometry),   intent(inout) :: self
-  type(fckit_configuration),  intent(in) :: f_conf
+  class(wrf_hydro_nwm_jedi_geometry),   intent(inout) :: self  !< the full geom object
+  type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
+
   character(512) :: geometry_flnm
   character(len=:), allocatable :: str
   integer :: ierr, ncid, dimid
@@ -132,12 +170,16 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
 end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 
 
-subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, lon, ind)!dim1_idx, dim2_idx)
-  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
-  real, intent(in) :: lat, lon
+!> Get the LSM nearest neighbor from a lat and lon pair.
+! @todo change indices to have dimension?
+subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn( &
+     self, lat, lon, ind)
+  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self  !< geom object
+  real, intent(in) :: lat, lon  !< the lat, lon of interest
+  type(indices), intent(out) :: ind  !< the index pair of the nearest neighbor
+
   real,dimension(2) :: minimum
   real, allocatable :: diff_lat(:,:), diff_lon(:,:), l2_norm(:,:)
-  type(indices), intent(out) :: ind
 
   allocate(diff_lat, source=self%lsm%lat)
   allocate(diff_lon, source=self%lsm%lon)
@@ -145,51 +187,23 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, lon, ind)!dim1_idx, dim
   
   diff_lat = diff_lat - lat
   diff_lon = diff_lon - lon
-
   l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
-
   minimum = minloc(l2_norm)
-
-  ind%ind_1 = minimum(1); ind%ind_2 = minimum(2)
+  ind%ind_1 = minimum(1)
+  ind%ind_2 = minimum(2)
 
   deallocate(l2_norm)
   deallocate(diff_lat)
   deallocate(diff_lon)  
-end subroutine wrf_hydro_nwm_jedi_geometry_get_nn
+end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn
 
 
-subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
-  class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
-  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other
-
-  self%lsm%dx = other%lsm%dx
-  self%lsm%dy = other%lsm%dy
-  self%lsm%xdim_len = other%lsm%xdim_len
-  self%lsm%ydim_len = other%lsm%ydim_len
-  self%lsm%zdim_len = other%lsm%zdim_len
-  self%lsm%n_snow_layers = other%lsm%n_snow_layers
-  self%lsm%xstart = other%lsm%xstart
-  self%lsm%ystart = other%lsm%ystart
-  self%lsm%xend = other%lsm%xend
-  self%lsm%yend = other%lsm%yend
-  allocate(self%lsm%lat, source = other%lsm%lat) 
-  allocate(self%lsm%lon, source = other%lsm%lon)  
-end subroutine
-  
-
-subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
-  class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self
-
-  deallocate(self%lsm%lat)
-  deallocate(self%lsm%lon)
-end subroutine
-
-
-subroutine wrf_hydro_nwm_jedi_geometry_get_info( &
+!> Get lsm info
+subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
      self, &
      dx, dy, &
      xdim_len, ydim_len, zdim_len)
-  class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self
+  class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self  !< geom object
   real, intent(out) :: dx, dy
   integer, intent(out) :: xdim_len, ydim_len, zdim_len
 
@@ -198,7 +212,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_info( &
   xdim_len = self%lsm%xdim_len
   ydim_len = self%lsm%ydim_len
   zdim_len = self%lsm%zdim_len 
-end subroutine wrf_hydro_nwm_jedi_geometry_get_info
+end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
 !Subroutine copied from module_wrfinputfile.F
@@ -246,16 +260,19 @@ subroutine get_2d(name, ncid, array, idim, jdim)
 end subroutine get_2d
 
 
-! Move this to utilities.
+! -----------------------------------------------------------------------------
+! Utilities to be moved to a separate file.
+
+!> A netcdf error handler.
 subroutine error_handler(status, failure, success)
   !
   ! Check the error flag from a NetCDF function call, and print appropriate
   ! error message.
   !
   implicit none
-  integer,                    intent(in) :: status
-  character(len=*), optional, intent(in) :: failure
-  character(len=*), optional, intent(in) :: success
+  integer,                    intent(in) :: status   !< the returned code
+  character(len=*), optional, intent(in) :: failure  !< mesage for failure
+  character(len=*), optional, intent(in) :: success  !< message for success
   
   if (status .ne. NF90_NOERR) then
      if (present(failure)) then
