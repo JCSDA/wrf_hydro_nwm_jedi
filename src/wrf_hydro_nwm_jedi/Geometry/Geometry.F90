@@ -1,6 +1,6 @@
 module wrf_hydro_nwm_jedi_geometry_mod
 
-  use fckit_configuration_module, only: fckit_configuration
+use fckit_configuration_module, only: fckit_configuration
 use netcdf
 
 implicit none
@@ -9,12 +9,14 @@ private
 public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
 
 !------------------------------------------------------------------------------
+! General:
+! The dims are generically named: 1=x, 2=y, 3=z
 
 type wrf_hydro_nwm_lsm_geometry
    integer :: xstart, ystart
    integer :: xend, yend ! same as xdim_len and ydim_len
-   integer :: xdim_len, ydim_len
-   integer :: npz, snow_layers  ! TODO JLM: I dont like npz
+   integer :: xdim_len, ydim_len, zdim_len
+   integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:)
 end type wrf_hydro_nwm_lsm_geometry
@@ -55,8 +57,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ! LSM init required
   call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
-  ! Streamflow optional TODO JLM how to signal?
-  
+  ! Streamflow optional TODO JLM how to signal?  
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
   
@@ -75,7 +76,7 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
 
   self%lsm%xstart = 1
   self%lsm%ystart = 1
-  self%lsm%snow_layers = 3  ! This is max, hard-coded.
+  self%lsm%n_snow_layers = 3  ! This is max, hard-coded.
 
   ierr = 0
   write(*,*) 'Reading from NETCDF file the Geometry'
@@ -103,7 +104,7 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
   self%lsm%yend = self%lsm%ydim_len
 
   ! This is unused currently... 
-  ierr = nf90_inq_dimid(ncid, "soil_layers_stag", self%lsm%npz)
+  ierr = nf90_inq_dimid(ncid, "soil_layers_stag", self%lsm%zdim_len)
   call error_handler(ierr, "STOP:  Problem finding soil_layers_stag dimension")
   
   allocate( &
@@ -117,8 +118,8 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
      write(*,*) ierr
      call abor1_ftn("ERROR: dx and/or dy need by Geometry not found")
   end if
-  
 end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
+
 
 subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, lon, ind)!dim1_idx, dim2_idx)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self
@@ -142,11 +143,9 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_nn(self, lat, lon, ind)!dim1_idx, dim
 
   deallocate(l2_norm)
   deallocate(diff_lat)
-  deallocate(diff_lon)
-  
+  deallocate(diff_lon)  
 end subroutine wrf_hydro_nwm_jedi_geometry_get_nn
 
-!------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self
@@ -156,50 +155,45 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   self%lsm%dy = other%lsm%dy
   self%lsm%xdim_len = other%lsm%xdim_len
   self%lsm%ydim_len = other%lsm%ydim_len
-  self%lsm%npz = other%lsm%npz
-  self%lsm%snow_layers = other%lsm%snow_layers
+  self%lsm%zdim_len = other%lsm%zdim_len
+  self%lsm%n_snow_layers = other%lsm%n_snow_layers
   self%lsm%xstart = other%lsm%xstart
   self%lsm%ystart = other%lsm%ystart
   self%lsm%xend = other%lsm%xend
   self%lsm%yend = other%lsm%yend
   allocate(self%lsm%lat, source = other%lsm%lat) 
-  allocate(self%lsm%lon, source = other%lsm%lon)
-  
+  allocate(self%lsm%lon, source = other%lsm%lon)  
 end subroutine
   
-!------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self
 
   deallocate(self%lsm%lat)
   deallocate(self%lsm%lon)
-
 end subroutine
 
-!------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_geometry_get_info(self,dx_,dy_,xdim_len,ydim_len,npz_)
+subroutine wrf_hydro_nwm_jedi_geometry_get_info( &
+     self, &
+     dx, dy, &
+     xdim_len, ydim_len, zdim_len)
   class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self
-  real, intent(out) :: dx_,dy_
-  integer, intent(out) :: xdim_len,ydim_len,npz_
+  real, intent(out) :: dx, dy
+  integer, intent(out) :: xdim_len, ydim_len, zdim_len
 
-  dx_ = self%lsm%dx
-  dy_ = self%lsm%dy
+  dx = self%lsm%dx
+  dy = self%lsm%dy
   xdim_len = self%lsm%xdim_len
   ydim_len = self%lsm%ydim_len
-  npz_ = self%lsm%npz  
-
+  zdim_len = self%lsm%zdim_len 
 end subroutine wrf_hydro_nwm_jedi_geometry_get_info
 
-!------------------------------------------------------------------------------
 
 !Subroutine copied from module_wrfinputfile.F
 subroutine get_2d(name, ncid, array, idim, jdim)
-  !
   ! From the NetCDF unit <ncid>, read the variable named <name> with  
   ! dimensions <idim> and <jdim>, filling the pre-dimensioned array <array>
-  !
   implicit none
   character(len=*),           intent(in)  :: name
   integer,                    intent(in)  :: ncid
@@ -238,8 +232,8 @@ subroutine get_2d(name, ncid, array, idim, jdim)
   ierr = nf90_get_var(ncid, varid, array)
   call error_handler(ierr, &
        "STOP:  READ_WRFINPUT:  Problem retrieving variable '"//trim(name)//"' from wrfinput file.")
-
 end subroutine get_2d
+
 
 ! Move this to utilities.
 subroutine error_handler(status, failure, success)
@@ -262,8 +256,7 @@ subroutine error_handler(status, failure, success)
   
   if (present(success)) then
      write(*,'(A)') success
-  endif
-  
+  endif 
 end subroutine error_handler
 
 end module
