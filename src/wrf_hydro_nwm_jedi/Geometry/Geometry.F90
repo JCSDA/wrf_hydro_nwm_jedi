@@ -109,32 +109,6 @@ subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
 end subroutine wrf_hydro_nwm_jedi_geometry_delete
 
 
-! -----------------------------------------------------------------------------
-! Helper functions for file operations
-
-!> Helper function for reading geometry file
-subroutine get_geom_dim_len(ncid, meta_name, dim_len)
-  integer,          intent(in)  :: ncid  !< the netcdf file id
-  character(len=*), intent(in)  :: meta_name  !< the meta name in file attrs
-  integer,          intent(out) :: dim_len  !< the dim length
-
-  integer :: ierr, dimid
-  character(len=512) :: dim_name
-
-  ! The metadata name / attribute reveals the actual variable name.
-  ! This provides a buffer against changes to the model files.
-  ierr = nf90_get_att(ncid, NF90_GLOBAL, meta_name, dim_name)
-  call error_handler(ierr, &
-       "STOP:  Problem finding '"//trim(meta_name)//"' attribute")
-  ierr = nf90_inq_dimid(ncid, trim(dim_name), dimid)
-  call error_handler(ierr, &
-       "STOP:  Problem finding '"//trim(dim_name)//"' dimension")
-  ierr = nf90_inquire_dimension(ncid, dimid, len=dim_len)
-  call error_handler(ierr, &
-       "STOP:  Problem getting '"//trim(dim_name)//"' dimension length")
-end subroutine get_geom_dim_len
-
-
 !-----------------------------------------------------------------------------
 ! LSM Section
 
@@ -160,19 +134,20 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   call error_handler(ierr, "STOP:  Problem finding DY attribute")  
 
   ! Dimension data
-  call get_geom_dim_len(ncid, "lsm_lon_dim_name", self%lsm%xdim_len)
+  call get_geom_dim_len(ncid, "lsm_xdim_name", self%lsm%xdim_len)
   self%lsm%xend = self%lsm%xdim_len
-  call get_geom_dim_len(ncid, "lsm_lat_dim_name", self%lsm%ydim_len)
+  call get_geom_dim_len(ncid, "lsm_ydim_name", self%lsm%ydim_len)
   self%lsm%yend = self%lsm%ydim_len
-  call get_geom_dim_len(ncid, "lsm_z_dim_name", self%lsm%zdim_len)
+  call get_geom_dim_len(ncid, "lsm_zdim_name", self%lsm%zdim_len)
   self%lsm%zend = self%lsm%zdim_len
 
   ! Positon data
   allocate( &
        self%lsm%lat(self%lsm%xdim_len, self%lsm%ydim_len), &
        self%lsm%lon(self%lsm%xdim_len, self%lsm%ydim_len))
-  call get_2d("XLAT", ncid, self%lsm%lat, self%lsm%xdim_len, self%lsm%ydim_len)
-  call get_2d("XLONG", ncid, self%lsm%lon, self%lsm%xdim_len, self%lsm%ydim_len)
+  ! Could this be polymorphic?
+  call get_geom_data_2d("lsm_lat_name", ncid, self%lsm%lat)
+  call get_geom_data_2d("lsm_lon_name", ncid, self%lsm%lon)
 end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 
 
@@ -221,49 +196,56 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
 end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
-!Subroutine copied from module_wrfinputfile.F
-subroutine get_2d(name, ncid, array, idim, jdim)
-  ! From the NetCDF unit <ncid>, read the variable named <name> with  
-  ! dimensions <idim> and <jdim>, filling the pre-dimensioned array <array>
-  implicit none
-  character(len=*),           intent(in)  :: name
-  integer,                    intent(in)  :: ncid
-  integer,                    intent(in)  :: idim
-  integer,                    intent(in)  :: jdim
-  real, dimension(idim,jdim), intent(out) :: array
-  ! Local:
-  integer                                 :: ierr
-  integer                                 :: varid
+! -----------------------------------------------------------------------------
+! Helper functions for preprocessed geometry file operations
 
-  ierr = nf90_inq_varid(ncid,  name,  varid)
-  ! If the variable is "XLAT", and "XLAT" is not found, look for "XLAT_M"
-  ! If the variable is "XLAT_M", and "XLAT_M" is not found, look for "XLAT"
-  ! If the variable is "XLONG", and "XLONG" is not found, look for "XLONG_M"
-  ! If the variable is "XLONG_M", and "XLONG_M" is not found, look for "XLONG"
-  if (name == "XLAT") then
-     if (ierr /= 0) then
-        ierr = nf90_inq_varid(ncid,  "XLAT_M",  varid)
-     endif
-  else if (name == "XLAT_M") then
-     if (ierr /= 0) then
-        ierr = nf90_inq_varid(ncid,  "XLAT",  varid)
-     endif
-  else  if (name == "XLONG") then
-     if (ierr /= 0) then
-        ierr = nf90_inq_varid(ncid,  "XLONG_M",  varid)
-     endif
-  else if (name == "XLONG_M") then
-     if (ierr /= 0) then
-        ierr = nf90_inq_varid(ncid,  "XLONG",  varid)
-     endif
-  endif
+!> Helper function for reading geometry file dimension information
+subroutine get_geom_dim_len(ncid, meta_name, dim_len)
+  integer,          intent(in)  :: ncid  !< the netcdf file id
+  character(len=*), intent(in)  :: meta_name  !< the meta name in file attrs
+  integer,          intent(out) :: dim_len  !< the dim length
+
+  integer :: ierr, dimid
+  character(len=512) :: dim_name
+
+  ! The metadata name / attribute reveals the actual variable name.
+  ! This provides a buffer against changes to the model files.
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, meta_name, dim_name)
   call error_handler(ierr, &
-       "STOP:  READ_WRFINPUT: Problem finding variable '"//trim(name)//"' in wrfinput file.")
+       "STOP:  Problem finding '"//trim(meta_name)//"' attribute")
+  ierr = nf90_inq_dimid(ncid, trim(dim_name), dimid)
+  call error_handler(ierr, &
+       "STOP:  Problem finding '"//trim(dim_name)//"' dimension")
+  ierr = nf90_inquire_dimension(ncid, dimid, len=dim_len)
+  call error_handler(ierr, &
+       "STOP:  Problem getting '"//trim(dim_name)//"' dimension length")
+end subroutine get_geom_dim_len
 
+
+!> Helper function for reading geometry file data (2D)
+! @todo make this polymorphic
+subroutine get_geom_data_2d(meta_name, ncid, array)
+  character(len=*),      intent(in)  :: meta_name
+  integer,               intent(in)  :: ncid
+  real, dimension(:, :), intent(out) :: array
+
+  integer :: ierr, varid
+  character(len=512) :: var_name
+
+  ! The metadata name / attribute reveals the actual variable name.
+  ! This provides a buffer against changes to the model files.
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, meta_name, var_name)
+  call error_handler(ierr, &
+       "STOP:  Problem finding '"//trim(meta_name)//"' attribute")
+  ierr = nf90_inq_varid(ncid, var_name, varid)
+  call error_handler(ierr, &
+       "STOP:  READ_WRFINPUT: Problem finding variable '"// &
+       trim(var_name)//"' in geometry file")
   ierr = nf90_get_var(ncid, varid, array)
   call error_handler(ierr, &
-       "STOP:  READ_WRFINPUT:  Problem retrieving variable '"//trim(name)//"' from wrfinput file.")
-end subroutine get_2d
+       "STOP:  READ_WRFINPUT: Problem getting variable '"// &
+       trim(var_name)//"' in geometry file")
+end subroutine get_geom_data_2d
 
 
 ! -----------------------------------------------------------------------------
@@ -275,7 +257,6 @@ subroutine error_handler(status, failure, success)
   ! Check the error flag from a NetCDF function call, and print appropriate
   ! error message.
   !
-  implicit none
   integer,                    intent(in) :: status   !< the returned code
   character(len=*), optional, intent(in) :: failure  !< mesage for failure
   character(len=*), optional, intent(in) :: success  !< message for success
