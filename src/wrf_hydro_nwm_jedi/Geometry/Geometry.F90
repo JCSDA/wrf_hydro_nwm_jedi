@@ -51,13 +51,28 @@ end type indices
 contains
 !------------------------------------------------------------------------------
 
-!> Initialize the geometry object
+!> Initialize the geometry object from the preprocessed geometry input file.
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self  !< the geom object
   type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
 
+  character(512) :: geometry_flnm
+  character(len=:), allocatable :: str
+  integer :: ierr, ncid
+
+  call f_conf%get_or_die("input_file",str)
+  geometry_flnm = str
+  deallocate(str)
+  ierr = 0
+  write(*,*) "Reading geometry file: "//trim(geometry_flnm)//"'"
+  ierr = nf90_open(geometry_flnm, NF90_NOWRITE, ncid)
+  if(ierr /= 0) then
+     write(*,*) ierr
+     call abor1_ftn( "ERROR: geometry file not found")
+  end if
+
   ! LSM init required
-  call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
+  call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   ! Streamflow optional TODO JLM how to signal?  
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
@@ -67,6 +82,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   class(wrf_hydro_nwm_jedi_geometry),  intent(out) :: self  !< geom object
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other  !< the new geom object
 
+  ! LSM
   self%lsm%dx = other%lsm%dx
   self%lsm%dy = other%lsm%dy
   self%lsm%xdim_len = other%lsm%xdim_len
@@ -79,6 +95,8 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   self%lsm%yend = other%lsm%yend
   allocate(self%lsm%lat, source = other%lsm%lat)
   allocate(self%lsm%lon, source = other%lsm%lon)
+
+  ! Stream
 end subroutine wrf_hydro_nwm_jedi_geometry_clone
 
 
@@ -121,25 +139,13 @@ end subroutine get_geom_dim_len
 ! LSM Section
 
 !> Init the LSM geometry object
-subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf)
+subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   ! LSM component is not optional
   class(wrf_hydro_nwm_jedi_geometry),   intent(inout) :: self  !< the full geom object
   type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
-
-  character(512) :: geometry_flnm
-  character(len=:), allocatable :: str
-  integer :: ierr, ncid, dimid
-
-  call f_conf%get_or_die("input_file",str)
-  geometry_flnm = str
-  deallocate(str)
-  ierr = 0
-  write(*,*) "Reading geometry file: "//trim(geometry_flnm)//"'"
-  ierr = nf90_open(geometry_flnm, NF90_NOWRITE, ncid)
-  if(ierr /= 0) then
-     write(*,*) ierr
-     call abor1_ftn( "ERROR: geometry file not found")
-  end if
+  integer, intent(in) :: ncid
+  
+  integer :: ierr, dimid
 
   ! Hard-coded values
   self%lsm%xstart = 1
