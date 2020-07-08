@@ -9,25 +9,26 @@ private
 public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
 
 !------------------------------------------------------------------------------
+! Data types
 ! General:
-! The dims are generically named: 1=x, 2=y, 3=z
+!   The dims are generically named: 1=x, 2=y, 3=z
 
 type wrf_hydro_nwm_lsm_geometry
    integer :: xstart, ystart, zstart
    integer :: xend, yend, zend ! same as xdim_len and ydim_len? redundant?
-   ! why not zstart, zend?
    integer :: xdim_len, ydim_len, zdim_len
    integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:)
 end type wrf_hydro_nwm_lsm_geometry
 
+
 type wrf_hydro_nwm_stream_geometry
    integer :: xstart, xend
    integer :: xdim_len
-   real    :: dx
-   real, allocatable :: lat(:), lon(:)
+   real, allocatable :: lat(:), lon(:), dx(:)
 end type wrf_hydro_nwm_stream_geometry
+
 
 type :: wrf_hydro_nwm_jedi_geometry
    ! integer :: ix, iy  ! unused
@@ -40,6 +41,7 @@ type :: wrf_hydro_nwm_jedi_geometry
    procedure :: get_lsm_info => wrf_hydro_nwm_jedi_geometry_get_lsm_info
    procedure :: get_lsm_nn => wrf_hydro_nwm_jedi_geometry_get_lsm_nn
 end type wrf_hydro_nwm_jedi_geometry
+
 
 ! This should go into Utilities
 type :: indices
@@ -73,7 +75,10 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 
   ! LSM init required
   call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
-  ! Streamflow optional TODO JLM how to signal?  
+
+  ! Streamflow optional TODO JLM how to signal/handle?
+  call wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
+
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 
@@ -115,8 +120,8 @@ end subroutine wrf_hydro_nwm_jedi_geometry_delete
 !> Init the LSM geometry object
 subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   ! LSM component is not optional
-  class(wrf_hydro_nwm_jedi_geometry),   intent(inout) :: self  !< the full geom object
-  type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
+  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  type(fckit_configuration), intent(in) :: f_conf  !< the yaml file
   integer, intent(in) :: ncid
   
   integer :: ierr, dimid
@@ -196,6 +201,39 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
 end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
+!-----------------------------------------------------------------------------
+! Streamflow section
+
+!> Init the streamflow geometry object
+subroutine wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
+  ! stream component IS optional
+  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  type(fckit_configuration), intent(in) :: f_conf  !< the yaml file
+  integer, intent(in) :: ncid !< the geom file netcdf id
+
+  integer :: ierr, dimid
+
+  ! Hard-coded values
+  self%stream%xstart = 1
+
+  ! Metadata / atts: None
+
+  ! Dimension data
+  call get_geom_dim_len(ncid, "stream_xdim_name", self%stream%xdim_len)
+  self%stream%xend = self%stream%xdim_len
+
+  ! Positon data
+  allocate( &
+       self%stream%lat(self%stream%xdim_len), &
+       self%stream%lon(self%stream%xdim_len), &
+       self%stream%dx(self%stream%xdim_len))
+
+  call get_geom_data_1d("stream_lon_name", ncid, self%stream%lat)
+  call get_geom_data_1d("stream_lat_name", ncid, self%stream%lon)
+  call get_geom_data_1d("stream_dx_name",  ncid, self%stream%dx)
+end subroutine wrf_hydro_nwm_jedi_stream_geometry_init
+
+
 ! -----------------------------------------------------------------------------
 ! Helper functions for preprocessed geometry file operations
 
@@ -220,6 +258,32 @@ subroutine get_geom_dim_len(ncid, meta_name, dim_len)
   call error_handler(ierr, &
        "STOP:  Problem getting '"//trim(dim_name)//"' dimension length")
 end subroutine get_geom_dim_len
+
+
+!> Helper function for reading geometry file data (1D)
+! @todo make this polymorphic with 1,2,3D versions
+subroutine get_geom_data_1d(meta_name, ncid, vector)
+  character(len=*),   intent(in)  :: meta_name
+  integer,            intent(in)  :: ncid
+  real, dimension(:), intent(out) :: vector
+
+  integer :: ierr, varid
+  character(len=512) :: var_name
+
+  ! The metadata name / attribute reveals the actual variable name.
+  ! This provides a buffer against changes to the model files.
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, meta_name, var_name)
+  call error_handler(ierr, &
+       "STOP:  Problem finding '"//trim(meta_name)//"' attribute")
+  ierr = nf90_inq_varid(ncid, var_name, varid)
+  call error_handler(ierr, &
+       "STOP:  READ_WRFINPUT: Problem finding variable '"// &
+       trim(var_name)//"' in geometry file")
+  ierr = nf90_get_var(ncid, varid, vector)
+  call error_handler(ierr, &
+       "STOP:  READ_WRFINPUT: Problem getting variable '"// &
+       trim(var_name)//"' in geometry file")
+end subroutine get_geom_data_1d
 
 
 !> Helper function for reading geometry file data (2D)
