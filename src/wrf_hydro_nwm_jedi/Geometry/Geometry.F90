@@ -45,7 +45,7 @@ end type wrf_hydro_nwm_jedi_geometry
 
 ! This should go into Utilities
 type :: indices
-   integer :: ind_1, ind_2, ind_3
+   integer :: ind_x, ind_y, ind_z
 end type indices
 
 
@@ -170,17 +170,17 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn( &
   allocate(diff_lat, source=self%lsm%lat)
   allocate(diff_lon, source=self%lsm%lon)
   allocate(l2_norm, source=self%lsm%lon)
-  
+
   diff_lat = diff_lat - lat
   diff_lon = diff_lon - lon
   l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
   minimum = minloc(l2_norm)
-  ind%ind_1 = minimum(1)
-  ind%ind_2 = minimum(2)
+  ind%ind_x = minimum(1)
+  ind%ind_y = minimum(2)
 
   deallocate(l2_norm)
   deallocate(diff_lat)
-  deallocate(diff_lon)  
+  deallocate(diff_lon)
 end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn
 
 
@@ -197,7 +197,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
   dy = self%lsm%dy
   xdim_len = self%lsm%xdim_len
   ydim_len = self%lsm%ydim_len
-  zdim_len = self%lsm%zdim_len 
+  zdim_len = self%lsm%zdim_len
 end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
@@ -232,6 +232,50 @@ subroutine wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
   call get_geom_data_1d("stream_lat_name", ncid, self%stream%lon)
   call get_geom_data_1d("stream_dx_name",  ncid, self%stream%dx)
 end subroutine wrf_hydro_nwm_jedi_stream_geometry_init
+
+
+!> Get the stream nearest neighbor from a lat and lon pair.
+! @todo change indices to have dimension?
+subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn( &
+     self, lat, lon, ind)
+  class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< geom object
+  real, intent(in) :: lat, lon  !< the lat, lon of interest
+  type(indices), intent(out) :: ind  !< the index pair of the nearest neighbor
+
+  real, dimension(1) :: minimum
+  real, allocatable  :: diff_lat(:), diff_lon(:), l2_norm(:)
+
+  allocate(diff_lat, source=self%stream%lat)
+  allocate(diff_lon, source=self%stream%lon)
+  allocate(l2_norm,  source=self%stream%lon)
+  
+  diff_lat = diff_lat - lat
+  diff_lon = diff_lon - lon
+  l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
+  minimum = minloc(l2_norm)
+  ind%ind_x = minimum(1)
+
+  deallocate(l2_norm)
+  deallocate(diff_lat)
+  deallocate(diff_lon)  
+end subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn
+
+
+! !> Get lsm info
+! subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
+!      self, &
+!      dx, dy, &
+!      xdim_len, ydim_len, zdim_len)
+!   class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self  !< geom object
+!   real, intent(out) :: dx, dy
+!   integer, intent(out) :: xdim_len, ydim_len, zdim_len
+
+!   dx = self%stream%dx
+!   dy = self%stream%dy
+!   xdim_len = self%stream%xdim_len
+!   ydim_len = self%stream%ydim_len
+!   zdim_len = self%stream%zdim_len 
+! end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
 ! -----------------------------------------------------------------------------

@@ -5,327 +5,419 @@
 
 module wrf_hydro_nwm_jedi_field_mod
 
-  use iso_c_binding, only: c_int, c_float,c_double
-  use fckit_mpi_module
-  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler, indices
-  use oops_variables_mod
-  use netcdf
-!use fv3jedi_kinds_mod, only: kind_real
-!use mpp_domains_mod,   only: east, north, center
+use iso_c_binding, only: c_int, c_float,c_double
+use fckit_mpi_module
+use wrf_hydro_nwm_jedi_geometry_mod, &
+     only: wrf_hydro_nwm_jedi_geometry, error_handler, indices
+use oops_variables_mod
+use netcdf
+! use fv3jedi_kinds_mod, only: kind_real
+! use mpp_domains_mod,   only: east, north, center
 
-  implicit none
+implicit none
 
-  public
+public
 
-  type, abstract :: base_field
-     character(len=32) :: short_name = "null"   !Short name (to match file name)
-     character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
-     character(len=64) :: long_name = "null"    !More descriptive name
-     character(len=32) :: units = "null"        !Units for the field
-     logical :: tracer = .false.
-   contains
-     procedure (print_field_interface), pass(self), deferred :: print_field
-     procedure (read_file_interface), pass(self), deferred :: read_file
-     procedure (get_value_field_interface), pass(self), deferred :: get_value
-  end type base_field
 
-  abstract interface
-     subroutine print_field_interface(self,string)
-       import base_field
-       class(base_field), intent(in) :: self
-       character(len=*),optional,intent(out) :: string
-     end subroutine print_field_interface
+!-----------------------------------------------------------------------------
+! Abstract definitions
 
-     subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
-       import base_field
-       class(base_field), intent(inout) :: self
-       character(len=*), intent(in) :: filename
-       integer, intent(in) :: xstart, xend, ystart, yend
-     end subroutine read_file_interface
+type, abstract :: base_field
+   character(len=32) :: short_name = "null"   !Short name (to match file name)
+   character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
+   character(len=64) :: long_name = "null"    !More descriptive name
+   character(len=32) :: units = "null"        !Units for the field
+   logical :: tracer = .false.
+ contains
+   procedure (print_field_interface),     pass(self), deferred :: print_field
+   procedure (read_file_interface),       pass(self), deferred :: read_file
+   procedure (get_value_field_interface), pass(self), deferred :: get_value
+end type base_field
 
-     function get_value_field_interface(self,ind) result(val)
-       use iso_c_binding, only : c_float
-       import base_field, indices
-       class(base_field), intent(in) :: self
-       type(indices), intent(in) :: ind
-       real(kind=c_float) :: val
-     end function get_value_field_interface
-  end interface
 
-  type, extends(base_field) :: field_2d
-     integer :: xdim_len, ydim_len
-     real(c_float), allocatable :: array(:,:)
-   contains
-     procedure, pass(self) :: print_field => print_field_2d
-     procedure, pass(self) :: read_file => read_file_2d
-     procedure, pass(self) :: get_value => get_value_2d
-     procedure, pass(self) :: fill => fill_field_2d
-     procedure, pass(self) :: mean_stddev => mean_stddev_2d
-     procedure, pass(self) :: rms => field_rms_2d
-     !    Destructor
-     ! final :: destroy_field_2d
-  end type field_2d
+abstract interface
+   subroutine print_field_interface(self, string)
+     import base_field
+     class(base_field), intent(in) :: self
+     character(len=*), optional, intent(out) :: string
+   end subroutine print_field_interface
 
-  type, extends(base_field) :: field_3d
-     integer :: xdim_len, ydim_len, dim3_len
-     real(c_float), allocatable :: array(:,:,:)
-   contains
-     procedure, pass(self) :: print_field => print_field_3d
-     procedure, pass(self) :: read_file => read_file_3d
-     procedure, pass(self) :: get_value => get_value_3d
-     procedure, pass(self) :: fill => fill_field_3d
-     procedure, pass(self) :: mean_stddev => mean_stddev_3d
-     procedure, pass(self) :: rms => field_rms_3d
-     !    Destructor
-     ! final :: destroy_field_3d
-  end type field_3d
+   subroutine read_file_interface(self, filename, xstart, xend, ystart, yend)
+     import base_field
+     class(base_field), intent(inout) :: self
+     character(len=*), intent(in) :: filename
+     integer, intent(in) :: xstart, xend, ystart, yend
+   end subroutine read_file_interface
 
-  !The function of this element is twofold:
-  ! 1) It allows one to create an array of base class object
-  ! 2) It makes it possible to organize the element data structures
-  ! other than simple arrays (e.g. binary search tree, hash tables, etc...)
-  type elem_field
-     class(base_field), allocatable :: field
-  end type elem_field
-  
+   function get_value_field_interface(self, ind) result(val)
+     use iso_c_binding, only : c_float
+     import base_field, indices
+     class(base_field), intent(in) :: self
+     type(indices), intent(in) :: ind
+     real(kind=c_float) :: val
+   end function get_value_field_interface
+end interface
+
+
+!-----------------------------------------------------------------------------
+! Field implementations
+
+type, extends(base_field) :: field_1d
+   integer :: xdim_len
+   real(c_float), allocatable :: array(:)
+ contains
+   procedure, pass(self) :: print_field => print_field_1d
+   procedure, pass(self) :: read_file => read_file_1d
+   procedure, pass(self) :: get_value => get_value_1d
+   procedure, pass(self) :: fill => fill_field_1d
+   procedure, pass(self) :: mean_stddev => mean_stddev_1d
+   procedure, pass(self) :: rms => field_rms_1d
+   ! Destructor
+   ! final :: destroy_field_1d
+end type field_1d
+
+
+type, extends(base_field) :: field_2d
+   integer :: xdim_len, ydim_len
+   real(c_float), allocatable :: array(:, :)
+ contains
+   procedure, pass(self) :: print_field => print_field_2d
+   procedure, pass(self) :: read_file => read_file_2d
+   procedure, pass(self) :: get_value => get_value_2d
+   procedure, pass(self) :: fill => fill_field_2d
+   procedure, pass(self) :: mean_stddev => mean_stddev_2d
+   procedure, pass(self) :: rms => field_rms_2d
+   ! Destructor
+   ! final :: destroy_field_2d
+end type field_2d
+
+
+type, extends(base_field) :: field_3d
+   integer :: xdim_len, ydim_len, zdim_len
+   real(c_float), allocatable :: array(:, :, :)
+ contains
+   procedure, pass(self) :: print_field => print_field_3d
+   procedure, pass(self) :: read_file => read_file_3d
+   procedure, pass(self) :: get_value => get_value_3d
+   procedure, pass(self) :: fill => fill_field_3d
+   procedure, pass(self) :: mean_stddev => mean_stddev_3d
+   procedure, pass(self) :: rms => field_rms_3d
+   ! Destructor
+   ! final :: destroy_field_3d
+end type field_3d
+
+
+!The function of this element is twofold:
+! 1) It allows one to create an array of base class object
+! 2) It makes it possible to organize the element data structures
+! other than simple arrays (e.g. binary search tree, hash tables, etc...)
+type elem_field
+   class(base_field), allocatable :: field
+end type elem_field
+
+
 public :: wrf_hydro_nwm_jedi_fields, checksame!, &
-     ! has_field, &
-     ! long_name_to_wrf_hydro_name, &
-     ! pointer_field, &
-     ! pointer_field_array, &
-     ! copy_field_array, &
-     ! allocate_copy_field_array, &
-     ! fields_rms, &
-     ! fields_gpnorm, &
-     ! fields_print, &
-     ! checksame, &
-     ! flip_array_vertical, &
-     ! copy_subset, &
+! has_field, &
+! long_name_to_wrf_hydro_name, &
+! pointer_field, &
+! pointer_field_array, &
+! copy_field_array, &
+! allocate_copy_field_array, &
+! fields_rms, &
+! fields_gpnorm, &
+! fields_print, &
+! checksame, &
+! flip_array_vertical, &
+! copy_subset, &
 !     mean_stddev
+
 
 !Field type mirror of C class
 type :: wrf_hydro_nwm_jedi_fields
    integer :: nf
- ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
- ! real(kind=c_float), allocatable :: array(:,:,:)
+   ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
+   ! real(kind=c_float), allocatable :: array(:,:,:)
    ! logical :: integerfield = .false.
    type(elem_field), allocatable :: fields(:)
-contains
-  procedure :: create
-  procedure :: search_field
-  procedure :: read_fields_from_file
-  procedure :: print_single_field
-  procedure :: print_all_fields
-  ! procedure :: allocate_field
-  ! procedure :: equals
-  ! procedure :: copy => field_copy
-  ! generic :: assignment(=) => equals
-  procedure :: deallocate_field
-  ! procedure :: mean_stddev
+ contains
+   procedure :: create
+   procedure :: search_field
+   procedure :: read_fields_from_file
+   procedure :: print_single_field
+   procedure :: print_all_fields
+   ! procedure :: allocate_field
+   ! procedure :: equals
+   ! procedure :: copy => field_copy
+   ! generic :: assignment(=) => equals
+   procedure :: deallocate_field
+   ! procedure :: mean_stddev
 end type wrf_hydro_nwm_jedi_fields
 
-! --------------------------------------------------------------------------------------------------
 
+! --------------------------------------------------------------------------------------------------
 contains
+! --------------------------------------------------------------------------------------------------
 
-  subroutine create(self, geom, vars)
-    implicit none
-    class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
-    type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
-    type(oops_variables), intent(in)    :: vars
 
-    class(field_2d), allocatable :: tmp_2d_field
-    class(field_3d), allocatable :: tmp_3d_field
-    
-    integer :: var, vcount, nlev
+subroutine create(self, geom, vars)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in)    :: geom
+  type(oops_variables),              intent(in)    :: vars
 
-    ! Total fields
-    ! ------------
-    self%nf = vars%nvars()
+  class(field_1d), allocatable :: tmp_1d_field
+  class(field_2d), allocatable :: tmp_2d_field
+  class(field_3d), allocatable :: tmp_3d_field
 
-    ! Allocate fields structure
-    ! -------------------------
-    allocate(self%fields(self%nf))
+  integer :: var, vcount, nlev
 
-    vcount = 0
-    do var = 1, self%nf
-       select case (trim(vars%variable(var)))
-       case("SNEQV")
-          vcount=vcount+1;
+  ! Total fields
+  ! ------------
+  self%nf = vars%nvars()
 
-          allocate(tmp_2d_field)
-          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-               short_name = vars%variable(var), &
-               long_name = 'snow_water_equivalent', &
-               wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+  ! Allocate fields structure
+  ! -------------------------
+  allocate(self%fields(self%nf))
 
-          allocate(self%fields(vcount)%field, source = tmp_2d_field)
-          deallocate(tmp_2d_field)
+  vcount = 0
+  do var = 1, self%nf
+     select case (trim(vars%variable(var)))
+     case("qlink1")
+        vcount=vcount+1;
+        allocate(tmp_1d_field)
+        call tmp_1d_field%fill(geom%stream%xdim_len, &
+             short_name = vars%variable(var), &
+             long_name = 'streamflow', &
+             wrf_hydro_nwm_name = 'qlink1', units = 'cms')
+        allocate(self%fields(vcount)%field, source = tmp_1d_field)
+        deallocate(tmp_1d_field)
 
-       case("SNOWH")
-          vcount=vcount+1;
+     case("SNEQV")
+        vcount=vcount+1;
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
+             short_name = vars%variable(var), &
+             long_name = 'snow_water_equivalent', &
+             wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
+        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        deallocate(tmp_2d_field)
 
-          allocate(tmp_2d_field)
-          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-               short_name = vars%variable(var), &
-               long_name = 'snow_depth', &
-               wrf_hydro_nwm_name = 'SNOWH', units = 'm')
-          
-          allocate(self%fields(vcount)%field, source = tmp_2d_field)
-          deallocate(tmp_2d_field)
+     case("SNOWH")
+        vcount=vcount+1;
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
+             short_name = vars%variable(var), &
+             long_name = 'snow_depth', &
+             wrf_hydro_nwm_name = 'SNOWH', units = 'm')
+        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        deallocate(tmp_2d_field)
 
-       case("LAI")
-          vcount=vcount+1
-          
-          allocate(tmp_2d_field)          
-          call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-               short_name = vars%variable(var),&
-               long_name = 'leaf_area', &
-               wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
+     case("LAI")
+        vcount=vcount+1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
+             short_name = vars%variable(var),&
+             long_name = 'leaf_area', &
+             wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
+        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        deallocate(tmp_2d_field)
 
-          allocate(self%fields(vcount)%field, source = tmp_2d_field)
-          deallocate(tmp_2d_field)
+     case("SNLIQ")
+        vcount=vcount+1
+        allocate(tmp_3d_field)
+        !MIDDLE DIMENSION HARDCODED
+        call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
+             short_name = vars%variable(var),&
+             long_name = 'snow_liquid', &
+             wrf_hydro_nwm_name = 'SNLIQ', units = 'liter') !unit invented
+        allocate(self%fields(vcount)%field, source = tmp_3d_field)
+        deallocate(tmp_3d_field)
 
-       case("SNLIQ")
-          vcount=vcount+1
-          
-          allocate(tmp_3d_field)
-          !MIDDLE DIMENSION HARDCODED
-          call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
-               short_name = vars%variable(var),&
-               long_name = 'snow_liquid', &
-               wrf_hydro_nwm_name = 'SNLIQ', units = 'liter') !unit invented
+     case("SNICE")
+        vcount=vcount+1
+        allocate(tmp_3d_field)
+        !MIDDLE DIMENSION HARDCODED
+        call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
+             short_name = vars%variable(var),&
+             long_name = 'snow_ice', &
+             wrf_hydro_nwm_name = 'SNICE', units = 'liter') !unit invented
+        allocate(self%fields(vcount)%field, source = tmp_3d_field)
+        deallocate(tmp_3d_field)
 
-          allocate(self%fields(vcount)%field, source = tmp_3d_field)
-          deallocate(tmp_3d_field)
+     case default
+        call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))
+     end select
+  end do
+end subroutine create
 
-       case("SNICE")
-          vcount=vcount+1
 
-          allocate(tmp_3d_field)
-          !MIDDLE DIMENSION HARDCODED
-          call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
-               short_name = vars%variable(var),&
-               long_name = 'snow_ice', &
-               wrf_hydro_nwm_name = 'SNICE', units = 'liter') !unit invented
-          
-          allocate(self%fields(vcount)%field, source = tmp_3d_field)
-          deallocate(tmp_3d_field)
-          
-       case default
-          call abor1_ftn("Create: unknown variable "//trim(vars%variable(var)))          
-       end select
-    end do
+!-----------------------------------------------------------------------------
+! Fill field method
 
-  end subroutine create
+subroutine fill_field_1d(self, &
+     xdim_len, &
+     short_name, long_name, wrf_hydro_nwm_name, &
+     units, tracer)
+  implicit none
+  class(field_1d),   intent(inout) :: self
+  integer,           intent(in)    :: xdim_len
+  character(len=*),  intent(in)    :: short_name
+  character(len=*),  intent(in)    :: long_name
+  character(len=*),  intent(in)    :: wrf_hydro_nwm_name
+  character(len=*),  intent(in)    :: units
+  logical, optional, intent(in)    :: tracer
 
-  subroutine fill_field_2d(self,xdim_len,ydim_len,short_name,long_name,&
-       wrf_hydro_nwm_name,units,tracer)
-    implicit none
+  self%xdim_len = xdim_len
+  if(.not.allocated(self%array)) then
+     allocate( self%array(xdim_len) )
+  else
+     call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+  end if
+  self%short_name   = trim(short_name)
+  self%long_name    = trim(long_name)
+  self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%units        = trim(units)
+end subroutine fill_field_1d
 
-    class(field_2d),intent(inout) :: self
-    integer, intent(in)    :: xdim_len, ydim_len
-    character(len=*),              intent(in)    :: short_name
-    character(len=*),              intent(in)    :: long_name
-    character(len=*),              intent(in)    :: wrf_hydro_nwm_name
-    character(len=*),              intent(in)    :: units
-    logical, optional,             intent(in)    :: tracer
 
-    self%xdim_len = xdim_len
-    self%ydim_len = ydim_len
+subroutine fill_field_2d(self, &
+     xdim_len, ydim_len, &
+     short_name, long_name, wrf_hydro_nwm_name, &
+     units, tracer)
+  implicit none
+  class(field_2d),   intent(inout) :: self
+  integer,           intent(in)    :: xdim_len, ydim_len
+  character(len=*),  intent(in)    :: short_name
+  character(len=*),  intent(in)    :: long_name
+  character(len=*),  intent(in)    :: wrf_hydro_nwm_name
+  character(len=*),  intent(in)    :: units
+  logical, optional, intent(in)    :: tracer
 
-    if(.not.allocated(self%array)) then
-       allocate( self%array(xdim_len, ydim_len) )
-    else
-       call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
-    end if
+  self%xdim_len = xdim_len
+  self%ydim_len = ydim_len
+  if(.not.allocated(self%array)) then
+     allocate( self%array(xdim_len, ydim_len) )
+  else
+     call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+  end if
+  self%short_name   = trim(short_name)
+  self%long_name    = trim(long_name)
+  self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%units        = trim(units)
+end subroutine fill_field_2d
 
-    self%short_name   = trim(short_name)
-    self%long_name    = trim(long_name)
-    self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
-    self%units        = trim(units)
-    
-  end subroutine fill_field_2d
 
-  subroutine fill_field_3d(self,xdim_len,ydim_len,dim3_len,short_name,&
-       long_name, wrf_hydro_nwm_name,units,tracer)
-    implicit none
-    
-    class(field_3d), intent(inout) :: self
-    integer, intent(in)    :: xdim_len, ydim_len, dim3_len
-    character(len=*),              intent(in)    :: short_name
-    character(len=*),              intent(in)    :: long_name
-    character(len=*),              intent(in)    :: wrf_hydro_nwm_name
-    character(len=*),              intent(in)    :: units
-    logical, optional,             intent(in)    :: tracer
+subroutine fill_field_3d(self, &
+     xdim_len, ydim_len, zdim_len, &
+     short_name, long_name, wrf_hydro_nwm_name, &
+     units, tracer)
+  implicit none
+  class(field_3d), intent(inout) :: self
+  integer, intent(in)    :: xdim_len, ydim_len, zdim_len
+  character(len=*),              intent(in)    :: short_name
+  character(len=*),              intent(in)    :: long_name
+  character(len=*),              intent(in)    :: wrf_hydro_nwm_name
+  character(len=*),              intent(in)    :: units
+  logical, optional,             intent(in)    :: tracer
 
-    self%xdim_len = xdim_len
-    self%ydim_len = ydim_len
-    self%dim3_len = dim3_len
-    
-   if(.not.allocated(self%array)) then
-       allocate( self%array(xdim_len, ydim_len, dim3_len) )
-   else
-      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
-   end if
+  self%xdim_len = xdim_len
+  self%ydim_len = ydim_len
+  self%zdim_len = zdim_len
+  if(.not.allocated(self%array)) then
+     allocate( self%array(xdim_len, ydim_len, zdim_len) )
+  else
+     call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
+  end if
+  self%short_name   = trim(short_name)
+  self%long_name    = trim(long_name)
+  self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%units        = trim(units)
+end subroutine fill_field_3d
 
-    self%short_name   = trim(short_name)
-    self%long_name    = trim(long_name)
-    self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
-    self%units        = trim(units)
-    
-  end subroutine fill_field_3d
 
-  subroutine read_file_2d(self,filename,xstart,xend,ystart,yend)
-    class(field_2d),intent(inout) :: self
-    character(len=*), intent(in) :: filename
-    integer, intent(in) :: xstart, xend, ystart, yend
-    integer :: ixfull, jxfull
+!-----------------------------------------------------------------------------
+! Read file method
 
-    ixfull = xend-xstart+1
-    jxfull = yend-ystart+1
+subroutine read_file_1d(self, filename, xstart, xend, ystart, yend)
+  class(field_1d),intent(inout) :: self
+  character(len=*), intent(in) :: filename
+  integer, intent(in) :: xstart, xend, ystart, yend
+  integer :: ixfull, jxfull
 
-    call get_from_restart_2d_float(filename, xstart, xend, xstart, ixfull, jxfull, self%wrf_hydro_nwm_name, self%array)
-    
-  end subroutine read_file_2d
+  ixfull = xend-xstart+1
 
-  subroutine read_file_3d(self,filename,xstart,xend,ystart,yend)
-    class(field_3d),intent(inout) :: self
-    character(len=*), intent(in) :: filename
-    integer, intent(in) :: xstart, xend, ystart, yend
-    integer :: ixfull, jxfull
+  call get_from_restart_1d_float(&
+       filename, xstart, xend, xstart, ixfull, jxfull, &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_1d
 
-    ixfull = xend-xstart+1
-    jxfull = yend-ystart+1
 
-    call get_from_restart_3d(filename, xstart, xend, xstart, ixfull, jxfull, self%wrf_hydro_nwm_name, self%array)
-    
-  end subroutine read_file_3d
+subroutine read_file_2d(self, filename, xstart, xend, ystart, yend)
+  class(field_2d),intent(inout) :: self
+  character(len=*), intent(in) :: filename
+  integer, intent(in) :: xstart, xend, ystart, yend
+
+  integer :: ixfull, jxfull
+
+  ixfull = xend-xstart+1
+  jxfull = yend-ystart+1
+
+  call get_from_restart_2d_float( &
+       filename, xstart, xend, xstart, ixfull, jxfull, &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_2d
+
+
+subroutine read_file_3d(self, filename, xstart, xend, ystart, yend)
+  class(field_3d),intent(inout) :: self
+  character(len=*), intent(in) :: filename
+  integer, intent(in) :: xstart, xend, ystart, yend
+
+  integer :: ixfull, jxfull
+
+  ixfull = xend-xstart+1
+  jxfull = yend-ystart+1
+
+  call get_from_restart_3d( &
+       filename, xstart, xend, xstart, ixfull, jxfull, &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_3d
+
+
+!-----------------------------------------------------------------------------
+! Get value method
+
+function get_value_1d(self, ind) result(val)
+  class(field_1d), intent(in) :: self
+  type(indices), intent(in) :: ind
+
+  real(c_float) :: val
+
+  val = self%array(ind%ind_x)
+end function get_value_1d
+
+
+function get_value_2d(self, ind) result(val)
+  class(field_2d), intent(in) :: self
+  type(indices), intent(in) :: ind
+
+  real(c_float) :: val
+
+  val = self%array(ind%ind_x, ind%ind_y)
+end function get_value_2d
+
+
+function get_value_3d(self, ind) result(val)
+  class(field_3d), intent(in) :: self
+  type(indices), intent(in) :: ind
+
+  real(c_float) :: val
+
+  val = self%array(ind%ind_x, ind%ind_y, ind%ind_z)
+end function get_value_3d
+
 
 ! --------------------------------------------------------------------------------------------------
-  
-  function get_value_2d(self,ind) result(val)
-    class(field_2d), intent(in) :: self
-    type(indices), intent(in) :: ind
-    real(c_float) :: val
-
-    val = self%array(ind%ind_1,ind%ind_2)
-    
-  end function get_value_2d
-
-  ! --------------------------------------------------------------------------------------------------
-
-  function get_value_3d(self,ind) result(val)
-    class(field_3d), intent(in) :: self
-    type(indices), intent(in) :: ind
-    real(c_float) :: val
-
-    val = self%array(ind%ind_1,ind%ind_2,ind%ind_3)
-    
-  end function get_value_3d
-
-  ! --------------------------------------------------------------------------------------------------
-  
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
 !                           wrf_hydro_nwm_name,units,tracer,integerfield)
 
@@ -375,17 +467,17 @@ contains
 ! end subroutine allocate_field
 
 ! --------------------------------------------------------------------------------------------------
+! Deallocatae method
 
 subroutine deallocate_field(self)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
 
-implicit none
-class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
-
-write(*,*) "Deallocating fields"
-if(allocated(self%fields)) deallocate(self%fields)
-! self%lalloc = .false.
-
+  write(*,*) "Deallocating fields"
+  if(allocated(self%fields)) deallocate(self%fields)
+  ! self%lalloc = .false.
 end subroutine deallocate_field
+
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -465,95 +557,91 @@ end subroutine deallocate_field
 
 ! end subroutine allocate_copy_field_array
 
-  ! --------------------------------------------------------------------------------------------------
-  ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
-  subroutine search_field(self,long_name,field_pointer)
-    class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
-    character(len=*),    intent(in)  :: long_name
-    class(base_field), pointer, intent(out) :: field_pointer
+! --------------------------------------------------------------------------------------------------
+! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
+subroutine search_field(self,long_name,field_pointer)
+  class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
+  character(len=*),    intent(in)  :: long_name
+  class(base_field), pointer, intent(out) :: field_pointer
 
-    integer :: n
-    character(len=255) :: wrf_hydro_nwm_name
-    
-    field_pointer => null()
+  integer :: n
+  character(len=255) :: wrf_hydro_nwm_name
 
-    !Mapping between wrf_hydro variable name and obs name
-    select case (long_name)
-    case ("swe")
-       wrf_hydro_nwm_name = "SNEQV"
-    case ("snow_depth")
-       wrf_hydro_nwm_name = "SNOWH"
-    case ("leaf_area")
-       wrf_hydro_nwm_name = "LAI"
-    case default
-       wrf_hydro_nwm_name = "null"
-    end select
-    
-    !linear search
-    do n = 1, size(self%fields)
-       if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then
-          field_pointer => self%fields(n)%field
-          return
-       endif
-    enddo
-    
-    call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
-         " not found in fields.")
-    
-  end subroutine search_field
+  field_pointer => null()
 
-  ! --------------------------------------------------------------------------------------------------
+  !Mapping between wrf_hydro variable name and obs name
+  select case (long_name)
+  case ("swe")
+     wrf_hydro_nwm_name = "SNEQV"
+  case ("snow_depth")
+     wrf_hydro_nwm_name = "SNOWH"
+  case ("leaf_area")
+     wrf_hydro_nwm_name = "LAI"
+  case default
+     wrf_hydro_nwm_name = "null"
+  end select
 
-  subroutine read_fields_from_file(self,filename,xstart,xend,ystart,yend)
-    class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
-    character(len=*),    intent(in)  :: filename
-    integer, intent(in) :: xstart, xend, ystart, yend
-    
-    integer :: n
+  !linear search
+  do n = 1, size(self%fields)
+     if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then
+        field_pointer => self%fields(n)%field
+        return
+     endif
+  enddo
 
-    do n = 1, size(self%fields)
-       call self%fields(n)%field%read_file(filename,xstart,xend,ystart,yend)
-    enddo
-    
-  end subroutine read_fields_from_file
+  call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
+       " not found in fields.")
+end subroutine search_field
 
-  ! --------------------------------------------------------------------------------------------------
 
-  subroutine print_single_field(self,long_name,string)
-    implicit none
-    class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
-    character(len=*),    intent(in)  :: long_name
-    character(len=*),optional,intent(out)  :: string
-    class(base_field), pointer :: field_pointer
+subroutine read_fields_from_file(self,filename,xstart,xend,ystart,yend)
+  class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
+  character(len=*),    intent(in)  :: filename
+  integer, intent(in) :: xstart, xend, ystart, yend
 
-    call self%search_field(long_name,field_pointer)
+  integer :: n
 
-    if(associated(field_pointer)) then
-       call field_pointer%print_field(string)
-    end if
-    
-  end subroutine print_single_field
-  
-  subroutine print_all_fields(self,string)
-    use iso_c_binding, only : c_new_line
-    implicit none
-    class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
-    character(len=*),optional,intent(out)  :: string
-    integer :: f
-    character(len=1024) :: local_str
+  do n = 1, size(self%fields)
+     call self%fields(n)%field%read_file(filename,xstart,xend,ystart,yend)
+  enddo
+end subroutine read_fields_from_file
 
-    string = ' '
-    
-    do f = 1,size(self%fields)
-       if(present(string)) then
-          call self%fields(f)%field%print_field(local_str)
-          string = trim(string) // trim(local_str) // c_new_line
-       else
-          call self%fields(f)%field%print_field()
-       end if
-    end do
-    
-  end subroutine print_all_fields
+
+subroutine print_single_field(self,long_name,string)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  character(len=*),    intent(in)  :: long_name
+  character(len=*),optional,intent(out)  :: string
+  class(base_field), pointer :: field_pointer
+
+  call self%search_field(long_name,field_pointer)
+
+  if(associated(field_pointer)) then
+     call field_pointer%print_field(string)
+  end if
+end subroutine print_single_field
+
+
+subroutine print_all_fields(self,string)
+  use iso_c_binding, only : c_new_line
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
+  character(len=*),optional,intent(out)  :: string
+  integer :: f
+  character(len=1024) :: local_str
+
+  string = ' '
+
+  do f = 1,size(self%fields)
+     if(present(string)) then
+        call self%fields(f)%field%print_field(local_str)
+        string = trim(string) // trim(local_str) // c_new_line
+     else
+        call self%fields(f)%field%print_field()
+     end if
+  end do    
+end subroutine print_all_fields
+
 
 ! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 
@@ -673,37 +761,59 @@ end subroutine deallocate_field
 
 ! end subroutine pointer_field_array
 
-! --------------------------------------------------------------------------------------------------
 
-subroutine mean_stddev_2d(self,mean,stddev)
+!-----------------------------------------------------------------------------
+subroutine mean_stddev_1d(self, mean, stddev)
   implicit none
-  class(field_2d), target,  intent(in) :: self
-  real(c_float),intent(inout) :: mean,stddev
+  class(field_1d), target, intent(in) :: self
+  real(c_float), intent(inout) :: mean, stddev
+
   real(c_double) :: tmp
   integer :: n, i, j
 
-  n = size(self%array,1)*size(self%array,2)
+  n = size(self%array, 1)
 
   tmp = 0.d0
-  tmp = sum(self%array(:,:))
-  tmp = tmp/n
-
-  mean = real(tmp,kind=c_float)
+  tmp = sum(self%array(:))
+  tmp = tmp / n
+  mean = real(tmp, kind=c_float)
 
   tmp = 0.d0
-  
   !Computing stddev
-  do i=1,size(self%array,1)
-     do j=1,size(self%array,2)
-        tmp = tmp + (self%array(i,j) - mean)**2
+  do i=1, size(self%array, 1)
+        tmp = tmp + (self%array(i) - mean)**2
+  end do
+  tmp = tmp / n
+  stddev = real(tmp, kind=c_float)
+end subroutine mean_stddev_1d
+
+
+subroutine mean_stddev_2d(self, mean, stddev)
+  implicit none
+  class(field_2d), target, intent(in) :: self
+  real(c_float), intent(inout) :: mean, stddev
+
+  real(c_double) :: tmp
+  integer :: n, i, j
+
+  n = size(self%array, 1) * size(self%array, 2)
+
+  tmp = 0.d0
+  tmp = sum(self%array(:, :))
+  tmp = tmp / n
+  mean = real(tmp, kind=c_float)
+
+  tmp = 0.d0
+  !Computing stddev
+  do i=1,size(self%array, 1)
+     do j=1,size(self%array, 2)
+        tmp = tmp + (self%array(i, j) - mean)**2
      end do
   end do
   tmp = tmp / n
-  stddev = real(tmp,kind=c_float)
-  
+  stddev = real(tmp, kind=c_float)
 end subroutine mean_stddev_2d
 
-! --------------------------------------------------------------------------------------------------
 
 subroutine mean_stddev_3d(self,mean,stddev,zlayer)
   implicit none
@@ -734,11 +844,40 @@ subroutine mean_stddev_3d(self,mean,stddev,zlayer)
   
 end subroutine mean_stddev_3d
 
-! --------------------------------------------------------------------------------------------------
+
+!-----------------------------------------------------------------------------
+! RMS method
+
+
+!> RMS method (1D)
+function field_rms_1d(self) result(rms)
+  implicit none
+  class(field_1d), intent(in) :: self
+  real(kind=c_float) :: rms
+  !type(fckit_mpi_comm), intent(in)    :: f_comm
+
+  integer :: i, ii
+  real(kind=c_float) :: zz
+
+  zz = 0.0
+  ii = 0
+
+  do i = 1, self%xdim_len
+     zz = zz + self%array(i)**2
+     ii = ii + 1 !unnecessary
+  enddo
+
+  ! !Get global values
+  ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+  ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
+
+  rms = sqrt(zz / real(ii, c_float))
+end function field_rms_1d
+
 
 function field_rms_2d(self) result(rms)
   implicit none
-  class(field_2d),  intent(in) :: self
+  class(field_2d), intent(in) :: self
   real(kind=c_float) :: rms
   !type(fckit_mpi_comm), intent(in)    :: f_comm
   
@@ -748,22 +887,22 @@ function field_rms_2d(self) result(rms)
   zz = 0.0
   ii = 0
   
-  do j = 1,self%ydim_len
-     do i = 1,self%xdim_len
-        zz = zz + self%array(i,j)**2
+  do j = 1, self%ydim_len
+     do i = 1, self%xdim_len
+        zz = zz + self%array(i, j)**2
         ii = ii + 1 !unnecessary
      enddo
   enddo
 
-! !Get global values
-! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
-! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
+  ! !Get global values
+  ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+  ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 
-  rms = sqrt(zz/real(ii,c_float))
-
+  rms = sqrt(zz / real(ii, c_float))
 end function field_rms_2d
 
-function field_rms_3d(self,zlayer) result(rms)
+
+function field_rms_3d(self, zlayer) result(rms)
   implicit none
   class(field_3d),  intent(in) :: self
   integer, intent(in) :: zlayer
@@ -790,7 +929,7 @@ function field_rms_3d(self,zlayer) result(rms)
 
 end function field_rms_3d
 
-! --------------------------------------------------------------------------------------------------
+!-----------------------------------------------------------------------------
 
 ! subroutine fields_gpnorm(nf, fields, pstat, f_comm)
 
@@ -822,18 +961,48 @@ end function field_rms_3d
 ! end subroutine fields_gpnorm
 
 ! --------------------------------------------------------------------------------------------------
+! Print methods
 
-subroutine print_field_2d(self,string)
+!> Print method for a 1d field
+! @todo, this is identical to 2d?
+subroutine print_field_1d(self, string)
   use iso_c_binding, only : c_new_line, c_float
   implicit none
-  class(field_2d),intent(in) :: self
+  class(field_1d), intent(in) :: self
   integer :: str_len
-  character(len=*),optional,intent(out) :: string
+  character(len=*), optional, intent(out) :: string
 
-  real(kind=c_float) :: mean,stddev
-  character(len=255) :: float_str1,float_str2,float_str3
+  real(kind=c_float) :: mean, stddev
+  character(len=255) :: float_str1, float_str2, float_str3
 
-  call self%mean_stddev(mean,stddev)
+  call self%mean_stddev(mean, stddev)
+
+  write(float_str1, *) mean
+  write(float_str2, *) stddev
+  write(float_str3, *) self%rms()
+
+  if(present(string)) then
+     write(string,*) c_new_line//self%long_name //&
+          c_new_line//'Mean: '//trim(float_str1) // &
+          c_new_line//'Std Dev: '//trim(float_str2) // &
+          c_new_line//'RMS: '//trim(float_str3)
+  else
+     write(*,*) 'Printing ', self%long_name
+  end if
+end subroutine print_field_1d
+
+
+subroutine print_field_2d(self, string)
+  use iso_c_binding, only : c_new_line, c_float
+  implicit none
+  class(field_2d), intent(in) :: self
+  integer :: str_len
+  character(len=*), optional, intent(out) :: string
+
+  real(kind=c_float) :: mean, stddev
+  character(len=255) :: float_str1, float_str2, float_str3
+
+  call self%mean_stddev(mean, stddev)
 
   write(float_str1,*) mean
   write(float_str2,*) stddev
@@ -850,15 +1019,16 @@ subroutine print_field_2d(self,string)
   
 end subroutine print_field_2d
 
-subroutine print_field_3d(self,string)
+
+subroutine print_field_3d(self, string)
   use iso_c_binding, only : c_new_line
   implicit none
-  class(field_3d),intent(in) :: self
-  character(len=*),optional,intent(out) :: string
+  class(field_3d), intent(in) :: self
+  character(len=*), optional, intent(out) :: string
 
   integer :: z_layer
-  real(kind=c_float) :: mean,stddev
-  character(len=255) :: float_str1,float_str2,float_str3,zlayer_str
+  real(kind=c_float) :: mean, stddev
+  character(len=255) :: float_str1, float_str2, float_str3, zlayer_str
 
   if(present(string)) then
         write(string,*) c_new_line//self%long_name     
@@ -872,10 +1042,10 @@ subroutine print_field_3d(self,string)
      float_str2 = ' '
      float_str3 = ' '
      zlayer_str = ' '
-     write(float_str1,*) mean
-     write(float_str2,*) stddev
-     write(float_str3,*) self%rms(z_layer)
-     write(zlayer_str,*) z_layer
+     write(float_str1, *) mean
+     write(float_str2, *) stddev
+     write(float_str3, *) self%rms(z_layer)
+     write(zlayer_str, *) z_layer
      
      if(present(string)) then
         string = trim(string) // c_new_line //&
@@ -889,6 +1059,7 @@ subroutine print_field_3d(self,string)
   end do
   
 end subroutine print_field_3d
+
 
 ! subroutine fields_print(nf, fields, name, f_comm)
 
@@ -956,27 +1127,27 @@ end subroutine print_field_3d
 
 ! --------------------------------------------------------------------------------------------------
 
-subroutine checksame(self,other,method)
 
-implicit none
-type(wrf_hydro_nwm_jedi_fields), intent(in) :: self
-type(wrf_hydro_nwm_jedi_fields), intent(in) :: other
-character(len=*),    intent(in) :: method
+subroutine checksame(self, other, method)
+  implicit none
+  type(wrf_hydro_nwm_jedi_fields), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_fields), intent(in) :: other
+  character(len=*),    intent(in) :: method
 
-integer :: var
+  integer :: var
 
-if (size(self%fields) .ne. size(other%fields)) then
-  call abor1_ftn(trim(method)//"(checksame): Different number of fields")
-endif
-
-do var = 1,size(self%fields)
-  if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
-     call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
-                     " not in the equivalent position in the right hand side")
+  if (size(self%fields) .ne. size(other%fields)) then
+     call abor1_ftn(trim(method)//"(checksame): Different number of fields")
   endif
-enddo
 
+  do var = 1,size(self%fields)
+     if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
+        call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
+             " not in the equivalent position in the right hand side")
+     endif
+  enddo
 end subroutine checksame
+
 
 ! --------------------------------------------------------------------------------------------------
 
@@ -1050,103 +1221,196 @@ end subroutine checksame
 
 !end subroutine copy_subset
 
+!-----------------------------------------------------------------------------
+! Get from restart methods
 
-subroutine get_from_restart_3d(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
+subroutine get_from_restart_1d_float( &
+     restart_filename_remember, &
+     parallel_xstart, parallel_xend, subwindow_xstart, &
+     ixfull, jxfull, name, array, return_error)
   implicit none
-    character(len=*), intent(in) :: restart_filename_remember
-    integer,                            intent(in) :: parallel_xstart
-    integer,                            intent(in) :: parallel_xend
-    integer,                            intent(in) :: subwindow_xstart
-    integer,                            intent(in) :: ixfull
-    integer,                            intent(in) :: jxfull
-    character(len=*),                   intent(in)  :: name
-    real(kind=c_float),             dimension(:,:,:), intent(out) :: array
-    integer,          optional,         intent(out) :: return_error
-    integer :: ierr
-    integer :: ncid
-    integer :: varid
-    integer, dimension(4) :: nstart
-    integer, dimension(4) :: ncount
-! #ifdef _PARALLEL_
-!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-! #else
-    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-    !#endif
-    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
-    nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
-    ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
-    if (present(return_error)) then
-       ierr = nf90_inq_varid(ncid, name, varid)
-       if (ierr == NF90_NOERR) then
-          return_error = 0
-          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
-          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-       else
-          return_error = 1
-          write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
-       endif
-    else
-       ierr = nf90_inq_varid(ncid, name, varid)
-       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
-       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-    endif
-    ierr = nf90_close(ncid)
-    call error_handler(ierr, "Problem closing restart file")
-    
-  end subroutine get_from_restart_3d
+  character(len=*),                   intent(in) :: restart_filename_remember
+  integer,                            intent(in) :: parallel_xstart
+  integer,                            intent(in) :: parallel_xend
+  integer,                            intent(in) :: subwindow_xstart
+  integer,                            intent(in) :: ixfull
+  integer,                            intent(in) :: jxfull
+  character(len=*),                   intent(in)  :: name
+  real, dimension(parallel_xstart:parallel_xend, jxfull), intent(out) :: array
+  integer, optional,                  intent(out) :: return_error
 
-  subroutine get_from_restart_2d_float(restart_filename_remember, parallel_xstart, parallel_xend, subwindow_xstart, ixfull, jxfull, name, array, return_error)
-    implicit none
-    character(len=*), intent(in) :: restart_filename_remember
-    integer,                            intent(in) :: parallel_xstart
-    integer,                            intent(in) :: parallel_xend
-    integer,                            intent(in) :: subwindow_xstart
-    integer,                            intent(in) :: ixfull
-    integer,                            intent(in) :: jxfull
-    character(len=*),                   intent(in)  :: name
-    real,             dimension(parallel_xstart:parallel_xend,jxfull), intent(out) :: array
-    integer,          optional,         intent(out) :: return_error
-    integer :: ierr
-    integer :: ncid
-    integer :: varid
-    integer, dimension(4) :: nstart
-    integer, dimension(4) :: ncount
-    integer :: rank
-! #ifdef _PARALLEL_
-!     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-!     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
-!     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-! #else
-    rank = 0
-    ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-!#endif
-    call error_handler(ierr, "GET_FROM_RESTART: Problem opening restart file '"//trim(restart_filename_remember)//"'")
-    nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
-    ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
-    if (present(return_error)) then
-       ierr = nf90_inq_varid(ncid, name, varid)
-       if (ierr == NF90_NOERR) then
-          return_error = 0
-          call error_handler(ierr, "Problem finding variable in restart file '"//trim(name)//"'")
-          ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-          call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-       else
-          return_error = 1
-          if (rank == 0) write(*,'("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') trim(name), trim(restart_filename_remember)
-       endif
-    else
-       ierr = nf90_inq_varid(ncid, name, varid)
-       call error_handler(ierr, "Problem finding required variable in restart file: '"//trim(name)//"'")
-       ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-       call error_handler(ierr, "Problem finding variable in restart file: '"//trim(name)//"'")
-    endif
-    ierr = nf90_close(ncid)
-    call error_handler(ierr, "Problem closing restart file")
-    
-  end subroutine get_from_restart_2d_float
+  integer :: ierr
+  integer :: ncid
+  integer :: varid
+  integer, dimension(4) :: nstart
+  integer, dimension(4) :: ncount
+  integer :: rank
 
-! --------------------------------------------------------------------------------------------------
+  ! #ifdef _PARALLEL_
+  !     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+  !     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+  ! #else
+  rank = 0
+  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+  !#endif
+  call error_handler(ierr, &
+       "GET_FROM_RESTART: Problem opening restart file '" &
+       //trim(restart_filename_remember)//"'")
+  nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
+  ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
+  if (present(return_error)) then
+     ierr = nf90_inq_varid(ncid, name, varid)
+     if (ierr == NF90_NOERR) then
+        return_error = 0
+        call error_handler(ierr, &
+             "Problem finding variable in restart file '"//trim(name)//"'")
+        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+        call error_handler(ierr, &
+             "Problem finding variable in restart file: '"//trim(name)//"'")
+     else
+        return_error = 1
+        if (rank == 0) write(*, &
+             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
+             trim(name), trim(restart_filename_remember)
+     endif
+  else
+     ierr = nf90_inq_varid(ncid, name, varid)
+     call error_handler(ierr, &
+          "Problem finding required variable in restart file: '" &
+          //trim(name)//"'")
+     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+     call error_handler(ierr, &
+          "Problem finding variable in restart file: '" &
+          //trim(name)//"'")
+  endif
+  ierr = nf90_close(ncid)
+  call error_handler(ierr, "Problem closing restart file")
+end subroutine get_from_restart_1d_float
+
+
+subroutine get_from_restart_2d_float( &
+     restart_filename_remember, &
+     parallel_xstart, parallel_xend, subwindow_xstart, &
+     ixfull, jxfull, name, array, return_error)
+  implicit none
+  character(len=*),                   intent(in) :: restart_filename_remember
+  integer,                            intent(in) :: parallel_xstart
+  integer,                            intent(in) :: parallel_xend
+  integer,                            intent(in) :: subwindow_xstart
+  integer,                            intent(in) :: ixfull
+  integer,                            intent(in) :: jxfull
+  character(len=*),                   intent(in)  :: name
+  real, dimension(parallel_xstart:parallel_xend, jxfull), intent(out) :: array
+  integer, optional,                  intent(out) :: return_error
+
+  integer :: ierr
+  integer :: ncid
+  integer :: varid
+  integer, dimension(4) :: nstart
+  integer, dimension(4) :: ncount
+  integer :: rank
+
+  ! #ifdef _PARALLEL_
+  !     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
+  !     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
+  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+  ! #else
+  rank = 0
+  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+  !#endif
+  call error_handler(ierr, &
+       "GET_FROM_RESTART: Problem opening restart file '" &
+       //trim(restart_filename_remember)//"'")
+  nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
+  ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
+  if (present(return_error)) then
+     ierr = nf90_inq_varid(ncid, name, varid)
+     if (ierr == NF90_NOERR) then
+        return_error = 0
+        call error_handler(ierr, &
+             "Problem finding variable in restart file '"//trim(name)//"'")
+        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+        call error_handler(ierr, &
+             "Problem finding variable in restart file: '"//trim(name)//"'")
+     else
+        return_error = 1
+        if (rank == 0) write(*, &
+             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
+             trim(name), trim(restart_filename_remember)
+     endif
+  else
+     ierr = nf90_inq_varid(ncid, name, varid)
+     call error_handler(ierr, &
+          "Problem finding required variable in restart file: '" &
+          //trim(name)//"'")
+     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
+     call error_handler(ierr, &
+          "Problem finding variable in restart file: '" &
+          //trim(name)//"'")
+  endif
+  ierr = nf90_close(ncid)
+  call error_handler(ierr, "Problem closing restart file")
+end subroutine get_from_restart_2d_float
+
+
+subroutine get_from_restart_3d(&
+     restart_filename_remember, parallel_xstart, parallel_xend, &
+     subwindow_xstart, ixfull, jxfull, name, array, return_error)
+  implicit none
+  character(len=*),                     intent(in) :: restart_filename_remember
+  integer,                              intent(in) :: parallel_xstart
+  integer,                              intent(in) :: parallel_xend
+  integer,                              intent(in) :: subwindow_xstart
+  integer,                              intent(in) :: ixfull
+  integer,                              intent(in) :: jxfull
+  character(len=*),                     intent(in)  :: name
+  real(kind=c_float), dimension(:,:,:), intent(out) :: array
+  integer, optional,                    intent(out) :: return_error
+
+  integer :: ierr
+  integer :: ncid
+  integer :: varid
+  integer, dimension(4) :: nstart
+  integer, dimension(4) :: ncount
+  ! #ifdef _PARALLEL_
+  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
+  ! #else
+
+  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
+  !#endif
+  call error_handler(ierr, &
+       "GET_FROM_RESTART: Problem opening restart file '" &
+       //trim(restart_filename_remember)//"'")
+  nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
+  ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
+  if (present(return_error)) then
+     ierr = nf90_inq_varid(ncid, name, varid)
+     if (ierr == NF90_NOERR) then
+        return_error = 0
+        call error_handler(ierr, &
+             "Problem finding variable in restart file '"//trim(name)//"'")
+        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+        call error_handler(ierr, &
+             "Problem finding variable in restart file: '"//trim(name)//"'")
+     else
+        return_error = 1
+        write(*,&
+             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
+             trim(name), trim(restart_filename_remember)
+     endif
+  else
+     ierr = nf90_inq_varid(ncid, name, varid)
+     call error_handler(ierr, &
+          "Problem finding required variable in restart file: '" &
+          //trim(name)//"'")
+     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
+     call error_handler(ierr, &
+          "Problem finding variable in restart file: '"//trim(name)//"'")
+  endif
+  ierr = nf90_close(ncid)
+  call error_handler(ierr, "Problem closing restart file")
+end subroutine get_from_restart_3d
+
 
 end module wrf_hydro_nwm_jedi_field_mod
