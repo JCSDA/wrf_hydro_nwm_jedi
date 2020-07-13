@@ -10,7 +10,7 @@ module wrf_hydro_nwm_jedi_covariance_interface_mod
 use iso_c_binding
 use wrf_hydro_nwm_jedi_covariance_mod
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
-use wrf_hydro_nwm_jedi_geomtry_mod_c, only : wrf_hydro_nwm_jedi_geometry_registry
+use wrf_hydro_nwm_jedi_geometry_mod_c, only : wrf_hydro_nwm_jedi_geometry_registry
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state_registry, wrf_hydro_nwm_jedi_state
@@ -22,7 +22,7 @@ public :: wrf_hydro_nwm_jedi_covar_registry
 #define LISTED_TYPE wrf_hydro_nwm_jedi_covar
 
 !> Linked list interface - defines registry_t type
-#include "linkedList_i.f"
+#include "oops/util/linkedList_i.f"
 
 !> Global registry
 type(registry_t) :: wrf_hydro_nwm_jedi_covar_registry
@@ -34,26 +34,30 @@ contains
 ! ------------------------------------------------------------------------------
 
 !> Linked list implementation
-#include "linkedList_c.f"
+#include "oops/util/linkedList_c.f"
 
 ! ------------------------------------------------------------------------------
-  subroutine c_wrf_hydro_nwm_jedi_b_setup_f90(c_key_self, c_conf, c_key_geom) &
+  subroutine c_wrf_hydro_nwm_jedi_b_setup_f90(c_key_self, c_conf, c_vars) &
        & bind (c,name='wrf_hydro_nwm_jedi_b_setup_f90')
 
   implicit none
   integer(c_int), intent(inout) :: c_key_self  !< Background error covariance structure
   type(c_ptr),    intent(   in) :: c_conf      !< Configuration
-  integer(c_int), intent(   in) :: c_key_geom  !< Geometry
+  ! integer(c_int), intent(   in) :: c_key_geom  !< Geometry
+  type(c_ptr), value, intent(in) :: c_vars !< List of variables
 
   type(wrf_hydro_nwm_jedi_covar),  pointer :: self
-  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+  ! type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+  type(oops_variables) :: vars
   
-  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+  ! call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   call wrf_hydro_nwm_jedi_covar_registry%init()
   call wrf_hydro_nwm_jedi_covar_registry%add(c_key_self)
   call wrf_hydro_nwm_jedi_covar_registry%get(c_key_self, self)
 
-  call wrf_hydro_nwm_jedi_covar_setup(self, geom, c_conf)
+  vars = oops_variables(c_vars)
+  
+  call wrf_hydro_nwm_jedi_covar_setup(self, c_conf, vars)
 
 end subroutine c_wrf_hydro_nwm_jedi_b_setup_f90
 

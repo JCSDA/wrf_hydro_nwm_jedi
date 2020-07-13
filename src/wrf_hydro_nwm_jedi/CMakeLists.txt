@@ -6,6 +6,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # # Covariance
   Covariance/Covariance.h
   Covariance/Covariance.cc
+  Covariance/CovarianceFortran.h
+  Covariance/Covariance.interface.F90
+  Covariance/Covariance.F90
   
   # Geometry  
   Geometry/Geometry.h  

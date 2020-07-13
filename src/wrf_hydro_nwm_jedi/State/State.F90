@@ -81,6 +81,17 @@ end subroutine delete
 
 ! ------------------------------------------------------------------------------
 
+function get_n_fields(self) result(nf)
+  implicit none
+  integer :: nf
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+
+  nf = self%nf
+
+end function get_n_fields
+
+! ------------------------------------------------------------------------------
+
 subroutine zeros(self)
 
 implicit none

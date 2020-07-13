@@ -9,6 +9,7 @@
 #define WRF_HYDRO_NWM_JEDI_COVARIANCE_FORTRAN_H_
 
 //#include "Fortran.h"
+#include "Increment/Increment.h"
 
 // Forward declarations
 namespace eckit {
@@ -28,7 +29,7 @@ extern "C" {
 
   void wrf_hydro_nwm_jedi_b_setup_f90(F90bmat &,
 				      const eckit::Configuration * const *,
-				      const F90geom &);
+				      const oops::Variables &);
   void wrf_hydro_nwm_jedi_b_delete_f90(F90bmat &);
   /* void wrf_hydro_nwm_jedi_b_linearize_f90(const F90bmat &, */
   /*                         const eckit::Configuration * const *); */

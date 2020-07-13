@@ -9,6 +9,7 @@
 #include <string>
 
 #include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
+#include "wrf_hydro_nwm_jedi/Covariance/CovarianceFortran.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
@@ -28,8 +29,8 @@ namespace wrf_hydro_nwm_jedi {
                          const State & x1, const State & x2) {
     time_ = util::DateTime(conf.getString("date"));
     const eckit::Configuration * configc = &conf;
-    wrf_hydro_nwm_jedi_b_setup_f90(keyFtnConfig_, &configc, resol.toFortran());
-    oops::Log::trace() << "Covariance created" << std::endl;
+    wrf_hydro_nwm_jedi_b_setup_f90(keyFtnConfig_, &configc, vars);
+    // oops::Log::trace() << "Covariance created" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
