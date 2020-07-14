@@ -23,6 +23,7 @@ module wrf_hydro_nwm_jedi_field_mod
      character(len=64) :: long_name = "null"    !More descriptive name
      character(len=32) :: units = "null"        !Units for the field
      logical :: tracer = .false.
+     !class(cov_obj) :: covariance
    contains
      procedure (print_field_interface), pass(self), deferred :: print_field
      procedure (read_file_interface), pass(self), deferred :: read_file
