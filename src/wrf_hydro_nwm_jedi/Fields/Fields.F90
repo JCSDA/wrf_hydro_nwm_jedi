@@ -33,6 +33,7 @@ type, abstract :: base_field
    procedure (print_field_interface),     pass(self), deferred :: print_field
    procedure (read_file_interface),       pass(self), deferred :: read_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
+   procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
 end type base_field
 
 
@@ -56,6 +57,14 @@ abstract interface
      type(indices), intent(in) :: ind
      real(kind=c_float) :: val
    end function get_value_field_interface
+
+   subroutine apply_covariance_mult_interface(self,in_f,scalar)
+     use iso_c_binding, only : c_float
+     import base_field
+     class(base_field), intent(inout) :: self
+     class(base_field), intent(in) :: in_f
+     real(kind=c_float),intent(in) :: scalar
+   end subroutine apply_covariance_mult_interface
 end interface
 
 
@@ -72,6 +81,7 @@ type, extends(base_field) :: field_1d
    procedure, pass(self) :: fill => fill_field_1d
    procedure, pass(self) :: mean_stddev => mean_stddev_1d
    procedure, pass(self) :: rms => field_rms_1d
+   procedure, pass(self) :: apply_cov => apply_cov_1d   
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -87,6 +97,7 @@ type, extends(base_field) :: field_2d
    procedure, pass(self) :: fill => fill_field_2d
    procedure, pass(self) :: mean_stddev => mean_stddev_2d
    procedure, pass(self) :: rms => field_rms_2d
+   procedure, pass(self) :: apply_cov => apply_cov_2d   
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -102,6 +113,7 @@ type, extends(base_field) :: field_3d
    procedure, pass(self) :: fill => fill_field_3d
    procedure, pass(self) :: mean_stddev => mean_stddev_3d
    procedure, pass(self) :: rms => field_rms_3d
+   procedure, pass(self) :: apply_cov => apply_cov_3d   
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -115,6 +127,13 @@ type elem_field
    class(base_field), allocatable :: field
 end type elem_field
 
+! MERGE: Keeping this until commit in caes I miseed 
+! subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
+!   import base_field
+!   class(base_field), intent(inout) :: self
+!   character(len=*), intent(in) :: filename
+!   integer, intent(in) :: xstart, xend, ystart, yend
+! end subroutine read_file_interface  
 
 public :: wrf_hydro_nwm_jedi_fields, checksame!, &
 ! has_field, &
@@ -154,9 +173,9 @@ type :: wrf_hydro_nwm_jedi_fields
 end type wrf_hydro_nwm_jedi_fields
 
 
-! --------------------------------------------------------------------------------------------------
+! -----------------------------------------------------------------------------
 contains
-! --------------------------------------------------------------------------------------------------
+! -----------------------------------------------------------------------------
 
 
 subroutine create(self, geom, vars)
@@ -555,12 +574,13 @@ end subroutine deallocate_field
 
 ! end subroutine allocate_copy_field_array
 
-! --------------------------------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
 ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
-subroutine search_field(self,long_name,field_pointer)
-  class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
-  character(len=*),    intent(in)  :: long_name
-  class(base_field), pointer, intent(out) :: field_pointer
+subroutine search_field(self, long_name, field_pointer)
+  class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
+  character(len=*),                         intent(in)    :: long_name
+  class(base_field),               pointer, intent(out)   :: field_pointer
 
   integer :: n
   character(len=255) :: wrf_hydro_nwm_name
@@ -587,8 +607,9 @@ subroutine search_field(self,long_name,field_pointer)
      endif
   enddo
 
-  call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
-       " not found in fields.")
+  call abor1_ftn( &
+       "wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name" &
+       //"long_name "//trim(long_name)//" not found in fields.")
 end subroutine search_field
 
 
@@ -1344,6 +1365,55 @@ subroutine get_from_restart_3d_float(ncid, name, array)
   call error_handler(ierr, &
        "Problem finding variable in restart file: '"//trim(name)//"'")
 end subroutine get_from_restart_3d_float
+
+
+!-----------------------------------------------------------------------------
+! Apply covariance implementations
+
+subroutine apply_cov_1d(self, in_f, scalar)
+  class(field_1d),   intent(inout) :: self
+  class(base_field), intent(in)    :: in_f
+  real(kind=c_float),intent(in)    :: scalar
+  
+  select type(in_f)
+  type is (field_1d)
+     self%array = in_f%array * scalar
+  class default
+     call abor1_ftn("apply_cov_1d: in_f not a 1d_field")
+  end select
+end subroutine apply_cov_1d
+
+
+subroutine apply_cov_2d(self, in_f, scalar)
+  class(field_2d),   intent(inout) :: self
+  class(base_field), intent(in)    :: in_f
+  real(kind=c_float),intent(in)    :: scalar
+  
+  select type(in_f)
+  type is (field_2d)
+     self%array = in_f%array * scalar
+  class default
+     call abor1_ftn("apply_cov_2d: in_f not a 2d_field")
+  end select
+end subroutine apply_cov_2d
+
+
+subroutine apply_cov_3d(self, in_f, scalar)
+  class(field_3d),   intent(inout) :: self
+  class(base_field), intent(in)    :: in_f
+  real(kind=c_float),intent(in)    :: scalar
+  
+  integer :: layer
+  
+  select type(in_f)
+  type is (field_3d)
+     do layer = 1, size(self%array,2) !zlayer is dim2
+        self%array(:,layer,:) = in_f%array(:,layer,:) * scalar
+     end do
+  class default
+     call abor1_ftn("apply_cov_3d: in_f not a 3d_field")
+  end select
+end subroutine apply_cov_3d
 
 
 end module wrf_hydro_nwm_jedi_field_mod
