@@ -47,7 +47,6 @@ subroutine create(self, geom, vars)
   type(wrf_hydro_nwm_jedi_geometry), intent(in)    :: geom
   type(oops_variables),              intent(in)    :: vars
 
-  write(*,*) "state create"
   self%nf = vars%nvars()
   call self%fields_obj%create(geom, vars)
 end subroutine create
@@ -322,14 +321,11 @@ subroutine change_resol(self, geom, rhs, geom_rhs)
 end subroutine change_resol
 
 
-!subroutine read_state_from_file(self, c_conf)
-subroutine read_state_from_file(self, geom, c_conf, vdate)
+subroutine read_state_from_file(self, c_conf)
   use string_utils
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self   !< State
-  type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: geom   !< Geometry
   type(c_ptr),                       intent(in)    :: c_conf !< Configuration
-  type(datetime),                    intent(inout) :: vdate  !< DateTime
   
   character(len=10) :: filetype
   character(len=255) :: filename_lsm, filename_hydro
@@ -338,8 +334,6 @@ subroutine read_state_from_file(self, geom, c_conf, vdate)
   character(len=:), allocatable :: str
   integer :: ixfull, jxfull, var
 
-  write(*,*) "foobar"
-  
   f_conf = fckit_configuration(c_conf)
 
   call f_conf%get_or_die("filename_lsm", str)
@@ -412,11 +406,11 @@ subroutine state_print(self, string)
   use iso_c_binding, only : c_null_char
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  
+
   character(len=1, kind=c_char) :: string(8192)
   character(len=8192) :: tmp_str
   integer :: s_len, i
-  
+
   ! call self%fields_obj%print_single_field("swe",tmp_str)
   call self%fields_obj%print_all_fields(tmp_str)
   s_len = len_trim(tmp_str)

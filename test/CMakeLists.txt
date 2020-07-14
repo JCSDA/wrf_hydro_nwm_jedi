@@ -7,6 +7,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   )
 

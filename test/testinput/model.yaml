@@ -17,7 +17,8 @@ ModelTest:
   tolerance: 1.0e-4
 
 State:
-  model_filename: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
-  date: 2017-01-01T00:00:00Z
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+  # date: 2017-01-01T00:00:00Z
   # qlink fails
-  variables: ['SNEQV'] # , 'qlink1']
+  variables: ['SNEQV', 'qlink1']

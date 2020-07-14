@@ -201,8 +201,7 @@ subroutine wrf_hydro_nwm_jedi_state_read_file_c(c_key_geom, c_key_state, c_conf,
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
   call c_f_datetime(c_dt, fdate)
-  call read_state_from_file(state, geom, c_conf, fdate)
-  ! call read_state_from_file(state, c_conf)
+  call read_state_from_file(state, c_conf)
 end subroutine wrf_hydro_nwm_jedi_state_read_file_c
 
 

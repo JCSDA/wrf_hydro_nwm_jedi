@@ -57,7 +57,6 @@ contains
 !------------------------------------------------------------------------------
 
 !> Initialize the geometry object from the preprocessed geometry input file.
-! @todo how to make components optional?  
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   class(wrf_hydro_nwm_jedi_geometry), intent(out) :: self  !< the geom object
   type(fckit_configuration), intent(in) :: f_conf  !< the yaml file
@@ -78,7 +77,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   call wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
 
   ierr = nf90_close(ncid)
-  call error_handler(ierr, "STOP: geometry file can not be closed")  
+  call error_handler(ierr, "STOP: geometry file can not be closed")
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 
@@ -323,7 +322,7 @@ end subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn
 
 
 ! !> Get stream info
-! subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
+! subroutine wrf_hydro_nwm_jedi_geometry_get_stream_info( &
 !      self, &
 !      dx, dy, &
 !      xdim_len, ydim_len, zdim_len)

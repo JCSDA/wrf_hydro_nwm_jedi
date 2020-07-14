@@ -65,7 +65,6 @@ end interface
 type, extends(base_field) :: field_1d
    integer :: xdim_len
    real(c_float), allocatable :: array(:)
-   integer :: xstart, xend
  contains
    procedure, pass(self) :: print_field => print_field_1d
    procedure, pass(self) :: read_file => read_file_1d
@@ -81,7 +80,6 @@ end type field_1d
 type, extends(base_field) :: field_2d
    integer :: xdim_len, ydim_len
    real(c_float), allocatable :: array(:, :)
-   integer :: xstart, xend, ystart, yend
  contains
    procedure, pass(self) :: print_field => print_field_2d
    procedure, pass(self) :: read_file => read_file_2d
@@ -97,7 +95,6 @@ end type field_2d
 type, extends(base_field) :: field_3d
    integer :: xdim_len, ydim_len, zdim_len
    real(c_float), allocatable :: array(:, :, :)
-   integer :: xstart, xend, ystart, yend, zstart, zend
  contains
    procedure, pass(self) :: print_field => print_field_3d
    procedure, pass(self) :: read_file => read_file_3d
@@ -190,7 +187,7 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_1d_field)
         call tmp_1d_field%fill( &
-             geom%stream%xdim_len, geom%stream%xstart,  geom%stream%xend, &
+             xdim_len=geom%stream%xdim_len, &
              short_name=vars%variable(var), long_name='streamflow', &
              wrf_hydro_nwm_name='qlink1', units='cms', ncid_index=2)
         allocate(self%fields(vcount)%field, source=tmp_1d_field)
@@ -200,8 +197,7 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
-             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var), &
              long_name='snow_water_equivalent', &
              wrf_hydro_nwm_name='SNEQV', units='mm', ncid_index=1)
@@ -212,8 +208,7 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
-             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var), &
              long_name='snow_depth', &
              wrf_hydro_nwm_name='SNOWH', units='m', ncid_index=1)
@@ -224,8 +219,7 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
-             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var),&
              long_name='leaf_area', &
              wrf_hydro_nwm_name='LAI', units='m^2m^-2', ncid_index=1)
@@ -237,9 +231,8 @@ subroutine create(self, geom, vars)
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
         call tmp_3d_field%fill( &
-             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
-             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
-             3, geom%lsm%zstart,  geom%lsm%zend, &
+             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             zdim_len=3, &
              short_name=vars%variable(var),&
              long_name='snow_liquid', &
              wrf_hydro_nwm_name='SNLIQ', units='liter', ncid_index=1) !unit invented
@@ -251,9 +244,8 @@ subroutine create(self, geom, vars)
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
         call tmp_3d_field%fill( &
-             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
-             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
-             3, geom%lsm%zstart,  geom%lsm%zend, &
+             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             zdim_len=3, &
              short_name=vars%variable(var),&
              long_name='snow_ice', &
              wrf_hydro_nwm_name='SNICE', units='liter', ncid_index=1) !unit invented
@@ -271,14 +263,12 @@ end subroutine create
 ! Fill field method
 
 subroutine fill_field_1d(self, &
-     xdim_len, xstart, xend, &
+     xdim_len, &
      short_name, long_name, wrf_hydro_nwm_name, &
      units, tracer, ncid_index)
   implicit none
   class(field_1d),   intent(inout) :: self
   integer,           intent(in)    :: xdim_len
-  integer,           intent(in)    :: xstart
-  integer,           intent(in)    :: xend
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
@@ -301,15 +291,12 @@ end subroutine fill_field_1d
 
 
 subroutine fill_field_2d(self, &
-     xdim_len, xstart, xend, &
-     ydim_len, ystart, yend, &
+     xdim_len, ydim_len, &
      short_name, long_name, wrf_hydro_nwm_name, &
      units, tracer, ncid_index)
   implicit none
   class(field_2d),   intent(inout) :: self
   integer,           intent(in)    :: xdim_len, ydim_len
-  integer,           intent(in)    :: xstart, ystart
-  integer,           intent(in)    :: xend, yend
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
@@ -333,16 +320,12 @@ end subroutine fill_field_2d
 
 
 subroutine fill_field_3d(self, &
-     xdim_len, xstart, xend, &
-     ydim_len, ystart, yend, &
-     zdim_len, zstart, zend, &
+     xdim_len, ydim_len, zdim_len, &
      short_name, long_name, wrf_hydro_nwm_name, &
      units, tracer, ncid_index)
   implicit none
   class(field_3d),  intent(inout) :: self
   integer,          intent(in)    :: xdim_len, ydim_len, zdim_len
-  integer,          intent(in)    :: xstart, ystart, zstart
-  integer,          intent(in)    :: xend, yend, zend
   character(len=*), intent(in)    :: short_name
   character(len=*), intent(in)    :: long_name
   character(len=*), intent(in)    :: wrf_hydro_nwm_name
@@ -362,7 +345,7 @@ subroutine fill_field_3d(self, &
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
   self%units        = trim(units)
-  self%ncid_index   = ncid_index  
+  self%ncid_index   = ncid_index
 end subroutine fill_field_3d
 
 
@@ -372,7 +355,7 @@ end subroutine fill_field_3d
 subroutine read_file_1d(self, ncid_vector)
   class(field_1d),       intent(inout) :: self
   integer, dimension(2), intent(in) :: ncid_vector
-  
+
   call get_from_restart_1d_float( &
        ncid_vector(self%ncid_index), &
        self%wrf_hydro_nwm_name, self%array)
@@ -613,31 +596,31 @@ subroutine read_fields_from_file(self, filename_lsm, filename_hydro)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
   character(len=*), intent(in) :: filename_lsm, filename_hydro
 
-  integer :: ncid_lsm, ncid_hydro, n
-  integer, dimension(2) :: ierr, ncid_vector
+  integer :: ncid_lsm, ncid_hydro, n, ierr
+  integer, dimension(2) :: ncid_vector
   logical :: read_file_lsm, read_file_hydro
 
-  write(*, *) 'foo 1'
   ! open files here and pass ncids
   ! check if lsm geom is defined: open the RESTART file
-  ncid_lsm = get_restart_ncid(self, filename_lsm=filename_lsm)
-  write(*, *) 'foo 2'
-  write(*, *) ncid_lsm
+  ncid_lsm = open_get_restart_ncid(self, filename_lsm=filename_lsm)
   ! check if any hydro variables are defined: open the HYDRO_RST file
-  ncid_hydro = get_restart_ncid(self, filename_hydro=filename_hydro)
+  ncid_hydro = open_get_restart_ncid(self, filename_hydro=filename_hydro)
 
   ncid_vector = (/ ncid_lsm, ncid_hydro /)
   do n = 1, size(self%fields)
-     write(*, *) n
      call self%fields(n)%field%read_file(ncid_vector)
   enddo
 
   ! close nc files
-  
+  call close_restart_ncid(ncid_lsm, filename_lsm)
+  call close_restart_ncid(ncid_hydro, filename_hydro)
 end subroutine read_fields_from_file
 
 
-function get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
+!> Helper function get get ncids for the two restart files (RESTART and
+!> HYDRO_RST. Contains harded coded information RESTART is index 1 and
+!> RESTART is index 2. If a file is not used, the returned ncid = -9999.
+function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
   character(len=*), optional, intent(in) :: filename_lsm, filename_hydro
   integer :: ncid
@@ -645,6 +628,7 @@ function get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   logical :: read_file = .false.
   character(len=256) :: filename
   integer :: ierr, n, ncid_index
+  integer, parameter :: unopened_ncid = -9999  ! should go in a constants module
 
   if (present(filename_lsm) .and. present(filename_hydro)) then
      stop "FATAL ERROR: get_restart_ncid: both optional file arguments not allowed."
@@ -664,11 +648,31 @@ function get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   do n = 1, size(self%fields)
      if (self%fields(n)%field%ncid_index .eq. ncid_index) read_file = .true.
   enddo
+  write(*, *) filename
+  write(*, *) read_file
+
   if (read_file) then
      ierr = nf90_open(filename, NF90_NOWRITE, ncid)
-     ! TODO JLM: handle ierr
+     call error_handler(ierr, "STOP: file can not be opened: "//trim(filename))
+     write(*, *) filename
+  else
+     ncid = unopened_ncid
   end if
-end function get_restart_ncid
+end function open_get_restart_ncid
+
+
+subroutine close_restart_ncid(ncid, filename)
+  integer, intent(in) :: ncid
+  character(len=*), intent(in) :: filename
+
+  integer :: ierr
+  integer, parameter :: unopened_ncid = -9999  ! should go in a constants module
+
+  if (ncid .eq. unopened_ncid) return
+
+  ierr = nf90_close(ncid)
+  call error_handler(ierr, "STOP: file can not be closed: "//trim(filename))
+end subroutine close_restart_ncid
 
 
 subroutine print_single_field(self,long_name,string)
