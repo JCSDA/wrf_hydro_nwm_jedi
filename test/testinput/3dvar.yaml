@@ -4,7 +4,7 @@ cost_function:
     Background:
       state:
       - date: '2010-01-01T00:05:00Z'
-        filename: 'Data/INPUTS/test.fc.2010-01-01T00:00:00Z.PT5M.nc'
+        model_filename: 'Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1'
         variables: ['SNEQV']
     Covariance:
       covariance: 'wrf_hydro_nwm_jediCovar'
@@ -19,9 +19,9 @@ cost_function:
         name: 'Identity'
       ObsSpace:
         ObsDataIn:
-          obsfile: 'Data/INPUTS/truth.uv.obs3d.nc'
+          obsfile: 'Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc'
         ObsDataOut:
-          obsfile: 'Data/OUTPUTS/3dvar.uv.obs3d.nc'
+          obsfile: 'Data/wrf_hydro_nwm_files/3dvar.uv.obs3d.nc'
         name: 'Simulate'
         simulate:
           variables: ['swe']
@@ -33,7 +33,7 @@ final:
   diagnostics:
     departures: 'oman'
 minimizer:
-  algorithm: 'DRIPCG'
+  algorithm: 'RPCG' #'DRIPCG'
 model:
   name: 'WRF_HYDRO_NWM_JEDI'
   tstep: PT12S
@@ -45,10 +45,6 @@ output:
   type: 'an'
 resolution:
   input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
-  # nx: 25
-  # ny: 25
-  # xmax: 100000.0
-  # ymax: 100000.0
 variational:
   iteration:
   - diagnostics:
@@ -63,8 +59,9 @@ variational:
       version: 'SWIdTLM'
     ninner: 10
     resolution:
-      nx: 25
-      ny: 25
-      xmax: 100000.0
-      ymax: 100000.0
+      input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
+      # nx: 25
+      # ny: 25
+      # xmax: 100000.0
+      # ymax: 100000.0
     test: 'on'

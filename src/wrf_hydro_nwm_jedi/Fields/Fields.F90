@@ -135,6 +135,92 @@ end type elem_field
 !   integer, intent(in) :: xstart, xend, ystart, yend
 ! end subroutine read_file_interface  
 
+  public
+
+  type, abstract :: base_field
+     character(len=32) :: short_name = "null"   !Short name (to match file name)
+     character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
+     character(len=64) :: long_name = "null"    !More descriptive name
+     character(len=32) :: units = "null"        !Units for the field
+     logical :: tracer = .false.
+     !class(cov_obj) :: covariance
+   contains
+     procedure (print_field_interface), pass(self), deferred :: print_field
+     procedure (read_file_interface), pass(self), deferred :: read_file
+     procedure (get_value_field_interface), pass(self), deferred :: get_value
+     procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
+     !procedure (install_bkgerr_interface), pass(self), deferred :: install_bkgerr
+  end type base_field
+
+  abstract interface
+     subroutine print_field_interface(self,string)
+       import base_field
+       class(base_field), intent(in) :: self
+       character(len=*),optional,intent(out) :: string
+     end subroutine print_field_interface
+
+     subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
+       import base_field
+       class(base_field), intent(inout) :: self
+       character(len=*), intent(in) :: filename
+       integer, intent(in) :: xstart, xend, ystart, yend
+     end subroutine read_file_interface
+
+     function get_value_field_interface(self,ind) result(val)
+       use iso_c_binding, only : c_float
+       import base_field, indices
+       class(base_field), intent(in) :: self
+       type(indices), intent(in) :: ind
+       real(kind=c_float) :: val
+     end function get_value_field_interface
+
+     subroutine apply_covariance_mult_interface(self,in_f,scalar)
+       use iso_c_binding, only : c_float
+       import base_field
+       class(base_field), intent(inout) :: self
+       class(base_field), intent(in) :: in_f
+       real(kind=c_float),intent(in) :: scalar
+     end subroutine apply_covariance_mult_interface
+  end interface
+
+  type, extends(base_field) :: field_2d
+     integer :: dim1_len, dim2_len
+     real(c_float), allocatable :: array(:,:)
+   contains
+     procedure, pass(self) :: print_field => print_field_2d
+     procedure, pass(self) :: read_file => read_file_2d
+     procedure, pass(self) :: get_value => get_value_2d
+     procedure, pass(self) :: fill => fill_field_2d
+     procedure, pass(self) :: mean_stddev => mean_stddev_2d
+     procedure, pass(self) :: rms => field_rms_2d
+     procedure, pass(self) :: apply_cov => apply_cov_2d
+     !    Destructor
+     ! final :: destroy_field_2d
+  end type field_2d
+
+  type, extends(base_field) :: field_3d
+     integer :: dim1_len, dim2_len, dim3_len
+     real(c_float), allocatable :: array(:,:,:)
+   contains
+     procedure, pass(self) :: print_field => print_field_3d
+     procedure, pass(self) :: read_file => read_file_3d
+     procedure, pass(self) :: get_value => get_value_3d
+     procedure, pass(self) :: fill => fill_field_3d
+     procedure, pass(self) :: mean_stddev => mean_stddev_3d
+     procedure, pass(self) :: rms => field_rms_3d
+     procedure, pass(self) :: apply_cov => apply_cov_3d
+     !    Destructor
+     ! final :: destroy_field_3d
+  end type field_3d
+
+  !The function of this element is twofold:
+  ! 1) It allows one to create an array of base class object
+  ! 2) It makes it possible to organize the element data structures
+  ! other than simple arrays (e.g. binary search tree, hash tables, etc...)
+  type elem_field
+     class(base_field), allocatable :: field
+  end type elem_field
+
 public :: wrf_hydro_nwm_jedi_fields, checksame!, &
 ! has_field, &
 ! long_name_to_wrf_hydro_name, &
