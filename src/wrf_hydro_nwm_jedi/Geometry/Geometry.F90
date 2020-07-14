@@ -32,14 +32,18 @@ end type wrf_hydro_nwm_stream_geometry
 
 type :: wrf_hydro_nwm_jedi_geometry
    ! integer :: ix, iy  ! unused
-   type(wrf_hydro_nwm_lsm_geometry) :: lsm
-   type(wrf_hydro_nwm_stream_geometry) :: stream
+   type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm
+   type(wrf_hydro_nwm_stream_geometry), allocatable :: stream
  contains
    procedure :: init   => wrf_hydro_nwm_jedi_geometry_init
    procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete
    procedure :: get_lsm_info => wrf_hydro_nwm_jedi_geometry_get_lsm_info
    procedure :: get_lsm_nn => wrf_hydro_nwm_jedi_geometry_get_lsm_nn
+   ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
+   ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
+   procedure :: lsm_active => lsm_active
+   procedure :: stream_active => stream_active
 end type wrf_hydro_nwm_jedi_geometry
 
 
@@ -54,9 +58,10 @@ contains
 !------------------------------------------------------------------------------
 
 !> Initialize the geometry object from the preprocessed geometry input file.
+! @todo how to make components optional?  
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
-  class(wrf_hydro_nwm_jedi_geometry),   intent(out) :: self  !< the geom object
-  type(fckit_configuration),  intent(in) :: f_conf  !< the yaml file
+  class(wrf_hydro_nwm_jedi_geometry), intent(out) :: self  !< the geom object
+  type(fckit_configuration), intent(in) :: f_conf  !< the yaml file
 
   character(512) :: geometry_flnm
   character(len=:), allocatable :: str
@@ -68,17 +73,13 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   ierr = 0
   write(*,*) "Reading geometry file: "//trim(geometry_flnm)//"'"
   ierr = nf90_open(geometry_flnm, NF90_NOWRITE, ncid)
-  if(ierr /= 0) then
-     write(*,*) ierr
-     call abor1_ftn( "ERROR: geometry file not found")
-  end if
+  call error_handler(ierr, "STOP: geometry file not found")
 
-  ! LSM init required
   call wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
-
-  ! Streamflow optional TODO JLM how to signal/handle?
   call wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
 
+  ierr = nf90_close(ncid)
+  call error_handler(ierr, "STOP: geometry file can not be closed")  
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 
@@ -88,6 +89,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other  !< the new geom object
 
   ! LSM
+  ! check if active
   self%lsm%dx = other%lsm%dx
   self%lsm%dy = other%lsm%dy
   self%lsm%xdim_len = other%lsm%xdim_len
@@ -102,6 +104,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   allocate(self%lsm%lon, source = other%lsm%lon)
 
   ! Stream
+  ! TODO JLM
 end subroutine wrf_hydro_nwm_jedi_geometry_clone
 
 
@@ -109,13 +112,24 @@ end subroutine wrf_hydro_nwm_jedi_geometry_clone
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self  !< geom object
 
-  deallocate(self%lsm%lat)
-  deallocate(self%lsm%lon)
+  if (self%lsm_active()) deallocate(self%lsm)
+  if (self%stream_active()) deallocate(self%stream)
+  ! one more level up?
+  
 end subroutine wrf_hydro_nwm_jedi_geometry_delete
 
 
 !-----------------------------------------------------------------------------
 ! LSM Section
+
+
+!> Check if the lsm geometry object is allocated/active.
+function lsm_active(self) result(is_active)
+  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  logical :: is_active
+  is_active = allocated(self%lsm)
+end function lsm_active
+
 
 !> Init the LSM geometry object
 subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
@@ -125,6 +139,16 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   integer, intent(in) :: ncid
   
   integer :: ierr, dimid
+  character(len=512) :: src_file_name
+
+  ! Check LSM active
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "lsm_src_file", src_file_name)
+  call error_handler(ierr, "STOP:  lsm_src_file attribute not defined in geometry file")
+  if (ierr .ne. NF90_NOERR) then
+     return
+  end if
+
+  allocate(self%lsm)
 
   ! Hard-coded values
   self%lsm%xstart = 1
@@ -204,6 +228,16 @@ end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 !-----------------------------------------------------------------------------
 ! Streamflow section
 
+
+!> Check if the streamflow geometry object is allocated/active.
+function stream_active(self) result(is_active)
+  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  logical :: is_active
+
+  is_active = allocated(self%stream)
+end function stream_active
+
+
 !> Init the streamflow geometry object
 subroutine wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
   ! stream component IS optional
@@ -212,7 +246,17 @@ subroutine wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
   integer, intent(in) :: ncid !< the geom file netcdf id
 
   integer :: ierr, dimid
+  character(len=512) :: src_file_name
 
+  ! Check LSM active
+  ierr = nf90_get_att(ncid, NF90_GLOBAL, "stream_src_file", src_file_name)
+  call error_handler(ierr, "STOP:  stream_src_file attribute not defined in geometry file")
+  if (ierr .ne. NF90_NOERR) then
+     return
+  end if
+
+  allocate(self%stream)
+  
   ! Hard-coded values
   self%stream%xstart = 1
 
@@ -261,7 +305,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn( &
 end subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn
 
 
-! !> Get lsm info
+! !> Get stream info
 ! subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
 !      self, &
 !      dx, dy, &
@@ -305,7 +349,6 @@ end subroutine get_geom_dim_len
 
 
 !> Helper function for reading geometry file data (1D)
-! @todo make this polymorphic with 1,2,3D versions
 subroutine get_geom_data_1d(meta_name, ncid, vector)
   character(len=*),   intent(in)  :: meta_name
   integer,            intent(in)  :: ncid
@@ -331,7 +374,6 @@ end subroutine get_geom_data_1d
 
 
 !> Helper function for reading geometry file data (2D)
-! @todo make this polymorphic
 subroutine get_geom_data_2d(meta_name, ncid, array)
   character(len=*),      intent(in)  :: meta_name
   integer,               intent(in)  :: ncid

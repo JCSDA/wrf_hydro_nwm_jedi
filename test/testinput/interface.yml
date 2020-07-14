@@ -1,4 +1,10 @@
-# Needed for TestGeometry
+# Tests used by:
+#   - TestGeometry
+#   ? TestState
+#   - TestModel
+#   - TestInterface
+
+# + needed for TestGeometry
 Geometry:
   input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
@@ -10,6 +16,8 @@ StateTest:
   StateGenerate:
     model_filename: RESTART
   StateFile:
+    filename_lsm: RESTART
+    filename_hydro: RESTART
     model_filename: RESTART
   norm-gen: 0.0
 
@@ -29,6 +37,6 @@ ModelTest:
 
 # + needed for TestInterface
 Variables:
-  variables: ['SNEQV']
+  variables: ['SNEQV'] #, 'qlink1']
 
 TestDate: 2018-04-15T00:00:00Z

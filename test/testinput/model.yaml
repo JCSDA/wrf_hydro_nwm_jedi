@@ -19,4 +19,5 @@ ModelTest:
 State:
   model_filename: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   date: 2017-01-01T00:00:00Z
-  variables: ['SNEQV']
+  # qlink fails
+  variables: ['SNEQV'] # , 'qlink1']

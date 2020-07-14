@@ -27,6 +27,7 @@ type, abstract :: base_field
    character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
    character(len=64) :: long_name = "null"    !More descriptive name
    character(len=32) :: units = "null"        !Units for the field
+   integer :: ncid_index
    logical :: tracer = .false.
  contains
    procedure (print_field_interface),     pass(self), deferred :: print_field
@@ -42,11 +43,10 @@ abstract interface
      character(len=*), optional, intent(out) :: string
    end subroutine print_field_interface
 
-   subroutine read_file_interface(self, filename, xstart, xend, ystart, yend)
+   subroutine read_file_interface(self, ncid_vector)
      import base_field
-     class(base_field), intent(inout) :: self
-     character(len=*), intent(in) :: filename
-     integer, intent(in) :: xstart, xend, ystart, yend
+     class(base_field),     intent(inout) :: self
+     integer, dimension(2), intent(in) :: ncid_vector
    end subroutine read_file_interface
 
    function get_value_field_interface(self, ind) result(val)
@@ -65,6 +65,7 @@ end interface
 type, extends(base_field) :: field_1d
    integer :: xdim_len
    real(c_float), allocatable :: array(:)
+   integer :: xstart, xend
  contains
    procedure, pass(self) :: print_field => print_field_1d
    procedure, pass(self) :: read_file => read_file_1d
@@ -80,6 +81,7 @@ end type field_1d
 type, extends(base_field) :: field_2d
    integer :: xdim_len, ydim_len
    real(c_float), allocatable :: array(:, :)
+   integer :: xstart, xend, ystart, yend
  contains
    procedure, pass(self) :: print_field => print_field_2d
    procedure, pass(self) :: read_file => read_file_2d
@@ -95,6 +97,7 @@ end type field_2d
 type, extends(base_field) :: field_3d
    integer :: xdim_len, ydim_len, zdim_len
    real(c_float), allocatable :: array(:, :, :)
+   integer :: xstart, xend, ystart, yend, zstart, zend
  contains
    procedure, pass(self) :: print_field => print_field_3d
    procedure, pass(self) :: read_file => read_file_3d
@@ -182,66 +185,79 @@ subroutine create(self, geom, vars)
   vcount = 0
   do var = 1, self%nf
      select case (trim(vars%variable(var)))
+
      case("qlink1")
-        vcount=vcount+1;
+        vcount = vcount + 1
         allocate(tmp_1d_field)
-        call tmp_1d_field%fill(geom%stream%xdim_len, &
-             short_name = vars%variable(var), &
-             long_name = 'streamflow', &
-             wrf_hydro_nwm_name = 'qlink1', units = 'cms')
-        allocate(self%fields(vcount)%field, source = tmp_1d_field)
+        call tmp_1d_field%fill( &
+             geom%stream%xdim_len, geom%stream%xstart,  geom%stream%xend, &
+             short_name=vars%variable(var), long_name='streamflow', &
+             wrf_hydro_nwm_name='qlink1', units='cms', ncid_index=2)
+        allocate(self%fields(vcount)%field, source=tmp_1d_field)
         deallocate(tmp_1d_field)
 
      case("SNEQV")
-        vcount=vcount+1;
+        vcount = vcount + 1
         allocate(tmp_2d_field)
-        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-             short_name = vars%variable(var), &
-             long_name = 'snow_water_equivalent', &
-             wrf_hydro_nwm_name = 'SNEQV', units = 'mm')
-        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        call tmp_2d_field%fill( &
+             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
+             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             short_name=vars%variable(var), &
+             long_name='snow_water_equivalent', &
+             wrf_hydro_nwm_name='SNEQV', units='mm', ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
      case("SNOWH")
-        vcount=vcount+1;
+        vcount = vcount + 1
         allocate(tmp_2d_field)
-        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-             short_name = vars%variable(var), &
-             long_name = 'snow_depth', &
-             wrf_hydro_nwm_name = 'SNOWH', units = 'm')
-        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        call tmp_2d_field%fill( &
+             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
+             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             short_name=vars%variable(var), &
+             long_name='snow_depth', &
+             wrf_hydro_nwm_name='SNOWH', units='m', ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
      case("LAI")
-        vcount=vcount+1
+        vcount = vcount + 1
         allocate(tmp_2d_field)
-        call tmp_2d_field%fill(geom%lsm%xdim_len, geom%lsm%ydim_len, &
-             short_name = vars%variable(var),&
-             long_name = 'leaf_area', &
-             wrf_hydro_nwm_name = 'LAI', units = 'm^2m^-2')
-        allocate(self%fields(vcount)%field, source = tmp_2d_field)
+        call tmp_2d_field%fill( &
+             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
+             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             short_name=vars%variable(var),&
+             long_name='leaf_area', &
+             wrf_hydro_nwm_name='LAI', units='m^2m^-2', ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
      case("SNLIQ")
-        vcount=vcount+1
+        vcount = vcount + 1
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
-        call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
-             short_name = vars%variable(var),&
-             long_name = 'snow_liquid', &
-             wrf_hydro_nwm_name = 'SNLIQ', units = 'liter') !unit invented
-        allocate(self%fields(vcount)%field, source = tmp_3d_field)
+        call tmp_3d_field%fill( &
+             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
+             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             3, geom%lsm%zstart,  geom%lsm%zend, &
+             short_name=vars%variable(var),&
+             long_name='snow_liquid', &
+             wrf_hydro_nwm_name='SNLIQ', units='liter', ncid_index=1) !unit invented
+        allocate(self%fields(vcount)%field, source=tmp_3d_field)
         deallocate(tmp_3d_field)
 
      case("SNICE")
-        vcount=vcount+1
+        vcount = vcount + 1
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
-        call tmp_3d_field%fill(geom%lsm%xdim_len, 3, geom%lsm%ydim_len, &
-             short_name = vars%variable(var),&
-             long_name = 'snow_ice', &
-             wrf_hydro_nwm_name = 'SNICE', units = 'liter') !unit invented
-        allocate(self%fields(vcount)%field, source = tmp_3d_field)
+        call tmp_3d_field%fill( &
+             geom%lsm%xdim_len, geom%lsm%xstart,  geom%lsm%xend, &
+             geom%lsm%ydim_len, geom%lsm%ystart,  geom%lsm%yend, &
+             3, geom%lsm%zstart,  geom%lsm%zend, &
+             short_name=vars%variable(var),&
+             long_name='snow_ice', &
+             wrf_hydro_nwm_name='SNICE', units='liter', ncid_index=1) !unit invented
+        allocate(self%fields(vcount)%field, source=tmp_3d_field)
         deallocate(tmp_3d_field)
 
      case default
@@ -255,17 +271,20 @@ end subroutine create
 ! Fill field method
 
 subroutine fill_field_1d(self, &
-     xdim_len, &
+     xdim_len, xstart, xend, &
      short_name, long_name, wrf_hydro_nwm_name, &
-     units, tracer)
+     units, tracer, ncid_index)
   implicit none
   class(field_1d),   intent(inout) :: self
   integer,           intent(in)    :: xdim_len
+  integer,           intent(in)    :: xstart
+  integer,           intent(in)    :: xend
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
   character(len=*),  intent(in)    :: units
   logical, optional, intent(in)    :: tracer
+  integer,           intent(in)    :: ncid_index
 
   self%xdim_len = xdim_len
   if(.not.allocated(self%array)) then
@@ -277,21 +296,26 @@ subroutine fill_field_1d(self, &
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
   self%units        = trim(units)
+  self%ncid_index   = ncid_index
 end subroutine fill_field_1d
 
 
 subroutine fill_field_2d(self, &
-     xdim_len, ydim_len, &
+     xdim_len, xstart, xend, &
+     ydim_len, ystart, yend, &
      short_name, long_name, wrf_hydro_nwm_name, &
-     units, tracer)
+     units, tracer, ncid_index)
   implicit none
   class(field_2d),   intent(inout) :: self
   integer,           intent(in)    :: xdim_len, ydim_len
+  integer,           intent(in)    :: xstart, ystart
+  integer,           intent(in)    :: xend, yend
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
   character(len=*),  intent(in)    :: units
   logical, optional, intent(in)    :: tracer
+  integer,           intent(in)    :: ncid_index
 
   self%xdim_len = xdim_len
   self%ydim_len = ydim_len
@@ -304,21 +328,27 @@ subroutine fill_field_2d(self, &
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
   self%units        = trim(units)
+  self%ncid_index   = ncid_index
 end subroutine fill_field_2d
 
 
 subroutine fill_field_3d(self, &
-     xdim_len, ydim_len, zdim_len, &
+     xdim_len, xstart, xend, &
+     ydim_len, ystart, yend, &
+     zdim_len, zstart, zend, &
      short_name, long_name, wrf_hydro_nwm_name, &
-     units, tracer)
+     units, tracer, ncid_index)
   implicit none
-  class(field_3d), intent(inout) :: self
-  integer, intent(in)    :: xdim_len, ydim_len, zdim_len
-  character(len=*),              intent(in)    :: short_name
-  character(len=*),              intent(in)    :: long_name
-  character(len=*),              intent(in)    :: wrf_hydro_nwm_name
-  character(len=*),              intent(in)    :: units
-  logical, optional,             intent(in)    :: tracer
+  class(field_3d),  intent(inout) :: self
+  integer,          intent(in)    :: xdim_len, ydim_len, zdim_len
+  integer,          intent(in)    :: xstart, ystart, zstart
+  integer,          intent(in)    :: xend, yend, zend
+  character(len=*), intent(in)    :: short_name
+  character(len=*), intent(in)    :: long_name
+  character(len=*), intent(in)    :: wrf_hydro_nwm_name
+  character(len=*), intent(in)    :: units
+  logical, optional,intent(in)    :: tracer
+  integer,          intent(in)    :: ncid_index
 
   self%xdim_len = xdim_len
   self%ydim_len = ydim_len
@@ -332,54 +362,39 @@ subroutine fill_field_3d(self, &
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
   self%units        = trim(units)
+  self%ncid_index   = ncid_index  
 end subroutine fill_field_3d
 
 
 !-----------------------------------------------------------------------------
-! Read file method
+! Read file implementations
 
-subroutine read_file_1d(self, filename, xstart, xend, ystart, yend)
-  class(field_1d),intent(inout) :: self
-  character(len=*), intent(in) :: filename
-  integer, intent(in) :: xstart, xend, ystart, yend
-  integer :: ixfull, jxfull
-
-  ixfull = xend-xstart+1
-
-  call get_from_restart_1d_float(&
-       filename, xstart, xend, xstart, ixfull, jxfull, &
+subroutine read_file_1d(self, ncid_vector)
+  class(field_1d),       intent(inout) :: self
+  integer, dimension(2), intent(in) :: ncid_vector
+  
+  call get_from_restart_1d_float( &
+       ncid_vector(self%ncid_index), &
        self%wrf_hydro_nwm_name, self%array)
 end subroutine read_file_1d
 
 
-subroutine read_file_2d(self, filename, xstart, xend, ystart, yend)
-  class(field_2d),intent(inout) :: self
-  character(len=*), intent(in) :: filename
-  integer, intent(in) :: xstart, xend, ystart, yend
-
-  integer :: ixfull, jxfull
-
-  ixfull = xend-xstart+1
-  jxfull = yend-ystart+1
+subroutine read_file_2d(self, ncid_vector)
+  class(field_2d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
 
   call get_from_restart_2d_float( &
-       filename, xstart, xend, xstart, ixfull, jxfull, &
+       ncid_vector(self%ncid_index), &
        self%wrf_hydro_nwm_name, self%array)
 end subroutine read_file_2d
 
 
-subroutine read_file_3d(self, filename, xstart, xend, ystart, yend)
-  class(field_3d),intent(inout) :: self
-  character(len=*), intent(in) :: filename
-  integer, intent(in) :: xstart, xend, ystart, yend
+subroutine read_file_3d(self, ncid_vector)
+  class(field_3d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
 
-  integer :: ixfull, jxfull
-
-  ixfull = xend-xstart+1
-  jxfull = yend-ystart+1
-
-  call get_from_restart_3d( &
-       filename, xstart, xend, xstart, ixfull, jxfull, &
+  call get_from_restart_3d_float( &
+       ncid_vector(self%ncid_index), &
        self%wrf_hydro_nwm_name, self%array)
 end subroutine read_file_3d
 
@@ -594,17 +609,66 @@ subroutine search_field(self,long_name,field_pointer)
 end subroutine search_field
 
 
-subroutine read_fields_from_file(self,filename,xstart,xend,ystart,yend)
-  class(wrf_hydro_nwm_jedi_fields),  target, intent(inout) :: self
-  character(len=*),    intent(in)  :: filename
-  integer, intent(in) :: xstart, xend, ystart, yend
+subroutine read_fields_from_file(self, filename_lsm, filename_hydro)
+  class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
+  character(len=*), intent(in) :: filename_lsm, filename_hydro
 
-  integer :: n
+  integer :: ncid_lsm, ncid_hydro, n
+  integer, dimension(2) :: ierr, ncid_vector
+  logical :: read_file_lsm, read_file_hydro
+
+  write(*, *) 'foo 1'
+  ! open files here and pass ncids
+  ! check if lsm geom is defined: open the RESTART file
+  ncid_lsm = get_restart_ncid(self, filename_lsm=filename_lsm)
+  write(*, *) 'foo 2'
+  write(*, *) ncid_lsm
+  ! check if any hydro variables are defined: open the HYDRO_RST file
+  ncid_hydro = get_restart_ncid(self, filename_hydro=filename_hydro)
+
+  ncid_vector = (/ ncid_lsm, ncid_hydro /)
+  do n = 1, size(self%fields)
+     write(*, *) n
+     call self%fields(n)%field%read_file(ncid_vector)
+  enddo
+
+  ! close nc files
+  
+end subroutine read_fields_from_file
+
+
+function get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
+  class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
+  character(len=*), optional, intent(in) :: filename_lsm, filename_hydro
+  integer :: ncid
+
+  logical :: read_file = .false.
+  character(len=256) :: filename
+  integer :: ierr, n, ncid_index
+
+  if (present(filename_lsm) .and. present(filename_hydro)) then
+     stop "FATAL ERROR: get_restart_ncid: both optional file arguments not allowed."
+  else if (.not.(present(filename_lsm)) .and. .not.(present(filename_hydro))) then
+     stop "FATAL ERROR: get_restart_ncid: at least one optional file argument required."
+  endif
+
+  ! Hard coded association. A dictionary/hashtable could be used (code in utilties).
+  if (present(filename_lsm)) then
+     filename = filename_lsm
+     ncid_index = 1
+  else
+     filename = filename_hydro
+     ncid_index = 2
+  end if
 
   do n = 1, size(self%fields)
-     call self%fields(n)%field%read_file(filename,xstart,xend,ystart,yend)
+     if (self%fields(n)%field%ncid_index .eq. ncid_index) read_file = .true.
   enddo
-end subroutine read_fields_from_file
+  if (read_file) then
+     ierr = nf90_open(filename, NF90_NOWRITE, ncid)
+     ! TODO JLM: handle ierr
+  end if
+end function get_restart_ncid
 
 
 subroutine print_single_field(self,long_name,string)
@@ -846,7 +910,7 @@ end subroutine mean_stddev_3d
 
 
 !-----------------------------------------------------------------------------
-! RMS method
+! RMS implementations
 
 
 !> RMS method (1D)
@@ -1224,193 +1288,59 @@ end subroutine checksame
 !-----------------------------------------------------------------------------
 ! Get from restart methods
 
-subroutine get_from_restart_1d_float( &
-     restart_filename_remember, &
-     parallel_xstart, parallel_xend, subwindow_xstart, &
-     ixfull, jxfull, name, array, return_error)
+subroutine get_from_restart_1d_float(ncid, name, array)
   implicit none
-  character(len=*),                   intent(in) :: restart_filename_remember
-  integer,                            intent(in) :: parallel_xstart
-  integer,                            intent(in) :: parallel_xend
-  integer,                            intent(in) :: subwindow_xstart
-  integer,                            intent(in) :: ixfull
-  integer,                            intent(in) :: jxfull
+  integer,                            intent(in) :: ncid
   character(len=*),                   intent(in)  :: name
-  real, dimension(parallel_xstart:parallel_xend, jxfull), intent(out) :: array
-  integer, optional,                  intent(out) :: return_error
+  real, dimension(:),                 intent(out) :: array
 
   integer :: ierr
-  integer :: ncid
   integer :: varid
-  integer, dimension(4) :: nstart
-  integer, dimension(4) :: ncount
-  integer :: rank
 
-  ! #ifdef _PARALLEL_
-  !     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-  !     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
-  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-  ! #else
-  rank = 0
-  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-  !#endif
+  ierr = nf90_inq_varid(ncid, name, varid)
   call error_handler(ierr, &
-       "GET_FROM_RESTART: Problem opening restart file '" &
-       //trim(restart_filename_remember)//"'")
-  nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
-  ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
-  if (present(return_error)) then
-     ierr = nf90_inq_varid(ncid, name, varid)
-     if (ierr == NF90_NOERR) then
-        return_error = 0
-        call error_handler(ierr, &
-             "Problem finding variable in restart file '"//trim(name)//"'")
-        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-        call error_handler(ierr, &
-             "Problem finding variable in restart file: '"//trim(name)//"'")
-     else
-        return_error = 1
-        if (rank == 0) write(*, &
-             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
-             trim(name), trim(restart_filename_remember)
-     endif
-  else
-     ierr = nf90_inq_varid(ncid, name, varid)
-     call error_handler(ierr, &
-          "Problem finding required variable in restart file: '" &
-          //trim(name)//"'")
-     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-     call error_handler(ierr, &
-          "Problem finding variable in restart file: '" &
-          //trim(name)//"'")
-  endif
-  ierr = nf90_close(ncid)
-  call error_handler(ierr, "Problem closing restart file")
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
 end subroutine get_from_restart_1d_float
 
 
-subroutine get_from_restart_2d_float( &
-     restart_filename_remember, &
-     parallel_xstart, parallel_xend, subwindow_xstart, &
-     ixfull, jxfull, name, array, return_error)
+subroutine get_from_restart_2d_float(ncid, name, array)
   implicit none
-  character(len=*),                   intent(in) :: restart_filename_remember
-  integer,                            intent(in) :: parallel_xstart
-  integer,                            intent(in) :: parallel_xend
-  integer,                            intent(in) :: subwindow_xstart
-  integer,                            intent(in) :: ixfull
-  integer,                            intent(in) :: jxfull
+  integer,                            intent(in) :: ncid
   character(len=*),                   intent(in)  :: name
-  real, dimension(parallel_xstart:parallel_xend, jxfull), intent(out) :: array
-  integer, optional,                  intent(out) :: return_error
+  real, dimension(:, :),              intent(out) :: array
 
   integer :: ierr
-  integer :: ncid
   integer :: varid
-  integer, dimension(4) :: nstart
-  integer, dimension(4) :: ncount
-  integer :: rank
 
-  ! #ifdef _PARALLEL_
-  !     call MPI_COMM_RANK(MPI_COMM_WORLD, rank, ierr)
-  !     if (ierr /= MPI_SUCCESS) stop "MPI_COMM_RANK"
-  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-  ! #else
-  rank = 0
-  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-  !#endif
+  ierr = nf90_inq_varid(ncid, name, varid)
   call error_handler(ierr, &
-       "GET_FROM_RESTART: Problem opening restart file '" &
-       //trim(restart_filename_remember)//"'")
-  nstart = (/ parallel_xstart-subwindow_xstart+1, 1,  1, -99999 /)
-  ncount = (/ parallel_xend-parallel_xstart+1,   size(array,2),  1, -99999 /)
-  if (present(return_error)) then
-     ierr = nf90_inq_varid(ncid, name, varid)
-     if (ierr == NF90_NOERR) then
-        return_error = 0
-        call error_handler(ierr, &
-             "Problem finding variable in restart file '"//trim(name)//"'")
-        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-        call error_handler(ierr, &
-             "Problem finding variable in restart file: '"//trim(name)//"'")
-     else
-        return_error = 1
-        if (rank == 0) write(*, &
-             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
-             trim(name), trim(restart_filename_remember)
-     endif
-  else
-     ierr = nf90_inq_varid(ncid, name, varid)
-     call error_handler(ierr, &
-          "Problem finding required variable in restart file: '" &
-          //trim(name)//"'")
-     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:3))
-     call error_handler(ierr, &
-          "Problem finding variable in restart file: '" &
-          //trim(name)//"'")
-  endif
-  ierr = nf90_close(ncid)
-  call error_handler(ierr, "Problem closing restart file")
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
 end subroutine get_from_restart_2d_float
 
 
-subroutine get_from_restart_3d(&
-     restart_filename_remember, parallel_xstart, parallel_xend, &
-     subwindow_xstart, ixfull, jxfull, name, array, return_error)
+subroutine get_from_restart_3d_float(ncid, name, array)
   implicit none
-  character(len=*),                     intent(in) :: restart_filename_remember
-  integer,                              intent(in) :: parallel_xstart
-  integer,                              intent(in) :: parallel_xend
-  integer,                              intent(in) :: subwindow_xstart
-  integer,                              intent(in) :: ixfull
-  integer,                              intent(in) :: jxfull
-  character(len=*),                     intent(in)  :: name
-  real(kind=c_float), dimension(:,:,:), intent(out) :: array
-  integer, optional,                    intent(out) :: return_error
+  integer,                            intent(in) :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:, :, :),           intent(out) :: array
 
   integer :: ierr
-  integer :: ncid
   integer :: varid
-  integer, dimension(4) :: nstart
-  integer, dimension(4) :: ncount
-  ! #ifdef _PARALLEL_
-  !     ierr = nf90_open_par(trim(restart_filename_remember), NF90_NOWRITE, MPI_COMM_WORLD, MPI_INFO_NULL, ncid)
-  ! #else
 
-  ierr = nf90_open(trim(restart_filename_remember), NF90_NOWRITE, ncid)
-  !#endif
+  ierr = nf90_inq_varid(ncid, name, varid)
   call error_handler(ierr, &
-       "GET_FROM_RESTART: Problem opening restart file '" &
-       //trim(restart_filename_remember)//"'")
-  nstart = (/parallel_xstart-subwindow_xstart+1,1, 1, 1/)
-  ncount = (/parallel_xend-parallel_xstart+1, size(array,2), size(array,3), 1/)
-  if (present(return_error)) then
-     ierr = nf90_inq_varid(ncid, name, varid)
-     if (ierr == NF90_NOERR) then
-        return_error = 0
-        call error_handler(ierr, &
-             "Problem finding variable in restart file '"//trim(name)//"'")
-        ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-        call error_handler(ierr, &
-             "Problem finding variable in restart file: '"//trim(name)//"'")
-     else
-        return_error = 1
-        write(*,&
-             '("Did not find optional variable ''",A,"'' in restart file ''", A, "''")') &
-             trim(name), trim(restart_filename_remember)
-     endif
-  else
-     ierr = nf90_inq_varid(ncid, name, varid)
-     call error_handler(ierr, &
-          "Problem finding required variable in restart file: '" &
-          //trim(name)//"'")
-     ierr = nf90_get_var(ncid, varid, array, start=nstart(1:4))
-     call error_handler(ierr, &
-          "Problem finding variable in restart file: '"//trim(name)//"'")
-  endif
-  ierr = nf90_close(ncid)
-  call error_handler(ierr, "Problem closing restart file")
-end subroutine get_from_restart_3d
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
+end subroutine get_from_restart_3d_float
 
 
 end module wrf_hydro_nwm_jedi_field_mod
+ 
