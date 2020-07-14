@@ -10,15 +10,16 @@
 
 #include <string>
 
-// #include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
+#include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 // #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 // #include "wrf_hydro_nwm_jedi/GetValuesTraj/GetValuesTraj.h"
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
-// #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
-// #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
+#include "wrf_hydro_nwm_jedi/LinearGetValues/LinearGetValues.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
-// #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxIncrement.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxIncrement.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 //#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 
@@ -26,6 +27,7 @@
 #include "ioda/ObsVector.h"
 
 #include "ufo/GeoVaLs.h"
+#include "ufo/LinearObsOperator.h"
 #include "ufo/Locations.h"
 #include "ufo/ObsBias.h"
 #include "ufo/ObsBiasCovariance.h"
@@ -42,19 +44,21 @@ namespace wrf_hydro_nwm_jedi {
 
     // Interfaces that wrf_hydro_nwm_jedi has to implement
     // ---------------------------------------------------
-    // typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
+    typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
     typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
     // typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
     // typedef wrf_hydro_nwm_jedi::GetValuesTraj       InterpolatorTraj;
     typedef wrf_hydro_nwm_jedi::GetValues           GetValues;
-    // typedef wrf_hydro_nwm_jedi::Increment           Increment;
+    typedef wrf_hydro_nwm_jedi::LinearGetValues     LinearGetValues;
+    typedef wrf_hydro_nwm_jedi::Increment           Increment;
     typedef wrf_hydro_nwm_jedi::State               State;
-    // typedef wrf_hydro_nwm_jedi::ModelAuxCovariance  ModelAuxCovariance;
+    typedef wrf_hydro_nwm_jedi::ModelAuxCovariance  ModelAuxCovariance;
     typedef wrf_hydro_nwm_jedi::ModelAuxControl     ModelAuxControl;
-    // typedef wrf_hydro_nwm_jedi::ModelAuxIncrement   ModelAuxIncrement;
+    typedef wrf_hydro_nwm_jedi::ModelAuxIncrement   ModelAuxIncrement;
 
     // Interfaces that are already provided by JEDI
     typedef ufo::GeoVaLs              GeoVaLs;
+    typedef ufo::LinearObsOperator    LinearObsOperator;
     typedef ufo::Locations            Locations;
     typedef ufo::ObsBias              ObsAuxControl;
     typedef ufo::ObsBiasCovariance    ObsAuxCovariance;

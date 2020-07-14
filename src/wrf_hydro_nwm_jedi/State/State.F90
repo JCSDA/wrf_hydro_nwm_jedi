@@ -55,18 +55,40 @@ end subroutine create
 
 ! ------------------------------------------------------------------------------
 
+! subroutine create_from_other(self, other)
+
+!   ! Passed variables
+!   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
+!   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
+
+!   ! Create new state from other state
+!   self = shallow_water_state_type(other%get_geometry())
+
+!   ! Initialize all arrays to zero
+!   !call zeros(self)
+
+! end subroutine create_from_other
+
+! ------------------------------------------------------------------------------
+
 subroutine delete(self)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 
-implicit none
-type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-! integer :: var
-
-! do var = 1, self%nf
-!   call self%fields(var)%deallocate_field()
-! enddo
-! deallocate(self%fields)
+  call self%fields_obj%deallocate_field()
 
 end subroutine delete
+
+! ------------------------------------------------------------------------------
+
+function get_n_fields(self) result(nf)
+  implicit none
+  integer :: nf
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+
+  nf = self%nf
+
+end function get_n_fields
 
 ! ------------------------------------------------------------------------------
 
@@ -121,171 +143,6 @@ type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
 ! enddo
 
 end subroutine axpy
-
-! ------------------------------------------------------------------------------
-
-!subroutine add_incr(geom,self,rhs)
-
-!implicit none
-! type(wrf_hydro_nwm_jedi_geometry),      intent(inout) :: geom
-! type(wrf_hydro_nwm_jedi_state),     intent(inout) :: self
-! type(fv3jedi_increment), intent(in)    :: rhs
-
-! integer :: var,i,j,k
-! logical :: found_neg
-! type(fv3jedi_field), pointer :: field_pointer
-
-! real(kind=kind_real), allocatable :: rhs_ud(:,:,:), rhs_vd(:,:,:)
-! real(kind=kind_real), allocatable :: rhs_delp(:,:,:)
-
-! real(kind=kind_real), pointer :: self_ua(:,:,:)
-! real(kind=kind_real), pointer :: self_va(:,:,:)
-! real(kind=kind_real), pointer :: self_ud(:,:,:)
-! real(kind=kind_real), pointer :: self_vd(:,:,:)
-! real(kind=kind_real), pointer :: self_t (:,:,:)
-! real(kind=kind_real), pointer :: self_pt(:,:,:)
-! real(kind=kind_real), pointer :: self_delp(:,:,:)
-! real(kind=kind_real), pointer :: self_ps(:,:,:)
-
-! real(kind=kind_real), pointer :: rhs_ua(:,:,:)
-! real(kind=kind_real), pointer :: rhs_va(:,:,:)
-! real(kind=kind_real), pointer :: rhs_t (:,:,:)
-! real(kind=kind_real), pointer :: rhs_pt(:,:,:)
-! real(kind=kind_real), pointer :: rhs_ps(:,:,:)
-
-! ! Handle special cases, e.g. D grid winds to A grid winds
-! ! -------------------------------------------------------
-
-! ! Get D-Grid winds if necessary
-! if (rhs%have_agrid) then !A-Grid in increment
-!   if (.not.rhs%have_dgrid) then !D-Grid not in increment
-!     if (self%have_dgrid) then !D-grid in state
-!       allocate(rhs_ud(rhs%isc:rhs%iec  ,rhs%jsc:rhs%jec+1,1:rhs%npz))
-!       allocate(rhs_vd(rhs%isc:rhs%iec+1,rhs%jsc:rhs%jec  ,1:rhs%npz))
-!       call pointer_field_array(rhs%fields, 'ua', rhs_ua)
-!       call pointer_field_array(rhs%fields, 'va', rhs_va)
-!       call a2d(geom, rhs_ua, rhs_va, rhs_ud, rhs_vd) !Linear
-!     endif
-!   endif
-! endif
-
-
-! ! Convert ps to delp if necessary
-! ! -------------------------------
-! if (has_field(rhs%fields, 'ps')) then !ps in increment
-!   if (.not.has_field(rhs%fields, 'delp')) then !delp not in increment
-!     if (has_field(self%fields, 'delp')) then !delp in state
-!       allocate(rhs_delp(rhs%isc:rhs%iec,rhs%jsc:rhs%jec,1:rhs%npz))
-!       call pointer_field_array(rhs%fields, 'ps', rhs_ps)
-!       do k = 1,rhs%npz
-!         rhs_delp(:,:,k) = (geom%bk(k+1)-geom%bk(k))*rhs_ps(:,:,1) !TLM
-!       enddo
-!     endif
-!   endif
-! endif
-
-! !Fields to add determined from increment
-! do var = 1,rhs%nf
-
-!   !Winds are a special case
-!   if (rhs%fields(var)%fv3jedi_name == 'ua') then
-
-!     if (has_field(self%fields, 'ua')) then
-!       call pointer_field_array(rhs%fields,  'ua', rhs_ua)
-!       call pointer_field_array(self%fields, 'ua', self_ua)
-!       self_ua = self_ua + rhs_ua
-!     endif
-!     if (has_field(self%fields, 'ud') .and. .not.has_field(rhs%fields, 'ud')) then
-!       call pointer_field_array(self%fields, 'ud', self_ud)
-!       self_ud = self_ud + rhs_ud
-!     endif
-
-!   elseif (rhs%fields(var)%fv3jedi_name == 'va') then
-
-!     if (has_field(self%fields, 'va')) then
-!       call pointer_field_array(rhs%fields,  'va', rhs_va)
-!       call pointer_field_array(self%fields, 'va', self_va)
-!       self_va = self_va + rhs_va
-!     endif
-!     if (has_field(self%fields, 'vd') .and. .not.has_field(rhs%fields, 'vd')) then
-!       call pointer_field_array(self%fields, 'vd', self_vd)
-!       self_vd = self_vd + rhs_vd
-!     endif
-
-!   elseif (rhs%fields(var)%fv3jedi_name == 't') then
-
-!     if (has_field(self%fields, 't')) then
-!       call pointer_field_array(rhs%fields,  't', rhs_t)
-!       call pointer_field_array(self%fields, 't', self_t)
-!       self_t = self_t + rhs_t
-!     endif
-
-!     if (has_field(self%fields, 'pt')) then
-!       call pointer_field_array(rhs%fields,  'pt', rhs_pt)
-!       call pointer_field_array(self%fields, 'pt', self_pt)
-!       self_pt = self_pt + rhs_pt
-!     endif
-
-!   elseif (rhs%fields(var)%fv3jedi_name == 'ps') then
-
-!     if (has_field(self%fields, 'ps')) then
-!       call pointer_field_array(rhs%fields,  'ps', rhs_ps)
-!       call pointer_field_array(self%fields, 'ps', self_ps)
-!       self_ps = self_ps + rhs_ps
-!     endif
-
-!     if (has_field(self%fields, 'delp') .and. .not. has_field(rhs%fields, 'delp')) then
-!       call pointer_field_array(self%fields, 'delp', self_delp)
-!       self_delp = self_delp + rhs_delp
-!     endif
-
-!   else
-
-!     !Get pointer to state
-!     call pointer_field(self%fields, rhs%fields(var)%fv3jedi_name, field_pointer)
-
-!     !Add increment to state
-!     field_pointer%array = field_pointer%array + rhs%fields(var)%array
-
-!     !Nullify pointer
-!     nullify(field_pointer)
-
-!   endif
-
-! enddo
-
-! if (allocated(rhs_ud)) deallocate(rhs_ud)
-! if (allocated(rhs_vd)) deallocate(rhs_vd)
-! if (allocated(rhs_delp)) deallocate(rhs_delp)
-
-! !Check for negative tracers and increase to 0.0
-! do var = 1,self%nf
-
-!   if (self%fields(var)%tracer) then
-
-!     found_neg = .false.
-
-!     do k = 1,self%fields(var)%npz
-!       do j = geom%jsc,geom%jec
-!         do i = geom%isc,geom%iec
-!           if (self%fields(var)%array(i,j,k) < 0.0_kind_real) then
-!             found_neg = .true.
-!             self%fields(var)%array(i,j,k) = 0.0_kind_real
-!           endif
-!         enddo
-!       enddo
-!     enddo
-
-!     !Print message warning about negative tracer removal
-!     if (found_neg .and. self%f_comm%rank() == 0) print*, &
-!              'wrf_hydro_nwm_jedi_state_mod.add_incr: Removed negative values for '&
-!              //trim(self%fields(var)%fv3jedi_name)
-
-!   endif
-
-! enddo
-
-!end subroutine add_incr
 
 ! ------------------------------------------------------------------------------
 
@@ -360,64 +217,6 @@ subroutine read_file(geom, self, c_conf, vdate)
   call self%fields_obj%read_fields_from_file(filename,geom%xstart,geom%xend,geom%ystart,geom%yend)
 
 end subroutine read_file
-
-! ------------------------------------------------------------------------------
-
-! subroutine write_file(geom, self, c_conf, vdate)
-
-!   use fv3jedi_io_latlon_mod
-
-!   implicit none
-
-!   type(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: geom     !< Geometry
-!   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self     !< State
-!   type(c_ptr),         intent(in)    :: c_conf   !< Configuration
-!   type(datetime),      intent(inout) :: vdate    !< DateTime
-
-!   ! type(fv3jedi_io_gfs)  :: gfs
-!   ! type(fv3jedi_io_geos) :: geos
-
-!   character(len=10) :: filetype
-!   integer :: flipvert
-!   type(fckit_configuration) :: f_conf
-!   character(len=:), allocatable :: str
-
-
-!   ! Fortran configuration
-!   ! ---------------------
-!   f_conf = fckit_configuration(c_conf)
-
-
-!   call f_conf%get_or_die("filetype",str)
-!   filetype = str
-!   deallocate(str)
-
-!   if (trim(filetype) == 'gfs') then
-
-!     flipvert = 0
-!     if (f_conf%has("flip_vertically")) then
-!       call f_conf%get_or_die("flip_vertically",flipvert)
-!     endif
-!     if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
-
-!     call gfs%setup(f_conf)
-!     call gfs%write_all(geom, self%fields, vdate, self%calendar_type, self%date_init)
-
-!     if (flipvert==1) call flip_array_vertical(self%nf, self%fields)
-
-!   elseif (trim(filetype) == 'geos') then
-
-!     call geos%setup(geom, self%fields, vdate, 'write', f_conf)
-!     call geos%write_all(geom, self%fields, vdate)
-!     call geos%delete()
-
-!   else
-
-!      call abor1_ftn("wrf_hydro_nwm_jedi_state_mod.write: restart type not supported")
-
-!   endif
-
-! end subroutine write_file
 
 ! ------------------------------------------------------------------------------
 

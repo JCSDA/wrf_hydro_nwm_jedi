@@ -8,17 +8,18 @@
 #include <ostream>
 #include <string>
 
-#include "wrf_hydro_nwm-jedi/Covariance/Covariance.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Increment/Increment.h"
-#include "wrf_hydro_nwm-jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
+#include "wrf_hydro_nwm_jedi/Covariance/CovarianceFortran.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -26,8 +27,10 @@ namespace wrf_hydro_nwm-jedi {
                          const oops::Variables & vars,
                          const eckit::Configuration & conf,
                          const State & x1, const State & x2) {
-    util::abor1_cpp("Covariance::Covariance() needs to be implemented.",
-                    __FILE__, __LINE__);
+    time_ = util::DateTime(conf.getString("date"));
+    const eckit::Configuration * configc = &conf;
+    wrf_hydro_nwm_jedi_b_setup_f90(keyFtnConfig_, &configc, vars);
+    // oops::Log::trace() << "Covariance created" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -40,8 +43,8 @@ namespace wrf_hydro_nwm-jedi {
 // ----------------------------------------------------------------------------
 
   void Covariance::multiply(const Increment & dxin, Increment & dxout) const {
-    util::abor1_cpp("Covariance::multiply() needs to be implemented.",
-                    __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_b_mult_f90(keyFtnConfig_, dxin.toFortran(),
+				  dxout.toFortran());
   }
 
 // ----------------------------------------------------------------------------
@@ -69,4 +72,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

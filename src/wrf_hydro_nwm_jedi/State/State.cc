@@ -55,6 +55,17 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
+  State::State(const Geometry & geom,
+	       const oops::Variables & vars,
+	       const util::DateTime & vt)
+    : fields_(new Fields(geom, vars, vt)){
+    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
+  }
+
+  // ----------------------------------------------------------------------------
+
   State::State(const Geometry &, const State &) {
     util::abor1_cpp("State::State() needs to be implemented.",
                     __FILE__, __LINE__);
@@ -65,15 +76,17 @@ namespace wrf_hydro_nwm_jedi {
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
 
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, fields_->geometry()->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
+    // wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
   }
 
 // ----------------------------------------------------------------------------
 
   State::~State() {
-    // util::abor1_cpp("State::~State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
+    
+    wrf_hydro_nwm_jedi_state_delete_f90(keyState_);
+    
   }
 
 // ----------------------------------------------------------------------------
@@ -101,15 +114,7 @@ namespace wrf_hydro_nwm_jedi {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_,string);
     os << string;
-    delete(string);
-    // os << *fields_;
-    // int const nf = 1;
-    // float pstat[3][nf];
-    // wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
-    // os << std::endl;
-    // os << "Mean SNEQV: " << pstat[0][0] << std::endl;
-    // os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
-    // os << "RMS SNEQV: " << pstat[2][0] << std::endl;
+    delete[] string;
   }
 
 // ----------------------------------------------------------------------------

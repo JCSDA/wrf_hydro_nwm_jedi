@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_MODEL_MODEL_H_
-#define WRF_HYDRO_NWM-JEDI_MODEL_MODEL_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODEL_H_
+#define WRF_HYDRO_NWM_JEDI_MODEL_H_
 
 #include <memory>
 #include <ostream>
@@ -17,7 +17,7 @@
 #include "oops/util/ObjectCounter.h"
 
 // forward declarations
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class ModelAuxControl;
   struct Traits;
@@ -25,7 +25,7 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // Model class
   class Model : public oops::ModelBase<Traits>,
@@ -50,5 +50,5 @@ namespace wrf_hydro_nwm-jedi {
     const oops::Variables vars_;
   };
 
-}  // namespace wrf_hydro_nwm-jedi
-#endif  // WRF_HYDRO_NWM-JEDI_MODEL_MODEL_H_
+}  // namespace wrf_hydro_nwm_jedi
+#endif  // WRF_HYDRO_NWM-JEDI_MODEL_H_

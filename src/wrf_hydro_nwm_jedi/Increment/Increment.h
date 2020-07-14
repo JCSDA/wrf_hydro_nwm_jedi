@@ -8,16 +8,20 @@
  * does it submit to any jurisdiction.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
-#define WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
+#ifndef WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_
+#define WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_
 
 #include <memory>
 #include <ostream>
 
 #include <boost/shared_ptr.hpp>
 
+#include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
+
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/IncrementFortran.h"
 
 // forward declarations
 namespace oops {
@@ -29,16 +33,17 @@ namespace ufo {
   class GeoVaLs;
   class Locations;
 }
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Fields;
   class Geometry;
   class GetValuesTraj;
   class State;
+  typedef int F90inc;
 }
 
 // ----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // Increment class
   class Increment : public util::Printable {
@@ -46,6 +51,7 @@ namespace wrf_hydro_nwm-jedi {
     // Constructor, destructor
     Increment(const Geometry &, const oops::Variables &,
               const util::DateTime &);
+    Increment(const Geometry &, Increment &);
     Increment(const Increment &, const bool);
     ~Increment();
 
@@ -60,6 +66,7 @@ namespace wrf_hydro_nwm-jedi {
     void axpy(const double &, const Increment &, const bool check = true);
     double dot_product_with(const Increment &) const;
     void zero();
+    void zero(const util::DateTime &);
     void diff(const State &, const State &);
     void schur_product_with(const Increment &);
 
@@ -78,23 +85,31 @@ namespace wrf_hydro_nwm-jedi {
     const util::DateTime & validTime() const;
     util::DateTime & validTime();
     void updateTime(const util::Duration &);
-
+    
     // unstructured grid conversions
     void ug_coord(oops::UnstructuredGrid &) const;
     void field_to_ug(oops::UnstructuredGrid &, const int &) const;
     void field_from_ug(const oops::UnstructuredGrid &, const int &);
 
     // Iterator access
-    oops::GridPoint getPoint(const GeometryIterator &) const;
+    /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
-
+    void accumul(const double &, const State &);
+    
     boost::shared_ptr<const Geometry> geometry() const;
 
-   private:
+    F90inc & toFortran() {return keyInc_;}
+    const F90inc & toFortran() const {return keyInc_;}
+
+  private:
+    
+    oops::Variables vars_;
+    util::DateTime time_;
+    F90inc keyInc_;
     void print(std::ostream &) const;
     std::unique_ptr<Fields> fields_;
   };
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_INCREMENT_INCREMENT_H_
+#endif  // WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_

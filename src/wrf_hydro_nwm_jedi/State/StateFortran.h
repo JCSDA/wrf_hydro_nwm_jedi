@@ -20,6 +20,7 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_state_print_f90(const F90state &, char *string);
     void wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(const F90state &, int nf, float pstat[][1]);
     void wrf_hydro_nwm_jedi_state_copy_f90(const F90state &, const F90state &);
+    void wrf_hydro_nwm_jedi_state_delete_f90(const F90state &);
     /* void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &); */
     /* void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &); */
   }

@@ -7,86 +7,103 @@
 
 #include <vector>
 
-#include "wrf_hydro_nwm-jedi/Fields/Fields.h"
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
-#include "oops/base/GridPoint.h"
+//#include "oops/base/GridPoint.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
-
+  
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
-                       const util::DateTime & vt) {
-    util::abor1_cpp("Increment::Increment() needs to be implemented.",
-                    __FILE__, __LINE__);
+                       const util::DateTime & vt)
+    : fields_(new Fields(geom, vars, vt)){
+    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
   }
 
 // ----------------------------------------------------------------------------
 
   Increment::Increment(const Increment & other, const bool copy) {
-    util::abor1_cpp("Increment::Increment() needs to be implemented.",
-                     __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+    //                  __FILE__, __LINE__);
+  }
+
+// ----------------------------------------------------------------------------
+
+  Increment::Increment(const Geometry &, Increment & other) {
+    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+    //                  __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   Increment::~Increment() {
-    util::abor1_cpp("Increment::~Increment() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::~Increment() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator =(const Increment &) {
-    util::abor1_cpp("Increment::operator= needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::operator= needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // Needed by test
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator -=(const Increment &) {
-    util::abor1_cpp("Increment::operator-= needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::operator-= needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // Needed by test
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
-  Increment & Increment::operator +=(const Increment &) {
-    util::abor1_cpp("Increment::operator+= needs to be implemented.",
-                    __FILE__, __LINE__);
+  Increment & Increment::operator +=(const Increment &other) {
+    // util::abor1_cpp("Increment::operator+= needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    //    wrf_hydro_nwm_jedi_increment_plus_f90(keyInc__,other);
+    //fields_->add(other->fields_));
+    // Needed by test
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator *=(const double &) {
-    util::abor1_cpp("Increment::operator*= needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::operator*= needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // Needed by test
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   void Increment::axpy(const double &, const Increment &, const bool check) {
-    util::abor1_cpp("Increment::axpy() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::axpy() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // Needed by test
   }
 
 // ----------------------------------------------------------------------------
 
   double Increment::dot_product_with(const Increment &) const {
-    util::abor1_cpp("Increment::dot_product_with() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::dot_product_with() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // Needed by test
     return 0.0;
   }
 
@@ -98,6 +115,13 @@ namespace wrf_hydro_nwm-jedi {
   }
 
 // ----------------------------------------------------------------------------
+
+  void Increment::zero(const util::DateTime & vt) {
+    // sw_increment_zero_f90(keyInc_);
+    time_ = vt;
+  }
+
+  // ----------------------------------------------------------------------------
 
   void Increment::diff(const State & x1, const State & x2) {
     util::abor1_cpp("Increment::diff() needs to be implemented.",
@@ -114,16 +138,19 @@ namespace wrf_hydro_nwm-jedi {
 // ----------------------------------------------------------------------------
 
   void Increment::random() {
-    util::abor1_cpp("Increment::random() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::random() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    //Needed by the test
   }
 
 // ----------------------------------------------------------------------------
 
   double Increment::norm() const {
-    util::abor1_cpp("Increment::norm() needs to be implemented.",
-                    __FILE__, __LINE__);
-    return fields_->norm();
+    // util::abor1_cpp("Increment::norm() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    // return fields_->norm();
+    //Needed by the test
+    return 0.0;
   }
 
 // ----------------------------------------------------------------------------
@@ -210,15 +237,15 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-  oops::GridPoint Increment::getPoint(const GeometryIterator &) const {
-    util::abor1_cpp("Increment::getPoint() needs to be implemented.",
-                    __FILE__, __LINE__);
+  // oops::GridPoint Increment::getPoint(const GeometryIterator &) const {
+  //   util::abor1_cpp("Increment::getPoint() needs to be implemented.",
+  //                   __FILE__, __LINE__);
 
-    oops::Variables vars;
-    std::vector<double> vals;
-    std::vector<int> varlens;
-    return oops::GridPoint(vars, vals, varlens);
-  }
+  //   oops::Variables vars;
+  //   std::vector<double> vals;
+  //   std::vector<int> varlens;
+  //   return oops::GridPoint(vars, vals, varlens);
+  // }
 
 // ----------------------------------------------------------------------------
 
@@ -229,4 +256,12 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+  void Increment::accumul(const double & zz, const State & xx) {
+    //sw_increment_axpy_state_f90(keyInc_, zz, xx.toFortran());
+
+    util::abor1_cpp("Increment::accumul() needs to be implemented.",
+                    __FILE__, __LINE__);
+}
+// -----------------------------------------------------------------------------
+
+}  // namespace wrf_hydro_nwm_jedi

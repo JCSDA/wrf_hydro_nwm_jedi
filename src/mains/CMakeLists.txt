@@ -18,6 +18,6 @@
 #                         SOURCES StaticBInit.cc
 #                         LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_var.x
-#                         SOURCES Var.cc
-#                         LIBS    wrf_hydro_nwm_jedi )
+ ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_var.x
+                         SOURCES Var.cc
+                         LIBS    wrf_hydro_nwm_jedi )
