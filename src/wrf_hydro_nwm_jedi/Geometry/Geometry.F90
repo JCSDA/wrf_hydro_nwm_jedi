@@ -31,7 +31,6 @@ end type wrf_hydro_nwm_stream_geometry
 
 
 type :: wrf_hydro_nwm_jedi_geometry
-   ! integer :: ix, iy  ! unused
    type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm
    type(wrf_hydro_nwm_stream_geometry), allocatable :: stream
  contains
@@ -89,22 +88,32 @@ subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
   class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: other  !< the new geom object
 
   ! LSM
-  ! check if active
-  self%lsm%dx = other%lsm%dx
-  self%lsm%dy = other%lsm%dy
-  self%lsm%xdim_len = other%lsm%xdim_len
-  self%lsm%ydim_len = other%lsm%ydim_len
-  self%lsm%zdim_len = other%lsm%zdim_len
-  self%lsm%n_snow_layers = other%lsm%n_snow_layers
-  self%lsm%xstart = other%lsm%xstart
-  self%lsm%ystart = other%lsm%ystart
-  self%lsm%xend = other%lsm%xend
-  self%lsm%yend = other%lsm%yend
-  allocate(self%lsm%lat, source = other%lsm%lat)
-  allocate(self%lsm%lon, source = other%lsm%lon)
+  if (other%lsm_active()) then
+     allocate(self%lsm)
+     self%lsm%dx = other%lsm%dx
+     self%lsm%dy = other%lsm%dy
+     self%lsm%xdim_len = other%lsm%xdim_len
+     self%lsm%ydim_len = other%lsm%ydim_len
+     self%lsm%zdim_len = other%lsm%zdim_len
+     self%lsm%n_snow_layers = other%lsm%n_snow_layers
+     self%lsm%xstart = other%lsm%xstart
+     self%lsm%ystart = other%lsm%ystart
+     self%lsm%xend = other%lsm%xend
+     self%lsm%yend = other%lsm%yend
+     allocate(self%lsm%lat, source = other%lsm%lat)
+     allocate(self%lsm%lon, source = other%lsm%lon)
+  end if
 
   ! Stream
-  ! TODO JLM
+  if (other%stream_active()) then
+     allocate(self%stream)
+     self%stream%dx = other%stream%dx
+     self%stream%xdim_len = other%stream%xdim_len
+     self%stream%xstart = other%stream%xstart
+     self%stream%xend = other%stream%xend
+     allocate(self%stream%lat, source = other%stream%lat)
+     allocate(self%stream%lon, source = other%stream%lon)
+  end if
 end subroutine wrf_hydro_nwm_jedi_geometry_clone
 
 
@@ -112,10 +121,9 @@ end subroutine wrf_hydro_nwm_jedi_geometry_clone
 subroutine wrf_hydro_nwm_jedi_geometry_delete(self)
   class(wrf_hydro_nwm_jedi_geometry),  intent(inout) :: self  !< geom object
 
+  ! TODO JLM: this should be recursive?
   if (self%lsm_active()) deallocate(self%lsm)
   if (self%stream_active()) deallocate(self%stream)
-  ! one more level up?
-  
 end subroutine wrf_hydro_nwm_jedi_geometry_delete
 
 
@@ -125,8 +133,9 @@ end subroutine wrf_hydro_nwm_jedi_geometry_delete
 
 !> Check if the lsm geometry object is allocated/active.
 function lsm_active(self) result(is_active)
-  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< the full geom object
   logical :: is_active
+
   is_active = allocated(self%lsm)
 end function lsm_active
 
@@ -184,12 +193,15 @@ end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 ! @todo change indices to have dimension?
 subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn( &
      self, lat, lon, ind)
-  class(wrf_hydro_nwm_jedi_geometry),   intent(in) :: self  !< geom object
+  class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< geom object
   real, intent(in) :: lat, lon  !< the lat, lon of interest
   type(indices), intent(out) :: ind  !< the index pair of the nearest neighbor
 
   real,dimension(2) :: minimum
   real, allocatable :: diff_lat(:,:), diff_lon(:,:), l2_norm(:,:)
+
+  ! TODO JLM: I dont love this...
+  if (.not. self%lsm_active()) return
 
   allocate(diff_lat, source=self%lsm%lat)
   allocate(diff_lon, source=self%lsm%lon)
@@ -217,6 +229,9 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
   real, intent(out) :: dx, dy
   integer, intent(out) :: xdim_len, ydim_len, zdim_len
 
+  ! TODO JLM: I dont love this...
+  if (.not. self%lsm_active()) return
+
   dx = self%lsm%dx
   dy = self%lsm%dy
   xdim_len = self%lsm%xdim_len
@@ -231,7 +246,7 @@ end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 !> Check if the streamflow geometry object is allocated/active.
 function stream_active(self) result(is_active)
-  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
+  class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< the full geom object
   logical :: is_active
 
   is_active = allocated(self%stream)
@@ -289,10 +304,12 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn( &
   real, dimension(1) :: minimum
   real, allocatable  :: diff_lat(:), diff_lon(:), l2_norm(:)
 
+  if (.not. self%stream_active()) return
+
   allocate(diff_lat, source=self%stream%lat)
   allocate(diff_lon, source=self%stream%lon)
   allocate(l2_norm,  source=self%stream%lon)
-  
+
   diff_lat = diff_lat - lat
   diff_lon = diff_lon - lon
   l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
