@@ -19,7 +19,7 @@ public wrf_hydro_nwm_jedi_state, wrf_hydro_nwm_jedi_state_registry
 type :: wrf_hydro_nwm_jedi_state
 
   !Local copies of grid for convenience
-  integer :: isc, iec, jsc, jec
+!  integer :: isc, iec, jsc, jec
   integer :: npx, npy, npz
   integer :: ntiles, ntile
   logical :: hydrostatic = .true.

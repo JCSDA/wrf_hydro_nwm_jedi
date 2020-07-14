@@ -11,6 +11,10 @@
 #include <ostream>
 #include <string>
 
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -25,6 +29,7 @@ namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class Increment;
   class State;
+  typedef int F90bmat;
 }
 
 // ----------------------------------------------------------------------------
@@ -48,6 +53,9 @@ namespace wrf_hydro_nwm_jedi {
 
    private:
     void print(std::ostream &) const;
+    F90bmat keyFtnConfig_;
+    boost::shared_ptr<const Geometry> geom_;
+    util::DateTime time_;
   };
 
 }  // namespace wrf_hydro_nwm_jedi

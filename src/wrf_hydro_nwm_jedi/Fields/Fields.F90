@@ -27,6 +27,8 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure (print_field_interface), pass(self), deferred :: print_field
      procedure (read_file_interface), pass(self), deferred :: read_file
      procedure (get_value_field_interface), pass(self), deferred :: get_value
+     procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
+     !procedure (install_bkgerr_interface), pass(self), deferred :: install_bkgerr
   end type base_field
 
   abstract interface
@@ -50,6 +52,14 @@ module wrf_hydro_nwm_jedi_field_mod
        type(indices), intent(in) :: ind
        real(kind=c_float) :: val
      end function get_value_field_interface
+
+     subroutine apply_covariance_mult_interface(self,in_f,scalar)
+       use iso_c_binding, only : c_float
+       import base_field
+       class(base_field), intent(inout) :: self
+       class(base_field), intent(in) :: in_f
+       real(kind=c_float),intent(in) :: scalar
+     end subroutine apply_covariance_mult_interface
   end interface
 
   type, extends(base_field) :: field_2d
@@ -62,6 +72,7 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure, pass(self) :: fill => fill_field_2d
      procedure, pass(self) :: mean_stddev => mean_stddev_2d
      procedure, pass(self) :: rms => field_rms_2d
+     procedure, pass(self) :: apply_cov => apply_cov_2d
      !    Destructor
      ! final :: destroy_field_2d
   end type field_2d
@@ -76,6 +87,7 @@ module wrf_hydro_nwm_jedi_field_mod
      procedure, pass(self) :: fill => fill_field_3d
      procedure, pass(self) :: mean_stddev => mean_stddev_3d
      procedure, pass(self) :: rms => field_rms_3d
+     procedure, pass(self) :: apply_cov => apply_cov_3d
      !    Destructor
      ! final :: destroy_field_3d
   end type field_3d
@@ -302,8 +314,44 @@ contains
     
   end subroutine read_file_3d
 
-! --------------------------------------------------------------------------------------------------
-  
+  ! --------------------------------------------------------------------------------------------------
+
+  subroutine apply_cov_2d(self,in_f,scalar)
+    class(field_2d), intent(inout) :: self
+    class(base_field), intent(in) :: in_f
+    real(kind=c_float),intent(in) :: scalar
+
+    select type(in_f)
+    type is (field_2d)
+       self%array = in_f%array * scalar
+    class default
+       call abor1_ftn("apply_cov_2d: in_f not a 2d_field")
+    end select
+    
+  end subroutine apply_cov_2d
+
+    ! --------------------------------------------------------------------------------------------------
+
+  subroutine apply_cov_3d(self,in_f,scalar)
+    class(field_3d), intent(inout) :: self
+    class(base_field), intent(in) :: in_f
+    real(kind=c_float),intent(in) :: scalar
+
+    integer :: layer
+
+    select type(in_f)
+    type is (field_3d)
+       do layer = 1, size(self%array,2) !zlayer is dim2
+          self%array(:,layer,:) = in_f%array(:,layer,:) * scalar
+       end do
+    class default
+       call abor1_ftn("apply_cov_3d: in_f not a 3d_field")
+    end select
+
+  end subroutine apply_cov_3d
+
+  ! --------------------------------------------------------------------------------------------------
+
   function get_value_2d(self,ind) result(val)
     class(field_2d), intent(in) :: self
     type(indices), intent(in) :: ind
@@ -488,7 +536,7 @@ end subroutine deallocate_field
     case default
        wrf_hydro_nwm_name = "null"
     end select
-    
+
     !linear search
     do n = 1, size(self%fields)
        if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then
