@@ -1015,7 +1015,7 @@ character(len=*),    intent(in) :: method
 integer :: var
 
 if (size(self%fields) .ne. size(other%fields)) then
-  call abor1_ftn(trim(method)//"(checksame): Different number of fields")
+   call abor1_ftn(trim(method)//"(checksame): Different number of fields")
 endif
 
 do var = 1,size(self%fields)
