@@ -52,6 +52,10 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Increment/IncrementFortran.h
   Increment/Increment.F90
 
+  # LinearModel
+  LinearModel/TlmId.h
+  LinearModel/TlmId.cc
+
   # Model
   Model/Model.h
   Model/Model.cc
