@@ -58,25 +58,26 @@ subroutine wrf_hydro_nwm_jedi_state_create_c(c_key_self, c_key_geom, c_vars) &
 end subroutine wrf_hydro_nwm_jedi_state_create_c
 
 
-! subroutine wrf_hydro_nwm_jedi_state_create_from_other_c(c_key_self, c_key_other) bind(c,name='wrf_hydro_nwm_jedi_state_create_from_other_f90')
+subroutine wrf_hydro_nwm_jedi_state_create_from_other_c(c_key_self, c_key_other) bind(c,name='wrf_hydro_nwm_jedi_state_create_from_other_f90')
 
-!   implicit none
-!   integer(c_int),intent(inout) :: c_key_self  !< Fields
-!   integer(c_int),intent(   in) :: c_key_other !< Other fields
+  implicit none
+  integer(c_int),intent(inout) :: c_key_self  !< Fields
+  integer(c_int),intent(   in) :: c_key_other !< Other fields
 
-!   ! Local variables
-!   type(wrf_hydro_nwm_jedi_state), pointer :: self
-!   type(wrf_hydro_nwm_jedi_state), pointer :: other
+  ! Local variables
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: other
 
-!   ! Interface
-!   call wrf_hydro_nwm_jedi_state_registry%get(c_key_other, other)
-!   call wrf_hydro_nwm_jedi_state_registry%init()
-!   call wrf_hydro_nwm_jedi_state_registry%add(c_key_self)
-!   call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+  ! Interface
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_other, other)
+  call wrf_hydro_nwm_jedi_state_registry%init()
+  call wrf_hydro_nwm_jedi_state_registry%add(c_key_self)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
 
-!   ! Call Fortran
-!   call create_from_other(self, other)
-! end subroutine wrf_hydro_nwm_jedi_state_create_from_other_c
+  ! Call Fortran
+  call create_from_other(self, other)
+
+end subroutine wrf_hydro_nwm_jedi_state_create_from_other_c
 
 
 subroutine wrf_hydro_nwm_jedi_state_delete_c(c_key_self) &

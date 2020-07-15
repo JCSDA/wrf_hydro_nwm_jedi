@@ -33,8 +33,10 @@ namespace wrf_hydro_nwm_jedi {
     if (conf.has("variables")) {
       oops::Variables lvars(conf);
       this->vars_ = lvars;
+      std::cout << "From conf"<<std::endl;
     } else {
       this->vars_ = vars;
+      std::cout << "From argument"<<std::endl;
     }
 
     wrf_hydro_nwm_jedi_state_create_f90(keyState_,
@@ -59,9 +61,10 @@ namespace wrf_hydro_nwm_jedi {
 	       const oops::Variables & vars,
 	       const util::DateTime & vt)
     : fields_(new Fields(geom, vars, vt)){
-    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
+
+    // util::abor1_cpp("State::State(const Geometry &,const Variables &, const DateTime & ) needs to be implemented.", __FILE__, __LINE__);
+    std::cout<< "Creating state as increment"<<std::endl;
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), vars);
   }
 
   // ----------------------------------------------------------------------------
@@ -76,8 +79,9 @@ namespace wrf_hydro_nwm_jedi {
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
 
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
-    // wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
+    // wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
+
+    wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
   }
 

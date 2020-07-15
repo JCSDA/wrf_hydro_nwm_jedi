@@ -36,8 +36,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Covariance::~Covariance() {
-    util::abor1_cpp("Covariance::~Covariance() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Covariance::~Covariance() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------

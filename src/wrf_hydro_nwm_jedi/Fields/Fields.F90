@@ -1217,7 +1217,6 @@ subroutine checksame(self, other, method)
   type(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   type(wrf_hydro_nwm_jedi_fields), intent(in) :: other
   character(len=*),    intent(in) :: method
-
   integer :: var
 
   if (size(self%fields) .ne. size(other%fields)) then

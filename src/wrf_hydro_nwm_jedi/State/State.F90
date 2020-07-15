@@ -30,9 +30,9 @@ use netcdf
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy, &
-     !add_incr, &
-     read_state_from_file, get_mean_stddev, &! write_file, gpnorm, rms, &
+public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
+     create_from_other,&!add_incr, &
+     read_file, get_mean_stddev, &! write_file, gpnorm, rms, &
      change_resol, state_print !getvalues, analytic_IC, state_print
 
 
@@ -53,19 +53,19 @@ end subroutine create
 
 ! ------------------------------------------------------------------------------
 
-! subroutine create_from_other(self, other)
+subroutine create_from_other(self, other)
 
-!   ! Passed variables
-!   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
-!   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
+  ! Passed variables
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
 
-!   ! Create new state from other state
-!   self = shallow_water_state_type(other%get_geometry())
+  ! Create new state from other state
+  self = other
 
-!   ! Initialize all arrays to zero
-!   !call zeros(self)
+  ! Initialize all arrays to zero
+  !call zeros(self)
 
-! end subroutine create_from_other
+end subroutine create_from_other
 
 subroutine delete(self)
   implicit none
