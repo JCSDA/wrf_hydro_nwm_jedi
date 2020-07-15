@@ -19,35 +19,35 @@ namespace wrf_hydro_nwm_jedi {
   ModelAuxCovariance::ModelAuxCovariance(const eckit::Configuration & conf,
                                          const Geometry & geom)
   : conf_(conf) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::ModelAuxCovariance() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::ModelAuxCovariance() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxCovariance::~ModelAuxCovariance() {
-    util::abor1_cpp(
-      "ModelAuxCovariance::~ModelAuxCovariance() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::~ModelAuxCovariance() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxCovariance::linearize(const ModelAuxControl &,
                                      const Geometry &) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::linearize() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::linearize() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxCovariance::multiply(const ModelAuxIncrement &,
                                     ModelAuxIncrement &) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::multiply() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::multiply() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
