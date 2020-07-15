@@ -62,8 +62,9 @@ namespace wrf_hydro_nwm_jedi {
 	       const util::DateTime & vt)
     : fields_(new Fields(geom, vars, vt)){
 
-    util::abor1_cpp("State::State(const Geometry &,const Variables &, const DateTime & ) needs to be implemented.", __FILE__, __LINE__);
-    // wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
+    // util::abor1_cpp("State::State(const Geometry &,const Variables &, const DateTime & ) needs to be implemented.", __FILE__, __LINE__);
+    std::cout<< "Creating state as increment"<<std::endl;
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), vars);
   }
 
   // ----------------------------------------------------------------------------

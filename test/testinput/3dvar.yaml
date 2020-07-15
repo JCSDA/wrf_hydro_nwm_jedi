@@ -56,7 +56,8 @@ variational:
       tstep: PT12S
       varchange: 'Identity'
       variables: ['SNEQV']
-      version: 'SWIdTLM'
+      version: 'WRF_HYDRO_NWM_JEDI'
+      name: 'QgIdTLM'
     ninner: 10
     resolution:
       input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
