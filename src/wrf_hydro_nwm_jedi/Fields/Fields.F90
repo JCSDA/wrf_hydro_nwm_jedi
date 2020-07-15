@@ -127,14 +127,6 @@ type elem_field
    class(base_field), allocatable :: field
 end type elem_field
 
-! MERGE: Keeping this until commit in caes I miseed 
-! subroutine read_file_interface(self,filename,xstart,xend,ystart,yend)
-!   import base_field
-!   class(base_field), intent(inout) :: self
-!   character(len=*), intent(in) :: filename
-!   integer, intent(in) :: xstart, xend, ystart, yend
-! end subroutine read_file_interface  
-
 public :: wrf_hydro_nwm_jedi_fields, checksame!, &
 ! has_field, &
 ! long_name_to_wrf_hydro_name, &
