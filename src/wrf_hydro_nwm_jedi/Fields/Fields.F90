@@ -29,11 +29,13 @@ type, abstract :: base_field
    character(len=32) :: units = "null"        !Units for the field
    integer :: ncid_index
    logical :: tracer = .false.
+   ! class(cov_obj) :: covariance   
  contains
    procedure (print_field_interface),     pass(self), deferred :: print_field
    procedure (read_file_interface),       pass(self), deferred :: read_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
+   !procedure (install_bkgerr_interface), pass(self), deferred :: install_bkgerr   
 end type base_field
 
 
@@ -58,12 +60,12 @@ abstract interface
      real(kind=c_float) :: val
    end function get_value_field_interface
 
-   subroutine apply_covariance_mult_interface(self,in_f,scalar)
+   subroutine apply_covariance_mult_interface(self, in_f, scalar)
      use iso_c_binding, only : c_float
      import base_field
      class(base_field), intent(inout) :: self
-     class(base_field), intent(in) :: in_f
-     real(kind=c_float),intent(in) :: scalar
+     class(base_field), intent(in)    :: in_f
+     real(kind=c_float),intent(in)    :: scalar
    end subroutine apply_covariance_mult_interface
 end interface
 
@@ -126,6 +128,7 @@ end type field_3d
 type elem_field
    class(base_field), allocatable :: field
 end type elem_field
+
 
 public :: wrf_hydro_nwm_jedi_fields, checksame!, &
 ! has_field, &
