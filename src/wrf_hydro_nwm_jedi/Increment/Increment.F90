@@ -10,11 +10,11 @@ module wrf_hydro_nwm_jedi_increment_mod
   use fckit_mpi_module
   use oops_variables_mod
 
-  use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_fields,checksame
-  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
-
+  use wrf_hydro_nwm_jedi_field_mod,    only: wrf_hydro_nwm_jedi_fields,checksame
+  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+  use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
   use iso_c_binding, only : c_float
-  use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state
+  use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state
 
   !GetValues
   use ufo_locs_mod,          only: ufo_locs

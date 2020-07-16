@@ -3,12 +3,14 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
+!> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
 module wrf_hydro_nwm_jedi_field_mod
 
 use iso_c_binding, only: c_int, c_float,c_double
 use fckit_mpi_module
-use wrf_hydro_nwm_jedi_geometry_mod, &
-     only: wrf_hydro_nwm_jedi_geometry, error_handler, indices
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
+use wrf_hydro_nwm_jedi_constants_mod, only: unopened_ncid
 use oops_variables_mod
 use netcdf
 ! use fv3jedi_kinds_mod, only: kind_real
@@ -16,19 +18,34 @@ use netcdf
 
 implicit none
 
-public
-
+private
+public :: wrf_hydro_nwm_jedi_fields, checksame, base_field!, &
+! has_field, &
+! long_name_to_wrf_hydro_name, &
+! pointer_field, &
+! pointer_field_array, &
+! copy_field_array, &
+! allocate_copy_field_array, &
+! fields_rms, &
+! fields_gpnorm, &
+! fields_print, &
+! checksame, &
+! flip_array_vertical, &
+! copy_subset, &
+!     mean_stddev
 
 !-----------------------------------------------------------------------------
 ! Abstract definitions
 
-type, abstract :: base_field
-   character(len=32) :: short_name = "null"   !Short name (to match file name)
-   character(len=10) :: wrf_hydro_nwm_name = "null" !Common name
-   character(len=64) :: long_name = "null"    !More descriptive name
-   character(len=32) :: units = "null"        !Units for the field
-   integer :: ncid_index
-   logical :: tracer = .false.
+!> Abstract field definition
+! @todo should this be public?
+type, abstract, public :: base_field
+   character(len=32) :: short_name = "null"   !< Short name (to match file name)
+   character(len=10) :: wrf_hydro_nwm_name = "null" !< Common name
+   character(len=64) :: long_name = "null"    !< More descriptive name
+   character(len=32) :: units = "null"        !< Units for the field
+   integer :: ncid_index                      !< Index for restart file (1=lsm, 2=hydro)
+   logical :: tracer = .false.                !< Tracer or not?
    ! class(cov_obj) :: covariance   
  contains
    procedure (print_field_interface),     pass(self), deferred :: print_field
@@ -73,7 +90,7 @@ end interface
 !-----------------------------------------------------------------------------
 ! Field implementations
 
-type, extends(base_field) :: field_1d
+type, private, extends(base_field) :: field_1d
    integer :: xdim_len
    real(c_float), allocatable :: array(:)
  contains
@@ -89,7 +106,7 @@ type, extends(base_field) :: field_1d
 end type field_1d
 
 
-type, extends(base_field) :: field_2d
+type, private, extends(base_field) :: field_2d
    integer :: xdim_len, ydim_len
    real(c_float), allocatable :: array(:, :)
  contains
@@ -105,7 +122,7 @@ type, extends(base_field) :: field_2d
 end type field_2d
 
 
-type, extends(base_field) :: field_3d
+type, private, extends(base_field) :: field_3d
    integer :: xdim_len, ydim_len, zdim_len
    real(c_float), allocatable :: array(:, :, :)
  contains
@@ -121,33 +138,17 @@ type, extends(base_field) :: field_3d
 end type field_3d
 
 
-!The function of this element is twofold:
-! 1) It allows one to create an array of base class object
-! 2) It makes it possible to organize the element data structures
+!> An elementary field. The function is twofold:  
+! 1) It allows one to create an array of base class object  
+! 2) It makes it possible to organize the element data structures  
 ! other than simple arrays (e.g. binary search tree, hash tables, etc...)
-type elem_field
+type, private :: elem_field
    class(base_field), allocatable :: field
 end type elem_field
 
 
-public :: wrf_hydro_nwm_jedi_fields, checksame!, &
-! has_field, &
-! long_name_to_wrf_hydro_name, &
-! pointer_field, &
-! pointer_field_array, &
-! copy_field_array, &
-! allocate_copy_field_array, &
-! fields_rms, &
-! fields_gpnorm, &
-! fields_print, &
-! checksame, &
-! flip_array_vertical, &
-! copy_subset, &
-!     mean_stddev
-
-
-!Field type mirror of C class
-type :: wrf_hydro_nwm_jedi_fields
+!> Fortran mirror of C class
+type, public :: wrf_hydro_nwm_jedi_fields
    integer :: nf
    ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
    ! real(kind=c_float), allocatable :: array(:,:,:)
@@ -635,7 +636,8 @@ end subroutine read_fields_from_file
 
 !> Helper function get get ncids for the two restart files (RESTART and
 !> HYDRO_RST. Contains harded coded information RESTART is index 1 and
-!> RESTART is index 2. If a file is not used, the returned ncid = -9999.
+!> RESTART is index 2. If a file is not returned, the unopened_ncid
+!> constant is returned.
 function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
   character(len=*), optional, intent(in) :: filename_lsm, filename_hydro
@@ -644,7 +646,6 @@ function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   logical :: read_file = .false.
   character(len=256) :: filename
   integer :: ierr, n, ncid_index
-  integer, parameter :: unopened_ncid = -9999  ! should go in a constants module
 
   if (present(filename_lsm) .and. present(filename_hydro)) then
      stop "FATAL ERROR: get_restart_ncid: both optional file arguments not allowed."
@@ -682,7 +683,6 @@ subroutine close_restart_ncid(ncid, filename)
   character(len=*), intent(in) :: filename
 
   integer :: ierr
-  integer, parameter :: unopened_ncid = -9999  ! should go in a constants module
 
   if (ncid .eq. unopened_ncid) return
 
