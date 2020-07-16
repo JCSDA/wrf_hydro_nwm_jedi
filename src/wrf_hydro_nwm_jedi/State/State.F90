@@ -32,7 +32,7 @@ private
 
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      create_from_other,&!add_incr, &
-     read_file, get_mean_stddev, &! write_file, gpnorm, rms, &
+     read_state_from_file, get_mean_stddev, &! write_file, gpnorm, rms, &
      change_resol, state_print !getvalues, analytic_IC, state_print
 
 
