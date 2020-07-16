@@ -38,14 +38,14 @@ namespace wrf_hydro_nwm_jedi {
   }
   // -----------------------------------------------------------------------------
   void TlmId::setTrajectory(const State &, State &,
-			    const ModelBias &) {}
+			    const ModelAuxControl &) {}
 // -----------------------------------------------------------------------------
-  void TlmIdSW::initializeTL(Increment & dx) const {
+  void TlmId::initializeTL(Increment & dx) const {
     oops::Log::debug() << "TlmId::initializTL" << std::endl;
   }
 // -----------------------------------------------------------------------------
   void TlmId::stepTL(Increment & dx,
-		     const ModelBiasIncrement &) const {
+		     const ModelAuxIncrement &) const {
     dx.updateTime(tstep_);
   }
 // -----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ void TlmId::initializeAD(Increment & dx) const {
 }
 // -----------------------------------------------------------------------------
 void TlmId::stepAD(Increment & dx,
-		   ModelBiasIncrement &) const {
+		   ModelAuxIncrement &) const {
   dx.updateTime(-tstep_);
 }
 // -----------------------------------------------------------------------------

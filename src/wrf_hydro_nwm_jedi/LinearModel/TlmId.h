@@ -18,12 +18,15 @@
 #include "oops/util/Printable.h"
 
 #include "wrf_hydro_nwm_jedi/Traits.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxIncrement.h"
 
 // Forward declarations
 namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class State;
   class Increment;
+  class ModelAuxControl;
   struct Traits;
 }
 
@@ -49,16 +52,16 @@ namespace wrf_hydro_nwm_jedi {
 
 /// Model trajectory computation
       void setTrajectory(const State &, State &,
-			 const ModelBias &) override;
+			 const ModelAuxControl &) override;
 
 /// Run TLM and its adjoint
   void initializeTL(Increment &) const override;
-  void stepTL(Increment &, const ModelBiasIncrement &)
+  void stepTL(Increment &, const ModelAuxIncrement &)
                const override;
   void finalizeTL(Increment &) const override;
 
   void initializeAD(Increment &) const override;
-  void stepAD(Increment &, ModelBiasIncrement &)
+  void stepAD(Increment &, ModelAuxIncrement &)
                 const override;
   void finalizeAD(Increment &) const override;
 

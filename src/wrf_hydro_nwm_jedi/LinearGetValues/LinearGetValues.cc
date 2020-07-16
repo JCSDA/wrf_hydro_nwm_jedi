@@ -28,7 +28,7 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   LinearGetValues::LinearGetValues(const Geometry &, const ufo::Locations &) {
-    util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
+    util::abor1_cpp("LinearGetValues::LinearGetValues(const Geometry &, const ufo::Locations &) needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
