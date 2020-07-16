@@ -95,7 +95,7 @@ subroutine c_wrf_hydro_nwm_jedi_geometry_info(c_key_self,dx,dy,npx,npy,npz) bind
   type(wrf_hydro_nwm_jedi_geometry), pointer :: self
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self , self)
-  call self%get_info(dx,dy,npx,npy,npz)
+  call self%get_lsm_info(dx, dy, npx, npy, npz)
 
 end subroutine c_wrf_hydro_nwm_jedi_geometry_info
 
