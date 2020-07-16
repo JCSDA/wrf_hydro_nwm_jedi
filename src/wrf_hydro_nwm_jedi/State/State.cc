@@ -65,6 +65,8 @@ namespace wrf_hydro_nwm_jedi {
     // util::abor1_cpp("State::State(const Geometry &,const Variables &, const DateTime & ) needs to be implemented.", __FILE__, __LINE__);
     std::cout<< "Creating state as increment"<<std::endl;
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), vars);
+    vars_ = vars;
+    time_ = vt;
   }
 
   // ----------------------------------------------------------------------------
@@ -73,6 +75,8 @@ namespace wrf_hydro_nwm_jedi {
     fields_(new Fields(resol, other.vars_, other.time_)){
     // util::abor1_cpp("State::State(const Geometry &, const State &) needs to be implemented.", __FILE__, __LINE__);
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, resol.toFortran(), other.vars_);
+    vars_ = other.vars_;
+    time_ = other.time_;
     oops::Log::trace() << "State::State created by interpolation."
                      << std::endl;
   }
@@ -86,6 +90,7 @@ namespace wrf_hydro_nwm_jedi {
 
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
+    time_ = fields_->time();
   }
 
 // ----------------------------------------------------------------------------

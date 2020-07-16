@@ -38,7 +38,7 @@ namespace wrf_hydro_nwm_jedi {
   }
   // -----------------------------------------------------------------------------
   void TlmId::setTrajectory(const State &, State &,
-			    const ModelAuxControl &) {}
+			    const ModelAuxControl &) {std::cout << "In trajectory" << std::endl;}
 // -----------------------------------------------------------------------------
   void TlmId::initializeTL(Increment & dx) const {
     oops::Log::debug() << "TlmId::initializTL" << std::endl;
