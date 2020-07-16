@@ -8,7 +8,7 @@
 #include <ostream>
 #include <string>
 
-#include "wrf_hydro_nwm_jedi/LinearGetValues/LinearGetValues.h"
+#include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
 
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -20,16 +20,16 @@ namespace wrf_hydro_nwm_jedi {
   
   // ----------------------------------------------------------------------------
   
-  LinearGetValues::LinearGetValues() {
-    util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
-                    __FILE__, __LINE__);
-  }
+  // lineargetvalues::LinearGetValues() {
+  //   util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
+  //                   __FILE__, __LINE__);
+  // }
   
 // ----------------------------------------------------------------------------
 
-  LinearGetValues::LinearGetValues(const Geometry &, const ufo::Locations &) {
-    util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
-                    __FILE__, __LINE__);
+  LinearGetValues::LinearGetValues(const Geometry & geom, const ufo::Locations & locs) : locs_(locs), geom_(new Geometry(geom)), model2geovals_(){
+    wrf_hydro_nwm_jedi_getvalues_create_f90(keyGetValues_, geom.toFortran(), locs_.toFortran());
+    oops::Log::trace() << "GetValues::GetValues done" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -44,7 +44,16 @@ namespace wrf_hydro_nwm_jedi {
 				      const util::DateTime & t2,
 				      ufo::GeoVaLs & geovals)
   {
-    util::abor1_cpp("LinearGetValues::setTrajectory() needs to be implemented.", __FILE__, __LINE__);
+    const util::DateTime * t1p = &t1;
+    const util::DateTime * t2p = &t2;
+
+    wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_,
+						  state.geometry()->toFortran(),
+						  state.toFortran(),
+						  &t1p, &t2p,
+						  locs_.toFortran(),
+						  geovals.toFortran());
+    // util::abor1_cpp("LinearGetValues::setTrajectory() needs to be implemented.", __FILE__, __LINE__);
   }
   
   // ----------------------------------------------------------------------------

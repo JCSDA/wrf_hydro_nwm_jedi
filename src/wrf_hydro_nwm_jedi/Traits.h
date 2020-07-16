@@ -15,7 +15,7 @@
 // #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 // #include "wrf_hydro_nwm_jedi/GetValuesTraj/GetValuesTraj.h"
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
-#include "wrf_hydro_nwm_jedi/LinearGetValues/LinearGetValues.h"
+#include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"

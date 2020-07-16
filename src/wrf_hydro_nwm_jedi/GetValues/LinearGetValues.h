@@ -6,7 +6,7 @@
  */
 
 #ifndef WRF_HYDRO_NWM_JEDI_LINEARGETVALUES_H_
-#define WRF_HYDRO_NWM_JEDI_LINEARGETVALUES_H
+#define WRF_HYDRO_NWM_JEDI_LINEARGETVALUES_H_
 
 #include <ostream>
 
@@ -15,8 +15,10 @@
 
 #include "ufo/Locations.h"
 
-//#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-//#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/GetValues/GetValues.interface.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
 namespace ufo {
   class GeoVaLs;
@@ -53,6 +55,10 @@ namespace wrf_hydro_nwm_jedi {
 		       const ufo::GeoVaLs & geovals) const;
    private:
     void print(std::ostream & os) const;
+    F90getvalues keyGetValues_;
+    ufo::Locations locs_;
+    std::shared_ptr<const Geometry> geom_;
+    std::unique_ptr<VarChaModel2GeoVaLs> model2geovals_;
   };
 
 }  // namespace wrf_hydro_nwm_jedi

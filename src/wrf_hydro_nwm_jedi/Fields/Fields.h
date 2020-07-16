@@ -17,6 +17,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "oops/base/Variables.h"
+
 // forward declarations
 namespace eckit {
   class Configuration;
@@ -61,6 +63,7 @@ namespace wrf_hydro_nwm_jedi {
    private:
     void print(std::ostream &) const;
     boost::shared_ptr<const Geometry> geom_;
+    oops::Variables vars_;
     F90flds keyFlds_;
     util::DateTime time_;
   };

@@ -33,6 +33,8 @@ namespace wrf_hydro_nwm_jedi {
 	std::cout << "Time statically configured"<<std::endl;
 	time_ = util::DateTime("2018-04-15T00:00:00Z");
       }
+
+    vars_ = vars;
   }
 
   // Used by Increment
@@ -41,7 +43,7 @@ namespace wrf_hydro_nwm_jedi {
     : geom_(new Geometry(geom)) {
 
     time_ = vt;
-
+    vars_ = vars;
   }
 
 // ----------------------------------------------------------------------------
