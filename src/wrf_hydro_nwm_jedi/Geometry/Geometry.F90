@@ -13,26 +13,8 @@ private
 public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn
 
 
-!> Fortran geometry object (contains specific geometry components).
-type, public :: wrf_hydro_nwm_jedi_geometry
-   type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm        !< LSM geom component (optional)
-   type(wrf_hydro_nwm_stream_geometry), allocatable :: stream  !< stream geom component (optional)
- contains
-   procedure :: init   => wrf_hydro_nwm_jedi_geometry_init    !< init/create
-   procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone   !< copy
-   procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete  !< delete
-   procedure :: get_lsm_info => get_lsm_info  !< get lsm info
-   procedure :: get_lsm_nn => get_lsm_nn  !< get lsm nearest neighbor
-   ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
-   ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
-   procedure :: lsm_active => lsm_active  !< query if the lsm component is active/allocated
-   procedure :: stream_active => stream_active  !< query if the stream component is active/allocated
-end type wrf_hydro_nwm_jedi_geometry
-
-
 ! General:
 !   The dims are generically named: 1=x, 2=y, 3=z
-
 
 !> Geometry for LSM (land surface model) fields (2D and 3D)
 type, private :: wrf_hydro_nwm_lsm_geometry
@@ -52,6 +34,22 @@ type, private :: wrf_hydro_nwm_stream_geometry
    real, allocatable :: lat(:), lon(:), dx(:)
 end type wrf_hydro_nwm_stream_geometry
 
+
+!> Fortran geometry object (contains specific geometry components).
+type, public :: wrf_hydro_nwm_jedi_geometry
+   type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm        !< LSM geom component (optional)
+   type(wrf_hydro_nwm_stream_geometry), allocatable :: stream  !< stream geom component (optional)
+ contains
+   procedure :: init   => wrf_hydro_nwm_jedi_geometry_init    !< init/create
+   procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone   !< copy
+   procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete  !< delete
+   procedure :: get_lsm_info => get_lsm_info  !< get lsm info
+   procedure :: get_lsm_nn => get_lsm_nn  !< get lsm nearest neighbor
+   ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
+   ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
+   procedure :: lsm_active => lsm_active  !< query if the lsm component is active/allocated
+   procedure :: stream_active => stream_active  !< query if the stream component is active/allocated
+end type wrf_hydro_nwm_jedi_geometry
 
 !------------------------------------------------------------------------------
 contains
