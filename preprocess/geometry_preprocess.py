@@ -66,11 +66,14 @@ def geometry_preprocess(
     # Actual LSM attributes
     lsm_attrs['lsm_dx'] = lsm_attrs.pop('DX')
     lsm_attrs['lsm_dy'] = lsm_attrs.pop('DY')
-    lsm_attrs['lsm_lat_dim_name'] = 'south_north'
-    lsm_attrs['lsm_lon_dim_name'] = 'west_east'
-    lsm_attrs['lsm_z_dim_name'] = 'soil_layers_stag'
+    # Consistency with the internal code in Geometry.F90
+    # would be
+    # lsm_xdim_name and lsm_ydim_name
+    lsm_attrs['lsm_xdim_name'] = 'west_east'
+    lsm_attrs['lsm_ydim_name'] = 'south_north'
+    lsm_attrs['lsm_zdim_name'] = 'soil_layers_stag'
     lsm_attrs['lsm_lat_name'] = 'XLAT'
-    lsm_attrs['lsm_lon_name'] = 'XLON'
+    lsm_attrs['lsm_lon_name'] = 'XLONG'
     lsm_attrs['lsm_z_name'] = 'ZS'
     lsm_attrs['lsm_src_file'] = str(wrfinput_file.absolute())
     lsm_attrs['lsm_src_md5'] = (
@@ -78,7 +81,6 @@ def geometry_preprocess(
     lsm_geom.attrs = lsm_attrs
     # This is the start of the geometry that is output
     geom = lsm_geom
-    
 
     # Streamflow "grid"  / Routelink file
     # This is not mandatory, throws a warning if missing
@@ -94,7 +96,7 @@ def geometry_preprocess(
         routelink_ds = xr.open_dataset(routelink_file)
         # variables
         routelink_vars = [vv for vv in routelink_ds.variables]
-        routelink_keep_vars = ['lat', 'lon']
+        routelink_keep_vars = ['lat', 'lon', 'Length']
         routelink_drop_vars = (
             set(routelink_vars).difference(set(routelink_keep_vars)))
         routelink_geom = (
@@ -105,7 +107,8 @@ def geometry_preprocess(
         routelink_attrs = {
             key: val for key, val in routelink_ds.attrs.items()
             if key in routelink_keep_attrs}
-        routelink_attrs['stream_dim_name'] = 'feature_id'
+        routelink_attrs['stream_dx_name'] = 'Length'
+        routelink_attrs['stream_xdim_name'] = 'feature_id'
         routelink_attrs['stream_lat_name'] = 'lat'
         routelink_attrs['stream_lon_name'] = 'lon'
         routelink_attrs['stream_src_file'] = str(routelink_file.absolute())
