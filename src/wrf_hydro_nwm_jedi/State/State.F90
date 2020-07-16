@@ -3,6 +3,7 @@
 ! This software is licensed under the terms of the Apache Licence Version 2.0
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
+!> State (a fields/variable manager) for wrf_hydro_nwm - jedi.
 module wrf_hydro_nwm_jedi_state_mod
 
 use iso_c_binding
@@ -11,16 +12,16 @@ use datetime_mod
 use fckit_mpi_module
 use oops_variables_mod
 
-use wrf_hydro_nwm_jedi_field_mod, only: wrf_hydro_nwm_jedi_fields,checksame
+use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_fields, checksame
 ! use fv3jedi_constants_mod,       only: rad2deg, constoz
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, error_handler
+use wrf_hydro_nwm_jedi_geometry_mod,only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_util_mod,    only: error_handler, indices
 ! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
 ! use fv3jedi_interpolation_mod,   only: field2field_interp
 ! use fv3jedi_kinds_mod,           only: kind_real
 use iso_c_binding, only : c_float
 !use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
 !use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
-use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state
 !use fv3jedi_getvalues_mod,       only: getvalues
 use netcdf
 !use wind_vt_mod, only: a2d
@@ -36,11 +37,28 @@ public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      change_resol, state_print !getvalues, analytic_IC, state_print
 
 
+!> Fortran mirror of C class
+type, public :: wrf_hydro_nwm_jedi_state
+  !Local copies of grid for convenience
+!  integer :: isc, iec, jsc, jec
+  integer :: npx, npy, npz
+  integer :: ntiles, ntile
+  logical :: hydrostatic = .true.
+  integer :: calendar_type, date_init(6) !Read/write for GFS
+  integer :: nf
+  logical :: have_agrid
+  logical :: have_dgrid
+  type(fckit_mpi_comm) :: f_comm
+  type(wrf_hydro_nwm_jedi_fields) :: fields_obj
+end type wrf_hydro_nwm_jedi_state
+
+
 ! ------------------------------------------------------------------------------
 contains
 ! ------------------------------------------------------------------------------
 
-  
+
+!> The init method for state. It calles all fields
 subroutine create(self, geom, vars)
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
@@ -84,7 +102,6 @@ function get_n_fields(self) result(nf)
 
 end function get_n_fields
 
-! ------------------------------------------------------------------------------
 
 subroutine zeros(self)
   implicit none
@@ -168,6 +185,7 @@ subroutine change_resol(self, geom, rhs, geom_rhs)
 end subroutine change_resol
 
 
+!> Read the state from files (via read_fields_from_file)
 subroutine read_state_from_file(self, c_conf)
   use string_utils
   implicit none
@@ -195,12 +213,13 @@ subroutine read_state_from_file(self, c_conf)
 end subroutine read_state_from_file
 
 
+!> Print the state
 subroutine state_print(self, string)
   use iso_c_binding, only : c_null_char
   implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(in)  :: self  !< State
+  character(len=1, kind=c_char),  intent(out) :: string(8192) !< The output string
 
-  character(len=1, kind=c_char) :: string(8192)
   character(len=8192) :: tmp_str
   integer :: s_len, i
 
@@ -249,5 +268,6 @@ subroutine rms(self, prms)
 
   ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
 end subroutine rms
+
 
 end module wrf_hydro_nwm_jedi_state_mod
