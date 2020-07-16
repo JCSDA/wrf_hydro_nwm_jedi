@@ -69,9 +69,12 @@ namespace wrf_hydro_nwm_jedi {
 
   // ----------------------------------------------------------------------------
 
-  State::State(const Geometry &, const State &) {
-    util::abor1_cpp("State::State() needs to be implemented.",
-                    __FILE__, __LINE__);
+  State::State(const Geometry & resol, const State & other) :
+    fields_(new Fields(resol, other.vars_, other.time_)){
+    // util::abor1_cpp("State::State(const Geometry &, const State &) needs to be implemented.", __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, resol.toFortran(), other.vars_);
+    oops::Log::trace() << "State::State created by interpolation."
+                     << std::endl;
   }
 
 // ----------------------------------------------------------------------------
