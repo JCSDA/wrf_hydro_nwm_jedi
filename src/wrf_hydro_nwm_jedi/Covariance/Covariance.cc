@@ -50,8 +50,9 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Covariance::inverseMultiply(const Increment &, Increment &) const {
-    util::abor1_cpp("Covariance::inverseMultiply() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Covariance::inverseMultiply() needs to be implemented.",
+    //                 __FILE__, __LINE__);
+    std::cout << "Inverse multiply not implemented"<<std::endl;
   }
 
 // ----------------------------------------------------------------------------

@@ -48,26 +48,26 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void ModelAuxIncrement::zero() {
-    util::abor1_cpp(
-      "ModelAuxIncrement::zero() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::zero() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement & ModelAuxIncrement::operator*=(const double) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::operator*=() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::operator*=() needs to be implemented.",
+    //   __FILE__, __LINE__);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement & ModelAuxIncrement::operator+=(const ModelAuxIncrement &) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::operator+=() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::operator+=() needs to be implemented.",
+    //   __FILE__, __LINE__);
     return *this;
   }
 
@@ -83,34 +83,34 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   double ModelAuxIncrement::norm() const {
-    util::abor1_cpp(
-      "ModelAuxIncrement::norm() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::norm() needs to be implemented.",
+    //   __FILE__, __LINE__);
     return 0.0;
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxIncrement::axpy(const double, const ModelAuxIncrement &) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::axpy() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::axpy() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   double ModelAuxIncrement::dot_product_with(const ModelAuxIncrement &) const {
-    util::abor1_cpp(
-      "ModelAuxIncrement::dot_product_with() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::dot_product_with() needs to be implemented.",
+    //   __FILE__, __LINE__);
     return 0.0;
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxIncrement::print(std::ostream & os) const {
-    util::abor1_cpp("ModelAuxIncrement::print() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("ModelAuxIncrement::print() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     os << "(TODO, print diagnostic info about the ModelAuxIncrement here)"
        << std::endl;
   }

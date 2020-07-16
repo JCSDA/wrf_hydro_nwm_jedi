@@ -54,9 +54,10 @@ namespace wrf_hydro_nwm_jedi {
 
   void ModelAuxCovariance::inverseMultiply(const ModelAuxIncrement &,
                                            ModelAuxIncrement &) const {
-    util::abor1_cpp(
-      "ModelAuxCovariance::inverseMultiply() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::inverseMultiply() needs to be implemented.",
+    //   __FILE__, __LINE__);
+    std::cout << "Inverse multiply in ModelAuxCovariance not implemented" << std::endl;
   }
 
 // ----------------------------------------------------------------------------

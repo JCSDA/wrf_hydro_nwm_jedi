@@ -52,6 +52,8 @@ type, abstract, public :: base_field
    procedure (read_file_interface),       pass(self), deferred :: read_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
+   procedure (difference_interface), deferred :: diff
+   generic, public :: operator(-) => diff
    !procedure (install_bkgerr_interface), pass(self), deferred :: install_bkgerr   
 end type base_field
 
@@ -84,6 +86,13 @@ abstract interface
      class(base_field), intent(in)    :: in_f
      real(kind=c_float),intent(in)    :: scalar
    end subroutine apply_covariance_mult_interface
+
+   function difference_interface(a,b) result(val)
+     import base_field
+     class(base_field), intent(in) :: a
+     class(base_field), intent(in) :: b
+     class(base_field), allocatable :: val
+   end function difference_interface
 end interface
 
 
@@ -100,7 +109,8 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: fill => fill_field_1d
    procedure, pass(self) :: mean_stddev => mean_stddev_1d
    procedure, pass(self) :: rms => field_rms_1d
-   procedure, pass(self) :: apply_cov => apply_cov_1d   
+   procedure, pass(self) :: apply_cov => apply_cov_1d
+   procedure :: diff => diff_1d
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -116,7 +126,8 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: fill => fill_field_2d
    procedure, pass(self) :: mean_stddev => mean_stddev_2d
    procedure, pass(self) :: rms => field_rms_2d
-   procedure, pass(self) :: apply_cov => apply_cov_2d   
+   procedure, pass(self) :: apply_cov => apply_cov_2d
+   procedure :: diff => diff_2d
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -132,7 +143,8 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: fill => fill_field_3d
    procedure, pass(self) :: mean_stddev => mean_stddev_3d
    procedure, pass(self) :: rms => field_rms_3d
-   procedure, pass(self) :: apply_cov => apply_cov_3d   
+   procedure, pass(self) :: apply_cov => apply_cov_3d
+   procedure :: diff => diff_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -160,6 +172,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: read_fields_from_file
    procedure :: print_single_field
    procedure :: print_all_fields
+   procedure :: difference
    ! procedure :: allocate_field
    ! procedure :: equals
    ! procedure :: copy => field_copy
@@ -429,6 +442,65 @@ function get_value_3d(self, ind) result(val)
   val = self%array(ind%ind_x, ind%ind_y, ind%ind_z)
 end function get_value_3d
 
+!-----------------------------------------------------------------------------
+! Diff methods
+
+function diff_1d(a, b) result(val)
+  class(field_1d), intent(in) :: a
+  class(base_field), intent(in) :: b
+  class(base_field),allocatable :: val
+
+  class(field_1d), allocatable :: tmp
+
+  select type(b)
+  type is (field_1d)
+     allocate(tmp)
+     tmp%array = a%array - b%array
+     allocate(val, source = tmp)
+     deallocate(tmp)
+  class default
+     call abor1_ftn("diff_1d: b not a 1d_field")
+  end select
+  
+end function diff_1d
+
+function diff_2d(a, b) result(val)
+  class(field_2d), intent(in) :: a
+  class(base_field), intent(in) :: b
+  class(base_field), allocatable :: val
+
+  class(field_2d),allocatable :: tmp
+  
+  select type(b)
+  type is (field_2d)
+     allocate(tmp)
+     tmp%array = a%array - b%array
+     allocate(val,source=tmp)
+     deallocate(tmp)
+  class default
+     call abor1_ftn("diff_2d: b not a 2d_field")
+  end select
+  
+end function diff_2d
+
+function diff_3d(a, b) result(val)
+  class(field_3d), intent(in) :: a
+  class(base_field), intent(in) :: b
+  class(base_field), allocatable :: val
+
+  class(field_3d), allocatable :: tmp
+  
+  select type(b)
+  type is (field_3d)
+     allocate(tmp)
+     tmp%array = a%array - b%array
+     allocate(val,source=tmp)
+     deallocate(tmp)
+  class default
+     call abor1_ftn("diff_3d: b not a 3d_field")
+  end select
+  
+end function diff_3d
 
 ! --------------------------------------------------------------------------------------------------
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
@@ -726,6 +798,22 @@ subroutine print_all_fields(self,string)
   end do    
 end subroutine print_all_fields
 
+
+subroutine difference(self,x1,x2)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: x1
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: x2
+
+  integer :: f
+
+  write(*,*) "Difference invoked in Fields.F90"
+
+  do f = 1,size(self%fields)
+     self%fields(f)%field = x1%fields(f)%field - x2%fields(f)%field
+  end do
+  
+end subroutine difference
 
 ! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 

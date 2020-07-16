@@ -180,8 +180,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Increment::print(std::ostream & os) const {
-    util::abor1_cpp("Increment::print() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Increment::print() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     os << "Increment: "
        << "(TODO, print diagnostic info about the increment here)"
        << std::endl;

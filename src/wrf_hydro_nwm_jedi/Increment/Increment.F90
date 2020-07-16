@@ -467,38 +467,9 @@ subroutine diff_incr(self, x1, x2)
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: x1
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: x2
 
-  type(wrf_hydro_nwm_jedi_geometry) :: geom_self, geom_x1, geom_x2
-  real, pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
-  real, pointer             :: x1_u(:,:), x1_v(:,:), x1_h(:,:)
-  real, pointer             :: x2_u(:,:), x2_v(:,:), x2_h(:,:)
   integer                           :: i, j
-  logical                           :: check
 
-  ! ! Get geometries
-  ! geom_self = self%get_geometry()
-  ! geom_x1 = x1%get_geometry()
-  ! geom_x2 = x2%get_geometry()
-
-  ! ! Check for matching resolution
-  ! check = (geom_self%get_nx() == geom_x1%get_nx()     .and. &
-  !          geom_self%get_ny() == geom_x1%get_ny()     .and. &
-  !          geom_self%get_xmax() == geom_x1%get_xmax() .and. &
-  !          geom_self%get_ymax() == geom_x1%get_ymax() .and. &
-  !          geom_self%get_nx() == geom_x2%get_nx()     .and. &
-  !          geom_self%get_ny() == geom_x2%get_ny()     .and. &
-  !          geom_self%get_xmax() == geom_x2%get_xmax() .and. &
-  !          geom_self%get_ymax() == geom_x2%get_ymax())
-
-  ! if (check) then
-  !   call self%get_u_ptr(self_u)
-  !   call self%get_v_ptr(self_v)
-  !   call self%get_h_ptr(self_h)
-  !   call x1%get_u_ptr(x1_u)
-  !   call x1%get_v_ptr(x1_v)
-  !   call x1%get_h_ptr(x1_h)
-  !   call x2%get_u_ptr(x2_u)
-  !   call x2%get_v_ptr(x2_v)
-  !   call x2%get_h_ptr(x2_h)
+  call self%fields_obj%difference(x1%fields_obj,x2%fields_obj)
 
   !   do j=geom_self%get_yps(), geom_self%get_ype()
   !      do i=geom_self%get_xps(), geom_self%get_xpe()
@@ -507,9 +478,6 @@ subroutine diff_incr(self, x1, x2)
   !         self_h(i,j) = x1_h(i,j) - x2_h(i,j)
   !      end do
   !   end do
-  ! else
-  !    call abor1_ftn("sw increment:  self_sub not implemented for mismatched resolutions")
-  ! endif
 
 end subroutine diff_incr
 
