@@ -10,6 +10,7 @@
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/State/State.h"
 
 //#include "oops/base/GridPoint.h"
 #include "oops/base/Variables.h"
@@ -124,8 +125,11 @@ namespace wrf_hydro_nwm_jedi {
   // ----------------------------------------------------------------------------
 
   void Increment::diff(const State & x1, const State & x2) {
-    util::abor1_cpp("Increment::diff() needs to be implemented.",
-                    __FILE__, __LINE__);
+    ASSERT(this->validTime() == x1.validTime());
+    ASSERT(this->validTime() == x2.validTime());
+    wrf_hydro_nwm_jedi_increment_diff_incr_f90(keyInc_, x1.toFortran(), x2.toFortran());
+    // util::abor1_cpp("Increment::diff() needs to be implemented.",
+    //                 __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------

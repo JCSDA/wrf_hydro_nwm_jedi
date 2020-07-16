@@ -23,9 +23,9 @@ module wrf_hydro_nwm_jedi_increment_mod
   implicit none
 
   private
-  public :: create!, create_from_other, delete, zeros, random, copy, &
+  public :: create, diff_incr!, create_from_other, delete, zeros, random, copy, &
           ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
-          ! dot_prod,  diff_incr, &
+          ! dot_prod, &
           ! read_file, write_file, &
           ! gpnorm, rms, &
           ! change_resol, &
@@ -461,57 +461,57 @@ contains
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine diff_incr(self, x1, x2)
+subroutine diff_incr(self, x1, x2)
 
-!   type(shallow_water_state_type), intent(inout) :: self
-!   type(shallow_water_state_type), intent(   in) :: x1
-!   type(shallow_water_state_type), intent(   in) :: x2
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x1
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x2
 
-!   type(shallow_water_geometry_type) :: geom_self, geom_x1, geom_x2
-!   real(r8kind), pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
-!   real(r8kind), pointer             :: x1_u(:,:), x1_v(:,:), x1_h(:,:)
-!   real(r8kind), pointer             :: x2_u(:,:), x2_v(:,:), x2_h(:,:)
-!   integer                           :: i, j
-!   logical                           :: check
+  type(wrf_hydro_nwm_jedi_geometry) :: geom_self, geom_x1, geom_x2
+  real, pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
+  real, pointer             :: x1_u(:,:), x1_v(:,:), x1_h(:,:)
+  real, pointer             :: x2_u(:,:), x2_v(:,:), x2_h(:,:)
+  integer                           :: i, j
+  logical                           :: check
 
-!   ! Get geometries
-!   geom_self = self%get_geometry()
-!   geom_x1 = x1%get_geometry()
-!   geom_x2 = x2%get_geometry()
+  ! ! Get geometries
+  ! geom_self = self%get_geometry()
+  ! geom_x1 = x1%get_geometry()
+  ! geom_x2 = x2%get_geometry()
 
-!   ! Check for matching resolution
-!   check = (geom_self%get_nx() == geom_x1%get_nx()     .and. &
-!            geom_self%get_ny() == geom_x1%get_ny()     .and. &
-!            geom_self%get_xmax() == geom_x1%get_xmax() .and. &
-!            geom_self%get_ymax() == geom_x1%get_ymax() .and. &
-!            geom_self%get_nx() == geom_x2%get_nx()     .and. &
-!            geom_self%get_ny() == geom_x2%get_ny()     .and. &
-!            geom_self%get_xmax() == geom_x2%get_xmax() .and. &
-!            geom_self%get_ymax() == geom_x2%get_ymax())
+  ! ! Check for matching resolution
+  ! check = (geom_self%get_nx() == geom_x1%get_nx()     .and. &
+  !          geom_self%get_ny() == geom_x1%get_ny()     .and. &
+  !          geom_self%get_xmax() == geom_x1%get_xmax() .and. &
+  !          geom_self%get_ymax() == geom_x1%get_ymax() .and. &
+  !          geom_self%get_nx() == geom_x2%get_nx()     .and. &
+  !          geom_self%get_ny() == geom_x2%get_ny()     .and. &
+  !          geom_self%get_xmax() == geom_x2%get_xmax() .and. &
+  !          geom_self%get_ymax() == geom_x2%get_ymax())
 
-!   if (check) then
-!     call self%get_u_ptr(self_u)
-!     call self%get_v_ptr(self_v)
-!     call self%get_h_ptr(self_h)
-!     call x1%get_u_ptr(x1_u)
-!     call x1%get_v_ptr(x1_v)
-!     call x1%get_h_ptr(x1_h)
-!     call x2%get_u_ptr(x2_u)
-!     call x2%get_v_ptr(x2_v)
-!     call x2%get_h_ptr(x2_h)
+  ! if (check) then
+  !   call self%get_u_ptr(self_u)
+  !   call self%get_v_ptr(self_v)
+  !   call self%get_h_ptr(self_h)
+  !   call x1%get_u_ptr(x1_u)
+  !   call x1%get_v_ptr(x1_v)
+  !   call x1%get_h_ptr(x1_h)
+  !   call x2%get_u_ptr(x2_u)
+  !   call x2%get_v_ptr(x2_v)
+  !   call x2%get_h_ptr(x2_h)
 
-!     do j=geom_self%get_yps(), geom_self%get_ype()
-!        do i=geom_self%get_xps(), geom_self%get_xpe()
-!           self_u(i,j) = x1_u(i,j) - x2_u(i,j)
-!           self_v(i,j) = x1_v(i,j) - x2_v(i,j)
-!           self_h(i,j) = x1_h(i,j) - x2_h(i,j)
-!        end do
-!     end do
-!   else
-!      call abor1_ftn("sw increment:  self_sub not implemented for mismatched resolutions")
-!   endif
+  !   do j=geom_self%get_yps(), geom_self%get_ype()
+  !      do i=geom_self%get_xps(), geom_self%get_xpe()
+  !         self_u(i,j) = x1_u(i,j) - x2_u(i,j)
+  !         self_v(i,j) = x1_v(i,j) - x2_v(i,j)
+  !         self_h(i,j) = x1_h(i,j) - x2_h(i,j)
+  !      end do
+  !   end do
+  ! else
+  !    call abor1_ftn("sw increment:  self_sub not implemented for mismatched resolutions")
+  ! endif
 
-! end subroutine diff_incr
+end subroutine diff_incr
 
 ! ! ------------------------------------------------------------------------------
 

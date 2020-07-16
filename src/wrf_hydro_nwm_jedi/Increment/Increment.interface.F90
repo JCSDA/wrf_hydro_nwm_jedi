@@ -20,6 +20,8 @@ use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_state_mod
+use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
+use wrf_hydro_nwm_jedi_increment_mod, only: diff_incr
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
@@ -384,25 +386,25 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_diff_incr_c(c_key_lhs, c_key_x1, c_key_x2) bind(c, name='sw_increment_diff_incr_f90')
+subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c(c_key_lhs, c_key_x1, c_key_x2) bind(c, name='wrf_hydro_nwm_jedi_increment_diff_incr_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_lhs
-!   integer(c_int), intent(in) :: c_key_x1
-!   integer(c_int), intent(in) :: c_key_x2
+  integer(c_int), intent(in) :: c_key_lhs
+  integer(c_int), intent(in) :: c_key_x1
+  integer(c_int), intent(in) :: c_key_x2
 
-!   type(shallow_water_state_type), pointer :: lhs
-!   type(shallow_water_state_type),                 pointer :: x1
-!   type(shallow_water_state_type),                 pointer :: x2
+  type(wrf_hydro_nwm_jedi_state), pointer :: lhs
+  type(wrf_hydro_nwm_jedi_state), pointer :: x1
+  type(wrf_hydro_nwm_jedi_state), pointer :: x2
 
-!   call sw_increment_registry%get(c_key_lhs, lhs)
-!   call sw_state_registry%get(c_key_x1, x1)
-!   call sw_state_registry%get(c_key_x2, x2)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_lhs, lhs)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_x1, x1)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_x2, x2)
 
-!   call diff_incr(lhs, x1, x2)
+  call diff_incr(lhs, x1, x2)
 
-! end subroutine sw_increment_diff_incr_c
+end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 
 ! ! ------------------------------------------------------------------------------
 

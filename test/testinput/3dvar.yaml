@@ -27,7 +27,7 @@ cost_function:
         simulate:
           variables: ['swe']
   varchange: 'Identity'
-  variables: ['swe']
+  variables: ['SNEQV']
   window_begin: '2010-01-01T00:04:48Z'
   window_length: PT24S
 final:

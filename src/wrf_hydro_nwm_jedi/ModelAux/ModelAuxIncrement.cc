@@ -15,34 +15,34 @@ namespace wrf_hydro_nwm_jedi {
 
   ModelAuxIncrement::ModelAuxIncrement(const ModelAuxIncrement &,
                                        const eckit::Configuration &) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::ModelAuxIncrement() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::ModelAuxIncrement(const ModelAuxIncrement &, const eckit::Configuration &) needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement::ModelAuxIncrement(const ModelAuxIncrement &, const bool) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::ModelAuxIncrement() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::ModelAuxIncrement(const ModelAuxIncrement &, const bool) needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement::ModelAuxIncrement(const Geometry &,
                                        const eckit::Configuration &) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::ModelAuxIncrement() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::ModelAuxIncrement(const Geometry &, const eckit::Configuration &) needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement::~ModelAuxIncrement() {
-    util::abor1_cpp(
-      "ModelAuxIncrement::~ModelAuxIncrement() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::~ModelAuxIncrement() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
