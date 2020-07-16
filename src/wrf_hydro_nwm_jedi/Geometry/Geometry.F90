@@ -1,21 +1,43 @@
+
+!> Geometry (location information) implementation for wrf_hydro_nwm - jedi integration.
 module wrf_hydro_nwm_jedi_geometry_mod
 
 use fckit_configuration_module, only: fckit_configuration
+use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
 
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_geometry, indices, error_handler
+! For doxygen purposes, this public statement is just a summary for the code reader?
+public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn
 
-!------------------------------------------------------------------------------
-! Data types
+
+!> Fortran geometry object (contains specific geometry components).
+type, public :: wrf_hydro_nwm_jedi_geometry
+   type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm        !< LSM geom component (optional)
+   type(wrf_hydro_nwm_stream_geometry), allocatable :: stream  !< stream geom component (optional)
+ contains
+   procedure :: init   => wrf_hydro_nwm_jedi_geometry_init    !< init/create
+   procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone   !< copy
+   procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete  !< delete
+   procedure :: get_lsm_info => get_lsm_info  !< get lsm info
+   procedure :: get_lsm_nn => get_lsm_nn  !< get lsm nearest neighbor
+   ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
+   ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
+   procedure :: lsm_active => lsm_active  !< query if the lsm component is active/allocated
+   procedure :: stream_active => stream_active  !< query if the stream component is active/allocated
+end type wrf_hydro_nwm_jedi_geometry
+
+
 ! General:
 !   The dims are generically named: 1=x, 2=y, 3=z
 
-type wrf_hydro_nwm_lsm_geometry
+
+!> Geometry for LSM (land surface model) fields (2D and 3D)
+type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: xstart, ystart, zstart
-   integer :: xend, yend, zend ! same as xdim_len and ydim_len? redundant?
+   integer :: xend, yend, zend !< @todo same as xdim_len and ydim_len? redundant?
    integer :: xdim_len, ydim_len, zdim_len
    integer :: n_snow_layers
    real    :: dx, dy
@@ -23,38 +45,18 @@ type wrf_hydro_nwm_lsm_geometry
 end type wrf_hydro_nwm_lsm_geometry
 
 
-type wrf_hydro_nwm_stream_geometry
+!> Geometry for stream channel/reach network (1D)
+type, private :: wrf_hydro_nwm_stream_geometry
    integer :: xstart, xend
    integer :: xdim_len
    real, allocatable :: lat(:), lon(:), dx(:)
 end type wrf_hydro_nwm_stream_geometry
 
 
-type :: wrf_hydro_nwm_jedi_geometry
-   type(wrf_hydro_nwm_lsm_geometry), allocatable :: lsm
-   type(wrf_hydro_nwm_stream_geometry), allocatable :: stream
- contains
-   procedure :: init   => wrf_hydro_nwm_jedi_geometry_init
-   procedure :: clone  => wrf_hydro_nwm_jedi_geometry_clone
-   procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete
-   procedure :: get_lsm_info => wrf_hydro_nwm_jedi_geometry_get_lsm_info
-   procedure :: get_lsm_nn => wrf_hydro_nwm_jedi_geometry_get_lsm_nn
-   ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
-   ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
-   procedure :: lsm_active => lsm_active
-   procedure :: stream_active => stream_active
-end type wrf_hydro_nwm_jedi_geometry
-
-
-! This should go into Utilities
-type :: indices
-   integer :: ind_x, ind_y, ind_z
-end type indices
-
-
 !------------------------------------------------------------------------------
 contains
 !------------------------------------------------------------------------------
+
 
 !> Initialize the geometry object from the preprocessed geometry input file.
 subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
@@ -190,10 +192,11 @@ end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 
 !> Get the LSM nearest neighbor from a lat and lon pair.
 ! @todo change indices to have dimension?
-subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn( &
+subroutine get_lsm_nn( &
      self, lat, lon, ind)
   class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< geom object
-  real, intent(in) :: lat, lon  !< the lat, lon of interest
+  real, intent(in) :: lat  !< the lat of interest
+  real, intent(in) :: lon  !< the lon of interest
   type(indices), intent(out) :: ind  !< the index pair of the nearest neighbor
 
   real,dimension(2) :: minimum
@@ -216,19 +219,22 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn( &
   deallocate(l2_norm)
   deallocate(diff_lat)
   deallocate(diff_lon)
-end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_nn
+end subroutine get_lsm_nn
 
 
-!> Get lsm info
-subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
+!> Get lsm geometry info
+subroutine get_lsm_info( &
      self, &
      dx, dy, &
      xdim_len, ydim_len, zdim_len)
   class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self  !< geom object
-  real, intent(out) :: dx, dy
-  integer, intent(out) :: xdim_len, ydim_len, zdim_len
+  real, intent(out) :: dx  !< the x resolution
+  real, intent(out) :: dy  !< the y resolution
+  integer, intent(out) :: xdim_len  !< x dimension size
+  integer, intent(out) :: ydim_len  !< y dimension size
+  integer, intent(out) :: zdim_len  !< z dimension size
 
-  ! TODO JLM: I dont love this...
+  !> @todo JLM: I dont love this...
   if (.not. self%lsm_active()) return
 
   dx = self%lsm%dx
@@ -236,7 +242,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info( &
   xdim_len = self%lsm%xdim_len
   ydim_len = self%lsm%ydim_len
   zdim_len = self%lsm%zdim_len
-end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
+end subroutine get_lsm_info
 
 
 !-----------------------------------------------------------------------------
@@ -414,30 +420,4 @@ subroutine get_geom_data_2d(meta_name, ncid, array)
 end subroutine get_geom_data_2d
 
 
-! -----------------------------------------------------------------------------
-! Utilities to be moved to a separate file.
-
-!> A netcdf error handler.
-subroutine error_handler(status, failure, success)
-  !
-  ! Check the error flag from a NetCDF function call, and print appropriate
-  ! error message.
-  !
-  integer,                    intent(in) :: status   !< the returned code
-  character(len=*), optional, intent(in) :: failure  !< mesage for failure
-  character(len=*), optional, intent(in) :: success  !< message for success
-  
-  if (status .ne. NF90_NOERR) then
-     if (present(failure)) then
-        write(*,'(/," ***** ", A)') failure
-     endif
-     write(*,'(" ***** ",A,/)') nf90_strerror(status)
-     stop 'FATAL ERROR: In module_wrfinputfile.F -- Stopped'
-  endif
-  
-  if (present(success)) then
-     write(*,'(A)') success
-  endif 
-end subroutine error_handler
-
-end module
+end module wrf_hydro_nwm_jedi_geometry_mod

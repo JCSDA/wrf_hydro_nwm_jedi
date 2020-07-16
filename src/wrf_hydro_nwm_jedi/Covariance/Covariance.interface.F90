@@ -13,7 +13,8 @@ use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only : wrf_hydro_nwm_jedi_geometry_registry
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
-use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state_registry, wrf_hydro_nwm_jedi_state
+use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state_registry
+use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state
 
 private
 public :: wrf_hydro_nwm_jedi_covar_registry

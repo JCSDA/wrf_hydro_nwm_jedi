@@ -30,7 +30,7 @@ namespace wrf_hydro_nwm_jedi {
 
 namespace wrf_hydro_nwm_jedi {
 
-  // Geometry class
+  /// Geometry class for wrf_hydro_nwm - jedi
   class Geometry : public util::Printable,
                    private util::ObjectCounter<Geometry> {
    public:

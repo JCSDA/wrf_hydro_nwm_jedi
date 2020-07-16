@@ -35,11 +35,11 @@ namespace wrf_hydro_nwm_jedi {
 
 namespace wrf_hydro_nwm_jedi {
 
-  // Fields class
+  /// Fields class for wrf_hydro_nwm - jedi
   class Fields : public util::Printable,
                  private util::ObjectCounter<Fields> {
    public:
-    static const std::string classname() {return "wrf_hydro_nwm-jedi::Fields";}
+    static const std::string classname() {return "wrf_hydro_nwm_jedi::Fields";}
 
     Fields(const Geometry &, const oops::Variables &,
            const eckit::Configuration &);
