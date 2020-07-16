@@ -4,7 +4,8 @@ cost_function:
     Background:
       state:
       - date: '2010-01-01T00:05:00Z'
-        model_filename: 'Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1'
+        filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+        filename_hydro: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
         variables: ['SNEQV']
     Covariance:
       covariance: 'wrf_hydro_nwm_jediCovar'
@@ -44,7 +45,7 @@ output:
   frequency: PT12S
   type: 'an'
 resolution:
-  input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
+  input_file: ./Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 variational:
   iteration:
   - diagnostics:
@@ -59,7 +60,7 @@ variational:
       version: 'WRF_HYDRO_NWM_IdTLM'
     ninner: 10
     resolution:
-      input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
+      input_file: ./Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
       # nx: 25
       # ny: 25
       # xmax: 100000.0
