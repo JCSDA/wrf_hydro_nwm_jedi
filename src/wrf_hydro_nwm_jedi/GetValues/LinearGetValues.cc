@@ -8,7 +8,7 @@
 #include <ostream>
 #include <string>
 
-#include "wrf_hydro_nwm_jedi/LinearGetValues/LinearGetValues.h"
+#include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
 
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
