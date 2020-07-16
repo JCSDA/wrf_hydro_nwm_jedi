@@ -60,11 +60,6 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Model/Model.h
   Model/Model.cc
 
-  # ModelBias
-  ModelBias/ModelBias.h
-  ModelBias/ModelBiasIncrement.h
-  ModelBias/ModelBiasCovariance.h
-
   # # ModelAux
   ModelAux/ModelAuxControl.h
   ModelAux/ModelAuxControl.cc
