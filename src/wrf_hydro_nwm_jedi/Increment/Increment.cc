@@ -30,12 +30,19 @@ namespace wrf_hydro_nwm_jedi {
     // util::abor1_cpp("Increment::Increment() needs to be implemented.",
     //                 __FILE__, __LINE__);
     wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
+    vars_ = vars;
+    time_ = vt;
   }
 
 // ----------------------------------------------------------------------------
 
-  Increment::Increment(const Increment & other, const bool copy) {
-    // util::abor1_cpp("Increment::Increment() needs to be implemented.",
+  Increment::Increment(const Increment & other, const bool copy)
+    : fields_(new Fields(*other.fields_->geometry(), other.vars_, other.time_)){
+
+    wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
+    vars_ = other.vars_;
+    time_ = other.time_;
+    // util::abor1_cpp("Increment::Increment(const Increment & other, const bool copy) needs to be implemented.",
     //                  __FILE__, __LINE__);
   }
 

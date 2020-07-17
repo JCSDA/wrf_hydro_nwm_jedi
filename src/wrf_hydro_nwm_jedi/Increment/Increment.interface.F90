@@ -68,26 +68,26 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_c
 
 ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_create_from_other_c(c_key_self, c_key_other) bind(c,name='sw_increment_create_from_other_f90')
+subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c(c_key_self, c_key_other) bind(c,name='wrf_hydro_nwm_jedi_increment_create_from_other_f90')
 
-!   implicit none
-!   integer(c_int),intent(inout) :: c_key_self  !< Fields
-!   integer(c_int),intent(   in) :: c_key_other !< Other fields
+  implicit none
+  integer(c_int),intent(inout) :: c_key_self  !< Fields
+  integer(c_int),intent(   in) :: c_key_other !< Other fields
 
-!   ! Local variables
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: other
+  ! Local variables
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: other
 
-!   ! Interface
-!   call sw_increment_registry%get(c_key_other, other)
-!   call sw_increment_registry%init()
-!   call sw_increment_registry%add(c_key_self)
-!   call sw_increment_registry%get(c_key_self, self)
+  ! Interface
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_other, other)
+  call wrf_hydro_nwm_jedi_increment_registry%init()
+  call wrf_hydro_nwm_jedi_increment_registry%add(c_key_self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
 
-!   ! Call Fortran
-!   call create_from_other(self, other)
+  ! Call Fortran
+  call create_from_other(self, other)
 
-! end subroutine sw_increment_create_from_other_c
+end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! ! ------------------------------------------------------------------------------
 
