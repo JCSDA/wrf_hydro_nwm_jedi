@@ -46,8 +46,8 @@ type, abstract, public :: wrf_hydro_nwm_jedi_getvalues_base
    procedure, public :: create
    procedure, public :: delete
    procedure, public :: fill_geovals
-   !generic, public :: set_trajectory => fill_geovals
-   !generic, public :: fill_geovals_tl => fill_geovals
+   generic, public :: set_trajectory => fill_geovals
+   generic, public :: fill_geovals_tl => fill_geovals
 end type wrf_hydro_nwm_jedi_getvalues_base
 
 

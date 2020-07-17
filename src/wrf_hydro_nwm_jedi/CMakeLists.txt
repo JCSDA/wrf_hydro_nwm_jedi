@@ -33,7 +33,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   GetValues/LinearGetValues.cc
   GetValues/LinearGetValues.h
   GetValues/GetValues.interface.F90
-
+  GetValues/LinearGetValues.interface.h
+  GetValues/LinearGetValues.interface.F90
+  
   # VariableChanges
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h

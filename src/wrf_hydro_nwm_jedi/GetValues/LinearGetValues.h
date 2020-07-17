@@ -17,6 +17,8 @@
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.interface.h"
+#include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.interface.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 #include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
@@ -38,7 +40,7 @@ namespace wrf_hydro_nwm_jedi {
   // LinearGetValues class
   class LinearGetValues : public util::Printable {
    public:
-    LinearGetValues();
+    //LinearGetValues();
     LinearGetValues(const Geometry &, const ufo::Locations &);
     virtual ~LinearGetValues();
     void setTrajectory(const State & state,

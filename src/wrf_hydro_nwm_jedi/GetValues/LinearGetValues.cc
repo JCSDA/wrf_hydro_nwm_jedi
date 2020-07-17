@@ -20,7 +20,7 @@ namespace wrf_hydro_nwm_jedi {
   
   // ----------------------------------------------------------------------------
   
-  // lineargetvalues::LinearGetValues() {
+  // LinearGetValues::LinearGetValues() {
   //   util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
   //                   __FILE__, __LINE__);
   // }
@@ -29,7 +29,7 @@ namespace wrf_hydro_nwm_jedi {
 
   LinearGetValues::LinearGetValues(const Geometry & geom, const ufo::Locations & locs) : locs_(locs), geom_(new Geometry(geom)), model2geovals_(){
     wrf_hydro_nwm_jedi_getvalues_create_f90(keyGetValues_, geom.toFortran(), locs_.toFortran());
-    oops::Log::trace() << "GetValues::GetValues done" << std::endl;
+    oops::Log::trace() << "LinearGetValues::LinearGetValues done" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -47,12 +47,20 @@ namespace wrf_hydro_nwm_jedi {
     const util::DateTime * t1p = &t1;
     const util::DateTime * t2p = &t2;
 
+    // wrf_hydro_nwm_jedi_lineargetvalues_set_trajectory_f90(keyLinearGetValues_,
+    // 							  geom_->toFortran(),
+    // 							  state.toFortran(),
+    // 							  &t1p,
+    // 							  &t2p,
+    // 							  locs_.toFortran(),
+    // 							  geovals.toFortran());
+
     wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_,
-						  state.geometry()->toFortran(),
-						  state.toFortran(),
-						  &t1p, &t2p,
-						  locs_.toFortran(),
-						  geovals.toFortran());
+    						  state.geometry()->toFortran(),
+    						  state.toFortran(),
+    						  &t1p, &t2p,
+    						  locs_.toFortran(),
+    						  geovals.toFortran());
     // util::abor1_cpp("LinearGetValues::setTrajectory() needs to be implemented.", __FILE__, __LINE__);
   }
   
@@ -62,19 +70,21 @@ namespace wrf_hydro_nwm_jedi {
 				      const util::DateTime & t1,
 				      const util::DateTime & t2,
 				      ufo::GeoVaLs & geovals) const {
-    oops::Log::trace() << "LinearGetValuesSW::fillGeovalsTL starting"
+    oops::Log::trace() << "LinearGetValues::fillGeovalsTL starting"
 		       << std::endl;
     
-    // const util::DateTime * t1p = &t1;
-    // const util::DateTime * t2p = &t2;
+    const util::DateTime * t1p = &t1;
+    const util::DateTime * t2p = &t2;
+
+    std::cout << "Before invoking lineargetvalues" << std::endl;
     
-  // sw_lineargetvalues_fill_geovals_tl_f90(keyLinearGetValues_,
-  //                                        geom_->toFortran(),
-  //                                        inc.toFortran(),
-  //                                        &t1p, &t2p,
-  //                                        locs_.toFortran(),
-  //                                        geovals.toFortran());
-  // oops::Log::trace() << "LinearGetValuesSW::fillGeovalsTL done" << std::endl;
+    wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_f90(keyGetValues_,
+							geom_->toFortran(),
+							inc.toFortran(),
+							&t1p, &t2p,
+							locs_.toFortran(),
+							geovals.toFortran());
+    oops::Log::trace() << "LinearGetValues::fillGeovalsTL done" << std::endl;
   }
   
   // -------------------------------------------------------------------------------------------------
@@ -83,7 +93,7 @@ namespace wrf_hydro_nwm_jedi {
                                       const util::DateTime & t1,
                                       const util::DateTime & t2,
 				      const ufo::GeoVaLs & geovals) const {
-    oops::Log::trace() << "LinearGetValuesSW::fillGeovalsAD starting"
+    oops::Log::trace() << "LinearGetValues::fillGeovalsAD starting"
                      << std::endl;
     
     // const util::DateTime * t1p = &t1;
@@ -96,8 +106,8 @@ namespace wrf_hydro_nwm_jedi {
     //                                        locs_.toFortran(),
     //                                        geovals.toFortran());
     
-    // oops::Log::trace() << "LinearGetValuesSW::fillGeovalsAD done"
-    //                    << std::endl;
+    oops::Log::trace() << "LinearGetValues::fillGeovalsAD done"
+                       << std::endl;
   }
   
   // -------------------------------------------------------------------------------------------------
