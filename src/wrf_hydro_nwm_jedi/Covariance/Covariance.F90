@@ -81,8 +81,8 @@ subroutine wrf_hydro_nwm_jedi_covar_mult(self, xin, xout)
   ! listed in the yaml file
   
   do i = 1, self%vars%nvars()
-     call xin%fields_obj%search_field(trim(self%vars%variable(i)),in_f)
-     call xout%fields_obj%search_field(trim(self%vars%variable(i)),out_f)
+     call xin%fields_obj%search_field(trim(self%vars%variable(i)),in_f,.true.)
+     call xout%fields_obj%search_field(trim(self%vars%variable(i)),out_f,.true.)
      call out_f%apply_cov(in_f,self%normfactor)
   end do
 

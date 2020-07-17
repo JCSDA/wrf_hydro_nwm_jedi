@@ -645,28 +645,32 @@ end subroutine deallocate_field
 
 ! -----------------------------------------------------------------------------
 ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
-subroutine search_field(self, long_name, field_pointer)
+subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
   character(len=*),                         intent(in)    :: long_name
   class(base_field),               pointer, intent(out)   :: field_pointer
+  logical,optional :: pass_wrf_hydro_name
 
   integer :: n
   character(len=255) :: wrf_hydro_nwm_name
 
   field_pointer => null()
 
-  !Mapping between wrf_hydro variable name and obs name
-  select case (long_name)
-  case ("swe")
-     wrf_hydro_nwm_name = "SNEQV"
-  case ("snow_depth")
-     wrf_hydro_nwm_name = "SNOWH"
-  case ("leaf_area")
-     wrf_hydro_nwm_name = "LAI"
-  case default
-     wrf_hydro_nwm_name = "null"
-  end select
-
+  if(.not.present(pass_wrf_hydro_name)) then
+     !Mapping between wrf_hydro variable name and obs name
+     select case (long_name)
+     case ("swe")
+        wrf_hydro_nwm_name = "SNEQV"
+     case ("snow_depth")
+        wrf_hydro_nwm_name = "SNOWH"
+     case ("leaf_area")
+        wrf_hydro_nwm_name = "LAI"
+     case default
+        wrf_hydro_nwm_name = "null"
+     end select
+  else
+     wrf_hydro_nwm_name = long_name
+  end if
   !linear search
   do n = 1, size(self%fields)
      if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then

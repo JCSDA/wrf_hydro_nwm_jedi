@@ -46,6 +46,7 @@ namespace wrf_hydro_nwm_jedi {
 // -----------------------------------------------------------------------------
   void TlmId::stepTL(Increment & dx,
 		     const ModelAuxIncrement &) const {
+    std::cout << "StepTL" << std::endl;
     dx.updateTime(tstep_);
   }
 // -----------------------------------------------------------------------------
