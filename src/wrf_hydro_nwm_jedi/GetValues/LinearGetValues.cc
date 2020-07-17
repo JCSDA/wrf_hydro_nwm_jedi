@@ -35,8 +35,9 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   LinearGetValues::~LinearGetValues() {
-    util::abor1_cpp("LinearGetValues::~LinearGetValues() needs to be implemented.",
-		    __FILE__, __LINE__);
+    std::cout << "LinearGetValues destructor invoked but not implemented" << std::endl;
+    // util::abor1_cpp("LinearGetValues::~LinearGetValues() needs to be implemented.",
+    // 		    __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------

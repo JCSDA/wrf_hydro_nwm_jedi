@@ -16,6 +16,7 @@ use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_utils_mod, only: wrf_hydro_nwm_jedi_state_registry
+use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
 !use fv3jedi_increment_utils_mod, only: fv3jedi_increment, fv3jedi_increment_registry
@@ -141,24 +142,27 @@ subroutine wrf_hydro_nwm_jedi_state_axpy_c(c_key_self,c_zz,c_key_rhs) &
   ! call axpy(self,zz,rhs)
 end subroutine wrf_hydro_nwm_jedi_state_axpy_c
 
+! ------------------------------------------------------------------------------
 
-! subroutine wrf_hydro_nwm_jedi_state_add_incr_c(c_key_geom,c_key_self,c_key_rhs) bind(c,name='wrf_hydro_nwm_jedi_state_add_incr_f90')
+subroutine wrf_hydro_nwm_jedi_state_add_incr_c(c_key_geom, c_key_self, c_key_rhs) &
+     bind(c, name='wrf_hydro_nwm_jedi_state_add_incr_f90')
 
-! implicit none
-! integer(c_int), intent(in) :: c_key_geom
-! integer(c_int), intent(in) :: c_key_self
-! integer(c_int), intent(in) :: c_key_rhs
-! type(fv3jedi_geom), pointer :: geom
-! type(wrf_hydro_nwm_jedi_state), pointer :: self
-! type(fv3jedi_increment), pointer :: rhs
+  implicit none
+  integer(c_int), intent(in) :: c_key_geom
+  integer(c_int), intent(in) :: c_key_self
+  integer(c_int), intent(in) :: c_key_rhs
 
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
-! call fv3jedi_increment_registry%get(c_key_rhs,rhs)
-! call fv3jedi_geom_registry%get(c_key_geom, geom)
+  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
 
-! call add_incr(geom,self,rhs)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs, rhs)
 
-!end subroutine wrf_hydro_nwm_jedi_state_add_incr_c
+  call add_incr(self, rhs)
+
+end subroutine wrf_hydro_nwm_jedi_state_add_incr_c
+
 
 ! ------------------------------------------------------------------------------
 

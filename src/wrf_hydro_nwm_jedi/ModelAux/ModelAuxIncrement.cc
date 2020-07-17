@@ -74,9 +74,9 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   ModelAuxIncrement & ModelAuxIncrement::operator-=(const ModelAuxIncrement &) {
-    util::abor1_cpp(
-      "ModelAuxIncrement::operator-=() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxIncrement::operator-=() needs to be implemented.",
+    //   __FILE__, __LINE__);
     return *this;
   }
 

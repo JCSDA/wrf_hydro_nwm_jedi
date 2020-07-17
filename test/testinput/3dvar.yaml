@@ -33,7 +33,7 @@ final:
   diagnostics:
     departures: 'oman'
 minimizer:
-  algorithm: 'RPCG' #'DRIPCG'
+  algorithm: 'DRIPCG'
 model:
   name: 'WRF_HYDRO_NWM_JEDI'
   tstep: P1D #PT24H

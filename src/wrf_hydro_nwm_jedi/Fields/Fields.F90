@@ -54,7 +54,8 @@ type, abstract, public :: base_field
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
    generic, public :: operator(-) => diff
-   !procedure (install_bkgerr_interface), pass(self), deferred :: install_bkgerr   
+   procedure (add_incr_interface), pass(self), deferred :: add_incr
+   ! generic, public :: operator(+) => add_incr
 end type base_field
 
 
@@ -93,6 +94,12 @@ abstract interface
      class(base_field), intent(in) :: b
      class(base_field), allocatable :: val
    end function difference_interface
+
+   subroutine add_incr_interface(self,inc)
+     import base_field
+     class(base_field), intent(inout) :: self
+     class(base_field), intent(in) :: inc
+   end subroutine add_incr_interface
 end interface
 
 
@@ -111,6 +118,7 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: rms => field_rms_1d
    procedure, pass(self) :: apply_cov => apply_cov_1d
    procedure :: diff => diff_1d
+   procedure :: add_incr => add_incr_1d
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -128,6 +136,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: rms => field_rms_2d
    procedure, pass(self) :: apply_cov => apply_cov_2d
    procedure :: diff => diff_2d
+   procedure :: add_incr => add_incr_2d
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -145,6 +154,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: rms => field_rms_3d
    procedure, pass(self) :: apply_cov => apply_cov_3d
    procedure :: diff => diff_3d
+   procedure :: add_incr => add_incr_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -172,6 +182,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: read_fields_from_file
    procedure :: print_single_field
    procedure :: print_all_fields
+   procedure :: add_increment
    procedure :: difference
    ! procedure :: allocate_field
    ! procedure :: equals
@@ -502,6 +513,48 @@ function diff_3d(a, b) result(val)
   
 end function diff_3d
 
+!-----------------------------------------------------------------------------
+! Incr methods
+
+subroutine add_incr_1d(self, inc)
+  class(field_1d), intent(inout) :: self
+  class(base_field), intent(in) :: inc
+
+  select type(inc)
+  type is (field_1d)
+     self%array = self%array + inc%array
+  class default
+     call abor1_ftn("add_incr_1d: inc not a 1d_field")
+  end select
+  
+end subroutine add_incr_1d
+
+subroutine add_incr_2d(self, inc)
+  class(field_2d), intent(inout) :: self
+  class(base_field), intent(in) :: inc
+  
+  select type(inc)
+  type is (field_2d)
+     self%array = self%array + inc%array
+  class default
+     call abor1_ftn("add_incr_2d: inc not a 2d_field")
+  end select
+  
+end subroutine add_incr_2d
+
+subroutine add_incr_3d(self, inc)
+  class(field_3d), intent(inout) :: self
+  class(base_field), intent(in) :: inc
+  
+  select type(inc)
+  type is (field_3d)
+     self%array = self%array + inc%array
+  class default
+     call abor1_ftn("add_incr_3d: inc not a 3d_field")
+  end select
+  
+end subroutine add_incr_3d
+
 ! --------------------------------------------------------------------------------------------------
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
 !                           wrf_hydro_nwm_name,units,tracer,integerfield)
@@ -818,6 +871,21 @@ subroutine difference(self,x1,x2)
   end do
   
 end subroutine difference
+
+subroutine add_increment(self,inc)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: inc
+
+  integer :: f
+
+  write(*,*) "Increment invoked in Fields.F90"
+
+  do f = 1,size(self%fields)
+     call self%fields(f)%field%add_incr(inc%fields(f)%field)
+  end do
+  
+end subroutine add_increment
 
 ! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 

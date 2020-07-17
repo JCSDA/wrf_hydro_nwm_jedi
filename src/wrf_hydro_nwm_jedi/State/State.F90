@@ -32,7 +32,7 @@ implicit none
 private
 
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
-     create_from_other,&!add_incr, &
+     create_from_other, add_incr, &
      read_state_from_file, get_mean_stddev, &! write_file, gpnorm, rms, &
      change_resol, state_print !getvalues, analytic_IC, state_print
 
@@ -148,6 +148,15 @@ subroutine axpy(self, zz, rhs)
   ! enddo
 end subroutine axpy
 
+  subroutine add_incr(self, rhs)
+    implicit none
+    
+    type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
+    type(wrf_hydro_nwm_jedi_state),    intent(in)    :: rhs
+
+    call self%fields_obj%add_increment(rhs%fields_obj)
+
+  end subroutine add_incr
 
 subroutine change_resol(self, geom, rhs, geom_rhs)
   implicit none
