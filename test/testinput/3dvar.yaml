@@ -3,15 +3,14 @@ cost_function:
   Jb:
     Background:
       state:
-      - date: '2010-01-01T00:05:00Z'
+      - date: '2017-01-01T00:00:00Z'
         filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
         filename_hydro: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
         variables: ['SNEQV']
     Covariance:
       covariance: 'wrf_hydro_nwm_jediCovar'
-      date: '2010-01-01T00:05:00Z'
+      date: '2017-01-01T00:00:00Z'
       normfactor: 0.2
-      # rad: 10
   Jo:
     ObsTypes:
     - Covariance:
@@ -28,8 +27,8 @@ cost_function:
           variables: ['swe']
   varchange: 'Identity'
   variables: ['SNEQV']
-  window_begin: '2010-01-01T00:04:48Z'
-  window_length: PT24S
+  window_begin: '2016-12-31T12:00:00Z'
+  window_length: P1D
 final:
   diagnostics:
     departures: 'oman'
@@ -37,12 +36,12 @@ minimizer:
   algorithm: 'RPCG' #'DRIPCG'
 model:
   name: 'WRF_HYDRO_NWM_JEDI'
-  tstep: PT12S
+  tstep: P1D #PT24H
   variables: ['SNEQV']
 output:
   datadir: 'Data/OUTPUTS'
   exp: '3dvar'
-  frequency: PT12S
+  frequency: P1D #PT24H
   type: 'an'
 resolution:
   input_file: ./Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
@@ -53,8 +52,8 @@ variational:
     gradient_norm_reduction: 1.0e-10
     linearmodel:
       trajectory:
-        tstep: PT12S
-      tstep: PT12S
+        tstep: P1D #PT24H
+      tstep: P1D #PT24H
       varchange: 'Identity'
       variables: ['SNEQV']
       version: 'WRF_HYDRO_NWM_IdTLM'
