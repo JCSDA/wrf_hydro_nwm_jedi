@@ -15,6 +15,8 @@
 #include "wrf_hydro_nwm_jedi/State/State.h"
 
 #include "eckit/config/Configuration.h"
+#include "oops/assimilation/GMRESR.h"
+#include "oops/base/IdentityMatrix.h"
 
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
@@ -49,10 +51,9 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  void Covariance::inverseMultiply(const Increment &, Increment &) const {
-    // util::abor1_cpp("Covariance::inverseMultiply() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    std::cout << "Inverse multiply not implemented"<<std::endl;
+  void Covariance::inverseMultiply(const Increment & dxin,
+				   Increment & dxout) const {
+    dxout = dxin;
   }
 
 // ----------------------------------------------------------------------------

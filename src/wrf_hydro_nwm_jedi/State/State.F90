@@ -33,7 +33,7 @@ private
 
 public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
      create_from_other, add_incr, &
-     read_state_from_file, get_mean_stddev, &! write_file, gpnorm, rms, &
+     read_state_from_file, get_mean_stddev, write_state_to_file, &!gpnorm, rms, &
      change_resol, state_print !getvalues, analytic_IC, state_print
 
 
@@ -221,6 +221,108 @@ subroutine read_state_from_file(self, c_conf)
   call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
 end subroutine read_state_from_file
 
+subroutine write_state_to_file(self, c_conf, vdate)
+  use string_utils
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self   !< State
+  type(c_ptr),                       intent(in)    :: c_conf !< Configuration
+  type(datetime), intent(inout) :: vdate
+  
+  character(len=10) :: filetype
+  character(len=255) :: filename_lsm, filename_hydro
+  character(len=255) :: validitydate
+  integer :: flipvert
+  type(fckit_configuration) :: f_conf
+  character(len=:), allocatable :: str
+  integer :: ixfull, jxfull, var
+
+  f_conf = fckit_configuration(c_conf)
+
+  call datetime_to_string(vdate, validitydate)
+  
+  filename_lsm = "lsm."//validitydate
+  filename_hydro = "hydro."//validitydate
+
+  ! call f_conf%get_or_die("filename_lsm", str)
+  ! filename_lsm = str
+  ! deallocate(str)
+
+  ! call f_conf%get_or_die("filename_hydro", str)
+  ! filename_hydro = str
+  ! deallocate(str)
+  write(*,*) "State written in ",filename_lsm,filename_hydro
+  !  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
+!  call self%fields_obj%write_state_to_file(trim(filename_lsm),trim(filename_hydro))
+  
+end subroutine write_state_to_file
+
+  function genfilename (c_conf,length,vdate)
+
+    use iso_c_binding
+    use datetime_mod
+    use duration_mod
+
+    type(c_ptr),    intent(in) :: c_conf  !< Configuration
+    integer,        intent(in) :: length
+    type(datetime), intent(in) :: vdate
+
+    type(fckit_configuration)     :: f_conf
+    character(len=:), allocatable :: str
+    character(len=length)         :: genfilename
+    character(len=length)         :: fdbdir, expver, typ, validitydate, referencedate, sstep
+    character(len=length)         :: prefix, mmb
+    type(datetime)                :: rdate
+    type(duration)                :: step
+    integer                       :: lenfn
+
+    f_conf = fckit_configuration(c_conf)
+
+    ! here we should query the length and then allocate "string".
+    ! But Fortran 90 does not allow variable-length allocatable strings.
+    call f_conf%get_or_die("datadir", str)
+    fdbdir = trim(str)
+    deallocate(str)
+    call f_conf%get_or_die("exp", str)
+    expver = trim(str)
+    deallocate(str)
+    call f_conf%get_or_die("type", str)
+    typ = trim(str)
+    deallocate(str)
+
+    if (typ=="ens") then
+      call f_conf%get_or_die("member", str)
+      mmb = trim(str)
+      deallocate(str)
+
+      lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ) + 1 + LEN_TRIM(mmb)
+      prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ) // "." // TRIM(mmb)
+    else
+      lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ)
+      prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ)
+    endif
+
+    if (typ=="fc" .or. typ=="ens") then
+      call f_conf%get_or_die("date", str)
+      referencedate = trim(str)
+      deallocate(str)
+      call datetime_to_string(vdate, validitydate)
+      call datetime_create(TRIM(referencedate), rdate)
+      call datetime_diff(vdate, rdate, step)
+      call duration_to_string(step, sstep)
+      lenfn = lenfn + 1 + LEN_TRIM(referencedate) + 1 + LEN_TRIM(sstep)
+      genfilename = TRIM(prefix) // "." // TRIM(referencedate) // "." // TRIM(sstep) // ".nc"
+    endif
+
+    if (typ=="an") then
+      call datetime_to_string(vdate, validitydate)
+      lenfn = lenfn + 1 + LEN_TRIM(validitydate)
+      genfilename = TRIM(prefix) // "." // TRIM(validitydate) // ".nc"
+    endif
+
+    if (lenfn>length) &
+      & call abor1_ftn("sw_state_mod:genfilename: filename too long")
+
+  end function genfilename
 
 !> Print the state
 subroutine state_print(self, string)

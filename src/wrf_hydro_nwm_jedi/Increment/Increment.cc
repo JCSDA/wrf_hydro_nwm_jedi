@@ -118,8 +118,7 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Increment::zero() {
-    util::abor1_cpp("Increment::zero() needs to be implemented.",
-                    __FILE__, __LINE__);
+    std::cout << "Zero function in Increment needs to be implemented" << std::endl;
   }
 
 // ----------------------------------------------------------------------------

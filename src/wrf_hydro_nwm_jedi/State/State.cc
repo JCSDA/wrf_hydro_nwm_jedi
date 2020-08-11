@@ -132,9 +132,10 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  void State::write(const eckit::Configuration & conf) const {
-    util::abor1_cpp("State::write() needs to be implemented.",
-                    __FILE__, __LINE__);
+  void State::write(const eckit::Configuration & config) const {
+    const util::DateTime * dtp = &time_;
+    const eckit::Configuration * conf = &config;
+    wrf_hydro_nwm_jedi_state_write_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
   }
   
 // ----------------------------------------------------------------------------
