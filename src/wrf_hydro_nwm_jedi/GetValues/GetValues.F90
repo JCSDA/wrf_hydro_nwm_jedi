@@ -209,6 +209,8 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
      enddo
   enddo
 
+  write(*,*) "End of fill_geovals"
+
   deallocate(field_us)
   deallocate(geovals_all)
   deallocate(geovals_tmp)

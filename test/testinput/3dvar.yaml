@@ -19,7 +19,7 @@ cost_function:
         name: 'Identity'
       ObsSpace:
         ObsDataIn:
-          obsfile: 'Data/wrf_hydro_nwm_files/nwm_osse_ioda_pct_oev_20.nc'
+          obsfile: 'Data/wrf_hydro_nwm_files/truth.obs4d_0000.nc'
         ObsDataOut:
           obsfile: 'Data/wrf_hydro_nwm_files/3dvar.uv.obs3d.nc'
         name: 'Simulate'

@@ -252,7 +252,7 @@ subroutine write_state_to_file(self, c_conf, vdate)
   ! deallocate(str)
   write(*,*) "State written in ",filename_lsm,filename_hydro
   !  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
-!  call self%fields_obj%write_state_to_file(trim(filename_lsm),trim(filename_hydro))
+  !call self%fields_obj%write_state_to_file(trim(filename_lsm),trim(filename_hydro))
   
 end subroutine write_state_to_file
 
