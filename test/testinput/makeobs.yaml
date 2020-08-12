@@ -37,7 +37,7 @@ Observations:
           random_seed: 29837
         obs_errors: [1]
       ObsDataOut:
-        obsfile: 'Data/wrf_hydro_nwm_files/truth.obs4d.nc'
+        obsfile: 'Data/wrf_hydro_nwm_files/makeobs_3dvar.nc'
       # ObsDataIn:
       #   obsfile: 'Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc'
     ObsOperator:
