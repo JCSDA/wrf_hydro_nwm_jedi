@@ -3,6 +3,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/model.yaml
   testinput/hofx_nomodel.yaml
   testinput/3dvar.yaml
+  testinput/makeobs.yaml
   testoutput/hofx_nomodel_identity.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc

@@ -1,0 +1,46 @@
+---
+Geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+Initial Condition:
+  date: '2017-01-01T00:00:00Z'
+  read_from_file: 1
+  basename: ./INPUT/
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+  state variables: ['SNEQV']
+  
+Model:
+  name: 'WRF_HYDRO_NWM_JEDI'
+  tstep: P1D #PT24H
+  variables: ['SNEQV']
+
+forecast length: P1D
+
+Assimilation Window:
+  window_begin: '2017-01-01T00:00:00Z'
+  window_length: P1D
+
+Observations:
+  ObsTypes:
+  - ObsSpace:
+      name: 'Simulate'
+      simulate:
+        variables: ['swe']
+      Generate:
+        Random:
+          nobs: 720
+          lat1: 38.8
+          lat2: 39.0
+          lon1: -106.8
+          lon2: -106.4
+          random_seed: 29837
+        obs_errors: [1]
+      ObsDataOut:
+        obsfile: 'Data/wrf_hydro_nwm_files/truth.obs4d.nc'
+      # ObsDataIn:
+      #   obsfile: 'Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc'
+    ObsOperator:
+      name: 'Identity'
+      variables: ['swe']
+    obspert: 1
