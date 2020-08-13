@@ -89,6 +89,7 @@ namespace wrf_hydro_nwm_jedi {
 
     // wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
 
+    std::cout << "About to invoke create_from_other from State constructor " << std::endl; 
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
     time_ = fields_->time();

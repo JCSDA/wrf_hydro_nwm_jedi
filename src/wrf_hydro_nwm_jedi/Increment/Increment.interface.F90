@@ -61,7 +61,7 @@ subroutine wrf_hydro_nwm_jedi_increment_create_c(c_key_self, c_key_geom, c_vars)
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
 
   vars = oops_variables(c_vars)
-  write(*,*) "Invoking create from Increment"
+  write(*,*) "Invoking create from Increment ",trim(vars%variable(1))
   call create(self, geom, vars)
 
 end subroutine wrf_hydro_nwm_jedi_increment_create_c
@@ -226,22 +226,23 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_copy_c(c_key_self, c_key_rhs) bind(c, name='sw_increment_copy_f90')
+subroutine wrf_hydro_nwm_jedi_increment_copy_c(c_key_self, c_key_rhs) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_copy_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_self
-!   integer(c_int), intent(in) :: c_key_rhs
+  integer(c_int), intent(in) :: c_key_self
+  integer(c_int), intent(in) :: c_key_rhs
 
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: rhs
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
 
-!   call sw_increment_registry%get(c_key_self, self)
-!   call sw_increment_registry%get(c_key_rhs, rhs)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
+  
+  call copy(self, rhs)
 
-!   call copy(self, rhs)
-
-! end subroutine sw_increment_copy_c
+end subroutine wrf_hydro_nwm_jedi_increment_copy_c
 
 ! ! ------------------------------------------------------------------------------
 
@@ -497,19 +498,20 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_print_c(c_key_self) bind(c, name='sw_increment_print_f90')
+subroutine wrf_hydro_nwm_jedi_increment_print_c(c_key_self, string) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_print_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_self
-
-!   type(shallow_water_state_type), pointer :: self
-
-!   call sw_increment_registry%get(c_key_self, self)
-
-!   call increment_print(self)
-
-! end subroutine sw_increment_print_c
+  integer(c_int), intent(in) :: c_key_self
+  character(len=1,kind=c_char) :: string(8192)
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
+  
+  call state_print(self,string)
+  
+end subroutine wrf_hydro_nwm_jedi_increment_print_c
 
 ! ! ------------------------------------------------------------------------------
 

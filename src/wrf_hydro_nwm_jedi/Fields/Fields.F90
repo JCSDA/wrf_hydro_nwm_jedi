@@ -49,6 +49,7 @@ type, abstract, public :: base_field
    ! class(cov_obj) :: covariance   
  contains
    procedure (print_field_interface),     pass(self), deferred :: print_field
+   procedure (print_field_dims_interface),pass(self), deferred :: print_field_dims
    procedure (read_file_interface),       pass(self), deferred :: read_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
@@ -65,6 +66,11 @@ abstract interface
      class(base_field), intent(in) :: self
      character(len=*), optional, intent(out) :: string
    end subroutine print_field_interface
+
+   subroutine print_field_dims_interface(self)
+     import base_field
+     class(base_field), intent(in) :: self
+   end subroutine print_field_dims_interface
 
    subroutine read_file_interface(self, ncid_vector)
      import base_field
@@ -111,6 +117,7 @@ type, private, extends(base_field) :: field_1d
    real(c_float), allocatable :: array(:)
  contains
    procedure, pass(self) :: print_field => print_field_1d
+   procedure, pass(self) :: print_field_dims => print_field_dims_1d
    procedure, pass(self) :: read_file => read_file_1d
    procedure, pass(self) :: get_value => get_value_1d
    procedure, pass(self) :: fill => fill_field_1d
@@ -129,6 +136,7 @@ type, private, extends(base_field) :: field_2d
    real(c_float), allocatable :: array(:, :)
  contains
    procedure, pass(self) :: print_field => print_field_2d
+   procedure, pass(self) :: print_field_dims => print_field_dims_2d
    procedure, pass(self) :: read_file => read_file_2d
    procedure, pass(self) :: get_value => get_value_2d
    procedure, pass(self) :: fill => fill_field_2d
@@ -147,6 +155,7 @@ type, private, extends(base_field) :: field_3d
    real(c_float), allocatable :: array(:, :, :)
  contains
    procedure, pass(self) :: print_field => print_field_3d
+   procedure, pass(self) :: print_field_dims => print_field_dims_3d
    procedure, pass(self) :: read_file => read_file_3d
    procedure, pass(self) :: get_value => get_value_3d
    procedure, pass(self) :: fill => fill_field_3d
@@ -467,6 +476,7 @@ function diff_1d(a, b) result(val)
   type is (field_1d)
      allocate(tmp)
      tmp%array = a%array - b%array
+     tmp%xdim_len = a%xdim_len
      allocate(val, source = tmp)
      deallocate(tmp)
   class default
@@ -486,6 +496,8 @@ function diff_2d(a, b) result(val)
   type is (field_2d)
      allocate(tmp)
      tmp%array = a%array - b%array
+     tmp%xdim_len = a%xdim_len
+     tmp%ydim_len = a%ydim_len
      allocate(val,source=tmp)
      deallocate(tmp)
   class default
@@ -505,6 +517,9 @@ function diff_3d(a, b) result(val)
   type is (field_3d)
      allocate(tmp)
      tmp%array = a%array - b%array
+     tmp%xdim_len = a%xdim_len
+     tmp%ydim_len = a%ydim_len
+     tmp%zdim_len = a%zdim_len
      allocate(val,source=tmp)
      deallocate(tmp)
   class default
@@ -1235,6 +1250,13 @@ subroutine print_field_1d(self, string)
   end if
 end subroutine print_field_1d
 
+subroutine print_field_dims_1d(self)
+  use iso_c_binding, only : c_new_line, c_float
+  implicit none
+  class(field_1d), intent(in) :: self
+  
+  write(*,*) 'Printing size', self%xdim_len
+end subroutine print_field_dims_1d
 
 subroutine print_field_2d(self, string)
   use iso_c_binding, only : c_new_line, c_float
@@ -1263,6 +1285,13 @@ subroutine print_field_2d(self, string)
   
 end subroutine print_field_2d
 
+subroutine print_field_dims_2d(self)
+  implicit none
+  class(field_2d), intent(in) :: self
+
+  write(*,*) 'Printing size ', self%xdim_len, &
+       self%ydim_len
+end subroutine print_field_dims_2d
 
 subroutine print_field_3d(self, string)
   use iso_c_binding, only : c_new_line
@@ -1304,6 +1333,14 @@ subroutine print_field_3d(self, string)
   
 end subroutine print_field_3d
 
+subroutine print_field_dims_3d(self)
+  implicit none
+  class(field_3d), intent(in) :: self
+
+  write(*,*) 'Printing size ', self%xdim_len,&
+       self%zdim_len, self%ydim_len
+  
+end subroutine print_field_dims_3d
 
 ! subroutine fields_print(nf, fields, name, f_comm)
 
@@ -1385,6 +1422,7 @@ subroutine checksame(self, other, method)
 
   do var = 1,size(self%fields)
      if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
+        write(*,*) self%fields(var)%field%wrf_hydro_nwm_name, other%fields(var)%field%wrf_hydro_nwm_name
         call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
              " not in the equivalent position in the right hand side")
      endif

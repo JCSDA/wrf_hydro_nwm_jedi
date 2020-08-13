@@ -19,12 +19,15 @@ cost_function:
         name: 'Identity'
       ObsSpace:
         ObsDataIn:
-          obsfile: 'Data/wrf_hydro_nwm_files/truth.obs4d_0000.nc'
+          obsfile: 'Data/wrf_hydro_nwm_files/makeobs_3dvar_0000.nc'
         ObsDataOut:
           obsfile: 'Data/wrf_hydro_nwm_files/3dvar.uv.obs3d.nc'
         name: 'Simulate'
         simulate:
           variables: ['swe']
+    ObsPert: true
+    member: 1
+
   varchange: 'Identity'
   variables: ['SNEQV']
   window_begin: '2016-12-31T12:00:00Z'
@@ -33,7 +36,7 @@ final:
   diagnostics:
     departures: 'oman'
 minimizer:
-  algorithm: 'RPCG'
+  algorithm: 'DRIPCG'
 model:
   name: 'WRF_HYDRO_NWM_JEDI'
   tstep: P1D #PT24H

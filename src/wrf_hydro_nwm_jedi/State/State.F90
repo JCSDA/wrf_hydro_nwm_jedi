@@ -78,6 +78,7 @@ subroutine create_from_other(self, other)
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
 
   ! Create new state from other state
+  write(*,*) "Calling create from other"
   self = other
 
   ! Initialize all arrays to zero
