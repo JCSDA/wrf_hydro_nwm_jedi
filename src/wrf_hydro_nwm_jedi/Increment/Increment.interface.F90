@@ -19,10 +19,10 @@ use iso_c_binding, only: c_int, c_float, c_ptr, c_char
 use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
+use wrf_hydro_nwm_jedi_increment_mod, only: diff_incr, create_increment
+use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
-use wrf_hydro_nwm_jedi_increment_mod, only: diff_incr
-use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
 
@@ -62,7 +62,7 @@ subroutine wrf_hydro_nwm_jedi_increment_create_c(c_key_self, c_key_geom, c_vars)
 
   vars = oops_variables(c_vars)
   write(*,*) "Invoking create from Increment ",trim(vars%variable(1))
-  call create(self, geom, vars)
+  call create_increment(self, geom, vars)
 
 end subroutine wrf_hydro_nwm_jedi_increment_create_c
 
@@ -240,7 +240,7 @@ subroutine wrf_hydro_nwm_jedi_increment_copy_c(c_key_self, c_key_rhs) &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
   
-  call copy(self, rhs)
+  call copy(self, rhs) !Implemented in State
 
 end subroutine wrf_hydro_nwm_jedi_increment_copy_c
 

@@ -54,6 +54,7 @@ type, abstract, public :: base_field
    procedure (get_value_field_interface), pass(self), deferred :: get_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
+   procedure (zero_interface), deferred :: zero
    generic, public :: operator(-) => diff
    procedure (add_incr_interface), pass(self), deferred :: add_incr
    ! generic, public :: operator(+) => add_incr
@@ -106,6 +107,11 @@ abstract interface
      class(base_field), intent(inout) :: self
      class(base_field), intent(in) :: inc
    end subroutine add_incr_interface
+
+   subroutine zero_interface(self)
+     import base_field
+     class(base_field), intent(inout) :: self
+   end subroutine zero_interface
 end interface
 
 
@@ -126,6 +132,7 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: apply_cov => apply_cov_1d
    procedure :: diff => diff_1d
    procedure :: add_incr => add_incr_1d
+   procedure :: zero => zero_1d
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -145,6 +152,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: apply_cov => apply_cov_2d
    procedure :: diff => diff_2d
    procedure :: add_incr => add_incr_2d
+   procedure :: zero => zero_2d
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -164,6 +172,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: apply_cov => apply_cov_3d
    procedure :: diff => diff_3d
    procedure :: add_incr => add_incr_3d
+   procedure :: zero => zero_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -193,6 +202,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: print_all_fields
    procedure :: add_increment
    procedure :: difference
+   procedure :: zeros
    ! procedure :: allocate_field
    ! procedure :: equals
    ! procedure :: copy => field_copy
@@ -327,6 +337,7 @@ subroutine fill_field_1d(self, &
   self%xdim_len = xdim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len) )
+     self%array = 0.0
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -356,6 +367,7 @@ subroutine fill_field_2d(self, &
   self%ydim_len = ydim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len, ydim_len) )
+     self%array = 0.0
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -386,6 +398,7 @@ subroutine fill_field_3d(self, &
   self%zdim_len = zdim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len, ydim_len, zdim_len) )
+     self%array = 0.0
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -475,6 +488,7 @@ function diff_1d(a, b) result(val)
   select type(b)
   type is (field_1d)
      allocate(tmp)
+     tmp = a
      tmp%array = a%array - b%array
      tmp%xdim_len = a%xdim_len
      allocate(val, source = tmp)
@@ -495,6 +509,7 @@ function diff_2d(a, b) result(val)
   select type(b)
   type is (field_2d)
      allocate(tmp)
+     tmp = a
      tmp%array = a%array - b%array
      tmp%xdim_len = a%xdim_len
      tmp%ydim_len = a%ydim_len
@@ -516,6 +531,7 @@ function diff_3d(a, b) result(val)
   select type(b)
   type is (field_3d)
      allocate(tmp)
+     tmp = a
      tmp%array = a%array - b%array
      tmp%xdim_len = a%xdim_len
      tmp%ydim_len = a%ydim_len
@@ -569,6 +585,27 @@ subroutine add_incr_3d(self, inc)
   end select
   
 end subroutine add_incr_3d
+
+subroutine zero_1d(self)
+  class(field_1d), intent(inout) :: self
+
+  self%array = 0.0
+  
+end subroutine zero_1d
+
+subroutine zero_2d(self)
+  class(field_2d), intent(inout) :: self
+
+  self%array = 0.0
+  
+end subroutine zero_2d
+
+subroutine zero_3d(self)
+  class(field_3d), intent(inout) :: self
+
+  self%array = 0.0
+  
+end subroutine zero_3d
 
 ! --------------------------------------------------------------------------------------------------
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
@@ -886,6 +923,18 @@ subroutine difference(self,x1,x2)
   end do
   
 end subroutine difference
+
+subroutine zeros(self)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+
+  integer :: f
+
+  do f = 1,size(self%fields)
+     call self%fields(f)%field%zero()
+  end do
+  
+end subroutine zeros
 
 subroutine add_increment(self,inc)
   implicit none
@@ -1246,7 +1295,7 @@ subroutine print_field_1d(self, string)
           c_new_line//'Std Dev: '//trim(float_str2) // &
           c_new_line//'RMS: '//trim(float_str3)
   else
-     write(*,*) 'Printing ', self%long_name
+     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name
   end if
 end subroutine print_field_1d
 
@@ -1280,7 +1329,7 @@ subroutine print_field_2d(self, string)
           c_new_line//'Std Dev: '//trim(float_str2) // &
           c_new_line//'RMS: '//trim(float_str3)
   else
-     write(*,*) 'Printing ', self%long_name
+     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name
   end if
   
 end subroutine print_field_2d
@@ -1327,7 +1376,7 @@ subroutine print_field_3d(self, string)
           c_new_line//'Std Dev: '//trim(float_str2) // &
           c_new_line//'RMS: '//trim(float_str3)
      else
-        write(*,*) 'Printing 3d: ', self%long_name
+        write(*,*) 'Printing 3d: ', self%long_name, self%wrf_hydro_nwm_name
      end if
   end do
   

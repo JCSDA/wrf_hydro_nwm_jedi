@@ -67,6 +67,7 @@ subroutine create(self, geom, vars)
 
   self%nf = vars%nvars()
   call self%fields_obj%create(geom, vars)
+  
 end subroutine create
 
 ! ------------------------------------------------------------------------------

@@ -30,9 +30,9 @@ namespace wrf_hydro_nwm_jedi {
     // util::abor1_cpp("Increment::Increment() needs to be implemented.",
     //                 __FILE__, __LINE__);
     std::cout << "Main constructor in increment " << std::endl;
-    wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, geom.toFortran(), vars);
     vars_ = vars;
     time_ = vt;
+    wrf_hydro_nwm_jedi_increment_create_f90(keyInc_, fields_->geometry()->toFortran(), vars_);
   }
 
 // ----------------------------------------------------------------------------

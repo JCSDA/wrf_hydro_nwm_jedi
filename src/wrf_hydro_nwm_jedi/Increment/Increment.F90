@@ -23,7 +23,7 @@ module wrf_hydro_nwm_jedi_increment_mod
   implicit none
 
   private
-  public :: create, diff_incr!, create_from_other, delete, zeros, random, copy, &
+  public :: create_increment, diff_incr!, create_from_other, delete, zeros, random, copy, &
           ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
           ! dot_prod, &
           ! read_file, write_file, &
@@ -39,7 +39,7 @@ contains
 
 ! ------------------------------------------------------------------------------
   
-  subroutine create(self, geom, vars)
+  subroutine create_increment(self, geom, vars)
 
     implicit none
     type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
@@ -47,17 +47,12 @@ contains
     type(oops_variables), intent(in)    :: vars
 
     self%nf = vars%nvars()
-    call self%fields_obj%create(geom,vars)
+    call self%fields_obj%create(geom,vars) !Initializes to zero by default
 
-  ! Instantiate a shallow water increment (state) object from the geometry
-    ! ----------------------------------------------------------------------
-    
-!  self = shallow_water_state_type(geom)
+    ! Initialize all arrays to zero
+    ! call self%fields_obj%zeros()
 
-  ! Initialize all arrays to zero
-!  call zeros(self)
-
-  end subroutine create
+  end subroutine create_increment
 
 ! ------------------------------------------------------------------------------
 
