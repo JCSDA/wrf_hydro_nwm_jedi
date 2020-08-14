@@ -150,15 +150,15 @@ subroutine axpy(self, zz, rhs)
   ! enddo
 end subroutine axpy
 
-  subroutine add_incr(self, rhs)
-    implicit none
-    
-    type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
-    type(wrf_hydro_nwm_jedi_state),    intent(in)    :: rhs
-
-    call self%fields_obj%add_increment(rhs%fields_obj)
-
-  end subroutine add_incr
+subroutine add_incr(self, rhs)
+  implicit none
+  
+  type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state),    intent(in)    :: rhs
+  
+  call self%fields_obj%add_increment(rhs%fields_obj)
+  
+end subroutine add_incr
 
 subroutine change_resol(self, geom, rhs, geom_rhs)
   implicit none

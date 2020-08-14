@@ -19,7 +19,7 @@ use iso_c_binding, only: c_int, c_float, c_ptr, c_char
 use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
-use wrf_hydro_nwm_jedi_increment_mod, only: diff_incr, create_increment
+use wrf_hydro_nwm_jedi_increment_mod, only: diff_incr, create_increment, self_mul
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
@@ -246,22 +246,23 @@ end subroutine wrf_hydro_nwm_jedi_increment_copy_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_self_add_c(c_key_self, c_key_rhs) bind(c, name='sw_increment_self_add_f90')
+subroutine wrf_hydro_nwm_jedi_increment_add_c(c_key_self, c_key_rhs) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_add_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_self
-!   integer(c_int), intent(in) :: c_key_rhs
+  integer(c_int), intent(in) :: c_key_self
+  integer(c_int), intent(in) :: c_key_rhs
 
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: rhs
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
 
-!   call sw_increment_registry%get(c_key_self, self)
-!   call sw_increment_registry%get(c_key_rhs, rhs)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
 
-!   call self_add(self, rhs)
+  call add_incr(self, rhs) !Implemented in State
 
-! end subroutine sw_increment_self_add_c
+end subroutine wrf_hydro_nwm_jedi_increment_add_c
 
 ! ! ------------------------------------------------------------------------------
 
@@ -284,41 +285,41 @@ end subroutine wrf_hydro_nwm_jedi_increment_copy_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_self_sub_c(c_key_self, c_key_rhs) bind(c, name='sw_increment_self_sub_f90')
+subroutine wrf_hydro_nwm_jedi_increment_sub_c(c_key_self, c_key_rhs) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_sub_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_self
-!   integer(c_int), intent(in) :: c_key_rhs
+  integer(c_int), intent(in) :: c_key_self
+  integer(c_int), intent(in) :: c_key_rhs
 
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: rhs
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
 
-!   call sw_increment_registry%get(c_key_self, self)
-!   call sw_increment_registry%get(c_key_rhs, rhs)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
 
-!   call self_sub(self, rhs)
+  call diff_incr(self, self, rhs)
 
-! end subroutine sw_increment_self_sub_c
+end subroutine wrf_hydro_nwm_jedi_increment_sub_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_self_mul_c(c_key_self, c_zz) bind(c, name='sw_increment_self_mul_f90')
+subroutine wrf_hydro_nwm_jedi_increment_mul_c(c_key_self, c_zz) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_mul_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(in) :: c_key_self
-!   real(c_double), intent(in) :: c_zz
+  integer(c_int), intent(in) :: c_key_self
+  real(c_float), intent(in) :: c_zz
 
-!   type(shallow_water_state_type), pointer :: self
-!   real(kind=r8kind)                       :: zz
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
 
-!   call sw_increment_registry%get(c_key_self, self)
-!   zz = c_zz
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
 
-!   call self_mul(self, zz)
+  call self_mul(self, c_zz)
 
-! end subroutine sw_increment_self_mul_c
+end subroutine wrf_hydro_nwm_jedi_increment_mul_c
 
 ! ! ------------------------------------------------------------------------------
 

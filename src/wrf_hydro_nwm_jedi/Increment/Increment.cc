@@ -67,41 +67,33 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator =(const Increment &rhs) {
-    // sw_increment_copy_f90(keyInc_, rhs.keyInc_);
-    std::cout << *this;
-    // std::cout << rhs << std::endl;
+
     wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, rhs.keyInc_);
     time_ = rhs.time_;
-    // Needed by test
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
-  Increment & Increment::operator -=(const Increment &) {
-    // util::abor1_cpp("Increment::operator-= needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // Needed by test
+  Increment & Increment::operator -=(const Increment &dx) {
+
+    ASSERT(this->validTime() == dx.validTime());
+    wrf_hydro_nwm_jedi_increment_sub_f90(keyInc_, dx.keyInc_);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
-  Increment & Increment::operator +=(const Increment &other) {
-    // util::abor1_cpp("Increment::operator+= needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    //    wrf_hydro_nwm_jedi_increment_plus_f90(keyInc__,other);
-    //fields_->add(other->fields_));
-    // Needed by test
+  Increment & Increment::operator +=(const Increment &dx) {
+    ASSERT(this->validTime() == dx.validTime());
+    wrf_hydro_nwm_jedi_increment_add_f90(keyInc_, dx.keyInc_);
     return *this;
   }
 
 // ----------------------------------------------------------------------------
 
-  Increment & Increment::operator *=(const double &) {
-    // util::abor1_cpp("Increment::operator*= needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // Needed by test
+  Increment & Increment::operator *=(const double &zz) {
+    wrf_hydro_nwm_jedi_increment_mul_f90(keyInc_, static_cast<float>(zz));
     return *this;
   }
 

@@ -57,7 +57,8 @@ type, abstract, public :: base_field
    procedure (zero_interface), deferred :: zero
    generic, public :: operator(-) => diff
    procedure (add_incr_interface), pass(self), deferred :: add_incr
-   ! generic, public :: operator(+) => add_incr
+   procedure (scalar_mul_interface), pass(self), deferred :: scalar_mul
+   !generic, public :: operator(+) => add_incr
 end type base_field
 
 
@@ -108,6 +109,13 @@ abstract interface
      class(base_field), intent(in) :: inc
    end subroutine add_incr_interface
 
+   subroutine scalar_mul_interface(self,scalar)
+     use iso_c_binding, only: c_float
+     import base_field
+     class(base_field), intent(inout) :: self
+     real(c_float), intent(in) :: scalar
+   end subroutine scalar_mul_interface
+
    subroutine zero_interface(self)
      import base_field
      class(base_field), intent(inout) :: self
@@ -133,6 +141,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: diff => diff_1d
    procedure :: add_incr => add_incr_1d
    procedure :: zero => zero_1d
+   procedure :: scalar_mul => scalar_mul_1d
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -152,6 +161,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: apply_cov => apply_cov_2d
    procedure :: diff => diff_2d
    procedure :: add_incr => add_incr_2d
+   procedure :: scalar_mul => scalar_mul_2d
    procedure :: zero => zero_2d
    ! Destructor
    ! final :: destroy_field_2d
@@ -172,6 +182,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: apply_cov => apply_cov_3d
    procedure :: diff => diff_3d
    procedure :: add_incr => add_incr_3d
+   procedure :: scalar_mul => scalar_mul_3d
    procedure :: zero => zero_3d
    ! Destructor
    ! final :: destroy_field_3d
@@ -202,6 +213,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: print_all_fields
    procedure :: add_increment
    procedure :: difference
+   procedure :: scalar_mult
    procedure :: zeros
    ! procedure :: allocate_field
    ! procedure :: equals
@@ -586,6 +598,30 @@ subroutine add_incr_3d(self, inc)
   
 end subroutine add_incr_3d
 
+subroutine scalar_mul_1d(self, scalar)
+  class(field_1d), intent(inout) :: self
+  real(c_float), intent(in) :: scalar
+
+  self%array = self%array * scalar
+  
+end subroutine scalar_mul_1d
+
+subroutine scalar_mul_2d(self, scalar)
+  class(field_2d), intent(inout) :: self
+  real(c_float), intent(in) :: scalar
+
+  self%array = self%array * scalar
+  
+end subroutine scalar_mul_2d
+
+subroutine scalar_mul_3d(self, scalar)
+  class(field_3d), intent(inout) :: self
+  real(c_float), intent(in) :: scalar
+
+  self%array = self%array * scalar
+  
+end subroutine scalar_mul_3d
+
 subroutine zero_1d(self)
   class(field_1d), intent(inout) :: self
 
@@ -916,13 +952,27 @@ subroutine difference(self,x1,x2)
 
   integer :: f
 
-  write(*,*) "Difference invoked in Fields.F90"
-
   do f = 1,size(self%fields)
      self%fields(f)%field = x1%fields(f)%field - x2%fields(f)%field
   end do
   
 end subroutine difference
+
+subroutine scalar_mult(self,zz)
+  use iso_c_binding, only: c_float
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  real(c_float),  intent(in) :: zz
+
+  integer :: f
+
+  write(*,*) "Scalar mult invoked in Fields.F90"
+
+  do f = 1,size(self%fields)
+     call self%fields(f)%field%scalar_mul(zz)
+  end do
+  
+end subroutine scalar_mult
 
 subroutine zeros(self)
   implicit none
