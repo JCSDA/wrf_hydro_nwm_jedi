@@ -55,6 +55,7 @@ type, abstract, public :: base_field
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
    procedure (zero_interface), deferred :: zero
+   procedure (dot_prod_interface), deferred :: dot_prod
    generic, public :: operator(-) => diff
    procedure (add_incr_interface), pass(self), deferred :: add_incr
    procedure (scalar_mul_interface), pass(self), deferred :: scalar_mul
@@ -120,6 +121,14 @@ abstract interface
      import base_field
      class(base_field), intent(inout) :: self
    end subroutine zero_interface
+
+   subroutine dot_prod_interface(self,other,d_prod)
+     use iso_c_binding, only: c_double
+     import base_field
+     class(base_field), intent(in) :: self
+     class(base_field), intent(in) :: other
+     real(c_double), intent(inout) :: d_prod
+   end subroutine dot_prod_interface
 end interface
 
 
@@ -141,6 +150,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: diff => diff_1d
    procedure :: add_incr => add_incr_1d
    procedure :: zero => zero_1d
+   procedure :: dot_prod => dot_prod_1d
    procedure :: scalar_mul => scalar_mul_1d
    ! Destructor
    ! final :: destroy_field_1d
@@ -163,6 +173,7 @@ type, private, extends(base_field) :: field_2d
    procedure :: add_incr => add_incr_2d
    procedure :: scalar_mul => scalar_mul_2d
    procedure :: zero => zero_2d
+   procedure :: dot_prod => dot_prod_2d
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -184,6 +195,7 @@ type, private, extends(base_field) :: field_3d
    procedure :: add_incr => add_incr_3d
    procedure :: scalar_mul => scalar_mul_3d
    procedure :: zero => zero_3d
+   procedure :: dot_prod => dot_prod_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -215,6 +227,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: difference
    procedure :: scalar_mult
    procedure :: zeros
+   procedure :: dot_prod
    ! procedure :: allocate_field
    ! procedure :: equals
    ! procedure :: copy => field_copy
@@ -643,6 +656,68 @@ subroutine zero_3d(self)
   
 end subroutine zero_3d
 
+subroutine dot_prod_1d(self,other,d_prod)
+  class(field_1d), intent(in) :: self
+  class(base_field), intent(in) :: other
+  real(c_double), intent(inout) :: d_prod
+
+  integer :: i
+  
+  select type(other)
+  type is (field_1d)
+     do i = 1, size(self%array,1)
+        d_prod = d_prod + self%array(i) * other%array(i)
+     end do
+  class default
+     call abor1_ftn("dot_prod_1d: other is not a 1d_field")
+  end select
+  
+end subroutine dot_prod_1d
+
+subroutine dot_prod_2d(self,other,d_prod)
+  class(field_2d), intent(in) :: self
+  class(base_field), intent(in) :: other
+  real(c_double), intent(inout) :: d_prod
+
+  integer :: i,j
+  
+  select type(other)
+  type is (field_2d)
+     do i = 1, size(self%array,1)
+        do j = 1, size(self%array,2)
+           d_prod = d_prod + self%array(i,j) * other%array(i,j)
+        end do
+     end do
+  class default
+     call abor1_ftn("dot_prod_2d: other is not a 2d_field")
+  end select
+
+  write(*,*) "Dot product in 2d_field ",d_prod
+  
+end subroutine dot_prod_2d
+
+subroutine dot_prod_3d(self,other,d_prod)
+  class(field_3d), intent(in) :: self
+  class(base_field), intent(in) :: other
+  real(c_double), intent(inout) :: d_prod
+
+  integer :: i,j,k
+  
+  select type(other)
+  type is (field_3d)
+     do i = 1, size(self%array,1)
+        do j = 1, size(self%array,2)
+           do k = 1, size(self%array,3)
+              d_prod = d_prod + self%array(i,j,k) * other%array(i,j,k)
+           end do
+        end do
+     end do
+  class default
+     call abor1_ftn("dot_prod_3d: other is not a 3d_field")
+  end select
+  
+end subroutine dot_prod_3d
+
 ! --------------------------------------------------------------------------------------------------
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
 !                           wrf_hydro_nwm_name,units,tracer,integerfield)
@@ -953,6 +1028,7 @@ subroutine difference(self,x1,x2)
   integer :: f
 
   do f = 1,size(self%fields)
+     ! - operator is overloaded for base_field
      self%fields(f)%field = x1%fields(f)%field - x2%fields(f)%field
   end do
   
@@ -986,6 +1062,20 @@ subroutine zeros(self)
   
 end subroutine zeros
 
+subroutine dot_prod(self, other, d_prod)
+  use iso_c_binding, only: c_double
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
+  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: other
+  real(c_double), intent(inout) :: d_prod 
+  integer :: f
+
+  do f = 1,size(self%fields)
+     call self%fields(f)%field%dot_prod (other%fields(f)%field,d_prod)
+  end do
+  
+end subroutine dot_prod
+
 subroutine add_increment(self,inc)
   implicit none
   class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
@@ -996,7 +1086,7 @@ subroutine add_increment(self,inc)
   write(*,*) "Increment invoked in Fields.F90"
 
   do f = 1,size(self%fields)
-     call self%fields(f)%field%add_incr(inc%fields(f)%field)
+     call self%fields(f)%field%add_incr (inc%fields(f)%field)
   end do
   
 end subroutine add_increment
@@ -1379,7 +1469,7 @@ subroutine print_field_2d(self, string)
           c_new_line//'Std Dev: '//trim(float_str2) // &
           c_new_line//'RMS: '//trim(float_str3)
   else
-     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name
+     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name, self%array
   end if
   
 end subroutine print_field_2d

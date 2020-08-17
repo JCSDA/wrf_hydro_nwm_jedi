@@ -23,15 +23,15 @@ module wrf_hydro_nwm_jedi_increment_mod
   implicit none
 
   private
-  public :: create_increment, diff_incr, self_mul!, create_from_other, delete, zeros, random, copy, &
-          ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
-          ! dot_prod, &
-          ! read_file, write_file, &
-          ! gpnorm, rms, &
-          ! change_resol, &
-          ! getpoint, setpoint, &
-          ! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
-          ! increment_print
+  public :: create_increment, diff_incr, self_mul, dot_prod !create_from_other, &
+  ! delete, zeros, random, copy, &
+  ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
+  ! read_file, write_file, &
+  ! gpnorm, rms, &
+  ! change_resol, &
+  ! getpoint, setpoint, &
+  ! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
+  ! increment_print
 
 ! ------------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@ contains
     type(oops_variables), intent(in)    :: vars
 
     self%nf = vars%nvars()
+    allocate(self%fields_obj)
     call self%fields_obj%create(geom,vars) !Initializes to zero by default
 
     ! Initialize all arrays to zero
@@ -311,60 +312,20 @@ end subroutine self_mul
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine dot_prod(self, other, zprod)
+subroutine dot_prod(self, other, zprod)
+  use iso_c_binding, only: c_double
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other
+  real(c_double),              intent(inout) :: zprod
 
-!   type(shallow_water_state_type), intent(   in) :: self
-!   type(shallow_water_state_type), intent(   in) :: other
-!   real(kind=r8kind),              intent(inout) :: zprod
+  zprod = 0.d0
 
-!   type(fckit_mpi_comm)              :: f_comm
-!   type(shallow_water_geometry_type) :: geom_self, geom_other
-!   real(r8kind), pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
-!   real(r8kind), pointer             :: other_u(:,:), other_v(:,:), other_h(:,:)
-!   real(kind=r8kind)                 :: zp
-!   integer                           :: i, j
-!   logical                           :: check
+  call self%fields_obj%dot_prod(other%fields_obj,zprod)
 
-!   ! Get geometries
-!   geom_self = self%get_geometry()
-!   geom_other = other%get_geometry()
+  write(*,*) "Dot product invoked ", zprod
 
-!   ! Check for matching resolution
-!   check = (geom_self%get_nx() == geom_other%get_nx()     .and. &
-!            geom_self%get_ny() == geom_other%get_ny()     .and. &
-!            geom_self%get_xmax() == geom_other%get_xmax() .and. &
-!            geom_self%get_ymax() == geom_other%get_ymax())
-
-!   if (check) then
-!     f_comm = fckit_mpi_comm()
-
-!     call self%get_u_ptr(self_u)
-!     call self%get_v_ptr(self_v)
-!     call self%get_h_ptr(self_h)
-!     call other%get_u_ptr(other_u)
-!     call other%get_v_ptr(other_v)
-!     call other%get_h_ptr(other_h)
-
-!     zp = 0.0_r8kind
-!     do j=geom_self%get_yps(), geom_self%get_ype()
-!        do i=geom_self%get_xps(), geom_self%get_xpe()
-!           zp = zp + self_u(i,j) * other_u(i,j)
-!           zp = zp + self_v(i,j) * other_v(i,j)
-!           zp = zp + self_h(i,j) * other_h(i,j)
-!        end do
-!     end do
-
-!     !Get global dot product
-!     call f_comm%allreduce(zp, zprod, fckit_mpi_sum())
-
-!     !For debugging print result:
-!     if (f_comm%rank() == 0) print*, "Dot product test result: ", zprod
-
-!   else
-!      call abor1_ftn("sw increment:  dot_prod not implemented for mismatched resolutions")
-!   endif
-
-! end subroutine dot_prod
+end subroutine dot_prod
 
 ! ! ------------------------------------------------------------------------------
 

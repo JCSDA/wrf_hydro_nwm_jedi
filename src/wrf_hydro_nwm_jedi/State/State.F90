@@ -49,7 +49,7 @@ type, public :: wrf_hydro_nwm_jedi_state
   logical :: have_agrid
   logical :: have_dgrid
   type(fckit_mpi_comm) :: f_comm
-  type(wrf_hydro_nwm_jedi_fields) :: fields_obj
+  type(wrf_hydro_nwm_jedi_fields),allocatable :: fields_obj
 end type wrf_hydro_nwm_jedi_state
 
 
@@ -66,6 +66,7 @@ subroutine create(self, geom, vars)
   type(oops_variables),              intent(in)    :: vars
 
   self%nf = vars%nvars()
+  allocate(self%fields_obj)
   call self%fields_obj%create(geom, vars)
   
 end subroutine create
@@ -127,11 +128,15 @@ subroutine copy(self, rhs)
        self%fields_obj,rhs%fields_obj, &
        "wrf_hydro_nwm_jedi_state_mod.copy")
   
-  ! write(*,*) "Copying field self%nf= ",self%nf
   ! Deep copy
   self%fields_obj = rhs%fields_obj
   self%calendar_type = rhs%calendar_type
   self%date_init = rhs%date_init
+
+  ! write(*,*) "Checking for deep copy in copy"
+  ! call rhs%fields_obj%print_all_fields()
+  ! call self%fields_obj%print_all_fields()
+  
 end subroutine copy
 
 
