@@ -1,7 +1,7 @@
 # first we can indicate the documentation build as an option and
 # set it to OFF by default since documenation will usually be
 # built at the bundle level
-option(BUILD_WRF_HYDRO_NWM_JEDI_DOC "Build WRF_HYDRO_NWM_JEDI documentation" ON)
+option(BUILD_WRF_HYDRO_NWM_JEDI_DOC "Build WRF_HYDRO_NWM_JEDI documentation" OFF)
 
 if (BUILD_WRF_HYDRO_NWM_JEDI_DOC)
     message("WRF_HYDRO_NWM_JEDI Documentation Requested")
