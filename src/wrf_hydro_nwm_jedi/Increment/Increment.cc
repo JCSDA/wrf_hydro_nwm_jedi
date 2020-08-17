@@ -99,10 +99,8 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  void Increment::axpy(const double &, const Increment &, const bool check) {
-    // util::abor1_cpp("Increment::axpy() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // Needed by test
+  void Increment::axpy(const double &aa, const Increment &yy, const bool check) {
+    wrf_hydro_nwm_jedi_axpy_inc_f90(keyInc_, static_cast<float>(aa), yy.keyInc_);
   }
 
 // ----------------------------------------------------------------------------

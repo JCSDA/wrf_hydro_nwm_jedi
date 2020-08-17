@@ -23,15 +23,16 @@ module wrf_hydro_nwm_jedi_increment_mod
   implicit none
 
   private
-  public :: create_increment, diff_incr, self_mul!, create_from_other, delete, zeros, random, copy, &
-          ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
-          ! dot_prod, &
-          ! read_file, write_file, &
-          ! gpnorm, rms, &
-          ! change_resol, &
-          ! getpoint, setpoint, &
-          ! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
-          ! increment_print
+  public :: create_increment, diff_incr, self_mul, axpy_inc
+  !, create_from_other, delete, zeros, random, copy, &
+  ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
+  ! dot_prod, &
+  ! read_file, write_file, &
+  ! gpnorm, rms, &
+  ! change_resol, &
+  ! getpoint, setpoint, &
+  ! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
+  ! increment_print
 
 ! ------------------------------------------------------------------------------
 
@@ -211,58 +212,25 @@ contains
 subroutine self_mul(self, zz)
   use iso_c_binding, only: c_float
   implicit none
-
-  type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-  real(c_float),              intent(   in) :: zz
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  real(c_float),                  intent(   in) :: zz
 
   call self%fields_obj%scalar_mult(zz)
-
 end subroutine self_mul
 
-! ! ------------------------------------------------------------------------------
 
-! subroutine axpy_inc(self, zz, rhs)
+!> Method for linear transform aa*self+yy
+!> @todo implement the resolution check requested by oops?
+subroutine axpy_inc(self, aa, yy)
+  use iso_c_binding, only: c_float
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  real(kind=c_float),             intent(   in) :: aa
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: yy
 
-!   type(shallow_water_state_type), intent(inout) :: self
-!   real(kind=r8kind),              intent(   in) :: zz
-!   type(shallow_water_state_type), intent(   in) :: rhs
-
-!   type(shallow_water_geometry_type) :: geom_self, geom_rhs
-!   real(r8kind), pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
-!   real(r8kind), pointer             :: rhs_u(:,:), rhs_v(:,:), rhs_h(:,:)
-!   integer                           :: i, j
-!   logical                           :: check
-
-!   ! Get geometries
-!   geom_self = self%get_geometry()
-!   geom_rhs = self%get_geometry()
-
-!   ! Check for matching resolution
-!   check = (geom_self%get_nx() == geom_rhs%get_nx()     .and. &
-!            geom_self%get_ny() == geom_rhs%get_ny()     .and. &
-!            geom_self%get_xmax() == geom_rhs%get_xmax() .and. &
-!            geom_self%get_ymax() == geom_rhs%get_ymax())
-
-!   if (check) then
-!     call self%get_u_ptr(self_u)
-!     call self%get_v_ptr(self_v)
-!     call self%get_h_ptr(self_h)
-!     call rhs%get_u_ptr(rhs_u)
-!     call rhs%get_v_ptr(rhs_v)
-!     call rhs%get_h_ptr(rhs_h)
-
-!     do j=geom_self%get_yps(), geom_self%get_ype()
-!        do i=geom_self%get_xps(), geom_self%get_xpe()
-!           self_u(i,j) = self_u(i,j) + zz * rhs_u(i,j)
-!           self_v(i,j) = self_v(i,j) + zz * rhs_v(i,j)
-!           self_h(i,j) = self_h(i,j) + zz * rhs_h(i,j)
-!        end do
-!     end do
-!   else
-!      call abor1_ftn("sw increment:  axpy_inc not implemented for mismatched resolutions")
-!   endif
-
-! end subroutine axpy_inc
+  call self%fields_obj%scalar_mult(aa)
+  call self%fields_obj%add_increment(yy%fields_obj)
+end subroutine axpy_inc
 
 ! ! ------------------------------------------------------------------------------
 
