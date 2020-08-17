@@ -20,8 +20,9 @@ use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_increment_mod, only: &
-     diff_incr, create_increment, self_mul, axpy_inc
-use wrf_hydro_nwm_jedi_increment_registry_mod, only: wrf_hydro_nwm_jedi_increment_registry
+     diff_incr, create_increment, self_mul, axpy_inc, dot_prod
+use wrf_hydro_nwm_jedi_increment_registry_mod, only: &
+     wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
@@ -351,24 +352,25 @@ end subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c
 
 ! ! ------------------------------------------------------------------------------
 
-! subroutine sw_increment_dot_prod_c(c_key_inc1, c_key_inc2, c_prod) bind(c, name='sw_increment_dot_prod_f90')
+subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c(c_key_inc1, c_key_inc2, c_prod) bind(c, name='wrf_hydro_nwm_jedi_increment_dot_prod_f90')
 
-!   implicit none
+  implicit none
 
-!   integer(c_int), intent(   in) :: c_key_inc1, c_key_inc2
-!   real(c_double), intent(inout) :: c_prod
+  integer(c_int), intent(   in) :: c_key_inc1, c_key_inc2
+  real(c_double), intent(inout) :: c_prod
 
-!   real(kind=r8kind)                       :: zz
-!   type(shallow_water_state_type), pointer :: inc1, inc2
+  real(kind=c_double)  :: zz
+  type(wrf_hydro_nwm_jedi_state), pointer :: inc1, inc2
 
-!   call sw_increment_registry%get(c_key_inc1, inc1)
-!   call sw_increment_registry%get(c_key_inc2, inc2)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc1, inc1)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc2, inc2)
 
-!   call dot_prod(inc1, inc2, zz)
+  zz = 0.d0
+  call dot_prod(inc1, inc2, zz)
 
-!   c_prod = zz
+  c_prod = zz
 
-! end subroutine sw_increment_dot_prod_c
+end subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c
 
 ! ! ------------------------------------------------------------------------------
 

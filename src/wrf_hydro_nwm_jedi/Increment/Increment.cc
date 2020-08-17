@@ -67,7 +67,6 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator =(const Increment &rhs) {
-
     wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, rhs.keyInc_);
     time_ = rhs.time_;
     return *this;
@@ -76,7 +75,6 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   Increment & Increment::operator -=(const Increment &dx) {
-
     ASSERT(this->validTime() == dx.validTime());
     wrf_hydro_nwm_jedi_increment_sub_f90(keyInc_, dx.keyInc_);
     return *this;
@@ -105,11 +103,11 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  double Increment::dot_product_with(const Increment &) const {
-    // util::abor1_cpp("Increment::dot_product_with() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // Needed by test
-    return 1.0;
+  double Increment::dot_product_with(const Increment & other) const {
+    double zz = 0.0;
+    wrf_hydro_nwm_jedi_increment_dot_prod_f90(keyInc_, other.keyInc_, zz);
+    std::cout << zz << std::endl;
+    return zz;
   }
 
 // ----------------------------------------------------------------------------
