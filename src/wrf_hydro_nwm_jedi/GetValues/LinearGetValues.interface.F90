@@ -211,6 +211,8 @@ subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_c( &
   write(*,*) "After ufo_geovals registry"
   ! Call method
   call self%fill_geovals_ad(geom, state%fields_obj, t1, t2, locs, geovals)
+  write(*,*) "After fill_geovals_ad"
+  call state%fields_obj%print_all_fields()
 end subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_c
 
 

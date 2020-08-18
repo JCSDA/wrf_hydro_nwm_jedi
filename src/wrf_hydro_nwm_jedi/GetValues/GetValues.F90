@@ -244,6 +244,7 @@ subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
   self%ngrid = 1
 
   do gv = 1, geovals%nvar
+
      call fields_obj%search_field(trim(geovals%variables(gv)), field)
      do ii = 1, locs%nlocs
         if (time_mask(ii)) then
@@ -296,7 +297,7 @@ subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
      ! enddo
   enddo
 
-  write(*,*) "End of fill_geovals"
+  write(*,*) "End of fill_geovals_ad"
 
   ! deallocate(field_us)
   ! deallocate(geovals_all)
