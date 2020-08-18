@@ -14,7 +14,7 @@ module wrf_hydro_nwm_jedi_increment_mod
   use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
   use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
   use iso_c_binding, only : c_float
-  use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state
+  use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state, create_from_other
 
   !GetValues
   use ufo_locs_mod,          only: ufo_locs
@@ -219,17 +219,20 @@ subroutine self_mul(self, zz)
 end subroutine self_mul
 
 
-!> Method for linear transform aa*self+yy
+!> Method for linear transform axpy == a*x+y == scalar*other + self
 !> @todo implement the resolution check requested by oops?
-subroutine axpy_inc(self, aa, yy)
+subroutine axpy_inc(self, scalar, other_in)
   use iso_c_binding, only: c_float
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  real(kind=c_float),             intent(   in) :: aa
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: yy
+  real(kind=c_float),             intent(   in) :: scalar
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other_in
 
-  call self%fields_obj%scalar_mult(aa)
-  call self%fields_obj%add_increment(yy%fields_obj)
+  type(wrf_hydro_nwm_jedi_state) :: other
+
+  call create_from_other(other, other_in)
+  call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
+  call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
 end subroutine axpy_inc
 
 ! ! ------------------------------------------------------------------------------
