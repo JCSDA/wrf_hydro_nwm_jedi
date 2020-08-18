@@ -905,9 +905,9 @@ end subroutine deallocate_field
 ! -----------------------------------------------------------------------------
 ! This subroutine unifies the long_name_to_wrf_hydro_name and pointer_field routines
 subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
-  class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
-  character(len=*),                         intent(in)    :: long_name
-  class(base_field),               pointer, intent(out)   :: field_pointer
+  class(wrf_hydro_nwm_jedi_fields), target, intent(in)  :: self
+  character(len=*),                         intent(in)  :: long_name
+  class(base_field),               pointer, intent(out) :: field_pointer
   logical,optional :: pass_wrf_hydro_name
 
   integer :: n

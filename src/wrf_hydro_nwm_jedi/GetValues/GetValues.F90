@@ -101,20 +101,21 @@ end subroutine delete
 
 !> Set the geovals from the increment/state
 subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
-  class(wrf_hydro_nwm_jedi_getvalues_base), intent(inout) :: self  ! intent(in)?
+  class(wrf_hydro_nwm_jedi_getvalues_base), intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry),        intent(in)    :: geom
-  type(wrf_hydro_nwm_jedi_fields),          intent(inout) :: fields_obj  ! intent(in)?
+  type(wrf_hydro_nwm_jedi_fields),          intent(in)    :: fields_obj
   type(datetime),                           intent(in)    :: t1
   type(datetime),                           intent(in)    :: t2
   type(ufo_locs),                           intent(in)    :: locs
   type(ufo_geovals),                        intent(inout) :: geovals
   
-  integer :: gv, n, i, idx_1, idx_2
+  integer :: gv, ii
+  ! integer :: idx_1, idx_2
   class(base_field), pointer :: field
-  character(len=10) :: wrf_hydro_nwm_name
+  ! character(len=10) :: wrf_hydro_nwm_name
   logical, allocatable :: time_mask(:)
   real(kind=c_float) :: lat, long
-  real(kind=c_float), allocatable :: field_us(:)
+  ! real(kind=c_float), allocatable :: field_us(:)
   real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
   type(indices) :: ind
   ! Get mask for locations in this time window
@@ -137,7 +138,7 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
 
   ! ! Loop over GeoVaLs
   ! ! -----------------
-  allocate(field_us(self%ngrid))
+  ! allocate(field_us(self%ngrid))
   ! allocate(geovals_all(locs%nlocs, self%npz+1))
   allocate(geovals_all(locs%nlocs, 1+1))
   allocate(geovals_tmp(locs%nlocs))
@@ -158,13 +159,11 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
      geovals_tmp = 0.0
      ! Work on geovals_tmp
 
-     do i = 1, locs%nlocs
-        lat = locs%lat(i)
-        long = locs%lon(i)
+     do ii = 1, locs%nlocs
+        lat = locs%lat(ii)
+        long = locs%lon(ii)
         call geom%get_lsm_nn(lat, long, ind)
-        ! coo%dim_1 = idx_1
-        ! coo%dim_2 = idx_2
-        geovals_tmp(i) = field%get_value(ind)!field%array(idx_1, idx_2, 1)
+        geovals_tmp(ii) = field%get_value(ind)!field%array(idx_1, idx_2, 1)
      end do
 
      geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)   
@@ -206,14 +205,14 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
 
      ! Fill GeoVaLs relevant to this window
      ! ------------------------------------
-     do n = 1,locs%nlocs
-        if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
+     do ii = 1,locs%nlocs
+        if (time_mask(ii)) geovals%geovals(gv)%vals(1:1, ii) = geovals_all(ii, 1:1)
      enddo
   enddo
 
   write(*,*) "End of fill_geovals"
 
-  deallocate(field_us)
+  ! deallocate(field_us)
   deallocate(geovals_all)
   deallocate(geovals_tmp)
   deallocate(time_mask)
@@ -222,72 +221,38 @@ end subroutine fill_geovals
 
 !> Set the increment/state from the geovals
 subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
-  class(wrf_hydro_nwm_jedi_getvalues_base), intent(inout) :: self        !intent(in)?
+  class(wrf_hydro_nwm_jedi_getvalues_base), intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry),        intent(in)    :: geom
-  type(wrf_hydro_nwm_jedi_fields),          intent(inout) :: fields_obj  ! intent(inout)?
+  type(wrf_hydro_nwm_jedi_fields),          intent(inout) :: fields_obj
   type(datetime),                           intent(in)    :: t1
   type(datetime),                           intent(in)    :: t2
   type(ufo_locs),                           intent(in)    :: locs
-  type(ufo_geovals),                        intent(inout) :: geovals     ! intent(in)?
+  type(ufo_geovals),                        intent(in)    :: geovals
 
-  integer :: gv, n, i, idx_1, idx_2
+  integer :: gv, ii
   class(base_field), pointer :: field
-  character(len=10) :: wrf_hydro_nwm_name
+  ! character(len=10) :: wrf_hydro_nwm_name
   logical, allocatable :: time_mask(:)
   real(kind=c_float) :: lat, long
-  real(kind=c_float), allocatable :: field_us(:)
-  real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
+  ! real(kind=c_float), allocatable :: field_us(:)
+  ! real(kind=c_float), allocatable :: geovals_all(:,:), geovals_tmp(:)
   type(indices) :: ind
   ! Get mask for locations in this time window
   ! ------------------------------------------
   call ufo_locs_time_mask(locs, t1, t2, time_mask)
 
-
-  ! ! Allocate geovals
-  ! ! ----------------
-  ! if (.not. geovals%linit) then
-  !    do gv = 1, geovals%nvar
-  !       geovals%geovals(gv)%nval = 1!fields(gv)%dim3_len
-  !       allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
-  !       geovals%geovals(gv)%vals = 0.0
-  !    enddo
-  ! endif
-  ! geovals%linit = .true.
-
   self%ngrid = 1
 
-  ! ! Loop over GeoVaLs
-  ! ! -----------------
-  allocate(field_us(self%ngrid))
-  ! allocate(geovals_all(locs%nlocs, self%npz+1))
-  allocate(geovals_all(locs%nlocs, 1+1))
-  allocate(geovals_tmp(locs%nlocs))
-
   do gv = 1, geovals%nvar
-
-     !   ! Get GeoVaLs field
-     !   ! -----------------
-     !   call long_name_to_wrf_hydro_name(fields, trim(geovals%variables(gv)), wrf_hydro_nwm_name)
-
-     !  call pointer_field(fields, wrf_hydro_nwm_name, field)
-
-     call fields_obj%search_field(trim(geovals%variables(gv)),field)
-
-     !   ! Interpolation
-     !   ! -------------
-     geovals_all = 0.0
-     geovals_tmp = 0.0
-     ! Work on geovals_tmp
-
-     do i = 1, locs%nlocs
-        lat = locs%lat(i)
-        long = locs%lon(i)
-        call geom%get_lsm_nn(lat, long, ind)
-        ! geovals_tmp(i) = field%get_value(ind)  ! invert this
-        call field%set_value(ind, geovals_tmp(i))  ! implement this
+     call fields_obj%search_field(trim(geovals%variables(gv)), field)
+     do ii = 1, locs%nlocs
+        if (time_mask(ii)) then
+           lat = locs%lat(ii)
+           long = locs%lon(ii)
+           call geom%get_lsm_nn(lat, long, ind)
+           call field%set_value(ind, real(geovals%geovals(gv)%vals(1, ii), kind=c_float))
+        endif
      end do
-
-     geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)
 
      ! Can optionally interpolate real valued magnitude fields with bump
      ! -----------------------------------------------------------------
@@ -326,16 +291,16 @@ subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
 
      ! Fill GeoVaLs relevant to this window
      ! ------------------------------------
-     do n = 1,locs%nlocs
-        if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
-     enddo
+     ! do n = 1,locs%nlocs
+     !    if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
+     ! enddo
   enddo
 
   write(*,*) "End of fill_geovals"
 
-  deallocate(field_us)
-  deallocate(geovals_all)
-  deallocate(geovals_tmp)
+  ! deallocate(field_us)
+  ! deallocate(geovals_all)
+  ! deallocate(geovals_tmp)
   deallocate(time_mask)
 end subroutine fill_geovals_ad
 
