@@ -107,12 +107,12 @@ namespace wrf_hydro_nwm_jedi {
     //                                        locs_.toFortran(),
     //                                        geovals.toFortran());
 
-    wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90(							         keyGetValues_,
-        geom_->toFortran(),
-        inc.toFortran(),
-        &t1p, &t2p,
-        locs_.toFortran(),
-        geovals.toFortran());
+    wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90(keyGetValues_,
+							   geom_->toFortran(),
+							   inc.toFortran(),
+							   &t1p, &t2p,
+							   locs_.toFortran(),
+							   geovals.toFortran());
 
     oops::Log::trace() << "LinearGetValues::fillGeovalsAD done" << std::endl;
   }

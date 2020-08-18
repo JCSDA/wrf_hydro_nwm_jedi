@@ -284,10 +284,12 @@ subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
         long = locs%lon(i)
         call geom%get_lsm_nn(lat, long, ind)
         ! geovals_tmp(i) = field%get_value(ind)  ! invert this
-        call field%set_value(ind, geovals_tmp(i))  ! implement this
+        if (time_mask(i)) then
+           call field%set_value(ind, real(geovals%geovals(gv)%vals(1, i),kind=c_float))
+        end if
      end do
 
-     geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)
+     !geovals_all(1:locs%nlocs, 1) = geovals_tmp(1:locs%nlocs)
 
      ! Can optionally interpolate real valued magnitude fields with bump
      ! -----------------------------------------------------------------
@@ -326,12 +328,12 @@ subroutine fill_geovals_ad(self, geom, fields_obj, t1, t2, locs, geovals)
 
      ! Fill GeoVaLs relevant to this window
      ! ------------------------------------
-     do n = 1,locs%nlocs
-        if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
-     enddo
+     ! do n = 1,locs%nlocs
+     !    if (time_mask(n)) geovals%geovals(gv)%vals(1:1, n) = geovals_all(n, 1:1)
+     ! enddo
   enddo
 
-  write(*,*) "End of fill_geovals"
+  write(*,*) "End of fill_geovals_ad"
 
   deallocate(field_us)
   deallocate(geovals_all)
