@@ -97,14 +97,14 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  void Increment::axpy(const double &aa, const Increment &yy, const bool check) {
-    wrf_hydro_nwm_jedi_axpy_inc_f90(keyInc_, static_cast<float>(aa), yy.keyInc_);
+  void Increment::axpy(const double &scalar, const Increment &other, const bool check) {
+    wrf_hydro_nwm_jedi_axpy_inc_f90(keyInc_, static_cast<float>(scalar), other.keyInc_);
   }
 
 // ----------------------------------------------------------------------------
 
   double Increment::dot_product_with(const Increment & other) const {
-    double zz = 0.0;
+    double zz = 0.0; // why do this here can we make this a function?
     wrf_hydro_nwm_jedi_increment_dot_prod_f90(keyInc_, other.keyInc_, zz);
     std::cout << zz << std::endl;
     return zz;

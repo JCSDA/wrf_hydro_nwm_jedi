@@ -96,19 +96,25 @@ namespace wrf_hydro_nwm_jedi {
 				      const ufo::GeoVaLs & geovals) const {
     oops::Log::trace() << "LinearGetValues::fillGeovalsAD starting"
                      << std::endl;
-    
-    // const util::DateTime * t1p = &t1;
-    // const util::DateTime * t2p = &t2;
-    
+
+    const util::DateTime * t1p = &t1;
+    const util::DateTime * t2p = &t2;
+
     // sw_lineargetvalues_fill_geovals_ad_f90(keyLinearGetValues_,
     //                                        geom_->toFortran(),
     //                                        inc.toFortran(),
     //                                        &t1p, &t2p,
     //                                        locs_.toFortran(),
     //                                        geovals.toFortran());
-    
-    oops::Log::trace() << "LinearGetValues::fillGeovalsAD done"
-                       << std::endl;
+
+    wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90(							         keyGetValues_,
+        geom_->toFortran(),
+        inc.toFortran(),
+        &t1p, &t2p,
+        locs_.toFortran(),
+        geovals.toFortran());
+
+    oops::Log::trace() << "LinearGetValues::fillGeovalsAD done" << std::endl;
   }
   
   // -------------------------------------------------------------------------------------------------

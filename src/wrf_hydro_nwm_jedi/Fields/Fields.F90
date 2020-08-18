@@ -52,6 +52,7 @@ type, abstract, public :: base_field
    procedure (print_field_dims_interface),pass(self), deferred :: print_field_dims
    procedure (read_file_interface),       pass(self), deferred :: read_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
+   procedure (set_value_field_interface), pass(self), deferred :: set_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
    procedure (zero_interface), deferred :: zero
@@ -88,6 +89,14 @@ abstract interface
      type(indices), intent(in) :: ind
      real(kind=c_float) :: val
    end function get_value_field_interface
+
+   subroutine set_value_field_interface(self, ind, val)
+     use iso_c_binding, only : c_float
+     import base_field, indices
+     class(base_field),  intent(inout) :: self
+     type(indices),      intent(in)    :: ind
+     real(kind=c_float), intent(in)    :: val
+   end subroutine set_value_field_interface
 
    subroutine apply_covariance_mult_interface(self, in_f, scalar)
      use iso_c_binding, only : c_float
@@ -143,6 +152,7 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: print_field_dims => print_field_dims_1d
    procedure, pass(self) :: read_file => read_file_1d
    procedure, pass(self) :: get_value => get_value_1d
+   procedure, pass(self) :: set_value => set_value_1d
    procedure, pass(self) :: fill => fill_field_1d
    procedure, pass(self) :: mean_stddev => mean_stddev_1d
    procedure, pass(self) :: rms => field_rms_1d
@@ -165,6 +175,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: print_field_dims => print_field_dims_2d
    procedure, pass(self) :: read_file => read_file_2d
    procedure, pass(self) :: get_value => get_value_2d
+   procedure, pass(self) :: set_value => set_value_2d
    procedure, pass(self) :: fill => fill_field_2d
    procedure, pass(self) :: mean_stddev => mean_stddev_2d
    procedure, pass(self) :: rms => field_rms_2d
@@ -187,6 +198,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: print_field_dims => print_field_dims_3d
    procedure, pass(self) :: read_file => read_file_3d
    procedure, pass(self) :: get_value => get_value_3d
+   procedure, pass(self) :: set_value => set_value_3d
    procedure, pass(self) :: fill => fill_field_3d
    procedure, pass(self) :: mean_stddev => mean_stddev_3d
    procedure, pass(self) :: rms => field_rms_3d
@@ -500,6 +512,37 @@ function get_value_3d(self, ind) result(val)
   val = self%array(ind%ind_x, ind%ind_y, ind%ind_z)
 end function get_value_3d
 
+
+!-----------------------------------------------------------------------------
+! Set value method
+
+subroutine set_value_1d(self, ind, val)
+  class(field_1d), intent(inout) :: self
+  type(indices),   intent(in)    :: ind
+  real(c_float),   intent(in)    :: val
+
+  self%array(ind%ind_x) = val
+end subroutine set_value_1d
+
+
+subroutine set_value_2d(self, ind, val)
+  class(field_2d), intent(inout) :: self
+  type(indices),   intent(in)    :: ind
+  real(c_float),   intent(in)    :: val
+
+  self%array(ind%ind_x, ind%ind_y) = val
+end subroutine set_value_2d
+
+
+subroutine set_value_3d(self, ind, val)
+  class(field_3d), intent(inout) :: self
+  type(indices),   intent(in)    :: ind
+  real(c_float),   intent(in)    :: val
+
+  self%array(ind%ind_x, ind%ind_y, ind%ind_z) = val
+end subroutine set_value_3d
+
+
 !-----------------------------------------------------------------------------
 ! Diff methods
 
@@ -662,7 +705,7 @@ subroutine dot_prod_1d(self,other,d_prod)
   real(c_double), intent(inout) :: d_prod
 
   integer :: i
-  
+
   select type(other)
   type is (field_1d)
      do i = 1, size(self%array,1)
@@ -671,7 +714,7 @@ subroutine dot_prod_1d(self,other,d_prod)
   class default
      call abor1_ftn("dot_prod_1d: other is not a 1d_field")
   end select
-  
+
 end subroutine dot_prod_1d
 
 subroutine dot_prod_2d(self,other,d_prod)
