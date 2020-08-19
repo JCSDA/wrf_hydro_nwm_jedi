@@ -1,4 +1,5 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
+  compare.sh
   testinput/interface.yml
   testinput/hofx_nomodel.yaml
   testoutput/hofx_nomodel_identity.ref
@@ -93,7 +94,7 @@ ecbuild_add_test(
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_cmp
    TYPE		SCRIPT
-   COMMAND	"${CMAKE_BINARY_DIR}/bin/compare.sh"
+   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
    ARGS         testoutput/hofx_nomodel_identity.run testoutput/hofx_nomodel_identity.ref)
 #   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
 #   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run

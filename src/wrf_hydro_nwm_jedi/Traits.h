@@ -22,16 +22,6 @@
 #include "wrf_hydro_nwm_jedi/State/State.h"
 //#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 
-#include "ioda/ObsSpace.h"
-#include "ioda/ObsVector.h"
-
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
-#include "ufo/ObsBias.h"
-#include "ufo/ObsBiasCovariance.h"
-#include "ufo/ObsBiasIncrement.h"
-#include "ufo/ObsDiagnostics.h"
-#include "ufo/ObsOperator.h"
 
 namespace wrf_hydro_nwm_jedi {
 
@@ -52,18 +42,6 @@ namespace wrf_hydro_nwm_jedi {
     // typedef wrf_hydro_nwm_jedi::ModelAuxCovariance  ModelAuxCovariance;
     typedef wrf_hydro_nwm_jedi::ModelAuxControl     ModelAuxControl;
     // typedef wrf_hydro_nwm_jedi::ModelAuxIncrement   ModelAuxIncrement;
-
-    // Interfaces that are already provided by JEDI
-    typedef ufo::GeoVaLs              GeoVaLs;
-    typedef ufo::Locations            Locations;
-    typedef ufo::ObsBias              ObsAuxControl;
-    typedef ufo::ObsBiasCovariance    ObsAuxCovariance;
-    typedef ufo::ObsBiasIncrement     ObsAuxIncrement;
-    typedef ufo::ObsDiagnostics       ObsDiagnostics;
-    typedef ufo::ObsOperator          ObsOperator;
-    typedef ioda::ObsSpace            ObsSpace;
-    typedef ioda::ObsVector           ObsVector;
-    template <typename DATA> using ObsDataVector = ioda::ObsDataVector<DATA>;
   };
 }  // namespace wrf_hydro_nwm_jedi
 

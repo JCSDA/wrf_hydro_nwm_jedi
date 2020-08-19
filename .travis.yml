@@ -118,7 +118,7 @@ script:
   - date
   - docker exec jcsda_container bash -c 'cd /build_container/wrf_hydro_nwm_jedi && make -j4'
   - date
-  - docker exec jcsda_container bash -c 'cd /build_container/wrf_hydro_nwm_jedi && ctest'
+  - docker exec jcsda_container bash -c 'cd /build_container/wrf_hydro_nwm_jedi && cd test && ctest'
   - date
 #upload to codecov
   - docker exec jcsda_container bash -c 'cd /build_container/wrf_hydro_nwm_jedi && ls'
