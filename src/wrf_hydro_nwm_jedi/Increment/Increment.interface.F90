@@ -328,29 +328,6 @@ subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c(c_key_self, c_aa, c_key_yy) b
   call axpy_inc(self, c_aa, yy)
 end subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c
 
-! ! ------------------------------------------------------------------------------
-
-! subroutine sw_increment_axpy_state_c(c_key_self, c_zz, c_key_rhs) bind(c, name='sw_increment_axpy_state_f90')
-
-!   implicit none
-
-!   integer(c_int), intent(in) :: c_key_self
-!   real(c_double), intent(in) :: c_zz
-!   integer(c_int), intent(in) :: c_key_rhs
-
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: rhs
-!   real(kind=r8kind)                       :: zz
-
-!   call sw_increment_registry%get(c_key_self, self)
-!   call sw_state_registry%get(c_key_rhs, rhs)
-!   zz = c_zz
-
-!   call axpy_state(self, zz, rhs)
-
-! end subroutine sw_increment_axpy_state_c
-
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c(c_key_inc1, c_key_inc2, c_prod) bind(c, name='wrf_hydro_nwm_jedi_increment_dot_prod_f90')
 
