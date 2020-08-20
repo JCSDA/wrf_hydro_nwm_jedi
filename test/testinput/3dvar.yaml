@@ -19,9 +19,9 @@ cost_function:
         name: 'Identity'
       ObsSpace:
         ObsDataIn:
-          obsfile: 'Data/wrf_hydro_nwm_files/makeobs_3dvar_0000.nc'
+          obsfile: ./Data/wrf_hydro_nwm_files/makeobs_3dvar_0000.nc
         ObsDataOut:
-          obsfile: 'Data/wrf_hydro_nwm_files/3dvar.uv.obs3d.nc'
+          obsfile: ./Data/wrf_hydro_nwm_files/3dvar_test_output.nc
         name: 'Simulate'
         simulate:
           variables: ['swe']
