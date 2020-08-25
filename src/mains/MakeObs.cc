@@ -8,11 +8,12 @@
 #include "oops/runs/MakeObs.h"
 #include "oops/runs/Run.h"
 #include "ufo/instantiateObsFilterFactory.h"
+#include "ufo/ObsTraits.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::instantiateObsFilterFactory<wrf_hydro_nwm_jedi::ObsTraits>();
-  oops::MakeObs<wrf_hydro_nwm_jedi::Traits, wrf_hydro_nwm_jedi::ObsTraits> mkobs;
+  ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
+  oops::MakeObs<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> mkobs;
   return run.execute(mkobs);
 }
