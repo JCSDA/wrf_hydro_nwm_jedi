@@ -1,0 +1,13 @@
+Test     : CostJb   : Nonlinear Jb = 0
+Test     : CostJo   : Nonlinear Jo(Simulate) = 153.873, nobs = 346, Jo/n = 0.444719, err = 1
+Test     : CostFunction: Nonlinear J = 153.873
+Test     : DRIPCGMinimizer: reduction in residual norm = 1.81063e-08
+Test     : CostFunction::addIncrement: Analysis:  
+Test     : snow_water_equivalent                                           
+Test     : Mean:    122.328827
+Test     : Std Dev:    1850.41394
+Test     : RMS:    129.671783
+Test     : (TODO, print diagnostic info about the ModelAuxControl here)
+Test     : CostJb   : Nonlinear Jb = 3.35073
+Test     : CostJo   : Nonlinear Jo(Simulate) = 143.312, nobs = 346, Jo/n = 0.414197, err = 1
+Test     : CostFunction: Nonlinear J = 146.663
