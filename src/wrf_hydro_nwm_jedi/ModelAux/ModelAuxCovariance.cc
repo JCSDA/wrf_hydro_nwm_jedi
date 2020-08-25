@@ -5,58 +5,57 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/ModelAux/ModelAuxCovariance.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
 
 #include "eckit/config/Configuration.h"
 
 #include "oops/util/abor1_cpp.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
   ModelAuxCovariance::ModelAuxCovariance(const eckit::Configuration & conf,
                                          const Geometry & geom)
   : conf_(conf) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::ModelAuxCovariance() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::ModelAuxCovariance() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   ModelAuxCovariance::~ModelAuxCovariance() {
-    util::abor1_cpp(
-      "ModelAuxCovariance::~ModelAuxCovariance() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::~ModelAuxCovariance() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxCovariance::linearize(const ModelAuxControl &,
                                      const Geometry &) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::linearize() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::linearize() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxCovariance::multiply(const ModelAuxIncrement &,
                                     ModelAuxIncrement &) {
-    util::abor1_cpp(
-      "ModelAuxCovariance::multiply() needs to be implemented.",
-      __FILE__, __LINE__);
+    // util::abor1_cpp(
+    //   "ModelAuxCovariance::multiply() needs to be implemented.",
+    //   __FILE__, __LINE__);
   }
 
 // ----------------------------------------------------------------------------
 
   void ModelAuxCovariance::inverseMultiply(const ModelAuxIncrement &,
                                            ModelAuxIncrement &) const {
-    util::abor1_cpp(
-      "ModelAuxCovariance::inverseMultiply() needs to be implemented.",
-      __FILE__, __LINE__);
+    
+    std::cout << "Inverse multiply in ModelAuxCovariance not implemented, probably not needed" << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -78,4 +77,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

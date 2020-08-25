@@ -33,6 +33,17 @@ namespace wrf_hydro_nwm_jedi {
 	std::cout << "Time statically configured"<<std::endl;
 	time_ = util::DateTime("2018-04-15T00:00:00Z");
       }
+
+    vars_ = vars;
+  }
+
+  // Used by Increment
+  Fields::Fields(const Geometry & geom, const oops::Variables & vars,
+		 const util::DateTime & vt)
+    : geom_(new Geometry(geom)) {
+
+    time_ = vt;
+    vars_ = vars;
   }
 
 // ----------------------------------------------------------------------------
@@ -56,7 +67,7 @@ namespace wrf_hydro_nwm_jedi {
   double Fields::norm() const {
     // util::abor1_cpp("Fields::norm() needs to be implemented.",
     //                 __FILE__, __LINE__);
-    return 0.0;
+    return 10.0;
   }
 
 // ----------------------------------------------------------------------------

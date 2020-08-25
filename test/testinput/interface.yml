@@ -1,6 +1,12 @@
-# Needed for TestGeometry
+# Tests used by:
+#   - TestGeometry
+#   ? TestState
+#   - TestModel
+#   - TestInterface
+
+# + needed for TestGeometry
 Geometry:
-  input_file: Data/wrf_hydro_nwm_files/wrfinput.nc
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
 # + needed for TestState
 StateTest:
@@ -8,9 +14,11 @@ StateTest:
   tolerance: 1.0e-12
   date: 2018-04-15T00:00:00Z
   StateGenerate:
-    model_filename: RESTART
+    filename_lsm: RESTART
+    filename_hydro: HYDRO_RST
   StateFile:
-    model_filename: RESTART
+    filename_lsm: RESTART
+    filename_hydro: HYDRO_RST
   norm-gen: 0.0
 
 # + needed for TestModel  
@@ -29,6 +37,6 @@ ModelTest:
 
 # + needed for TestInterface
 Variables:
-  variables: [ 'sea_surface_temperature']
+  variables: ['SNEQV', 'qlink1']
 
 TestDate: 2018-04-15T00:00:00Z

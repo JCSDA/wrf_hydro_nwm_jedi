@@ -1,6 +1,6 @@
 ---
 Geometry:
-  input_file: ./Data/wrf_hydro_nwm_files/wrfinput.nc
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
 Forecasts:
   variables: [SNEQV]
@@ -8,7 +8,8 @@ Forecasts:
   - date: 2017-01-01T00:00:00Z
     read_from_file: 1
     basename: ./INPUT/
-    model_filename: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+    filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+    filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
 
 Assimilation Window:
   window_begin: '2016-12-31T12:00:00Z'

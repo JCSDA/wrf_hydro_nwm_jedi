@@ -1,0 +1,24 @@
+test_framework_runtime_config: --log_level=test_suite
+
+Geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+Model:
+  name: 'WRF_HYDRO_NWM_JEDI'
+  tstep: PT12S
+
+ModelBias: null
+
+ModelBiasCovariance: null
+
+ModelTest:
+  fclength: PT1M
+  finalnorm: 2896.8862773008368
+  tolerance: 1.0e-4
+
+State:
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+  # date: 2017-01-01T00:00:00Z
+  # qlink fails
+  variables: ['SNEQV', 'qlink1']

@@ -58,6 +58,9 @@ namespace wrf_hydro_nwm_jedi {
     // constructor, destructor
     State(const Geometry &, const oops::Variables &,
           const eckit::Configuration &);
+    State(const Geometry & geom,
+	  const oops::Variables & vars,
+	  const util::DateTime & vt);
     State(const Geometry &, const State &);
     State(const State &);
     State & operator=(const State &);

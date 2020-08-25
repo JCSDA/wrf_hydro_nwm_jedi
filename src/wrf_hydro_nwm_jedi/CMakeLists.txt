@@ -4,8 +4,11 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Traits.h
   
   # # Covariance
-  # Covariance/Covariance.h
-  # Covariance/Covariance.cc
+  Covariance/Covariance.h
+  Covariance/Covariance.cc
+  Covariance/CovarianceFortran.h
+  Covariance/Covariance.interface.F90
+  Covariance/Covariance.F90
   
   # Geometry  
   Geometry/Geometry.h  
@@ -27,31 +30,47 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   GetValues/GetValues.h
   GetValues/GetValues.cc
   GetValues/GetValues.F90
+  GetValues/LinearGetValues.cc
+  GetValues/LinearGetValues.h
   GetValues/GetValues.interface.F90
-
+  GetValues/LinearGetValues.interface.h
+  GetValues/LinearGetValues.interface.F90
+  
   # VariableChanges
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h
+
+  # # LinearGetValues
+  #LinearGetValues/LinearGetValues.h
+  #LinearGetValues/LinearGetValues.cc
 
   # # GetValuesTraj
   # GetValuesTraj/GetValuesTraj.h
   # GetValuesTraj/GetValuesTraj.cc
   
   # # Increment
-  # Increment/Increment.h
-  # Increment/Increment.cc
+  Increment/Increment.interface.F90
+  Increment/Increment.h
+  Increment/Increment.cc
+  Increment/Increment_utils.F90
+  Increment/IncrementFortran.h
+  Increment/Increment.F90
 
-  # # Model
-  # Model/Model.h
-  # Model/Model.cc
+  # LinearModel
+  LinearModel/TlmId.h
+  LinearModel/TlmId.cc
+
+  # Model
+  Model/Model.h
+  Model/Model.cc
 
   # # ModelAux
   ModelAux/ModelAuxControl.h
   ModelAux/ModelAuxControl.cc
-  # ModelAux/ModelAuxIncrement.h
-  # ModelAux/ModelAuxIncrement.cc
-  # ModelAux/ModelAuxCovariance.h
-  # ModelAux/ModelAuxCovariance.cc
+  ModelAux/ModelAuxIncrement.h
+  ModelAux/ModelAuxIncrement.cc
+  ModelAux/ModelAuxCovariance.h
+  ModelAux/ModelAuxCovariance.cc
   
   # # State
   State/State.h
@@ -60,6 +79,10 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   State/State.interface.F90
   State/StateFortran.h
   State/State.F90
+
+  # Utilities
+  Utilities/utilities.F90
+  Utilities/constants.F90	
   )
 
 

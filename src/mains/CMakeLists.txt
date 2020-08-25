@@ -2,6 +2,10 @@
                          SOURCES HofXNoModel.cc
                          LIBS    wrf_hydro_nwm_jedi )
 
+ ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_make_obs.x
+                         SOURCES MakeObs.cc
+                         LIBS    wrf_hydro_nwm_jedi )
+
 # ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_forecast.x
 #                        SOURCES Forecast.cc
 #                        LIBS    wrf_hydro_nwm_jedi )
@@ -18,6 +22,6 @@
 #                         SOURCES StaticBInit.cc
 #                         LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_var.x
-#                         SOURCES Var.cc
-#                         LIBS    wrf_hydro_nwm_jedi )
+ ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_var.x
+                         SOURCES Var.cc
+                         LIBS    wrf_hydro_nwm_jedi )

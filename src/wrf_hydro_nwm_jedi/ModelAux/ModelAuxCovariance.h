@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
-#define WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_COVARIANCE_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_COVARIANCE_H_
 
 #include <ostream>
 #include <string>
@@ -17,7 +17,7 @@
 #include "oops/util/Printable.h"
 
 // forward declarations
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class ModelAuxControl;
   class ModelAuxIncrement;
@@ -25,7 +25,7 @@ namespace wrf_hydro_nwm-jedi {
 
 // -----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 class ModelAuxCovariance : public util::Printable,
                            private util::ObjectCounter<ModelAuxCovariance> {
@@ -51,7 +51,7 @@ class ModelAuxCovariance : public util::Printable,
 
 // -----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
+#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_COVARIANCE_H_
 
