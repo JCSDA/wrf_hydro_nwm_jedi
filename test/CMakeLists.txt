@@ -1,3 +1,5 @@
+
+
 list( APPEND wrf_hydro_nwm_jedi_test_input
   compare.sh
   testinput/interface.yml
@@ -114,5 +116,5 @@ ecbuild_add_test(
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_cmp
    TYPE		SCRIPT
-   COMMAND	"${CMAKE_BINARY_DIR}/bin/compare.sh"
+   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
    ARGS         testoutput/3dvar.run testoutput/3dvar.ref)
