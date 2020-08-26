@@ -282,19 +282,16 @@ end subroutine axpy_inc
 
 ! ! ------------------------------------------------------------------------------
 
-subroutine dot_prod(self, other, zprod)
+subroutine dot_prod(self, other, result)
   use iso_c_binding, only: c_double
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: self
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other
-  real(c_double),              intent(inout) :: zprod
+  real(c_double),                 intent(inout) :: result
 
-  zprod = 0.d0
-
-  call self%fields_obj%dot_prod(other%fields_obj,zprod)
-
-  write(*,*) "Dot product invoked ", zprod
-
+  ! result = 0.d0  ! This is by construction fromthe interface
+  call self%fields_obj%dot_prod(other%fields_obj, result)
+  write(*,*) "Dot product invoked ", result
 end subroutine dot_prod
 
 ! ! ------------------------------------------------------------------------------

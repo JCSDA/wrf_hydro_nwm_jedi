@@ -329,23 +329,22 @@ subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c(c_key_self, c_aa, c_key_yy) b
 end subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c
 
 
-subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c(c_key_inc1, c_key_inc2, c_prod) bind(c, name='wrf_hydro_nwm_jedi_increment_dot_prod_f90')
+subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c( &
+     c_key_inc1, c_key_inc2, c_prod &
+     ) bind(c, name='wrf_hydro_nwm_jedi_increment_dot_prod_f90')
 
   implicit none
 
   integer(c_int), intent(   in) :: c_key_inc1, c_key_inc2
   real(c_double), intent(inout) :: c_prod
 
-  real(kind=c_double)  :: zz
   type(wrf_hydro_nwm_jedi_state), pointer :: inc1, inc2
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc1, inc1)
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc2, inc2)
 
-  zz = 0.d0
-  call dot_prod(inc1, inc2, zz)
-
-  c_prod = zz
+  c_prod = 0.d0
+  call dot_prod(inc1, inc2, c_prod)
 
 end subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c
 
