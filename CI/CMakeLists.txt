@@ -68,18 +68,6 @@ ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"  
 # ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA/ioda-converters.git" UPDATE TAG f57c8b0d6b2ff974438b1aecf3fa97a5d667f602 )
 # ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE TAG cddd7c949a64e0430ebb3e1ac9010f95155fda77 )
 
-# -----------------------------------------------------------------------------
-# feature/3dvar: July/August 2020.
-# singularity container: jedi-gnu-openmpi-dev_sha256.de5e28890fee511bf22db77b0083c1255b5b96c572ff1ce05e7f34c4c99d76cf.sif
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA/fckit.git"           UPDATE TAG 2fad06b133744751b91cf9d0fb5d5b7de7ff1c57 )
-ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA/atlas.git"           UPDATE TAG d075f57b7cf561e082a2904261801447758bd5cf )
-ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE TAG 0566cc7ed432f442e3d912953f77191f0b605bb2 )
-ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG e9518dcce4115c8d07658e8c4400cbbc87bc5e5a )
-ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE TAG 3e49e5322b04eebba32de3b1efdb7fc971d2dc43 )
-ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA/ioda-converters.git" UPDATE TAG f57c8b0d6b2ff974438b1aecf3fa97a5d667f602 )
-ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE TAG cddd7c949a64e0430ebb3e1ac9010f95155fda77 )
->>>>>>> origin/feature/3dvar
-
 
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
