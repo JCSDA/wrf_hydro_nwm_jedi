@@ -26,7 +26,7 @@ namespace wrf_hydro_nwm_jedi {
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
                        const util::DateTime & vt)
-    : fields_(new Fields(geom, vars, vt)),
+    : fields_(new Fields(geom, vars)),
       vars_(vars),
       time_(vt)
   {
@@ -38,8 +38,9 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  Increment::Increment(const Increment & other, const bool copy)
-    : fields_(new Fields(*other.fields_->geometry(), other.vars_, other.time_)),
+  Increment::Increment(const Increment & other,
+		       const bool copy)
+    : fields_(new Fields(*other.fields_->geometry(), other.vars_)),
       vars_(other.vars_),
       time_(other.time_) {
     std::cout << "Second constructor in increment " << std::endl;

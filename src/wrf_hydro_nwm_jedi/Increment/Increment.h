@@ -49,7 +49,8 @@ namespace wrf_hydro_nwm_jedi {
   class Increment : public util::Printable {
    public:
     // Constructor, destructor
-    Increment(const Geometry &, const oops::Variables &,
+    Increment(const Geometry &,
+	      const oops::Variables &,
               const util::DateTime &);
     Increment(const Geometry &, Increment &);
     Increment(const Increment &, const bool);

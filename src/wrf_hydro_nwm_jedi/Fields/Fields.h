@@ -41,11 +41,15 @@ namespace wrf_hydro_nwm_jedi {
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::Fields";}
 
-    Fields(const Geometry &, const oops::Variables &,
-           const eckit::Configuration &);
-
-    Fields(const Geometry & geom, const oops::Variables & vars,
-	   const util::DateTime & vt);
+    Fields(const Geometry &, const oops::Variables &);
+    Fields(const Geometry &, const eckit::Configuration &);
+    
+    // Fields(const Geometry &,
+    // 	   const oops::Variables &,
+    //        const eckit::Configuration &);
+    // Fields(const Geometry & geom,
+    // 	   const oops::Variables & vars,
+    // 	   const util::DateTime & vt);
     
     ~Fields();
 

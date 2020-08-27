@@ -17,35 +17,54 @@ namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
-  Fields::Fields(const Geometry & geom, const oops::Variables & vars,
-               const eckit::Configuration & conf)
-    : geom_(new Geometry(geom)) {
+  // before newyaml
+  // Fields::Fields(const Geometry & geom, const oops::Variables & vars,
+  //              const eckit::Configuration & conf)
+  //   : geom_(new Geometry(geom)) {
 
-    if(conf.has("date"))
-      {
-	std::cout << "Supposed to read from file"<<std::endl;
-	std::string current_date;
-	conf.get("date", current_date);
-	time_ = util::DateTime(current_date);
-      }
-    else
-      {
-	std::cout << "Time statically configured"<<std::endl;
-	time_ = util::DateTime("2018-04-15T00:00:00Z");
-      }
+  //   if(conf.has("date"))
+  //     {
+  // 	std::cout << "Supposed to read from file"<<std::endl;
+  // 	std::string current_date;
+  // 	conf.get("date", current_date);
+  // 	time_ = util::DateTime(current_date);
+  //     }
+  //   else
+  //     {
+  // 	std::cout << "Time statically configured"<<std::endl;
+  // 	time_ = util::DateTime("2018-04-15T00:00:00Z");
+  //     }
 
-    vars_ = vars;
-  }
+  //   vars_ = vars;
+  // }
 
   // Used by Increment
-  Fields::Fields(const Geometry & geom, const oops::Variables & vars,
-		 const util::DateTime & vt)
+  // Fields::Fields(const Geometry & geom,
+  // 		 const oops::Variables & vars,
+  // 		 const util::DateTime & vt)
+  //   : geom_(new Geometry(geom)),
+  //     time_(vt),
+  //     vars_(vars)
+  // {
+  // }
+
+
+  Fields::Fields(const Geometry & geom,
+		 const oops::Variables & vars)
     : geom_(new Geometry(geom)) {
-
-    time_ = vt;
-    vars_ = vars;
+    // time_ = util::DateTime("2000-01-01T00:00:00Z");
   }
-
+ 
+  Fields::Fields(const Geometry & geom,
+		 const eckit::Configuration & conf)
+    : geom_(new Geometry(geom))
+  {
+    std::cout << "Supposed to read from file" << std::endl;
+    std::string current_date;
+    conf.get("date", current_date);
+    time_ = util::DateTime(current_date);
+   }
+  
 // ----------------------------------------------------------------------------
 
   Fields::~Fields() {

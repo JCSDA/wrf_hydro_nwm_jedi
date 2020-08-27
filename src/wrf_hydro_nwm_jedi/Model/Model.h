@@ -44,9 +44,9 @@ namespace wrf_hydro_nwm_jedi {
 
    private:
     void print(std::ostream &) const;
-
-    const std::unique_ptr<Geometry> geom_;
+    int keyConfig_;
     util::Duration tstep_;
+    const std::unique_ptr<Geometry> geom_;
     const oops::Variables vars_;
   };
 
