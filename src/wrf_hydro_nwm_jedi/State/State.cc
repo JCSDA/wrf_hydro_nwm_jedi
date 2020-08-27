@@ -21,65 +21,46 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-// ----------------------------------------------------------------------------
-
-  State::State(const Geometry & geom, const oops::Variables & vars,
+  State::State(const Geometry & geom,
                const eckit::Configuration & conf)
-    : fields_(new Fields(geom, vars, conf)) {
-
-    oops::Log::trace() << "State::State create from analytical or"
-      " from file." << std::endl;
-
-    oops::Variables lvars;
-    if (conf.has("variables")) {
-      oops::Variables lvars(conf);
-      this->vars_ = lvars;
-      std::cout << "From conf"<<std::endl;
-    } else {
-      this->vars_ = vars;
-      std::cout << "From argument"<<std::endl;
-    }
-
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_,
-					fields_->geometry()->toFortran(), vars_);
-    
-    // Analytical or read from file
-    // if (conf.has("analytic_init")) {
-    //   this->analytic_init(conf, geom);
-    // } else {
+    : vars_(conf, "state variables"),
+      fields_(new Fields(geom, vars_)),
+      time_(util::DateTime()) {
+    oops::Log::trace() << "State::State 1 create from file." << std::endl;
+    oops::Variables vars(vars_);
+    wrf_hydro_nwm_jedi_state_create_f90(
+       keyState_,
+       fields_->geometry()->toFortran(),
+       vars);
+    util::DateTime * dtp = &time_;
     this->read(conf);
-      //}
-    
     oops::Log::trace() << "State::State create from analytical or"
       " from file done." << std::endl;
-    // util::abor1_cpp("State::State() needs to be implemented.",
-    //                 __FILE__, __LINE__);
   }
-
-// ----------------------------------------------------------------------------
 
   State::State(const Geometry & geom,
 	       const oops::Variables & vars,
-	       const util::DateTime & vt)
-    : fields_(new Fields(geom, vars, vt)){
-
-    // util::abor1_cpp("State::State(const Geometry &,const Variables &, const DateTime & ) needs to be implemented.", __FILE__, __LINE__);
-    std::cout<< "Creating state as increment"<<std::endl;
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), vars);
-    vars_ = vars;
-    time_ = vt;
+               const util::DateTime & time)
+    : vars_(vars),
+      fields_(new Fields(geom, vars_)),
+      time_(time) {
+    oops::Log::trace() << "State::State 2 create from file." << std::endl;
+    oops::Log::trace() << "State::State 2 time_: " << time_ << std::endl;
+    wrf_hydro_nwm_jedi_state_create_f90(
+	keyState_,
+	fields_->geometry()->toFortran(),
+	vars);
+    oops::Log::trace() << "State::State 2 create from file DONE." << std::endl;
   }
 
-  // ----------------------------------------------------------------------------
 
-  State::State(const Geometry & resol, const State & other) :
-    fields_(new Fields(resol, other.vars_, other.time_)){
-    // util::abor1_cpp("State::State(const Geometry &, const State &) needs to be implemented.", __FILE__, __LINE__);
-    wrf_hydro_nwm_jedi_state_create_f90(keyState_, resol.toFortran(), other.vars_);
-    vars_ = other.vars_;
-    time_ = other.time_;
-    oops::Log::trace() << "State::State created by interpolation."
-                     << std::endl;
+  State::State(const Geometry & geom,
+              const State & other)
+    : vars_ (other.vars_),
+      fields_(new Fields(geom, other.vars_)),
+      time_(other.time_) {
+    wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), other.vars_);
+    oops::Log::trace() << "State::State created from existing state." << std::endl;
   }
 
 // ----------------------------------------------------------------------------
@@ -89,7 +70,7 @@ namespace wrf_hydro_nwm_jedi {
 
     // wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
 
-    std::cout << "About to invoke create_from_other from State constructor " << std::endl; 
+    std::cout << "About to invoke create_from_other from State constructor " << std::endl;
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
     time_ = fields_->time();
@@ -129,14 +110,25 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_state_print_f90(keyState_,string);
     os << string;
     delete[] string;
+    // os << *fields_;
+    // int const nf = 1;
+    // float pstat[3][nf];
+    // wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
+    // os << std::endl;
+    // os << "Mean SNEQV: " << pstat[0][0] << std::endl;
+    // os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
+    // os << "RMS SNEQV: " << pstat[2][0] << std::endl;
   }
 
 // ----------------------------------------------------------------------------
 
-  void State::write(const eckit::Configuration & config) const {
-    const util::DateTime * dtp = &time_;
-    const eckit::Configuration * conf = &config;
-    wrf_hydro_nwm_jedi_state_write_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
+  // void State::write(const eckit::Configuration & config) const {
+  //   const util::DateTime * dtp = &time_;
+  //   const eckit::Configuration * conf = &config;
+  //   wrf_hydro_nwm_jedi_state_write_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
+  void State::write(const eckit::Configuration & conf) const {
+    util::abor1_cpp("State::write() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
   
 // ----------------------------------------------------------------------------
@@ -145,7 +137,12 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State read starting" << std::endl;
     const eckit::Configuration * conf = &config;
     util::DateTime * dtp = &time_;
-    wrf_hydro_nwm_jedi_state_read_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
+    wrf_hydro_nwm_jedi_state_read_file_f90(
+	fields_->geometry()->toFortran(),
+	keyState_, &conf,
+	&dtp);
+    this->print(std::cout);
+    // oops::Log::trace() << "time_: " << time_ << std::endl;
     oops::Log::trace() << "State read done" << std::endl;
   }
 
@@ -161,10 +158,12 @@ namespace wrf_hydro_nwm_jedi {
 
   State & State::operator+=(const Increment & dx)
   {
-    oops::Log::trace() << "State add increment starting" << std::endl;
-    ASSERT(this->validTime() == dx.validTime());
-    wrf_hydro_nwm_jedi_state_add_incr_f90(geom_->toFortran(), keyState_, dx.toFortran());
-    oops::Log::trace() << "State add increment done" << std::endl;
+    // oops::Log::trace() << "State add increment starting" << std::endl;
+    // ASSERT(this->validTime() == dx.validTime());
+    // wrf_hydro_nwm_jedi_state_add_incr_f90(geom_->toFortran(), keyState_, dx.toFortran());
+    // oops::Log::trace() << "State add increment done" << std::endl;
+    util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
+                    __FILE__, __LINE__);
     return *this;
   }
 
@@ -185,19 +184,21 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   const util::DateTime & State::validTime() const {
-    return fields_->time();
+    //return fields_->time();
+    return time_;
   }
 
 // ----------------------------------------------------------------------------
 
   util::DateTime & State::validTime() {
-    return fields_->time();
+    // return fields_->time();
+    return time_;
   }
 
 // ----------------------------------------------------------------------------
 
   double State::norm() const {
-    std::cout << "Norm requested from State"<<std::endl;
+    //std::cout << "Norm requested from State" << std::endl;
     return fields_->norm();
   }
 

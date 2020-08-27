@@ -56,11 +56,11 @@ namespace wrf_hydro_nwm_jedi {
     static const std::string classname() {return "wrf_hydro_nwm-jedi::State";}
 
     // constructor, destructor
-    State(const Geometry &, const oops::Variables &,
+    State(const Geometry &,
+	  const oops::Variables &,
+	  const util::DateTime &);
+    State(const Geometry &,
           const eckit::Configuration &);
-    State(const Geometry & geom,
-	  const oops::Variables & vars,
-	  const util::DateTime & vt);
     State(const Geometry &, const State &);
     State(const State &);
     State & operator=(const State &);
@@ -78,26 +78,38 @@ namespace wrf_hydro_nwm_jedi {
     // interactions with increment
     State & operator+=(const Increment &);
 
-    const util::DateTime & validTime() const;
-    util::DateTime & validTime();
     double norm() const;
     void write(const eckit::Configuration &) const;
     void zero();
     void accumul(const double &, const State &);
     void read(const eckit::Configuration &);
 
-    boost::shared_ptr<const Geometry> geometry() const;// {return fields_->geometry();}
+    boost::shared_ptr<const Geometry> geometry() const; // {return fields_->geometry();}
+
+    const oops::Variables & variables() const {return vars_;}
+
+    // time()
+    const util::DateTime & time() const {return time_;}
+    util::DateTime & time() {return time_;}
+
+    // validTime()
+    // const util::DateTime & validTime() const {return time_;}
+    // util::DateTime & validTime() {return time_;}
+    const util::DateTime & validTime() const;
+    util::DateTime & validTime();
     
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}
-   private:
+
+  private:
     void print(std::ostream &) const;
     F90state keyState_;
-    boost::scoped_ptr<Fields> fields_;
-    boost::shared_ptr<const Geometry> geom_;
+    // boost::shared_ptr<const Geometry> geom_;
     oops::Variables vars_;
+    boost::scoped_ptr<Fields> fields_;
     util::DateTime time_;
-  };
+  }; // state class
+
 }  // namespace wrf_hydro_nwm_jedi
 
 #endif  // WRF_HYDRO_NWM_JEDI_STATE_STATE_H_
