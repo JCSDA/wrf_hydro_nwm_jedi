@@ -2,6 +2,7 @@
 
 list( APPEND wrf_hydro_nwm_jedi_test_input
   compare.sh
+  testinput/geometry.yaml
   testinput/interface.yml
   testinput/model.yaml
   testinput/hofx_nomodel.yaml
@@ -36,7 +37,7 @@ endforeach()
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_geometry
   SOURCES executables/TestGeometry.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/geometry.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
