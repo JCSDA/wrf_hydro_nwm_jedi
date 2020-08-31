@@ -1,8 +1,7 @@
-
-
 list( APPEND wrf_hydro_nwm_jedi_test_input
   compare.sh
   testinput/geometry.yaml
+  testinput/state.yaml
   testinput/interface.yml
   testinput/model.yaml
   testinput/hofx_nomodel.yaml
@@ -43,7 +42,7 @@ ecbuild_add_test(
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_state
   SOURCES executables/TestState.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/state.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(

@@ -21,6 +21,7 @@
 
 namespace wrf_hydro_nwm_jedi {
 
+
   State::State(const Geometry & geom,
                const eckit::Configuration & conf)
     : vars_(conf, "state variables"),
@@ -37,6 +38,7 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State::State create from analytical or"
       " from file done." << std::endl;
   }
+
 
   State::State(const Geometry & geom,
 	       const oops::Variables & vars,
@@ -63,7 +65,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State::State created from existing state." << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
@@ -76,15 +77,12 @@ namespace wrf_hydro_nwm_jedi {
     time_ = fields_->time();
   }
 
-// ----------------------------------------------------------------------------
 
-  State::~State() {
-    
-    wrf_hydro_nwm_jedi_state_delete_f90(keyState_);
-    
-  }
+  State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
 
-// ----------------------------------------------------------------------------
+
+  // ----------------------------------------------------------------------------
+
 
   void State::getValues(const ufo::Locations & locs,
                         const oops::Variables & vars,
@@ -93,7 +91,6 @@ namespace wrf_hydro_nwm_jedi {
     //                 __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void State::getValues(const ufo::Locations & locs,
                  const oops::Variables & vars,
@@ -103,11 +100,10 @@ namespace wrf_hydro_nwm_jedi {
     //                 __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
-    wrf_hydro_nwm_jedi_state_print_f90(keyState_,string);
+    wrf_hydro_nwm_jedi_state_print_f90(keyState_, string);
     os << string;
     delete[] string;
     // os << *fields_;
@@ -120,7 +116,6 @@ namespace wrf_hydro_nwm_jedi {
     // os << "RMS SNEQV: " << pstat[2][0] << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   // void State::write(const eckit::Configuration & config) const {
   //   const util::DateTime * dtp = &time_;
@@ -131,7 +126,6 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
   
-// ----------------------------------------------------------------------------
 
   void State::read(const eckit::Configuration & config) {
     oops::Log::trace() << "State read starting" << std::endl;
@@ -146,7 +140,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State read done" << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   State & State::operator=(const State & rhs) {
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
@@ -154,7 +147,6 @@ namespace wrf_hydro_nwm_jedi {
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   State & State::operator+=(const Increment & dx)
   {
@@ -167,45 +159,43 @@ namespace wrf_hydro_nwm_jedi {
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   void State::zero() {
     util::abor1_cpp("State::zero() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void State::accumul(const double &, const State &) {
     util::abor1_cpp("State::accumul() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   const util::DateTime & State::validTime() const {
     //return fields_->time();
     return time_;
   }
 
-// ----------------------------------------------------------------------------
 
   util::DateTime & State::validTime() {
     // return fields_->time();
     return time_;
   }
 
-// ----------------------------------------------------------------------------
 
   double State::norm() const {
     //std::cout << "Norm requested from State" << std::endl;
-    return fields_->norm();
+    double norm = 0.0;
+    // wrf_hydro_nwm_jedi_state_rms_f90(toFortran(), norm);
+    norm = wrf_hydro_nwm_jedi_state_rms_f90(toFortran());
+    return norm;
   }
+
 
   boost::shared_ptr<const Geometry> State::geometry() const {
     return fields_->geometry();
   }
 
-// ----------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi

@@ -5,57 +5,54 @@
 
 module wrf_hydro_nwm_jedi_increment_mod
 
-  use fckit_configuration_module, only: fckit_configuration
-  use datetime_mod
-  use fckit_mpi_module
-  use oops_variables_mod
+use fckit_configuration_module, only: fckit_configuration
+use datetime_mod
+use fckit_mpi_module
+use oops_variables_mod
 
-  use wrf_hydro_nwm_jedi_fields_mod,    only: wrf_hydro_nwm_jedi_fields, checksame
-  use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
-  use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
-  use iso_c_binding, only : c_float
-  use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state, create_from_other
+use wrf_hydro_nwm_jedi_fields_mod,    only: wrf_hydro_nwm_jedi_fields, checksame
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
+use wrf_hydro_nwm_jedi_constants_mod, only: zero_c_double
 
-  !GetValues
-  use ufo_locs_mod,          only: ufo_locs
-  use ufo_geovals_mod,       only: ufo_geovals
+use iso_c_binding, only : c_float
+use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state, create_from_other
 
-  implicit none
+!GetValues
+use ufo_locs_mod,          only: ufo_locs
+use ufo_geovals_mod,       only: ufo_geovals
 
-  private
-  public :: create_increment, diff_incr, self_mul, axpy_inc, dot_prod
-  !, create_from_other, delete, zeros, random, copy, &
-  ! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
-  ! read_file, write_file, &
-  ! gpnorm, rms, &
-  ! change_resol, &
-  ! getpoint, setpoint, &
-  ! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
-  ! increment_print
+implicit none
 
-! ------------------------------------------------------------------------------
+private
+public :: create_increment, diff_incr, self_mul, axpy_inc, dot_prod
+!, create_from_other, delete, zeros, random, copy, &
+! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
+! read_file, write_file, &
+! gpnorm, rms, &
+! change_resol, &
+! getpoint, setpoint, &
+! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
+! increment_print
+
 
 contains
 
-! ------------------------------------------------------------------------------
   
-  subroutine create_increment(self, geom, vars)
+subroutine create_increment(self, geom, vars)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
+  type(oops_variables), intent(in)    :: vars
 
-    implicit none
-    type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-    type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
-    type(oops_variables), intent(in)    :: vars
+  self%nf = vars%nvars()
+  allocate(self%fields_obj)
+  call self%fields_obj%create(geom,vars) !Initializes to zero by default
 
-    self%nf = vars%nvars()
-    allocate(self%fields_obj)
-    call self%fields_obj%create(geom,vars) !Initializes to zero by default
+  ! Initialize all arrays to zero
+  ! call self%fields_obj%zeros()
+end subroutine create_increment
 
-    ! Initialize all arrays to zero
-    ! call self%fields_obj%zeros()
-
-  end subroutine create_increment
-
-! ------------------------------------------------------------------------------
 
 ! subroutine create_from_other(self, other)
 
@@ -71,18 +68,13 @@ contains
 
 ! end subroutine create_from_other
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine delete(self)
-
 !   type(shallow_water_state_type), intent(inout) :: self
-
 ! end subroutine delete
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine zeros(self)
-
 !   type(shallow_water_state_type), intent(inout) :: self
 
 !   type(shallow_water_geometry_type) :: geom
@@ -105,7 +97,6 @@ contains
 
 ! end subroutine zeros
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine random(self)
 
@@ -280,21 +271,19 @@ end subroutine axpy_inc
 
 ! end subroutine axpy_state
 
-! ! ------------------------------------------------------------------------------
 
-subroutine dot_prod(self, other, result)
+function dot_prod(self, other) result(the_result)
   use iso_c_binding, only: c_double
   implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: self
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other
-  real(c_double),                 intent(inout) :: result
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: other
+  real(c_double)                             :: the_result
 
-  ! result = 0.d0  ! This is by construction fromthe interface
-  call self%fields_obj%dot_prod(other%fields_obj, result)
-  write(*,*) "Dot product invoked ", result
-end subroutine dot_prod
+  the_result = zero_c_double
+  the_result = self%fields_obj%dot_prod(other%fields_obj)
+  write(*,*) "Increment dot product invoked ", the_result
+end function dot_prod
 
-! ! ------------------------------------------------------------------------------
 
 subroutine diff_incr(self, x1, x2)
 
@@ -317,7 +306,6 @@ subroutine diff_incr(self, x1, x2)
 
 end subroutine diff_incr
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine change_resol(self, rhs)
 

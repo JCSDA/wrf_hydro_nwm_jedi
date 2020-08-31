@@ -40,11 +40,9 @@ implicit none
 
 private
 
-! ------------------------------------------------------------------------------
 
 contains
 
-! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_create_c(c_key_self, c_key_geom, c_vars) bind(c, name='wrf_hydro_nwm_jedi_increment_create_f90')
 
@@ -68,7 +66,6 @@ subroutine wrf_hydro_nwm_jedi_increment_create_c(c_key_self, c_key_geom, c_vars)
 
 end subroutine wrf_hydro_nwm_jedi_increment_create_c
 
-! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c(c_key_self, c_key_other) bind(c,name='wrf_hydro_nwm_jedi_increment_create_from_other_f90')
 
@@ -91,25 +88,16 @@ subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c(c_key_self, c_key_ot
 
 end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_delete_c(c_key_self) bind(c, name='sw_increment_delete_f90')
-
 !   implicit none
-
 !   integer(c_int), intent(inout) :: c_key_self
-
 !   type(shallow_water_state_type), pointer :: self
-
 !   call sw_increment_registry%get(c_key_self, self)
-
 !   call delete(self)
-
 !   call sw_increment_registry%remove(c_key_self)
-
 ! end subroutine sw_increment_delete_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_zero_c(c_key_self) bind(c, name='sw_increment_zero_f90')
 
@@ -124,7 +112,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_zero_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_dirac_c(c_key_self, c_conf, c_key_geom) bind(c, name='sw_increment_dirac_f90')
 
@@ -143,7 +130,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_dirac_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_random_c(c_key_self) bind(c, name='sw_increment_random_f90')
 
@@ -158,7 +144,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_random_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_ug_coord_c(c_key_inc, c_key_ug, c_key_geom) bind (c,name='sw_increment_ug_coord_f90')
 
@@ -180,7 +165,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_ug_coord_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_increment_to_ug_c(c_key_inc, c_key_ug, c_its) bind (c,name='sw_increment_increment_to_ug_f90')
 
@@ -203,7 +187,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_increment_to_ug_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_increment_from_ug_c(c_key_inc, c_key_ug, c_its) bind (c,name='sw_increment_increment_from_ug_f90')
 
@@ -226,7 +209,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
 
 ! end subroutine sw_increment_increment_from_ug_c
 
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_copy_c(c_key_self, c_key_rhs) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_copy_f90')
@@ -243,10 +225,8 @@ subroutine wrf_hydro_nwm_jedi_increment_copy_c(c_key_self, c_key_rhs) &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
   
   call copy(self, rhs) !Implemented in State
-
 end subroutine wrf_hydro_nwm_jedi_increment_copy_c
 
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_add_c(c_key_self, c_key_rhs) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_add_f90')
@@ -263,10 +243,8 @@ subroutine wrf_hydro_nwm_jedi_increment_add_c(c_key_self, c_key_rhs) &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs,rhs)
 
   call add_incr(self, rhs) !Implemented in State
-
 end subroutine wrf_hydro_nwm_jedi_increment_add_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_self_schur_c(c_key_self, c_key_rhs) bind(c, name='sw_increment_self_schur_f90')
 
@@ -282,10 +260,8 @@ end subroutine wrf_hydro_nwm_jedi_increment_add_c
 !   call sw_increment_registry%get(c_key_rhs, rhs)
 
 !   call self_schur(self, rhs)
-
 ! end subroutine sw_increment_self_schur_c
 
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_sub_c(c_key_self, c_key_rhs) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_sub_f90')
@@ -344,11 +320,9 @@ subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c( &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc2, inc2)
 
   c_prod = 0.d0
-  call dot_prod(inc1, inc2, c_prod)
-
+  c_prod = dot_prod(inc1, inc2)
 end subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c
 
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c(c_key_lhs, c_key_x1, c_key_x2) bind(c, name='wrf_hydro_nwm_jedi_increment_diff_incr_f90')
 
@@ -367,10 +341,8 @@ subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c(c_key_lhs, c_key_x1, c_key_x
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_x2, x2)
 
   call diff_incr(lhs, x1, x2)
-
 end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_change_resol_c(c_key_inc, c_key_rhs) bind(c, name='sw_increment_change_resol_f90')
 
@@ -385,13 +357,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !   call sw_increment_registry%get(c_key_rhs, rhs)
 
 !   call change_resol(inc, rhs)
-
 ! end subroutine sw_increment_change_resol_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_read_file_c(c_key_geom, c_key_inc, c_conf, c_dt) bind(c, name='sw_increment_read_file_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(   in) :: c_key_inc  !< Increment
@@ -407,13 +376,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !   call sw_increment_registry%get(c_key_inc, inc)
 !   call c_f_datetime(c_dt, fdate)
 !   call read_file(geom, inc, c_conf, fdate)
-
 ! end subroutine sw_increment_read_file_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_write_file_c(c_key_geom, c_key_inc, c_conf, c_dt) bind(c, name='sw_increment_write_file_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(in) :: c_key_inc  !< Increment
@@ -429,13 +395,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !   call sw_increment_registry%get(c_key_inc, inc)
 !   call c_f_datetime(c_dt, fdate)
 !   call write_file(geom, inc, c_conf, fdate)
-
 ! end subroutine sw_increment_write_file_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_gpnorm_c(c_key_inc, kf, pstat) bind(c, name='sw_increment_gpnorm_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(   in) :: c_key_inc
@@ -456,10 +419,8 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !       pstat(jj) = zstat(js, jf)
 !     enddo
 !   enddo
-
 ! end subroutine sw_increment_gpnorm_c
 
-! ! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_increment_print_c(c_key_self, string) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_print_f90')
@@ -472,11 +433,9 @@ subroutine wrf_hydro_nwm_jedi_increment_print_c(c_key_self, string) &
   
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
   
-  call state_print(self,string)
-  
+  call state_print(self, string)
 end subroutine wrf_hydro_nwm_jedi_increment_print_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_rms_c(c_key_inc, prms) bind(c, name='sw_increment_rms_f90')
 
@@ -493,13 +452,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_print_c
 !   call rms(inc, zz)
 
 !   prms = zz
-
 ! end subroutine sw_increment_rms_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_getpoint_c(c_key_self, c_key_geoiter, c_values) bind(c, name='sw_increment_getpoint_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(   in) :: c_key_self       !< Increment
@@ -513,15 +469,11 @@ end subroutine wrf_hydro_nwm_jedi_increment_print_c
 !   call sw_geom_iter_registry%get(c_key_geoiter, geoiter)
 
 !   call getpoint(self, geoiter, c_values)
-
 ! end subroutine sw_increment_getpoint_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine qg_fields_setpoint_c(c_key_self, c_key_geoiter, c_values) bind(c, name='sw_increment_setpoint_f90')
-
 !   implicit none
-
 !   ! Passed variables
 !   integer(c_int), intent(in) :: c_key_self        !< Increment
 !   integer(c_int), intent(in) :: c_key_geoiter     !< Geometry iterator
@@ -537,13 +489,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_print_c
 
 !   ! Call Fortran
 !   call setpoint(self, geoiter, c_values)
-
 ! end subroutine qg_fields_setpoint_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_sizes_c(c_key_self, nx, ny, nv) bind(c, name='sw_increment_sizes_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(   in) :: c_key_self
@@ -559,13 +508,10 @@ end subroutine wrf_hydro_nwm_jedi_increment_print_c
 !   nv = 3
 !   nx = geom%get_nx()
 !   ny = geom%get_ny()
-
 ! end subroutine sw_increment_sizes_c
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine sw_increment_jnormgrad_c(c_key_self, c_key_geom, c_key_state, c_conf) bind(c, name='sw_increment_jnormgrad_f90')
-
 !   implicit none
 
 !   integer(c_int), intent(in) :: c_key_self
@@ -582,9 +528,7 @@ end subroutine wrf_hydro_nwm_jedi_increment_print_c
 !   call sw_state_registry%get(c_key_state, state)
 
 !   call jnormgrad(self, geom, state, c_conf)
-
 ! end subroutine sw_increment_jnormgrad_c
 
-! ------------------------------------------------------------------------------
 
 end module wrf_hydro_nwm_jedi_increment_interface_mod

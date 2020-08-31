@@ -10,7 +10,7 @@ use iso_c_binding, only: c_int, c_float,c_double
 use fckit_mpi_module
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
-use wrf_hydro_nwm_jedi_constants_mod, only: unopened_ncid
+use wrf_hydro_nwm_jedi_constants_mod, only: unopened_ncid, zero_c_double, zero_c_float
 use oops_variables_mod
 use netcdf
 ! use fv3jedi_kinds_mod, only: kind_real
@@ -106,20 +106,20 @@ abstract interface
      real(kind=c_float),intent(in)    :: scalar
    end subroutine apply_covariance_mult_interface
 
-   function difference_interface(a,b) result(val)
+   function difference_interface(a, b) result(val)
      import base_field
      class(base_field), intent(in) :: a
      class(base_field), intent(in) :: b
      class(base_field), allocatable :: val
    end function difference_interface
 
-   subroutine add_incr_interface(self,inc)
+   subroutine add_incr_interface(self, inc)
      import base_field
      class(base_field), intent(inout) :: self
      class(base_field), intent(in) :: inc
    end subroutine add_incr_interface
 
-   subroutine scalar_mul_interface(self,scalar)
+   subroutine scalar_mul_interface(self, scalar)
      use iso_c_binding, only: c_float
      import base_field
      class(base_field), intent(inout) :: self
@@ -131,13 +131,13 @@ abstract interface
      class(base_field), intent(inout) :: self
    end subroutine zero_interface
 
-   subroutine dot_prod_interface(self,other,d_prod)
+   function dot_prod_interface(self, other) result(dot_prod)
      use iso_c_binding, only: c_double
      import base_field
      class(base_field), intent(in) :: self
      class(base_field), intent(in) :: other
-     real(c_double), intent(inout) :: d_prod
-   end subroutine dot_prod_interface
+     real(c_double)                :: dot_prod
+   end function dot_prod_interface
 end interface
 
 
@@ -374,7 +374,7 @@ subroutine fill_field_1d(self, &
   self%xdim_len = xdim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len) )
-     self%array = 0.0
+     self%array = zero_c_float
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -404,7 +404,7 @@ subroutine fill_field_2d(self, &
   self%ydim_len = ydim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len, ydim_len) )
-     self%array = 0.0
+     self%array = zero_c_float
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -435,7 +435,7 @@ subroutine fill_field_3d(self, &
   self%zdim_len = zdim_len
   if(.not.allocated(self%array)) then
      allocate( self%array(xdim_len, ydim_len, zdim_len) )
-     self%array = 0.0
+     self%array = zero_c_float
   else
      call abor1_ftn("Fields.F90.allocate_field: Field already allocated")
   end if
@@ -625,8 +625,8 @@ subroutine add_incr_1d(self, inc)
   class default
      call abor1_ftn("add_incr_1d: inc not a 1d_field")
   end select
-  
 end subroutine add_incr_1d
+
 
 subroutine add_incr_2d(self, inc)
   class(field_2d), intent(inout) :: self
@@ -638,8 +638,8 @@ subroutine add_incr_2d(self, inc)
   class default
      call abor1_ftn("add_incr_2d: inc not a 2d_field")
   end select
-  
 end subroutine add_incr_2d
+
 
 subroutine add_incr_3d(self, inc)
   class(field_3d), intent(inout) :: self
@@ -651,115 +651,121 @@ subroutine add_incr_3d(self, inc)
   class default
      call abor1_ftn("add_incr_3d: inc not a 3d_field")
   end select
-  
 end subroutine add_incr_3d
+
 
 subroutine scalar_mul_1d(self, scalar)
   class(field_1d), intent(inout) :: self
   real(c_float), intent(in) :: scalar
 
   self%array = self%array * scalar
-  
 end subroutine scalar_mul_1d
+
 
 subroutine scalar_mul_2d(self, scalar)
   class(field_2d), intent(inout) :: self
   real(c_float), intent(in) :: scalar
 
   self%array = self%array * scalar
-  
 end subroutine scalar_mul_2d
+
 
 subroutine scalar_mul_3d(self, scalar)
   class(field_3d), intent(inout) :: self
   real(c_float), intent(in) :: scalar
 
   self%array = self%array * scalar
-  
 end subroutine scalar_mul_3d
+
 
 subroutine zero_1d(self)
   class(field_1d), intent(inout) :: self
 
-  self%array = 0.0
-  
+  self%array = zero_c_float
 end subroutine zero_1d
+
 
 subroutine zero_2d(self)
   class(field_2d), intent(inout) :: self
 
-  self%array = 0.0
-  
+  self%array = zero_c_float
 end subroutine zero_2d
+
 
 subroutine zero_3d(self)
   class(field_3d), intent(inout) :: self
 
-  self%array = 0.0
-  
+  self%array = zero_c_float
 end subroutine zero_3d
 
-subroutine dot_prod_1d(self,other,d_prod)
-  class(field_1d), intent(in) :: self
-  class(base_field), intent(in) :: other
-  real(c_double), intent(inout) :: d_prod
 
-  integer :: i
+function dot_prod_1d(self, other)
+  implicit none
+  class(field_1d),   intent(in) :: self
+  class(base_field), intent(in) :: other
+  real(c_double)                :: dot_prod_1d
+
+  integer :: ii
+  dot_prod_1d = zero_c_double
 
   select type(other)
   type is (field_1d)
-     do i = 1, size(self%array,1)
-        d_prod = d_prod + self%array(i) * other%array(i)
+     do ii = 1, size(self%array,1)
+        dot_prod_1d = dot_prod_1d + self%array(ii) * other%array(ii)
      end do
   class default
      call abor1_ftn("dot_prod_1d: other is not a 1d_field")
   end select
+end function dot_prod_1d
 
-end subroutine dot_prod_1d
 
-subroutine dot_prod_2d(self,other,d_prod)
-  class(field_2d), intent(in) :: self
-  class(base_field), intent(in) :: other
-  real(c_double), intent(inout) :: d_prod
+function dot_prod_2d(self, other)
+  implicit none
+  class(field_2d),   intent(in) :: self         !> This field
+  class(base_field), intent(in) :: other        !> The other field
+  real(c_double)                :: dot_prod_2d  !> The return value
 
-  integer :: i,j
+  integer :: ii, jj
+  dot_prod_2d = zero_c_double
   
   select type(other)
   type is (field_2d)
-     do i = 1, size(self%array,1)
-        do j = 1, size(self%array,2)
-           d_prod = d_prod + self%array(i,j) * other%array(i,j)
+     do ii = 1, size(self%array,1)
+        do jj = 1, size(self%array,2)
+          dot_prod_2d = dot_prod_2d + self%array(ii, jj) * other%array(ii, jj)
         end do
      end do
   class default
      call abor1_ftn("dot_prod_2d: other is not a 2d_field")
   end select
 
-  write(*,*) "Dot product in 2d_field ",d_prod
-  
-end subroutine dot_prod_2d
+  ! write(*,*) "Dot product in 2d_field ", dot_prod_2d
+end function dot_prod_2d
 
-subroutine dot_prod_3d(self,other,d_prod)
-  class(field_3d), intent(in) :: self
+
+function dot_prod_3d(self, other)
+  implicit none
+  class(field_3d),   intent(in) :: self
   class(base_field), intent(in) :: other
-  real(c_double), intent(inout) :: d_prod
+  real(c_double)                :: dot_prod_3d
 
-  integer :: i,j,k
+  integer :: ii, jj, kk
+  dot_prod_3d = zero_c_double
   
   select type(other)
   type is (field_3d)
-     do i = 1, size(self%array,1)
-        do j = 1, size(self%array,2)
-           do k = 1, size(self%array,3)
-              d_prod = d_prod + self%array(i,j,k) * other%array(i,j,k)
+     do ii = 1, size(self%array, 1)
+        do jj = 1, size(self%array, 2)
+           do kk = 1, size(self%array, 3)
+              dot_prod_3d = dot_prod_3d + self%array(ii, jj, kk) * other%array(ii, jj, kk)
            end do
         end do
      end do
   class default
      call abor1_ftn("dot_prod_3d: other is not a 3d_field")
   end select
-  
-end subroutine dot_prod_3d
+end function dot_prod_3d
+
 
 ! --------------------------------------------------------------------------------------------------
 ! subroutine allocate_field(self,xdim_len,ydim_len,dim3_len,short_name,long_name,&
@@ -1058,7 +1064,7 @@ subroutine print_all_fields(self,string)
      else
         call self%fields(f)%field%print_field()
      end if
-  end do    
+  end do
 end subroutine print_all_fields
 
 
@@ -1074,8 +1080,8 @@ subroutine difference(self,x1,x2)
      ! - operator is overloaded for base_field
      self%fields(f)%field = x1%fields(f)%field - x2%fields(f)%field
   end do
-  
 end subroutine difference
+
 
 subroutine scalar_mult(self,zz)
   use iso_c_binding, only: c_float
@@ -1090,8 +1096,8 @@ subroutine scalar_mult(self,zz)
   do f = 1,size(self%fields)
      call self%fields(f)%field%scalar_mul(zz)
   end do
-  
 end subroutine scalar_mult
+
 
 subroutine zeros(self)
   implicit none
@@ -1102,24 +1108,25 @@ subroutine zeros(self)
   do f = 1,size(self%fields)
      call self%fields(f)%field%zero()
   end do
-  
 end subroutine zeros
 
-subroutine dot_prod(self, other, d_prod)
-  use iso_c_binding, only: c_double
+
+function dot_prod(self, other)
   implicit none
   class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
   class(wrf_hydro_nwm_jedi_fields),  intent(in) :: other
-  real(c_double), intent(inout) :: d_prod 
-  integer :: f
+  real(c_double)                                :: dot_prod
 
-  do f = 1,size(self%fields)
-     call self%fields(f)%field%dot_prod (other%fields(f)%field,d_prod)
+  integer :: ff
+
+  dot_prod = zero_c_double
+  do ff = 1, size(self%fields)
+     dot_prod = dot_prod + self%fields(ff)%field%dot_prod(other%fields(ff)%field)
   end do
-  
-end subroutine dot_prod
+end function dot_prod
 
-subroutine add_increment(self,inc)
+
+subroutine add_increment(self, inc)
   implicit none
   class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
   class(wrf_hydro_nwm_jedi_fields),  intent(in) :: inc
@@ -1131,8 +1138,8 @@ subroutine add_increment(self,inc)
   do f = 1,size(self%fields)
      call self%fields(f)%field%add_incr (inc%fields(f)%field)
   end do
-  
 end subroutine add_increment
+
 
 ! subroutine long_name_to_wrf_hydro_name(fields, long_name, wrf_hydro_nwm_name)
 
@@ -1170,13 +1177,10 @@ end subroutine add_increment
 
 ! call abor1_ftn("wrf_hydro_nwm_jedi_fields_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
 !      " not found in fields.")
-
 ! end subroutine long_name_to_wrf_hydro_name
 
-! --------------------------------------------------------------------------------------------------
 
 ! subroutine copy_field_array(fields, fv3jedi_name, field_array)
-
 ! ! type(wrf_hydro_nwm_jedi_field),  intent(in)  :: fields(:)
 ! ! character(len=*),     intent(in)  :: fv3jedi_name
 ! ! real(kind=c_float), intent(out) :: field_array(:,:,:)
@@ -1195,13 +1199,10 @@ end subroutine add_increment
 
 ! ! if (.not.found) call abor1_ftn("fv3jedi_field.copy_field_array: field "&
 ! !                                 //trim(fv3jedi_name)//" not found in fields")
-
 ! end subroutine copy_field_array
 
-! --------------------------------------------------------------------------------------------------
 
 ! subroutine pointer_field(fields, wrf_hydro_nwm_name, field_pointer)
-
 ! ! type(wrf_hydro_nwm_jedi_field), target,  intent(in)  :: fields(:)
 ! ! character(len=*),             intent(in)  :: wrf_hydro_nwm_name
 ! ! type(wrf_hydro_nwm_jedi_field), pointer, intent(out) :: field_pointer
@@ -1222,13 +1223,10 @@ end subroutine add_increment
 
 ! ! if (.not.found) call abor1_ftn("wrf_hydro_field.pointer_field: field "&
 ! !                                 //trim(wrf_hydro_nwm_name)//" not found in fields")
-
 ! end subroutine pointer_field
 
-! --------------------------------------------------------------------------------------------------
 
 ! subroutine pointer_field_array(fields, wrf_hydro_nwm_jedi_name, array_pointer)
-
 ! ! type(wrf_hydro_nwm_jedi_field), target,   intent(in)    :: fields(:)
 ! ! character(len=*),              intent(in)    :: wrf_hydro_nwm_jedi_name
 ! ! real(kind=c_float), pointer, intent(out)   :: array_pointer(:,:,:)
@@ -1249,11 +1247,9 @@ end subroutine add_increment
 
 ! ! if (.not.found) call abor1_ftn("fv3jedi_field.pointer_field_array: field "&
 ! !                                 //trim(fv3jedi_name)//" not found in fields")
-
 ! end subroutine pointer_field_array
 
 
-!-----------------------------------------------------------------------------
 subroutine mean_stddev_1d(self, mean, stddev)
   implicit none
   class(field_1d), target, intent(in) :: self
@@ -1264,7 +1260,7 @@ subroutine mean_stddev_1d(self, mean, stddev)
 
   n = size(self%array, 1)
 
-  tmp = 0.d0
+  tmp = zero_c_double
   tmp = sum(self%array(:))
   tmp = tmp / n
   mean = real(tmp, kind=c_float)
@@ -1332,13 +1328,11 @@ subroutine mean_stddev_3d(self,mean,stddev,zlayer)
   end do
   tmp = tmp / n
   stddev = real(tmp,kind=c_float)
-  
 end subroutine mean_stddev_3d
 
 
 !-----------------------------------------------------------------------------
 ! RMS implementations
-
 
 !> RMS method (1D)
 function field_rms_1d(self) result(rms)
@@ -1350,18 +1344,17 @@ function field_rms_1d(self) result(rms)
   integer :: i, ii
   real(kind=c_float) :: zz
 
-  zz = 0.0
+  zz = zero_c_float
   ii = 0
 
   do i = 1, self%xdim_len
      zz = zz + self%array(i)**2
-     ii = ii + 1 !unnecessary
+     ii = ii + 1
   enddo
 
   ! !Get global values
   ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
   ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
-
   rms = sqrt(zz / real(ii, c_float))
 end function field_rms_1d
 
@@ -1375,20 +1368,19 @@ function field_rms_2d(self) result(rms)
   integer :: i, j, ii
   real(kind=c_float) :: zz
   
-  zz = 0.0
+  zz = zero_c_float
   ii = 0
   
   do j = 1, self%ydim_len
      do i = 1, self%xdim_len
         zz = zz + self%array(i, j)**2
-        ii = ii + 1 !unnecessary
+        ii = ii + 1
      enddo
   enddo
 
   ! !Get global values
   ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
   ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
-
   rms = sqrt(zz / real(ii, c_float))
 end function field_rms_2d
 
@@ -1403,24 +1395,22 @@ function field_rms_3d(self, zlayer) result(rms)
   integer :: i, j, k, ii
   real(kind=c_float) :: zz
   
-  zz = 0.0
+  zz = zero_c_float
   ii = 0
 
   do k = 1,self%ydim_len
      do i = 1,self%xdim_len
         zz = zz + self%array(i,zlayer,k)**2
-        ii = ii + 1 !unnecessary
+        ii = ii + 1
      enddo
   end do
-! !Get global values
-! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
-! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 
+  ! !Get global values
+  ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
+  ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
   rms = sqrt(zz/real(ii,c_float))
-
 end function field_rms_3d
 
-!-----------------------------------------------------------------------------
 
 ! subroutine fields_gpnorm(nf, fields, pstat, f_comm)
 
@@ -1448,8 +1438,8 @@ end function field_rms_3d
 ! !   pstat(3,var) = sqrt(pstat(3,var)/gs3g)
 
 ! ! enddo
-
 ! end subroutine fields_gpnorm
+
 
 ! --------------------------------------------------------------------------------------------------
 ! Print methods
@@ -1482,6 +1472,7 @@ subroutine print_field_1d(self, string)
   end if
 end subroutine print_field_1d
 
+
 subroutine print_field_dims_1d(self)
   use iso_c_binding, only : c_new_line, c_float
   implicit none
@@ -1489,6 +1480,7 @@ subroutine print_field_dims_1d(self)
   
   write(*,*) 'Printing size', self%xdim_len
 end subroutine print_field_dims_1d
+
 
 subroutine print_field_2d(self, string)
   use iso_c_binding, only : c_new_line, c_float
@@ -1514,8 +1506,8 @@ subroutine print_field_2d(self, string)
   else
      write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name, self%array
   end if
-  
 end subroutine print_field_2d
+
 
 subroutine print_field_dims_2d(self)
   implicit none
@@ -1524,6 +1516,7 @@ subroutine print_field_dims_2d(self)
   write(*,*) 'Printing size ', self%xdim_len, &
        self%ydim_len
 end subroutine print_field_dims_2d
+
 
 subroutine print_field_3d(self, string)
   use iso_c_binding, only : c_new_line
@@ -1562,8 +1555,8 @@ subroutine print_field_3d(self, string)
         write(*,*) 'Printing 3d: ', self%long_name, self%wrf_hydro_nwm_name
      end if
   end do
-  
 end subroutine print_field_3d
+
 
 subroutine print_field_dims_3d(self)
   implicit none
@@ -1571,8 +1564,8 @@ subroutine print_field_dims_3d(self)
 
   write(*,*) 'Printing size ', self%xdim_len,&
        self%zdim_len, self%ydim_len
-  
 end subroutine print_field_dims_3d
+
 
 ! subroutine fields_print(nf, fields, name, f_comm)
 
@@ -1638,6 +1631,7 @@ end subroutine print_field_dims_3d
 
 !end subroutine fields_print
 
+! End print implementations
 ! --------------------------------------------------------------------------------------------------
 
 
@@ -1662,10 +1656,7 @@ subroutine checksame(self, other, method)
 end subroutine checksame
 
 
-! --------------------------------------------------------------------------------------------------
-
 ! subroutine flip_array_vertical(nf,fields)
-
 ! implicit none
 ! integer,             intent(in)    :: nf
 ! type(wrf_hydro_nwm_jedi_field), intent(inout) :: fields(nf)
@@ -1699,13 +1690,10 @@ end subroutine checksame
 !   endif
 
 ! enddo
-
 !end subroutine flip_array_vertical
 
-! ------------------------------------------------------------------------------
 
 ! subroutine copy_subset(rhs,lhs,not_copied)
-
 ! implicit none
 ! type(wrf_hydro_nwm_jedi_field),        intent(in)    :: rhs(:)
 ! type(wrf_hydro_nwm_jedi_field),        intent(inout) :: lhs(:)
@@ -1731,7 +1719,6 @@ end subroutine checksame
 !   allocate(not_copied(num_not_copied))
 !   not_copied(1:num_not_copied) = not_copied_(1:num_not_copied)
 ! endif
-
 !end subroutine copy_subset
 
 !-----------------------------------------------------------------------------
