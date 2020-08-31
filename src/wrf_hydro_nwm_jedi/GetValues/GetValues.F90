@@ -21,7 +21,7 @@ use ufo_geovals_mod,                only: ufo_geovals
 ! fv3jedi uses
 !use fv3jedi_constants_mod,          only: rad2deg
 !use fv3jedi_bump_mod,               only: bump_init, bump_apply
-use wrf_hydro_nwm_jedi_field_mod,   only: wrf_hydro_nwm_jedi_fields, base_field
+use wrf_hydro_nwm_jedi_fields_mod,  only: wrf_hydro_nwm_jedi_fields, base_field
 use wrf_hydro_nwm_jedi_geometry_mod,only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod,    only: indices
 !use fv3jedi_interpolation_mod,      only: unsinterp_integer_apply, unsinterp_nearest_apply

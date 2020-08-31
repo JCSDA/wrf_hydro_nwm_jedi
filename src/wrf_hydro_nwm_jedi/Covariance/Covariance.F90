@@ -13,7 +13,7 @@ use oops_variables_mod
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state
-use wrf_hydro_nwm_jedi_field_mod, only: base_field
+use wrf_hydro_nwm_jedi_fields_mod, only: base_field
 
 implicit none
 

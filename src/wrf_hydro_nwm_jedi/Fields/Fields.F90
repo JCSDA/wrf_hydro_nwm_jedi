@@ -4,7 +4,7 @@
 ! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 
 !> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
-module wrf_hydro_nwm_jedi_field_mod
+module wrf_hydro_nwm_jedi_fields_mod
 
 use iso_c_binding, only: c_int, c_float,c_double
 use fckit_mpi_module
@@ -939,7 +939,7 @@ subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
   enddo
 
   call abor1_ftn( &
-       "wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name" &
+       "wrf_hydro_nwm_jedi_fields_mod.long_name_to_wrf_hydro_nwm_jedi_name" &
        //"long_name "//trim(long_name)//" not found in fields.")
 end subroutine search_field
 
@@ -1168,7 +1168,7 @@ end subroutine add_increment
 !    endif
 ! enddo
 
-! call abor1_ftn("wrf_hydro_nwm_jedi_field_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
+! call abor1_ftn("wrf_hydro_nwm_jedi_fields_mod.long_name_to_wrf_hydro_nwm_jedi_name long_name "//trim(long_name)//&
 !      " not found in fields.")
 
 ! end subroutine long_name_to_wrf_hydro_name
@@ -1840,5 +1840,4 @@ subroutine apply_cov_3d(self, in_f, scalar)
 end subroutine apply_cov_3d
 
 
-end module wrf_hydro_nwm_jedi_field_mod
- 
+end module wrf_hydro_nwm_jedi_fields_mod
