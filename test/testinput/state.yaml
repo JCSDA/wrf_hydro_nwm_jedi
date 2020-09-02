@@ -2,7 +2,7 @@ geometry:
   input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
 state test:
-  norm file: 3479.3901764533393  # this is the answer  = norm of state variables in the filename_lsm
+  norm file: 129.66921557852504  # this is the answer  = norm of state variables in the filename_lsm
   norm generated state: 1.0
   tolerance: 5.0e-05
   date: '2017-01-01T00:00:00Z'

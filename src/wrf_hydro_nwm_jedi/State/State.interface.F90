@@ -328,8 +328,7 @@ function wrf_hydro_nwm_jedi_state_rms_c(c_key_state) &
   type(wrf_hydro_nwm_jedi_state), pointer :: state
 
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
-  dot_prod = state%fields_obj%dot_prod(state%fields_obj)
-  wrf_hydro_nwm_jedi_state_rms_c = sqrt(dot_prod)
+  wrf_hydro_nwm_jedi_state_rms_c = state%fields_obj%rms()
 end function wrf_hydro_nwm_jedi_state_rms_c
 
 

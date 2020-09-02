@@ -173,21 +173,17 @@ namespace wrf_hydro_nwm_jedi {
 
 
   const util::DateTime & State::validTime() const {
-    //return fields_->time();
     return time_;
   }
 
 
   util::DateTime & State::validTime() {
-    // return fields_->time();
     return time_;
   }
 
 
   double State::norm() const {
-    //std::cout << "Norm requested from State" << std::endl;
     double norm = 0.0;
-    // wrf_hydro_nwm_jedi_state_rms_f90(toFortran(), norm);
     norm = wrf_hydro_nwm_jedi_state_rms_f90(toFortran());
     return norm;
   }
