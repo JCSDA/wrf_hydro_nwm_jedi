@@ -48,7 +48,7 @@ ecbuild_add_test(
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_modelauxcontrol
   SOURCES executables/TestModelAuxControl.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/model.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
