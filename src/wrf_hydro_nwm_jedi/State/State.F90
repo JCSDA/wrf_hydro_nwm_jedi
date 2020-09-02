@@ -31,10 +31,23 @@ use netcdf
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_state, create, delete, zeros, copy, axpy,&
-     create_from_other, add_incr, &
-     read_state_from_file, get_mean_stddev, write_state_to_file, &!gpnorm, rms, &
-     change_resol, state_print !getvalues, analytic_IC, state_print
+public :: wrf_hydro_nwm_jedi_state, &
+     create, &
+     delete, &
+     zeros, &
+     copy,  &
+     axpy,&
+     create_from_other, &
+     add_incr, &
+     read_state_from_file,  &
+     get_mean_stddev, &
+     write_state_to_file, &
+     change_resol, &
+     state_print, &
+     rms !&
+     ! gpnorm, &
+     ! getvalues, &
+     ! analytic_IC,
 
 
 !> Fortran mirror of C class
@@ -53,40 +66,34 @@ type, public :: wrf_hydro_nwm_jedi_state
 end type wrf_hydro_nwm_jedi_state
 
 
-! ------------------------------------------------------------------------------
 contains
-! ------------------------------------------------------------------------------
 
 
-!> The init method for state. It calles all fields
+!> init method for state. It calls all fields
 subroutine create(self, geom, vars)
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in)    :: geom
   type(oops_variables),              intent(in)    :: vars
+  ! type(datetime),                    intent(inout) :: time
 
   self%nf = vars%nvars()
   allocate(self%fields_obj)
   call self%fields_obj%create(geom, vars)
-  
 end subroutine create
 
-! ------------------------------------------------------------------------------
 
 subroutine create_from_other(self, other)
-
-  ! Passed variables
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
 
   ! Create new state from other state
   write(*,*) "Calling create from other"
   self = other
-
   ! Initialize all arrays to zero
   !call zeros(self)
-
 end subroutine create_from_other
+
 
 subroutine delete(self)
   implicit none
@@ -102,7 +109,6 @@ function get_n_fields(self) result(nf)
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 
   nf = self%nf
-
 end function get_n_fields
 
 
@@ -136,7 +142,6 @@ subroutine copy(self, rhs)
   ! write(*,*) "Checking for deep copy in copy"
   ! call rhs%fields_obj%print_all_fields()
   ! call self%fields_obj%print_all_fields()
-  
 end subroutine copy
 
 
@@ -155,15 +160,15 @@ subroutine axpy(self, zz, rhs)
   ! enddo
 end subroutine axpy
 
+
 subroutine add_incr(self, rhs)
   implicit none
-  
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
   type(wrf_hydro_nwm_jedi_state),    intent(in)    :: rhs
   
   call self%fields_obj%add_increment(rhs%fields_obj)
-  
 end subroutine add_incr
+
 
 subroutine change_resol(self, geom, rhs, geom_rhs)
   implicit none
@@ -202,11 +207,12 @@ end subroutine change_resol
 
 
 !> Read the state from files (via read_fields_from_file)
-subroutine read_state_from_file(self, c_conf)
+subroutine read_state_from_file(self, c_conf, f_dt)
   use string_utils
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self   !< State
   type(c_ptr),                       intent(in)    :: c_conf !< Configuration
+  type(datetime),                    intent(inout) :: f_dt   !< DateTime
   
   character(len=10) :: filetype
   character(len=255) :: filename_lsm, filename_hydro
@@ -214,6 +220,7 @@ subroutine read_state_from_file(self, c_conf)
   type(fckit_configuration) :: f_conf
   character(len=:), allocatable :: str
   integer :: ixfull, jxfull, var
+  character(len=30) :: fstring
 
   f_conf = fckit_configuration(c_conf)
 
@@ -224,17 +231,20 @@ subroutine read_state_from_file(self, c_conf)
   call f_conf%get_or_die("filename_hydro", str)
   filename_hydro = str
   deallocate(str)
-  
-  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
+
+  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro, f_dt)
+  call datetime_to_string(f_dt, fstring)
+  write(*,*) 'read_state_from_file f_dt to string: '//fstring
 end subroutine read_state_from_file
 
-subroutine write_state_to_file(self, c_conf, vdate)
+
+subroutine write_state_to_file(self, c_conf, f_dt)
   use string_utils
   implicit none
-  type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self   !< State
-  type(c_ptr),                       intent(in)    :: c_conf !< Configuration
-  type(datetime), intent(inout) :: vdate
-  
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self   !< State
+  type(c_ptr),                    intent(in)    :: c_conf !< Configuration
+  type(datetime),                 intent(inout) :: f_dt
+
   character(len=10) :: filetype
   character(len=255) :: filename_lsm, filename_hydro
   character(len=255) :: validitydate
@@ -245,8 +255,8 @@ subroutine write_state_to_file(self, c_conf, vdate)
 
   f_conf = fckit_configuration(c_conf)
 
-  call datetime_to_string(vdate, validitydate)
-  
+  call datetime_to_string(f_dt, validitydate)
+
   filename_lsm = "lsm."//validitydate
   filename_hydro = "hydro."//validitydate
 
@@ -260,78 +270,77 @@ subroutine write_state_to_file(self, c_conf, vdate)
   write(*,*) "State written in ",filename_lsm,filename_hydro
   !  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
   !call self%fields_obj%write_state_to_file(trim(filename_lsm),trim(filename_hydro))
-  
 end subroutine write_state_to_file
 
-  function genfilename (c_conf,length,vdate)
 
-    use iso_c_binding
-    use datetime_mod
-    use duration_mod
+function genfilename (c_conf, length, f_dt)
+  use iso_c_binding
+  use datetime_mod
+  use duration_mod
 
-    type(c_ptr),    intent(in) :: c_conf  !< Configuration
-    integer,        intent(in) :: length
-    type(datetime), intent(in) :: vdate
+  type(c_ptr),    intent(in) :: c_conf  !< Configuration
+  integer,        intent(in) :: length
+  type(datetime), intent(in) :: f_dt
 
-    type(fckit_configuration)     :: f_conf
-    character(len=:), allocatable :: str
-    character(len=length)         :: genfilename
-    character(len=length)         :: fdbdir, expver, typ, validitydate, referencedate, sstep
-    character(len=length)         :: prefix, mmb
-    type(datetime)                :: rdate
-    type(duration)                :: step
-    integer                       :: lenfn
+  type(fckit_configuration)     :: f_conf
+  character(len=:), allocatable :: str
+  character(len=length)         :: genfilename
+  character(len=length)         :: fdbdir, expver, typ, validitydate, referencedate, sstep
+  character(len=length)         :: prefix, mmb
+  type(datetime)                :: rdate
+  type(duration)                :: step
+  integer                       :: lenfn
 
-    f_conf = fckit_configuration(c_conf)
+  f_conf = fckit_configuration(c_conf)
 
-    ! here we should query the length and then allocate "string".
-    ! But Fortran 90 does not allow variable-length allocatable strings.
-    call f_conf%get_or_die("datadir", str)
-    fdbdir = trim(str)
-    deallocate(str)
-    call f_conf%get_or_die("exp", str)
-    expver = trim(str)
-    deallocate(str)
-    call f_conf%get_or_die("type", str)
-    typ = trim(str)
-    deallocate(str)
+  ! here we should query the length and then allocate "string".
+  ! But Fortran 90 does not allow variable-length allocatable strings.
+  call f_conf%get_or_die("datadir", str)
+  fdbdir = trim(str)
+  deallocate(str)
+  call f_conf%get_or_die("exp", str)
+  expver = trim(str)
+  deallocate(str)
+  call f_conf%get_or_die("type", str)
+  typ = trim(str)
+  deallocate(str)
 
-    if (typ=="ens") then
-      call f_conf%get_or_die("member", str)
-      mmb = trim(str)
-      deallocate(str)
+  if (typ=="ens") then
+     call f_conf%get_or_die("member", str)
+     mmb = trim(str)
+     deallocate(str)
 
-      lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ) + 1 + LEN_TRIM(mmb)
-      prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ) // "." // TRIM(mmb)
-    else
-      lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ)
-      prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ)
-    endif
+     lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ) + 1 + LEN_TRIM(mmb)
+     prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ) // "." // TRIM(mmb)
+  else
+     lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ)
+     prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(typ)
+  endif
 
-    if (typ=="fc" .or. typ=="ens") then
-      call f_conf%get_or_die("date", str)
-      referencedate = trim(str)
-      deallocate(str)
-      call datetime_to_string(vdate, validitydate)
-      call datetime_create(TRIM(referencedate), rdate)
-      call datetime_diff(vdate, rdate, step)
-      call duration_to_string(step, sstep)
-      lenfn = lenfn + 1 + LEN_TRIM(referencedate) + 1 + LEN_TRIM(sstep)
-      genfilename = TRIM(prefix) // "." // TRIM(referencedate) // "." // TRIM(sstep) // ".nc"
-    endif
+  if (typ=="fc" .or. typ=="ens") then
+     call f_conf%get_or_die("date", str)
+     referencedate = trim(str)
+     deallocate(str)
+     call datetime_to_string(f_dt, validitydate)
+     call datetime_create(TRIM(referencedate), rdate)
+     call datetime_diff(f_dt, rdate, step)
+     call duration_to_string(step, sstep)
+     lenfn = lenfn + 1 + LEN_TRIM(referencedate) + 1 + LEN_TRIM(sstep)
+     genfilename = TRIM(prefix) // "." // TRIM(referencedate) // "." // TRIM(sstep) // ".nc"
+  endif
 
-    if (typ=="an") then
-      call datetime_to_string(vdate, validitydate)
-      lenfn = lenfn + 1 + LEN_TRIM(validitydate)
-      genfilename = TRIM(prefix) // "." // TRIM(validitydate) // ".nc"
-    endif
+  if (typ=="an") then
+     call datetime_to_string(f_dt, validitydate)
+     lenfn = lenfn + 1 + LEN_TRIM(validitydate)
+     genfilename = TRIM(prefix) // "." // TRIM(validitydate) // ".nc"
+  endif
 
-    if (lenfn>length) &
-      & call abor1_ftn("sw_state_mod:genfilename: filename too long")
+  if (lenfn>length) &
+       & call abor1_ftn("sw_state_mod:genfilename: filename too long")
+end function genfilename
 
-  end function genfilename
 
-!> Print the state
+!> Print state
 subroutine state_print(self, string)
   use iso_c_binding, only : c_null_char
   implicit none
@@ -365,6 +374,15 @@ subroutine get_mean_stddev(self, nf, pstat)
 end subroutine get_mean_stddev
 
 
+subroutine rms(self, prms)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
+  real(kind=c_float),             intent(out) :: prms
+
+  ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
+end subroutine rms
+
+
 subroutine gpnorm(self, nf, pstat)
   implicit none
   type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
@@ -377,15 +395,6 @@ subroutine gpnorm(self, nf, pstat)
 
   ! call fields_gpnorm(nf, self%fields, pstat, self%f_comm)
 end subroutine gpnorm
-
-
-subroutine rms(self, prms)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
-  real(kind=c_float),             intent(out) :: prms
-
-  ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
-end subroutine rms
 
 
 end module wrf_hydro_nwm_jedi_state_mod

@@ -46,13 +46,13 @@ subroutine wrf_hydro_nwm_jedi_state_create_c(c_key_self, c_key_geom, c_vars) &
   type(c_ptr), value, intent(in) :: c_vars     !< List of variables
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
-  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
   type(oops_variables)         :: vars
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   call wrf_hydro_nwm_jedi_state_registry%init()
   call wrf_hydro_nwm_jedi_state_registry%add(c_key_self)
-  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
 
   vars = oops_variables(c_vars)
   call create(self, geom, vars)
@@ -187,21 +187,22 @@ subroutine wrf_hydro_nwm_jedi_state_read_file_c( &
      bind(c,name='wrf_hydro_nwm_jedi_state_read_file_f90')
 
   implicit none
+  integer(c_int), intent(in) :: c_key_geom   !< Geometry
   integer(c_int), intent(in) :: c_key_state  !< State
   type(c_ptr), intent(in)    :: c_conf       !< Configuration
   type(c_ptr), intent(inout) :: c_dt         !< DateTime
-  integer(c_int), intent(in) :: c_key_geom   !< Geometry
 
   type(wrf_hydro_nwm_jedi_state), pointer :: state
-  type(datetime) :: fdate
+  type(datetime) :: f_dt
   type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
 
   write(*,*) "Key_geom from read_state_from_file", c_key_geom
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
-  call c_f_datetime(c_dt, fdate)
-  call read_state_from_file(state, c_conf)
+  call c_f_datetime(c_dt, f_dt)
+  call read_state_from_file(state, c_conf, f_dt)
+  call f_c_datetime(f_dt, c_dt)
 end subroutine wrf_hydro_nwm_jedi_state_read_file_c
 
 

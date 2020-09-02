@@ -7,9 +7,10 @@
 module wrf_hydro_nwm_jedi_fields_mod
 
 use iso_c_binding, only: c_int, c_float,c_double
+use datetime_mod
 use fckit_mpi_module
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
-use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
+use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices, datetime_eq
 use wrf_hydro_nwm_jedi_constants_mod, only: unopened_ncid, zero_c_double, zero_c_float
 use oops_variables_mod
 use netcdf
@@ -294,8 +295,11 @@ subroutine create(self, geom, vars)
         allocate(tmp_1d_field)
         call tmp_1d_field%fill( &
              xdim_len=geom%stream%xdim_len, &
-             short_name=vars%variable(var), long_name='streamflow', &
-             wrf_hydro_nwm_name='qlink1', units='cms', ncid_index=2)
+             short_name=vars%variable(var), &
+             long_name='streamflow', &
+             wrf_hydro_nwm_name='qlink1', &
+             units='cms', &
+             ncid_index=2)
         allocate(self%fields(vcount)%field, source=tmp_1d_field)
         deallocate(tmp_1d_field)
 
@@ -303,10 +307,13 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var), &
              long_name='snow_water_equivalent', &
-             wrf_hydro_nwm_name='SNEQV', units='mm', ncid_index=1)
+             wrf_hydro_nwm_name='SNEQV', &
+             units='mm', &
+             ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
@@ -314,10 +321,13 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var), &
              long_name='snow_depth', &
-             wrf_hydro_nwm_name='SNOWH', units='m', ncid_index=1)
+             wrf_hydro_nwm_name='SNOWH', &
+             units='m', &
+             ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
@@ -325,7 +335,8 @@ subroutine create(self, geom, vars)
         vcount = vcount + 1
         allocate(tmp_2d_field)
         call tmp_2d_field%fill( &
-             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var),&
              long_name='leaf_area', &
              wrf_hydro_nwm_name='LAI', units='m^2m^-2', ncid_index=1)
@@ -337,11 +348,14 @@ subroutine create(self, geom, vars)
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
         call tmp_3d_field%fill( &
-             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
              zdim_len=3, &
              short_name=vars%variable(var),&
              long_name='snow_liquid', &
-             wrf_hydro_nwm_name='SNLIQ', units='liter', ncid_index=1) !unit invented
+             wrf_hydro_nwm_name='SNLIQ', &
+             units='liter', &
+             ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
         deallocate(tmp_3d_field)
 
@@ -350,11 +364,14 @@ subroutine create(self, geom, vars)
         allocate(tmp_3d_field)
         !MIDDLE DIMENSION HARDCODED
         call tmp_3d_field%fill( &
-             xdim_len=geom%lsm%xdim_len, ydim_len=geom%lsm%ydim_len, &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
              zdim_len=3, &
              short_name=vars%variable(var),&
              long_name='snow_ice', &
-             wrf_hydro_nwm_name='SNICE', units='liter', ncid_index=1) !unit invented
+             wrf_hydro_nwm_name='SNICE', &
+             units='liter', &
+             ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
         deallocate(tmp_3d_field)
 
@@ -513,96 +530,6 @@ subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
        "wrf_hydro_nwm_jedi_fields_mod.long_name_to_wrf_hydro_nwm_jedi_name" &
        //"long_name "//trim(long_name)//" not found in fields.")
 end subroutine search_field
-
-
-!-----------------------------------------------------------------------------
-! Read file implementations
-
-! Read 1-d
-subroutine read_file_1d(self, ncid_vector)
-  class(field_1d),       intent(inout) :: self
-  integer, dimension(2), intent(in) :: ncid_vector
-
-  call get_from_restart_1d_float( &
-       ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
-end subroutine read_file_1d
-
-
-subroutine get_from_restart_1d_float(ncid, name, array)
-  implicit none
-  integer,                            intent(in) :: ncid
-  character(len=*),                   intent(in)  :: name
-  real, dimension(:),                 intent(out) :: array
-
-  integer :: ierr
-  integer :: varid
-
-  ierr = nf90_inq_varid(ncid, name, varid)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file '"//trim(name)//"'")
-  ierr = nf90_get_var(ncid, varid, array)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file: '"//trim(name)//"'")
-end subroutine get_from_restart_1d_float
-
-
-! Read 2-d
-subroutine read_file_2d(self, ncid_vector)
-  class(field_2d),       intent(inout) :: self
-  integer, dimension(2), intent(in)    :: ncid_vector
-
-  call get_from_restart_2d_float( &
-       ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
-end subroutine read_file_2d
-
-
-subroutine get_from_restart_2d_float(ncid, name, array)
-  implicit none
-  integer,                            intent(in)  :: ncid
-  character(len=*),                   intent(in)  :: name
-  real, dimension(:, :),              intent(out) :: array
-
-  integer :: ierr
-  integer :: varid
-
-  ierr = nf90_inq_varid(ncid, name, varid)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file '"//trim(name)//"'")
-  ierr = nf90_get_var(ncid, varid, array)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file: '"//trim(name)//"'")
-end subroutine get_from_restart_2d_float
-
-
-! Read 3-d
-subroutine read_file_3d(self, ncid_vector)
-  class(field_3d),       intent(inout) :: self
-  integer, dimension(2), intent(in)    :: ncid_vector
-
-  call get_from_restart_3d_float( &
-       ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
-end subroutine read_file_3d
-
-
-subroutine get_from_restart_3d_float(ncid, name, array)
-  implicit none
-  integer,                            intent(in)  :: ncid
-  character(len=*),                   intent(in)  :: name
-  real, dimension(:, :, :),           intent(out) :: array
-
-  integer :: ierr
-  integer :: varid
-
-  ierr = nf90_inq_varid(ncid, name, varid)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file '"//trim(name)//"'")
-  ierr = nf90_get_var(ncid, varid, array)
-  call error_handler(ierr, &
-       "Problem finding variable in restart file: '"//trim(name)//"'")
-end subroutine get_from_restart_3d_float
 
 
 !-----------------------------------------------------------------------------
@@ -1378,19 +1305,31 @@ end subroutine print_field_3d
 !-----------------------------------------------------------------------------
 ! File related subroutines/functions
 
-subroutine read_fields_from_file(self, filename_lsm, filename_hydro)
+subroutine read_fields_from_file(self, filename_lsm, filename_hydro, f_dt)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
-  character(len=*), intent(in) :: filename_lsm, filename_hydro
+  character(len=*),                         intent(in   ) :: filename_lsm, filename_hydro
+  type(datetime),                           intent(out  ) :: f_dt
 
   integer :: ncid_lsm, ncid_hydro, n, ierr
   integer, dimension(2) :: ncid_vector
   logical :: read_file_lsm, read_file_hydro
+  type(datetime)  :: file_time_lsm, file_time_hydro
 
   ! open files here and pass ncids
   ! check if lsm geom is defined: open the RESTART file
   ncid_lsm = open_get_restart_ncid(self, filename_lsm=filename_lsm)
   ! check if any hydro variables are defined: open the HYDRO_RST file
   ncid_hydro = open_get_restart_ncid(self, filename_hydro=filename_hydro)
+
+  ! verify that the files are at the same time if both are being used.
+  file_time_lsm = get_lsm_file_time(ncid_lsm)
+  !file_time_hydro = get_lsm_file_time(ncid_hydro)
+
+  !if (datetime_eq(file_time_lsm, file_time_hydro)) then
+  f_dt = file_time_lsm
+  !else
+  !   call abor1_ftn("read_fields_from_file: lsm and hydryo restart files have different times")
+  !end if
 
   ncid_vector = (/ ncid_lsm, ncid_hydro /)
   do n = 1, size(self%fields)
@@ -1458,6 +1397,134 @@ subroutine close_restart_ncid(ncid, filename)
   ierr = nf90_close(ncid)
   call error_handler(ierr, "STOP: file can not be closed: "//trim(filename))
 end subroutine close_restart_ncid
+
+
+! Get file time ----------------------
+function get_lsm_file_time(ncid) result(f_dt)
+  integer,        intent(in) :: ncid
+  type(datetime)             :: f_dt
+
+  !character*19, dimension(1) :: time_char
+  character*19 :: time_char
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, "Times", varid)
+  call error_handler(ierr, "Problem finding variable 'Times' in LSM restart file")
+  ierr = nf90_get_var(ncid, varid, time_char)
+  call error_handler(ierr, "Problem finding value of 'Times' in LSM restart file")
+  ! Create a DateTime from an ISO8601 string, e.g.: 2020-09-02T21:08:08Z
+  ! time_char is of the form: 2017-01-01_00:00:00
+  write(*,*) "time_char: "//time_char
+  write(*,*) "ISO08601 : "//time_char(1:10)//'T'//time_char(12:19)//'Z'
+  call datetime_create(time_char(1:10)//'T'//time_char(12:19)//'Z', f_dt)
+end function get_lsm_file_time
+
+
+function get_hydro_file_time(ncid) result(f_dt)
+  integer,        intent(in) :: ncid
+  type(datetime)             :: f_dt
+
+  character*19, dimension(1) :: time_char
+  integer :: ierr
+  integer :: varid
+
+  ! Restart_Time = "2017-01-01_00:00:00" ;
+
+  !ierr = nf90_inq_varid(ncid, "Times", varid)
+  !call error_handler(ierr, &
+  !     "Problem finding variable in restart file '"//trim(name)//"'")
+  !ierr = nf90_get_var(ncid, varid, time_char)
+  !call error_handler(ierr, &
+  !     "Problem finding variable in restart file: '"//trim(name)//"'")
+  !write(*,*) "time_char: "//time_char
+end function get_hydro_file_time
+
+! Read 1-d ----------------------
+subroutine read_file_1d(self, ncid_vector)
+  class(field_1d),       intent(inout) :: self
+  integer, dimension(2), intent(in) :: ncid_vector
+
+  call get_from_restart_1d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_1d
+
+
+subroutine get_from_restart_1d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in) :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:),                 intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
+end subroutine get_from_restart_1d_float
+
+
+! Read 2-d ----------------------
+subroutine read_file_2d(self, ncid_vector)
+  class(field_2d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
+
+  call get_from_restart_2d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_2d
+
+
+subroutine get_from_restart_2d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in)  :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:, :),              intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
+end subroutine get_from_restart_2d_float
+
+
+! Read 3-d ----------------------
+subroutine read_file_3d(self, ncid_vector)
+  class(field_3d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
+
+  call get_from_restart_3d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, self%array)
+end subroutine read_file_3d
+
+
+subroutine get_from_restart_3d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in)  :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:, :, :),           intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_get_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
+end subroutine get_from_restart_3d_float
 
 
 ! --------------------------------------------------------------------------------------------------

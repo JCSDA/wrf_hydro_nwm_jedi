@@ -27,6 +27,7 @@ namespace wrf_hydro_nwm_jedi {
     : vars_(conf, "state variables"),
       fields_(new Fields(geom, vars_)),
       time_(util::DateTime()) {
+    // time_(util::DateTime()) {
     oops::Log::trace() << "State::State 1 create from file." << std::endl;
     oops::Variables vars(vars_);
     wrf_hydro_nwm_jedi_state_create_f90(
@@ -34,9 +35,8 @@ namespace wrf_hydro_nwm_jedi {
        fields_->geometry()->toFortran(),
        vars);
     util::DateTime * dtp = &time_;
-    this->read(conf);
-    oops::Log::trace() << "State::State create from analytical or"
-      " from file done." << std::endl;
+    this->read_state_from_file(conf);
+    oops::Log::trace() << "State::State 1 create from file done." << std::endl;
   }
 
 
@@ -68,20 +68,13 @@ namespace wrf_hydro_nwm_jedi {
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
-
-    // wrf_hydro_nwm_jedi_state_create_f90(keyState_, other.fields_->geometry()->toFortran(), other.vars_);
-
-    std::cout << "About to invoke create_from_other from State constructor " << std::endl;
+    std::cout << "State::State 3 create_from_other from State " << std::endl;
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
-    time_ = fields_->time();
+    time_ = other.time_;
   }
 
-
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
-
-
-  // ----------------------------------------------------------------------------
 
 
   void State::getValues(const ufo::Locations & locs,
@@ -127,19 +120,21 @@ namespace wrf_hydro_nwm_jedi {
   }
   
 
-  void State::read(const eckit::Configuration & config) {
+  void State::read_state_from_file(const eckit::Configuration & config) {
     oops::Log::trace() << "State read starting" << std::endl;
     const eckit::Configuration * conf = &config;
     util::DateTime * dtp = &time_;
+    // oops::Log::trace() << "before time_: " << time_ << std::endl;
     wrf_hydro_nwm_jedi_state_read_file_f90(
-	fields_->geometry()->toFortran(),
-	keyState_, &conf,
-	&dtp);
+        fields_->geometry()->toFortran(),
+        keyState_, &conf,
+        &dtp);
     this->print(std::cout);
-    // oops::Log::trace() << "time_: " << time_ << std::endl;
+    // oops::Log::trace() << "after dtp: " << *dtp << std::endl;
+    time_ = *dtp;  // huh?? is not setting dtp the same as setting time_
+    oops::Log::trace() << "after time_: " << time_ << std::endl;
     oops::Log::trace() << "State read done" << std::endl;
   }
-
 
   State & State::operator=(const State & rhs) {
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
@@ -172,14 +167,8 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 
-  const util::DateTime & State::validTime() const {
-    return time_;
-  }
-
-
-  util::DateTime & State::validTime() {
-    return time_;
-  }
+  const util::DateTime & State::validTime() const { return time_; }
+  util::DateTime & State::validTime() { return time_; }
 
 
   double State::norm() const {
