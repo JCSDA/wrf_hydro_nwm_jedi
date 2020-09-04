@@ -168,6 +168,7 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 
+  // in State.h
   // const util::DateTime & State::validTime() const { return time_; }
   // util::DateTime & State::validTime() { return time_; }
 

@@ -325,9 +325,7 @@ function wrf_hydro_nwm_jedi_state_rms_c(c_key_state) &
   integer(c_int), intent(in)    :: c_key_state      !> State key from C
   real(c_double) :: wrf_hydro_nwm_jedi_state_rms_c  !> return value
 
-  real(c_double) :: dot_prod
   type(wrf_hydro_nwm_jedi_state), pointer :: state
-
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
   wrf_hydro_nwm_jedi_state_rms_c = state%fields_obj%rms()
 end function wrf_hydro_nwm_jedi_state_rms_c

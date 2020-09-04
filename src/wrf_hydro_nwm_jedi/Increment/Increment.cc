@@ -23,17 +23,16 @@ namespace wrf_hydro_nwm_jedi {
 
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
-                       const util::DateTime & vt)
+                       const util::DateTime & time)
     : fields_(new Fields(geom, vars)),
       vars_(vars),
-      time_(vt)
+      time_(time)
   {
     std::cout << "Increment::Increment 1 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_f90(
 	keyInc_,
 	fields_->geometry()->toFortran(),
 	vars_);
-    // this->print(std::cout);
   }
 
 
@@ -42,10 +41,13 @@ namespace wrf_hydro_nwm_jedi {
     : fields_(new Fields(*other.fields_->geometry(), other.vars_)),
       vars_(other.vars_),
       time_(other.time_) {
-    std::cout << "Second constructor in increment " << std::endl;
+    std::cout << "Increment::Increment 2 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
-    if(copy)
+    if(copy) {
       wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, other.keyInc_);
+    } else {
+      wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
+    }
     // this->print(std::cout);
   }
 
@@ -141,11 +143,9 @@ namespace wrf_hydro_nwm_jedi {
 
 
   double Increment::norm() const {
-    // util::abor1_cpp("Increment::norm() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    // return fields_->norm();
-    //Needed by the test
-    return 0.0;
+    double norm = 0.0;
+    norm = wrf_hydro_nwm_jedi_increment_rms_f90(toFortran());
+    return norm;
   }
 
 
@@ -180,19 +180,15 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 
-  const util::DateTime & Increment::validTime() const {
-    return fields_->time();
-  }
+  // const util::DateTime & time() const {return time_;}
+  // util::DateTime & time() {return time_;}
 
 
-  util::DateTime & Increment::validTime() {
-    return fields_->time();
-  }
+  const util::DateTime & Increment::validTime() const { return time_;  }
+  util::DateTime & Increment::validTime() { return time_; }
 
 
-  void Increment::updateTime(const util::Duration & dt) {
-    fields_->time() += dt;
-  }
+  void Increment::updateTime(const util::Duration & dt) { fields_->time() += dt;}
 
 
   boost::shared_ptr<const Geometry> Increment::geometry() const {

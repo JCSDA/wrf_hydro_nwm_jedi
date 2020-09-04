@@ -76,8 +76,8 @@ subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c( &
      c_key_self, c_key_other) &
      bind(c,name='wrf_hydro_nwm_jedi_increment_create_from_other_f90')
   implicit none
-  integer(c_int),intent(inout) :: c_key_self  !< Fields
-  integer(c_int),intent(   in) :: c_key_other !< Other fields
+  integer(c_int),intent(inout) :: c_key_self
+  integer(c_int),intent(   in) :: c_key_other
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   type(wrf_hydro_nwm_jedi_state), pointer :: other
@@ -231,6 +231,29 @@ subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c( &
 end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 
 
+subroutine wrf_hydro_nwm_jedi_increment_zero_c(c_key_self) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_zero_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+  call zeros(self)
+end subroutine wrf_hydro_nwm_jedi_increment_zero_c
+
+
+function wrf_hydro_nwm_jedi_increment_rms_c(c_key_inc) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_rms_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_inc  !> Increment registry key
+  real(c_double) :: wrf_hydro_nwm_jedi_increment_rms_c  !> return value
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: increment
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, increment)
+  wrf_hydro_nwm_jedi_increment_rms_c = increment%fields_obj%rms()
+end function wrf_hydro_nwm_jedi_increment_rms_c
+
+
 ! subroutine sw_increment_delete_c(c_key_self) bind(c, name='sw_increment_delete_f90')
 !   implicit none
 !   integer(c_int), intent(inout) :: c_key_self
@@ -239,18 +262,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !   call delete(self)
 !   call sw_increment_registry%remove(c_key_self)
 ! end subroutine sw_increment_delete_c
-
-
-! subroutine sw_increment_zero_c(c_key_self) bind(c, name='sw_increment_zero_f90')
-!   implicit none
-
-!   integer(c_int), intent(in) :: c_key_self
-
-!   type(shallow_water_state_type), pointer :: self
-
-!   call sw_increment_registry%get(c_key_self, self)
-!   call zeros(self)
-! end subroutine sw_increment_zero_c
 
 
 ! subroutine sw_increment_dirac_c(c_key_self, c_conf, c_key_geom) bind(c, name='sw_increment_dirac_f90')
@@ -421,24 +432,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_diff_incr_c
 !     enddo
 !   enddo
 ! end subroutine sw_increment_gpnorm_c
-
-
-! subroutine sw_increment_rms_c(c_key_inc, prms) bind(c, name='sw_increment_rms_f90')
-
-!   implicit none
-
-!   integer(c_int), intent(   in) :: c_key_inc
-!   real(c_double), intent(inout) :: prms
-
-!   type(shallow_water_state_type), pointer :: inc
-!   real(kind=r8kind)                       :: zz
-
-!   call sw_increment_registry%get(c_key_inc, inc)
-
-!   call rms(inc, zz)
-
-!   prms = zz
-! end subroutine sw_increment_rms_c
 
 
 ! subroutine sw_increment_getpoint_c(c_key_self, c_key_geoiter, c_values) bind(c, name='sw_increment_getpoint_f90')
