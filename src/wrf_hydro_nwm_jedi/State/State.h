@@ -93,11 +93,9 @@ namespace wrf_hydro_nwm_jedi {
     util::DateTime & time() {return time_;}
 
     // validTime()
-    // const util::DateTime & validTime() const {return time_;}
-    // util::DateTime & validTime() {return time_;}
-    const util::DateTime & validTime() const;
-    util::DateTime & validTime();
-    
+    const util::DateTime & validTime() const { return time_; }
+    util::DateTime & validTime() { return time_; }
+
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}
 

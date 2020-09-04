@@ -8,9 +8,14 @@ implicit none
 
 public
 
-integer,        parameter :: unopened_ncid = -9999
+! named numeric constants
 real(c_float),  parameter :: zero_c_float = 0.d0
 real(c_double), parameter :: zero_c_double = 0.d0
+real(c_float),  parameter :: one_c_float = 1.d0
+real(c_double), parameter :: one_c_double = 1.d0
+
+! conventions
+integer,        parameter :: unopened_ncid = -9999
 
 contains
 

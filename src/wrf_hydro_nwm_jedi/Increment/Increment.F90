@@ -13,7 +13,7 @@ use oops_variables_mod
 use wrf_hydro_nwm_jedi_fields_mod,    only: wrf_hydro_nwm_jedi_fields, checksame
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
-use wrf_hydro_nwm_jedi_constants_mod, only: zero_c_double
+use wrf_hydro_nwm_jedi_constants_mod, only: zero_c_double, zero_c_float, one_c_float
 
 use iso_c_binding, only : c_float
 use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state, create_from_other
@@ -25,14 +25,35 @@ use ufo_geovals_mod,       only: ufo_geovals
 implicit none
 
 private
-public :: create_increment, diff_incr, self_mul, axpy_inc, dot_prod
-!, create_from_other, delete, zeros, random, copy, &
-! self_add, self_schur, self_sub, self_mul, axpy_inc, axpy_state, &
-! read_file, write_file, &
-! gpnorm, rms, &
+public :: &
+     create_increment, &
+     diff_incr, &
+     self_mul, &
+     axpy_inc, &
+     dot_prod, &
+     random_normal
+! create_from_other, &
+! delete, &
+! zeros, &
+! copy, &
+! self_add, &
+! self_schur, &
+! self_sub, &
+! self_mul, &
+! axpy_inc, &
+! axpy_state, &
+! read_file, &
+! write_file, &
+! gpnorm, &
+! rms, &
 ! change_resol, &
-! getpoint, setpoint, &
-! ug_coord, increment_to_ug, increment_from_ug, dirac, jnormgrad, &
+! getpoint, &
+! setpoint, &
+! ug_coord, &
+! increment_to_ug, &
+! increment_from_ug, &
+! dirac, &
+! jnormgrad, &
 ! increment_print
 
 
@@ -41,21 +62,30 @@ contains
   
 subroutine create_increment(self, geom, vars)
   implicit none
-  type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-  type(wrf_hydro_nwm_jedi_geometry),   intent(in)    :: geom
-  type(oops_variables), intent(in)    :: vars
+  type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in)    :: geom
+  type(oops_variables),              intent(in)    :: vars
 
   self%nf = vars%nvars()
   allocate(self%fields_obj)
-  call self%fields_obj%create(geom,vars) !Initializes to zero by default
-
+  call self%fields_obj%create(geom, vars) !Initializes to zero by default
   ! Initialize all arrays to zero
   ! call self%fields_obj%zeros()
 end subroutine create_increment
 
 
-! subroutine create_from_other(self, other)
+subroutine random_normal(self)
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  integer, parameter :: rseed = 1 ! constant for reproducability of tests
+    ! NOTE from soca: random seeds are not quite working the way expected,
+    !  it is only set the first time normal_distribution() is called with a seed
+  integer :: ff
 
+  call self%fields_obj%set_random_normal(rseed)
+end subroutine random_normal
+
+
+! subroutine create_from_other(self, other)
 !   ! Passed variables
 !   type(shallow_water_state_type), intent(inout) :: self  !< Fields
 !   type(shallow_water_state_type), intent(   in) :: other !< Other fields
@@ -65,7 +95,6 @@ end subroutine create_increment
 
 !   ! Initialize all arrays to zero
 !   call zeros(self)
-
 ! end subroutine create_from_other
 
 
@@ -94,53 +123,20 @@ end subroutine create_increment
 !       h(i,j) = 0.0_r8kind
 !     end do
 !   end do
-
 ! end subroutine zeros
 
 
-! subroutine random(self)
-
-!   type(shallow_water_state_type), intent(inout) :: self
-
-!   integer, parameter                :: rseed = 7
-!   type(shallow_water_geometry_type) :: geom
-!   real(r8kind), pointer             :: u(:,:), v(:,:), h(:,:)
-!   integer                           :: xps, xpe, yps, ype
-
-!   call self%get_u_ptr(u)
-!   call self%get_v_ptr(v)
-!   call self%get_h_ptr(h)
-
-!   geom = self%get_geometry()
-
-!   xps = geom%get_xps()
-!   xpe = geom%get_xpe()
-!   yps = geom%get_yps()
-!   ype = geom%get_ype()
-
-!   call normal_distribution(u(xps:xpe, yps:ype), 0.0_r8kind, 1.0_r8kind, rseed)
-!   call normal_distribution(v(xps:xpe, yps:ype), 0.0_r8kind, 1.0_r8kind, rseed)
-!   call normal_distribution(h(xps:xpe, yps:ype), 0.0_r8kind, 1.0_r8kind, rseed)
-
-! end subroutine random
-
-! ! ------------------------------------------------------------------------------
-
 ! subroutine copy(self, rhs)
-
 !   implicit none
 
 !   type(shallow_water_state_type), intent(inout) :: self
 !   type(shallow_water_state_type), intent(   in) :: rhs
 
 !   self = rhs
-
 ! end subroutine copy
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine self_schur(self, rhs)
-
 !   type(shallow_water_state_type), intent(inout) :: self
 !   type(shallow_water_state_type), intent(   in) :: rhs
 
@@ -178,13 +174,10 @@ end subroutine create_increment
 !   else
 !      call abor1_ftn("sw increment:  self_schur not implemented for mismatched resolutions")
 !   endif
-
 ! end subroutine self_schur
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine self_sub(self, rhs)
-
 !   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
 !   type(wrf_hydro_nwm_jedi_state), intent(   in) :: rhs
 
@@ -195,10 +188,8 @@ end subroutine create_increment
 !         self_h(i,j) = self_h(i,j) - rhs_h(i,j)
 !      end do
 !   end do
-
 ! end subroutine self_sub
 
-! ! ------------------------------------------------------------------------------
 
 subroutine self_mul(self, zz)
   use iso_c_binding, only: c_float
@@ -229,7 +220,6 @@ end subroutine axpy_inc
 ! ! ------------------------------------------------------------------------------
 
 ! subroutine axpy_state(self, zz, rhs)
-
 !   type(shallow_water_state_type), intent(inout) :: self
 !   real(kind=r8kind),              intent(   in) :: zz
 !   type(shallow_water_state_type), intent(   in) :: rhs
@@ -286,7 +276,6 @@ end function dot_prod
 
 
 subroutine diff_incr(self, x1, x2)
-
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: x1
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: x2
@@ -294,7 +283,7 @@ subroutine diff_incr(self, x1, x2)
   integer                           :: i, j
 
   write(*,*) "Difference invoked from diff_inc"
-  call self%fields_obj%difference(x1%fields_obj,x2%fields_obj)
+  call self%fields_obj%difference(x1%fields_obj, x2%fields_obj)
 
   !   do j=geom_self%get_yps(), geom_self%get_ype()
   !      do i=geom_self%get_xps(), geom_self%get_xpe()
@@ -303,12 +292,10 @@ subroutine diff_incr(self, x1, x2)
   !         self_h(i,j) = x1_h(i,j) - x2_h(i,j)
   !      end do
   !   end do
-
 end subroutine diff_incr
 
 
 ! subroutine change_resol(self, rhs)
-
 !   type(shallow_water_state_type), intent(inout) :: self
 !   type(shallow_water_state_type), intent(   in) :: rhs
 
@@ -333,15 +320,11 @@ end subroutine diff_incr
 !   else
 !      call abor1_ftn("sw increment:  change_resol not implemented yet")
 !   endif
-
 ! end subroutine change_resol
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine read_file(geom, self, c_conf, vdate)
-
 !   implicit none
-
 !   type(shallow_water_geometry_type), intent(inout) :: geom     !< Geometry
 !   type(shallow_water_state_type),    intent(inout) :: self     !< Increment
 !   type(c_ptr),                       intent(   in) :: c_conf   !< Configuration
@@ -367,15 +350,11 @@ end subroutine diff_incr
 !   sdate = trim(str)
 !   deallocate(str)
 !   call datetime_set(sdate, vdate)
-
 ! end subroutine read_file
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine write_file(geom, self, c_conf, vdate)
-
 !   implicit none
-
 !   type(shallow_water_geometry_type), intent(inout) :: geom     !< Geometry
 !   type(shallow_water_state_type),    intent(   in) :: self     !< Increment
 !   type(c_ptr),                       intent(   in) :: c_conf   !< Configuration
@@ -396,13 +375,10 @@ end subroutine diff_incr
 !     write(*,*) 'sw_increment_mod:write_file: writing ' // trim(filename)
 !   end if
 !   call self%write(trim(filename))
-
 ! end subroutine write_file
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine increment_print(self)
-
 !   implicit none
 !   type(shallow_water_state_type), intent(in) :: self
 
@@ -468,13 +444,10 @@ end subroutine diff_incr
 
 !   if (f_comm%rank() == 0) &
 !     write(*,"(A70)") "---------------------------------------------------------------------"
-
 ! end subroutine increment_print
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine gpnorm(self, nf, pstat)
-
 !   type(shallow_water_state_type), intent(   in) :: self
 !   integer,                        intent(   in) :: nf
 !   real(kind=r8kind),              intent(inout) :: pstat(3, nf)
@@ -527,13 +500,10 @@ end subroutine diff_incr
 !     pstat(3, i) = sqrt(pstat(3, i) / n)
 
 !   end do
-
 ! end subroutine gpnorm
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine rms(self, prms)
-
 !   type(shallow_water_state_type), intent( in) :: self
 !   real(kind=r8kind),              intent(out) :: prms
 
@@ -577,25 +547,19 @@ end subroutine diff_incr
 
 !   ! Calculate rms
 !   prms = sqrt(prms / real(n, r8kind))
-
 ! end subroutine rms
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine dirac(self, c_conf, geom)
-
 !   type(shallow_water_state_type),    intent(inout) :: self
 !   type(c_ptr),                       intent(   in) :: c_conf
 !   type(shallow_water_geometry_type), intent(   in) :: geom
 
 !   call abor1_ftn("sw increment:  dirac not implemented yet")
-
 ! end subroutine dirac
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine getpoint(self, geoiter, values)
-
 !   type(shallow_water_state_type), intent(   in) :: self
 !   type(sw_geom_iter),             intent(   in) :: geoiter
 !   real(r8kind),                   intent(inout) :: values(3)
@@ -611,13 +575,10 @@ end subroutine diff_incr
 !   values(1) = u(geoiter%ilon, geoiter%ilat)
 !   values(2) = v(geoiter%ilon, geoiter%ilat)
 !   values(3) = h(geoiter%ilon, geoiter%ilat)
-
 ! end subroutine getpoint
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine setpoint(self, geoiter, values)
-
 !   ! Passed variables
 !   type(shallow_water_state_type), intent(inout) :: self
 !   type(sw_geom_iter),             intent(   in) :: geoiter
@@ -635,13 +596,10 @@ end subroutine diff_incr
 !   u(geoiter%ilon, geoiter%ilat) = values(1)
 !   v(geoiter%ilon, geoiter%ilat) = values(2)
 !   h(geoiter%ilon, geoiter%ilat) = values(3)
-
 ! end subroutine setpoint
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine ug_size(self, ug)
-
 !   type(shallow_water_state_type), intent(   in) :: self
 !   type(unstructured_grid),        intent(inout) :: ug
 
@@ -673,13 +631,10 @@ end subroutine diff_incr
 
 !   ! Set number of timeslots
 !   ug%grid(1)%nts = ug%nts
-
 ! end subroutine ug_size
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine ug_coord(self, ug, geom)
-
 !   type(shallow_water_state_type),    intent(   in) :: self
 !   type(unstructured_grid),           intent(inout) :: ug
 !   type(shallow_water_geometry_type), intent(   in) :: geom
@@ -710,13 +665,10 @@ end subroutine diff_incr
 !       enddo
 !     enddo
 !   endif
-
 ! end subroutine ug_coord
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine increment_to_ug(self, ug, its)
-
 !   type(shallow_water_state_type), intent(   in) :: self
 !   type(unstructured_grid),        intent(inout) :: ug
 !   integer,                        intent(   in) :: its
@@ -776,13 +728,10 @@ end subroutine diff_incr
 !       enddo
 !     enddo
 !   endif
-
 ! end subroutine increment_to_ug
 
-! ! -----------------------------------------------------------------------------
 
 ! subroutine increment_from_ug(self, ug, its)
-
 !   type(shallow_water_state_type), intent(inout) :: self
 !   type(unstructured_grid),        intent(   in) :: ug
 !   integer,                        intent(   in) :: its
@@ -835,7 +784,6 @@ end subroutine diff_incr
 
 ! end subroutine increment_from_ug
 
-! ! ------------------------------------------------------------------------------
 
 ! subroutine jnormgrad(self, geom, ref, c_conf)
 
@@ -847,13 +795,10 @@ end subroutine diff_incr
 !   type(c_ptr),                       intent(   in) :: c_conf
 
 !   call abor1_ftn("sw increment:  jnormgrad not implemented yet")
-
 ! end subroutine jnormgrad
 
-! ! ------------------------------------------------------------------------------
 
 ! function genfilename (c_conf,length,vdate)
-
 !   use iso_c_binding
 !   use datetime_mod
 !   use duration_mod
@@ -917,9 +862,7 @@ end subroutine diff_incr
 
 !   if (lenfn>length) &
 !     & call abor1_ftn("sw_increment_mod:genfilename: filename too long")
-
 ! end function genfilename
 
-! ------------------------------------------------------------------------------
 
 end module wrf_hydro_nwm_jedi_increment_mod

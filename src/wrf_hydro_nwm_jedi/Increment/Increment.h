@@ -29,10 +29,12 @@ namespace oops {
   class UnstructuredGrid;
   class Variables;
 }
+
 namespace ufo {
   class GeoVaLs;
   class Locations;
 }
+
 namespace wrf_hydro_nwm_jedi {
   class Fields;
   class Geometry;
@@ -41,12 +43,17 @@ namespace wrf_hydro_nwm_jedi {
   typedef int F90inc;
 }
 
+
 // ----------------------------------------------------------------------------
 
 namespace wrf_hydro_nwm_jedi {
 
   // Increment class
-  class Increment : public util::Printable {
+  class Increment : public util::Printable
+    // public oops::GeneralizedDepartures,
+    // public util::Printable,
+    // private util::ObjectCounter<IncrementSW> {
+  {
    public:
     // Constructor, destructor
     Increment(const Geometry &,
@@ -58,18 +65,19 @@ namespace wrf_hydro_nwm_jedi {
 
     void read(const eckit::Configuration &);
     double norm() const;
-    void random();
 
+    void diff(const State &, const State &);
+    void zero();
+    void zero(const util::DateTime &);
     Increment & operator =(const Increment &);
     Increment & operator-=(const Increment &);
     Increment & operator+=(const Increment &);
     Increment & operator*=(const double &);
     void axpy(const double &, const Increment &, const bool check = true);
     double dot_product_with(const Increment &) const;
-    void zero();
-    void zero(const util::DateTime &);
-    void diff(const State &, const State &);
     void schur_product_with(const Increment &);
+    void random();
+    // void dirac(const eckit::Configuration &);
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,
@@ -104,13 +112,13 @@ namespace wrf_hydro_nwm_jedi {
     const F90inc & toFortran() const {return keyInc_;}
 
   private:
-    
     oops::Variables vars_;
     util::DateTime time_;
     F90inc keyInc_;
     void print(std::ostream &) const;
     std::unique_ptr<Fields> fields_;
   };
+
 }  // namespace wrf_hydro_nwm_jedi
 
 #endif  // WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_

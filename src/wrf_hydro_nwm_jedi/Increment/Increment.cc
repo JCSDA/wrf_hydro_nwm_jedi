@@ -21,8 +21,6 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-// ----------------------------------------------------------------------------
-  
   Increment::Increment(const Geometry & geom,
                        const oops::Variables & vars,
                        const util::DateTime & vt)
@@ -30,13 +28,14 @@ namespace wrf_hydro_nwm_jedi {
       vars_(vars),
       time_(vt)
   {
-    std::cout << "Main constructor in increment " << std::endl;
+    std::cout << "Increment::Increment 1 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_f90(
-	keyInc_, fields_->geometry()->toFortran(), vars_);
+	keyInc_,
+	fields_->geometry()->toFortran(),
+	vars_);
     // this->print(std::cout);
   }
 
-// ----------------------------------------------------------------------------
 
   Increment::Increment(const Increment & other,
 		       const bool copy)
@@ -50,21 +49,19 @@ namespace wrf_hydro_nwm_jedi {
     // this->print(std::cout);
   }
 
-// ----------------------------------------------------------------------------
 
   Increment::Increment(const Geometry &, Increment & other) {
     util::abor1_cpp("Increment::Increment() needs to be implemented.",
                      __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
-
   Increment::~Increment() {
     //util::abor1_cpp("Increment::~Increment() needs to be implemented.",
     //                __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
+
+  // ----------------------------------------------------------------------------
 
   Increment & Increment::operator =(const Increment &rhs) {
     wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, rhs.keyInc_);
@@ -72,7 +69,6 @@ namespace wrf_hydro_nwm_jedi {
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   Increment & Increment::operator -=(const Increment &dx) {
     ASSERT(this->validTime() == dx.validTime());
@@ -80,7 +76,6 @@ namespace wrf_hydro_nwm_jedi {
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   Increment & Increment::operator +=(const Increment &dx) {
     ASSERT(this->validTime() == dx.validTime());
@@ -88,14 +83,12 @@ namespace wrf_hydro_nwm_jedi {
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   Increment & Increment::operator *=(const double &zz) {
     wrf_hydro_nwm_jedi_increment_mul_f90(keyInc_, static_cast<float>(zz));
     return *this;
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::axpy(const double &scalar,
 		       const Increment &other,
@@ -104,7 +97,6 @@ namespace wrf_hydro_nwm_jedi {
 	keyInc_, static_cast<float>(scalar), other.keyInc_);
   }
 
-// ----------------------------------------------------------------------------
 
   double Increment::dot_product_with(const Increment & other) const {
     double result = 0.0;
@@ -115,20 +107,17 @@ namespace wrf_hydro_nwm_jedi {
     return result;
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::zero() {
     std::cout << "Zero function in Increment needs to be implemented" << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::zero(const util::DateTime & vt) {
     time_ = vt;
     // sw_increment_zero_f90(keyInc_);
   }
 
-  // ----------------------------------------------------------------------------
 
   void Increment::diff(const State & x1, const State & x2) {
     ASSERT(this->validTime() == x1.validTime());
@@ -139,22 +128,17 @@ namespace wrf_hydro_nwm_jedi {
     //                 __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::schur_product_with(const Increment & ) {
     util::abor1_cpp("Increment::schur_product_with() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::random() {
-    // util::abor1_cpp("Increment::random() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    //Needed by the test
+    wrf_hydro_nwm_jedi_increment_random_f90(toFortran());
   }
 
-// ----------------------------------------------------------------------------
 
   double Increment::norm() const {
     // util::abor1_cpp("Increment::norm() needs to be implemented.",
@@ -164,7 +148,6 @@ namespace wrf_hydro_nwm_jedi {
     return 0.0;
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::getValuesTL(const ufo::Locations &,
                               const oops::Variables &,
@@ -174,7 +157,6 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::getValuesAD(const ufo::Locations &,
                               const oops::Variables &,
@@ -184,7 +166,6 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::print(std::ostream & os) const {
     // util::abor1_cpp("Increment::print() needs to be implemented.",
@@ -198,59 +179,50 @@ namespace wrf_hydro_nwm_jedi {
     //    << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   const util::DateTime & Increment::validTime() const {
     return fields_->time();
   }
 
-// ----------------------------------------------------------------------------
 
   util::DateTime & Increment::validTime() {
     return fields_->time();
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::updateTime(const util::Duration & dt) {
     fields_->time() += dt;
   }
 
-// ----------------------------------------------------------------------------
 
   boost::shared_ptr<const Geometry> Increment::geometry() const {
     return fields_->geometry();
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::read(const eckit::Configuration & conf) {
     util::abor1_cpp("Increment::read() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::ug_coord(oops::UnstructuredGrid &) const {
     util::abor1_cpp("Increment::ug_coord() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::field_to_ug(oops::UnstructuredGrid &, const int &) const {
     util::abor1_cpp("Increment::field_to_ug() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::field_from_ug(const oops::UnstructuredGrid &, const int &) {
     util::abor1_cpp("Increment::field_from_ug() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   // oops::GridPoint Increment::getPoint(const GeometryIterator &) const {
   //   util::abor1_cpp("Increment::getPoint() needs to be implemented.",
@@ -262,21 +234,19 @@ namespace wrf_hydro_nwm_jedi {
   //   return oops::GridPoint(vars, vals, varlens);
   // }
 
-// ----------------------------------------------------------------------------
 
   void Increment::setPoint(const oops::GridPoint &, const GeometryIterator &) {
     util::abor1_cpp("Increment::setPoint() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Increment::accumul(const double & zz, const State & xx) {
     //sw_increment_axpy_state_f90(keyInc_, zz, xx.toFortran());
 
     util::abor1_cpp("Increment::accumul() needs to be implemented.",
                     __FILE__, __LINE__);
-}
-// -----------------------------------------------------------------------------
+  }
+
 
 }  // namespace wrf_hydro_nwm_jedi
