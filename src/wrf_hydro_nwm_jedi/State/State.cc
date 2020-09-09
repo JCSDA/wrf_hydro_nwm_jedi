@@ -96,7 +96,10 @@ namespace wrf_hydro_nwm_jedi {
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_, string);
+    os << "Print State (C++) ------------------------ ";
     os << string << std::endl;
+    os << "End Print State (C++) -------------------- ";
+
     delete[] string;
     // os << *fields_;
     // int const nf = 1;

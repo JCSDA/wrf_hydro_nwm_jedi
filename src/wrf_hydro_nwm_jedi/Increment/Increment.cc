@@ -170,7 +170,9 @@ namespace wrf_hydro_nwm_jedi {
   void Increment::print(std::ostream & os) const {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_increment_print_f90(keyInc_, string);
+    os << "Print Increment (C++) -------------------- ";
     os << string << std::endl ;
+    os << "End Print Increment (C++) ---------------- " << std::endl  << std::endl;
     delete[] string;
   }
 

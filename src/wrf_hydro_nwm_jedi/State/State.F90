@@ -336,41 +336,21 @@ end function genfilename
 
 
 !> Print state
-subroutine state_print(self, id_str, string)
+subroutine state_print(self, string)
   use iso_c_binding, only : c_null_char, c_new_line
   implicit none
   type(wrf_hydro_nwm_jedi_state),           intent(in)  :: self         !< State
-  character(len=5),               optional, intent(in)  :: id_str       !< State vs increment id.
   character(len=1, kind=c_char),  optional, intent(out) :: string(8192) !< The output string
 
   character(len=1, kind=c_char) :: local_string(8192)
-  character(len=5) :: id_str_
-  character(len=15) :: id_line
-  integer :: ii, id_line_len, ii_local
 
-  ! incmt
-  ! state 
-  if(present(id_str)) then
-     id_str_ = id_str
-  else
-     id_str_ = "State"
-  end if
-  
   if(present(string)) then
-     call self%fields_obj%print_all_fields(local_string)
-     !                  1     234567        89012      35    5
-     id_line = c_new_line // "Print "//trim(id_str_)//": "// c_new_line
-     id_line_len = len(id_line)
-     do ii = 1, id_line_len
-        string(ii:ii) = id_line(ii:ii)
-     end do
-     do ii = id_line_len+1, 8192-id_line_len+1
-        ii_local = ii-id_line_len
-        string(ii:ii) = local_string(ii_local:ii_local)
-     end do
+     call self%fields_obj%print_all_fields(string)
   else
-     write(*,*) c_new_line//"Print "//id_str_//"(in fortran): "
+     !                      "Print State (C++) ------------------------ ";
+     write(*,*) c_new_line//"Print State (Fortran) -------------------- "
      call self%fields_obj%print_all_fields()
+     write(*,*) c_new_line//"End Print State (Fortran) ---------------- "
   end if
 end subroutine state_print
 

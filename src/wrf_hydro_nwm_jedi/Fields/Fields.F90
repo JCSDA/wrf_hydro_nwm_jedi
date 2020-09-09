@@ -1255,7 +1255,7 @@ subroutine print_single_field(self, long_name, string)
   class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
   character(len=*),                 intent(in)    :: long_name
   character(len=*), optional,       intent(out)   :: string
-  
+
   class(base_field), pointer :: field_pointer
   call self%search_field(long_name, field_pointer)
   if(associated(field_pointer)) then
@@ -1268,25 +1268,24 @@ end subroutine print_single_field
 subroutine print_all_fields(self, string)
   use iso_c_binding, only : c_new_line
   implicit none
-  class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
+  class(wrf_hydro_nwm_jedi_fields),        intent(in ) :: self
   character(len=1, kind=c_char), optional, intent(out) :: string(8192) !< The output string
-  ! character(len=*),optional,        intent(out) :: string
   integer :: ff, ii, s_len
-  character(len=1024) :: local_str
-  character(len=8192) :: tmp_str
-  
+  character(len=8192) :: tmp_str, agg_str
+
   tmp_str = c_null_char
+  agg_str = ''
   if(present(string)) then
      do ff = 1, self%nf
-        call self%fields(ff)%field%print_field(local_str)
+        call self%fields(ff)%field%print_field(tmp_str)
         ! this aggregates the string over the passed fields
-        tmp_str = trim(tmp_str) // trim(local_str)
+        agg_str = trim(agg_str) // trim(tmp_str)
      end do
      ! To manually/visually check the aggregation of the string.
-     ! write(*,*) "[asdf "//trim(tmp_str)//"asdf]"
-     s_len = len_trim(tmp_str)
+     ! write(*,*) "[asdf "//trim(agg_str)//"asdf]"
+     s_len = len_trim(agg_str)
      do ii = 1, s_len
-        string(ii:ii) = tmp_str(ii:ii)
+        string(ii:ii) = agg_str(ii:ii)
      end do
      string(s_len+1) = c_null_char
   else
@@ -1328,7 +1327,7 @@ subroutine print_field_1d(self, string, print_array)
        c_new_line//'Std Dev: '//trim(float_str2) // &
        c_new_line//'RMS: '//trim(float_str3) // &
        c_new_line
-  
+
   if(present(string)) then
      write(string, *) trim(message)
   else
@@ -1371,7 +1370,7 @@ subroutine print_field_2d(self, string, print_array)
        c_new_line//'Std Dev: '//trim(float_str2) // &
        c_new_line//'RMS: '//trim(float_str3) // &
        c_new_line
-  
+
   if(present(string)) then
      write(string, *) trim(message)
   else
@@ -1426,7 +1425,7 @@ subroutine print_field_3d(self, string, print_array)
           c_new_line//'Std Dev: '//trim(float_str2) // &
           c_new_line//'RMS: '//trim(float_str3) // &
           c_new_line
-   
+
   if(present(string)) then
      write(string,*) trim(message)
   else

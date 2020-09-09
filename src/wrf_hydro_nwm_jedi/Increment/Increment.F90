@@ -82,20 +82,16 @@ subroutine increment_print(self, string)
   type(wrf_hydro_nwm_jedi_state),           intent(inout) :: self         !< increment is a state
   character(len=1, kind=c_char),  optional, intent(out  ) :: string(8192) !< The output string
 
-  character(len=5) :: id_str = 'Incrm'
-  integer:: ii
-  
-  call state_print(self, id_str=id_str, string=string)
-  ! if(present(string)) then
-  !    call state_print(self, id_str=id_str, string=string)
-  ! else
-  !    call state_print(self, id_str=id_str)
-  ! endif
-  write(*,*) "[zzzzzzz"
-  do ii = 1, 8192
-     write(*,*)  string(ii:ii)
-  end do
-  write(*,*) "zzzzzzz]"
+  integer :: ii
+
+  if(present(string)) then
+     call self%fields_obj%print_all_fields(string)
+  else
+     !                      "Print Increment (C++) -------------------- ";
+     write(*,*) c_new_line//"Print Increment (Fortran) ---------------- "
+     call self%fields_obj%print_all_fields()
+     write(*,*) c_new_line//"End Print Increment (Fortran) ------------ "
+  endif
   end subroutine increment_print
 
 
@@ -107,6 +103,7 @@ subroutine random_normal(self)
   integer :: ff
 
   call self%fields_obj%set_random_normal(rseed)
+  call increment_print(self)
 end subroutine random_normal
 
 
