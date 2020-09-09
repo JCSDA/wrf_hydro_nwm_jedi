@@ -43,8 +43,6 @@ public :: &
 ! self_schur, &
 ! self_sub, &
 ! self_mul, &
-! axpy_inc, &
-! axpy_state, &
 ! read_file, &
 ! write_file, &
 ! gpnorm, &
@@ -57,7 +55,6 @@ public :: &
 ! increment_from_ug, &
 ! dirac, &
 ! jnormgrad, &
-! increment_print
 
 
 contains
@@ -87,12 +84,14 @@ subroutine increment_print(self, string)
   if(present(string)) then
      call self%fields_obj%print_all_fields(string)
   else
+     write(*,*) c_new_line
      !                      "Print Increment (C++) -------------------- ";
      write(*,*) c_new_line//"Print Increment (Fortran) ---------------- "
      call self%fields_obj%print_all_fields()
      write(*,*) c_new_line//"End Print Increment (Fortran) ------------ "
+     write(*,*) c_new_line//c_new_line
   endif
-  end subroutine increment_print
+end subroutine increment_print
 
 
 subroutine random_normal(self)
@@ -103,7 +102,6 @@ subroutine random_normal(self)
   integer :: ff
 
   call self%fields_obj%set_random_normal(rseed)
-  call increment_print(self)
 end subroutine random_normal
 
 
@@ -157,6 +155,7 @@ subroutine diff_incr(self, x1, x2)
   write(*,*) "Difference invoked from diff_inc"
   call self%fields_obj%difference(x1%fields_obj, x2%fields_obj)
 
+  call increment_print(self)
   !   do j=geom_self%get_yps(), geom_self%get_ype()
   !      do i=geom_self%get_xps(), geom_self%get_xpe()
   !         self_u(i,j) = x1_u(i,j) - x2_u(i,j)

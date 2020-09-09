@@ -95,6 +95,7 @@ namespace wrf_hydro_nwm_jedi {
   void Increment::axpy(const double &scalar,
 		       const Increment &other,
 		       const bool check) {
+    ASSERT(this->validTime() == other.validTime());
     wrf_hydro_nwm_jedi_axpy_inc_f90(
 	keyInc_, static_cast<float>(scalar), other.keyInc_);
   }
@@ -171,7 +172,7 @@ namespace wrf_hydro_nwm_jedi {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_increment_print_f90(keyInc_, string);
     os << "Print Increment (C++) -------------------- ";
-    os << string << std::endl ;
+    os << string;
     os << "End Print Increment (C++) ---------------- " << std::endl  << std::endl;
     delete[] string;
   }

@@ -24,7 +24,10 @@ implicit none
 
 private
 
-public :: wrf_hydro_nwm_jedi_fields, checksame, base_field !, &
+public :: &
+     wrf_hydro_nwm_jedi_fields, &
+     checksame, &
+     base_field !, &
 ! has_field, &
 ! long_name_to_wrf_hydro_name, &
 ! pointer_field, &
@@ -730,14 +733,14 @@ subroutine add_increment(self, inc)
 
   write(*,*) "Increment invoked in Fields.F90"
   do f = 1, self%nf
-     call self%fields(f)%field%add_incr (inc%fields(f)%field)
+     call self%fields(f)%field%add_incr(inc%fields(f)%field)
   end do
 end subroutine add_increment
 
 
 subroutine add_incr_1d(self, inc)
-  class(field_1d), intent(inout) :: self
-  class(base_field), intent(in) :: inc
+  class(field_1d),   intent(inout) :: self
+  class(base_field), intent(in)    :: inc
 
   select type(inc)
   type is (field_1d)

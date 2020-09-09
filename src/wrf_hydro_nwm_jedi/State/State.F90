@@ -30,12 +30,12 @@ use netcdf
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_state, &
+public :: &
+     wrf_hydro_nwm_jedi_state, &
      create, &
      delete, &
      zeros, &
      copy,  &
-     axpy, &
      create_from_other, &
      add_incr, &
      read_state_from_file,  &
@@ -138,22 +138,6 @@ subroutine copy(self, rhs)
   ! call rhs%fields_obj%print_all_fields()
   ! call self%fields_obj%print_all_fields()
 end subroutine copy
-
-
-subroutine axpy(self, zz, rhs)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-  real(kind=c_float), intent(in)    :: zz
-  type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
-  
-  ! integer :: var
-  
-  ! call checksame(self%fields_obj, rhs%fields_obj,"wrf_hydro_nwm_jedi_state_mod.axpy")
-  
-  ! do var = 1, self%nf
-  !   self%fields_obj(var)%array = self%fields_obj(var)%array + zz * rhs%fields_obj(var)%array
-  ! enddo
-end subroutine axpy
 
 
 subroutine add_incr(self, rhs)
@@ -347,10 +331,12 @@ subroutine state_print(self, string)
   if(present(string)) then
      call self%fields_obj%print_all_fields(string)
   else
+     write(*,*) c_new_line
      !                      "Print State (C++) ------------------------ ";
      write(*,*) c_new_line//"Print State (Fortran) -------------------- "
      call self%fields_obj%print_all_fields()
      write(*,*) c_new_line//"End Print State (Fortran) ---------------- "
+     write(*,*) c_new_line//c_new_line
   end if
 end subroutine state_print
 
