@@ -168,15 +168,10 @@ namespace wrf_hydro_nwm_jedi {
 
 
   void Increment::print(std::ostream & os) const {
-    // util::abor1_cpp("Increment::print() needs to be implemented.",
-    //                 __FILE__, __LINE__);
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_increment_print_f90(keyInc_, string);
-    os << string;
+    os << string << std::endl ;
     delete[] string;
-    // os << "Increment: "
-    //    << "(TODO, print diagnostic info about the increment here)"
-    //    << std::endl;
   }
 
 

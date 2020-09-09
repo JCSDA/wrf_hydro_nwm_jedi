@@ -6,7 +6,8 @@
 !> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
 module wrf_hydro_nwm_jedi_fields_mod
 
-use iso_c_binding, only: c_int, c_float,c_double
+  use iso_c_binding, only: &
+       c_int, c_float, c_double, c_char, c_null_char
 use datetime_mod
 use fckit_mpi_module
 use random_mod
@@ -1249,44 +1250,54 @@ end subroutine print_field_dims_3d
 !-----------------------------------------------------------------------------
 ! Print
 
-subroutine print_single_field(self,long_name,string)
+subroutine print_single_field(self, long_name, string)
   implicit none
-  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
-  character(len=*),    intent(in)  :: long_name
-  character(len=*),optional,intent(out)  :: string
+  class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
+  character(len=*),                 intent(in)    :: long_name
+  character(len=*), optional,       intent(out)   :: string
+  
   class(base_field), pointer :: field_pointer
-
-  call self%search_field(long_name,field_pointer)
-
+  call self%search_field(long_name, field_pointer)
   if(associated(field_pointer)) then
      call field_pointer%print_field(string)
   end if
 end subroutine print_single_field
 
 
+!> Print all fields
 subroutine print_all_fields(self, string)
   use iso_c_binding, only : c_new_line
   implicit none
-  class(wrf_hydro_nwm_jedi_fields), intent(in ) :: self
-  character(len=*),optional,        intent(out) :: string
-  integer :: ff
+  class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
+  character(len=1, kind=c_char), optional, intent(out) :: string(8192) !< The output string
+  ! character(len=*),optional,        intent(out) :: string
+  integer :: ff, ii, s_len
   character(len=1024) :: local_str
-
-  string = ' '
-
-  do ff = 1, self%nf
-     if(present(string)) then
+  character(len=8192) :: tmp_str
+  
+  tmp_str = c_null_char
+  if(present(string)) then
+     do ff = 1, self%nf
         call self%fields(ff)%field%print_field(local_str)
-        string = trim(string) // trim(local_str) // c_new_line
-     else
+        ! this aggregates the string over the passed fields
+        tmp_str = trim(tmp_str) // trim(local_str)
+     end do
+     ! To manually/visually check the aggregation of the string.
+     ! write(*,*) "[asdf "//trim(tmp_str)//"asdf]"
+     s_len = len_trim(tmp_str)
+     do ii = 1, s_len
+        string(ii:ii) = tmp_str(ii:ii)
+     end do
+     string(s_len+1) = c_null_char
+  else
+     do ff = 1, self%nf
         call self%fields(ff)%field%print_field()
-     end if
-  end do
+     end do
+  end if
 end subroutine print_all_fields
 
 
 !> Print method for a 1d field
-! @todo, this is identical to 2d?
 subroutine print_field_1d(self, string, print_array)
   use iso_c_binding, only : c_new_line, c_float
   implicit none
@@ -1298,6 +1309,7 @@ subroutine print_field_1d(self, string, print_array)
   real(kind=c_float) :: mean, stddev
   character(len=255) :: float_str1, float_str2, float_str3
   character(len=255) :: int_str1
+  character(len=8192) :: message
 
   if(.not.(present(print_array))) print_array_ = .FALSE.
 
@@ -1305,27 +1317,22 @@ subroutine print_field_1d(self, string, print_array)
   write(float_str1, *) mean
   write(float_str2, *) stddev
   write(float_str3, *) self%rms()
-
   write(int_str1, *) self%xdim_len
 
+  write(message,*) &
+       c_new_line//self%wrf_hydro_nwm_name // &
+       c_new_line//self%long_name //  &
+       c_new_line//'1D Field shape: ( ' // &
+       trim(int_str1) // ' )' // &
+       c_new_line//'Mean: '//trim(float_str1) // &
+       c_new_line//'Std Dev: '//trim(float_str2) // &
+       c_new_line//'RMS: '//trim(float_str3) // &
+       c_new_line
+  
   if(present(string)) then
-     write(string,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'1D Field shape: ( ' // &
-          trim(int_str1) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(string, *) trim(message)
   else
-     write(*,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'1D Field shape: ( ' // &
-          trim(int_str1) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(*, *) trim(message)
      if(print_array_) write(*,*) self%array
   end if
 end subroutine print_field_1d
@@ -1342,6 +1349,7 @@ subroutine print_field_2d(self, string, print_array)
   real(kind=c_float) :: mean, stddev
   character(len=255) :: float_str1, float_str2, float_str3
   character(len=255) :: int_str1, int_str2
+  character(len=8192) :: message
 
   if(.not.(present(print_array))) print_array_ = .FALSE.
 
@@ -1353,26 +1361,21 @@ subroutine print_field_2d(self, string, print_array)
   write(int_str1, *) self%xdim_len
   write(int_str2, *) self%ydim_len
 
+  write(message, *) &
+       c_new_line//self%wrf_hydro_nwm_name // &
+       c_new_line//self%long_name //  &
+       c_new_line//'2D Field shape: ( ' // &
+       trim(int_str1) // ', ' // &
+       trim(int_str2) // ' )' // &
+       c_new_line//'Mean: '//trim(float_str1) // &
+       c_new_line//'Std Dev: '//trim(float_str2) // &
+       c_new_line//'RMS: '//trim(float_str3) // &
+       c_new_line
+  
   if(present(string)) then
-     write(string,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'2D shape: ( ' // &
-          trim(int_str1) // ', ' // &
-          trim(int_str2) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(string, *) trim(message)
   else
-     write(*,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'2D shape: ( ' // &
-          trim(int_str1) // ', ' // &
-          trim(int_str2) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(*,*) trim(message)
      if(print_array_) write(*,*) self%array
   end if
 end subroutine print_field_2d
@@ -1390,6 +1393,7 @@ subroutine print_field_3d(self, string, print_array)
   real(kind=c_float) :: mean, stddev
   character(len=255) :: float_str1, float_str2, float_str3
   character(len=255) :: int_str1, int_str2, int_str3, zlayer_str
+  character(len=8192) :: message
 
   if(.not.(present(print_array))) print_array_ = .FALSE.
 
@@ -1411,28 +1415,22 @@ subroutine print_field_3d(self, string, print_array)
   write(int_str3, *) self%zdim_len
   ! write(zlayer_str, *) z_layer
 
+  write(message, *) &
+          c_new_line//self%wrf_hydro_nwm_name // &
+          c_new_line//self%long_name //  &
+          c_new_line//'3D Field shape: ( ' // &
+          trim(int_str1) // ', ' // &
+          trim(int_str2) // ', ' // &
+          trim(int_str3) // ' )' // &
+          c_new_line//'Mean: '//trim(float_str1) // &
+          c_new_line//'Std Dev: '//trim(float_str2) // &
+          c_new_line//'RMS: '//trim(float_str3) // &
+          c_new_line
+   
   if(present(string)) then
-     write(string,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'3D shape: ( ' // &
-          trim(int_str1) // ', ' // &
-          trim(int_str2) // ', ' // &
-          trim(int_str3) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(string,*) trim(message)
   else
-     write(*,*) &
-          c_new_line//self%wrf_hydro_nwm_name // &
-          c_new_line//self%long_name //  &
-          c_new_line//'3D shape: ( ' // &
-          trim(int_str1) // ', ' // &
-          trim(int_str2) // ', ' // &
-          trim(int_str3) // ' )' // &
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(*,*) trim(message)
      if(print_array_) write(*,*) self%array
   end if
 end subroutine print_field_3d

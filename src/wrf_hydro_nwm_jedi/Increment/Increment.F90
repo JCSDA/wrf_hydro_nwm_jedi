@@ -5,6 +5,7 @@
 
 module wrf_hydro_nwm_jedi_increment_mod
 
+use iso_c_binding, only: c_char, c_new_line
 use fckit_configuration_module, only: fckit_configuration
 use datetime_mod
 use fckit_mpi_module
@@ -16,7 +17,8 @@ use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
 use wrf_hydro_nwm_jedi_constants_mod, only: zero_c_double, zero_c_float, one_c_float
 
 use iso_c_binding, only : c_float
-use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state, create_from_other
+use wrf_hydro_nwm_jedi_state_mod, only: &
+     wrf_hydro_nwm_jedi_state, create_from_other, state_print
 
 !GetValues
 use ufo_locs_mod,          only: ufo_locs
@@ -26,7 +28,8 @@ implicit none
 
 private
 public :: &
-     create_increment, &
+     increment_create, &
+     increment_print, &
      diff_incr, &
      self_mul, &
      axpy_inc, &
@@ -60,7 +63,7 @@ public :: &
 contains
 
   
-subroutine create_increment(self, geom, vars)
+subroutine increment_create(self, geom, vars)
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in)    :: geom
@@ -71,7 +74,29 @@ subroutine create_increment(self, geom, vars)
   call self%fields_obj%create(geom, vars) !Initializes to zero by default
   ! Initialize all arrays to zero
   ! call self%fields_obj%zeros()
-end subroutine create_increment
+end subroutine increment_create
+
+
+subroutine increment_print(self, string)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),           intent(inout) :: self         !< increment is a state
+  character(len=1, kind=c_char),  optional, intent(out  ) :: string(8192) !< The output string
+
+  character(len=5) :: id_str = 'Incrm'
+  integer:: ii
+  
+  call state_print(self, id_str=id_str, string=string)
+  ! if(present(string)) then
+  !    call state_print(self, id_str=id_str, string=string)
+  ! else
+  !    call state_print(self, id_str=id_str)
+  ! endif
+  write(*,*) "[zzzzzzz"
+  do ii = 1, 8192
+     write(*,*)  string(ii:ii)
+  end do
+  write(*,*) "zzzzzzz]"
+  end subroutine increment_print
 
 
 subroutine random_normal(self)
@@ -83,6 +108,66 @@ subroutine random_normal(self)
 
   call self%fields_obj%set_random_normal(rseed)
 end subroutine random_normal
+
+
+subroutine self_mul(self, zz)
+  use iso_c_binding, only: c_float
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  real(c_float),                  intent(   in) :: zz
+
+  call self%fields_obj%scalar_mult(zz)
+end subroutine self_mul
+
+
+!> Method for linear transform axpy == a*x+y == scalar*other + self
+!> @todo implement the resolution check requested by oops?
+subroutine axpy_inc(self, scalar, other_in)
+  use iso_c_binding, only: c_float
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  real(kind=c_float),             intent(   in) :: scalar
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other_in
+
+  type(wrf_hydro_nwm_jedi_state) :: other
+
+  call create_from_other(other, other_in)
+  call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
+  call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
+end subroutine axpy_inc
+
+
+function dot_prod(self, other) result(the_result)
+  use iso_c_binding, only: c_double
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: other
+  real(c_double)                             :: the_result
+
+  the_result = zero_c_double
+  the_result = self%fields_obj%dot_prod(other%fields_obj)
+  write(*,*) "Increment dot product invoked ", the_result
+end function dot_prod
+
+
+subroutine diff_incr(self, x1, x2)
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x1
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x2
+
+  integer                           :: i, j
+
+  write(*,*) "Difference invoked from diff_inc"
+  call self%fields_obj%difference(x1%fields_obj, x2%fields_obj)
+
+  !   do j=geom_self%get_yps(), geom_self%get_ype()
+  !      do i=geom_self%get_xps(), geom_self%get_xpe()
+  !         self_u(i,j) = x1_u(i,j) - x2_u(i,j)
+  !         self_v(i,j) = x1_v(i,j) - x2_v(i,j)
+  !         self_h(i,j) = x1_h(i,j) - x2_h(i,j)
+  !      end do
+  !   end do
+end subroutine diff_incr
 
 
 ! subroutine create_from_other(self, other)
@@ -191,32 +276,6 @@ end subroutine random_normal
 ! end subroutine self_sub
 
 
-subroutine self_mul(self, zz)
-  use iso_c_binding, only: c_float
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  real(c_float),                  intent(   in) :: zz
-
-  call self%fields_obj%scalar_mult(zz)
-end subroutine self_mul
-
-
-!> Method for linear transform axpy == a*x+y == scalar*other + self
-!> @todo implement the resolution check requested by oops?
-subroutine axpy_inc(self, scalar, other_in)
-  use iso_c_binding, only: c_float
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  real(kind=c_float),             intent(   in) :: scalar
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other_in
-
-  type(wrf_hydro_nwm_jedi_state) :: other
-
-  call create_from_other(other, other_in)
-  call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
-  call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
-end subroutine axpy_inc
-
 ! ! ------------------------------------------------------------------------------
 
 ! subroutine axpy_state(self, zz, rhs)
@@ -260,39 +319,6 @@ end subroutine axpy_inc
 !   endif
 
 ! end subroutine axpy_state
-
-
-function dot_prod(self, other) result(the_result)
-  use iso_c_binding, only: c_double
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
-  type(wrf_hydro_nwm_jedi_state), intent(in) :: other
-  real(c_double)                             :: the_result
-
-  the_result = zero_c_double
-  the_result = self%fields_obj%dot_prod(other%fields_obj)
-  write(*,*) "Increment dot product invoked ", the_result
-end function dot_prod
-
-
-subroutine diff_incr(self, x1, x2)
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x1
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: x2
-
-  integer                           :: i, j
-
-  write(*,*) "Difference invoked from diff_inc"
-  call self%fields_obj%difference(x1%fields_obj, x2%fields_obj)
-
-  !   do j=geom_self%get_yps(), geom_self%get_ype()
-  !      do i=geom_self%get_xps(), geom_self%get_xpe()
-  !         self_u(i,j) = x1_u(i,j) - x2_u(i,j)
-  !         self_v(i,j) = x1_v(i,j) - x2_v(i,j)
-  !         self_h(i,j) = x1_h(i,j) - x2_h(i,j)
-  !      end do
-  !   end do
-end subroutine diff_incr
 
 
 ! subroutine change_resol(self, rhs)
@@ -376,75 +402,6 @@ end subroutine diff_incr
 !   end if
 !   call self%write(trim(filename))
 ! end subroutine write_file
-
-
-! subroutine increment_print(self)
-!   implicit none
-!   type(shallow_water_state_type), intent(in) :: self
-
-!   type(fckit_mpi_comm)              :: f_comm
-!   type(shallow_water_geometry_type) :: geom
-!   integer                           :: xps, xpe, yps, ype, i
-!   real(r8kind)                      :: n
-!   real(r8kind)                      :: tmp(3), pstat(3)
-!   real(r8kind), pointer             :: field(:,:)
-!   character(len=1)                  :: fields(3)
-
-!   ! Get MPI communicator
-!   f_comm = fckit_mpi_comm()
-
-!   ! Set fields
-!   fields(1) = "U"
-!   fields(2) = "V"
-!   fields(3) = "H"
-
-!   ! Get local indices
-!   geom = self%get_geometry()
-!   xps = geom%get_xps()
-!   xpe = geom%get_xpe()
-!   yps = geom%get_yps()
-!   ype = geom%get_ype()
-
-!   ! Get total global size of fields
-!   n = real(geom%get_nx() * geom%get_ny(), r8kind)
-  
-!   ! Print header
-!   if (f_comm%rank() == 0) then
-!     write(*,"(A70)") "----------------------------------------------------------------------"
-!     write(*,"(A17)") "|     Increment print" 
-!     write(*,"(A70)") "----------------------------------------------------------------------"
-!   endif
-
-!   ! Print field stats
-!   do i = 1, size(fields)
-!     select case(fields(i))
-!       case("U")
-!         call self%get_u_ptr(field)
-!       case("V")
-!         call self%get_v_ptr(field)
-!       case("H")
-!         call self%get_h_ptr(field)
-!       case DEFAULT
-!         call abor1_ftn("sw_increment: increment_print, invalid field" // fields(i))         
-!     end select
-
-!     tmp(1) = minval(field(xps:xpe, yps:ype))
-!     tmp(2) = maxval(field(xps:xpe, yps:ype))
-!     tmp(3) =    sum(field(xps:xpe, yps:ype)**2)
-!     call f_comm%allreduce(tmp(1), pstat(1), fckit_mpi_min())
-!     call f_comm%allreduce(tmp(2), pstat(2), fckit_mpi_max())
-!     call f_comm%allreduce(tmp(3), pstat(3), fckit_mpi_sum())
-!     pstat(3) = sqrt(pstat(3) / n)
-!     if (f_comm%rank() == 0) write(*,"(A10,A6,ES14.7,A6,ES14.7,A6,ES14.7)") &
-!                                      fields(i),                            &
-!                                      "| Min=",real(pstat(1),4),            &
-!                                      ", Max=",real(pstat(2),4),            &
-!                                      ", RMS=",real(pstat(3),4)
-!   end do
-
-!   if (f_comm%rank() == 0) &
-!     write(*,"(A70)") "---------------------------------------------------------------------"
-! end subroutine increment_print
 
 
 ! subroutine gpnorm(self, nf, pstat)

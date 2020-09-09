@@ -20,8 +20,9 @@ use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_increment_mod, only: &
+     increment_create, &
+     increment_print, &
      diff_incr, &
-     create_increment, &
      self_mul, &
      axpy_inc, &
      dot_prod, &
@@ -68,7 +69,7 @@ subroutine wrf_hydro_nwm_jedi_increment_create_c( &
 
   vars = oops_variables(c_vars)
   write(*,*) "Invoking create from Increment ",trim(vars%variable(1))
-  call create_increment(self, geom, vars)
+  call increment_create(self, geom, vars)
 end subroutine wrf_hydro_nwm_jedi_increment_create_c
 
 
@@ -99,7 +100,7 @@ subroutine wrf_hydro_nwm_jedi_increment_random_c(c_key_self) &
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
   call random_normal(self)
-  call state_print(self)
+  ! call increment_print(self)
 end subroutine wrf_hydro_nwm_jedi_increment_random_c
 
 
@@ -127,7 +128,7 @@ subroutine wrf_hydro_nwm_jedi_increment_print_c(c_key_self, string) &
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
-  call state_print(self, string)
+  call increment_print(self, string=string)
 end subroutine wrf_hydro_nwm_jedi_increment_print_c
 
 

@@ -300,7 +300,7 @@ subroutine wrf_hydro_nwm_jedi_state_print_c(c_key_self, string) &
   type(wrf_hydro_nwm_jedi_state), pointer :: self
 
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
-  call state_print(self, string)
+  call state_print(self, string=string)
 end subroutine wrf_hydro_nwm_jedi_state_print_c
 
 
