@@ -6,12 +6,16 @@
 !> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
 module wrf_hydro_nwm_jedi_fields_mod
 
-use iso_c_binding, only: c_int, c_float,c_double
+  use iso_c_binding, only: &
+       c_int, c_float, c_double, c_char, c_null_char
 use datetime_mod
 use fckit_mpi_module
+use random_mod
+
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices, datetime_eq
-use wrf_hydro_nwm_jedi_constants_mod, only: unopened_ncid, zero_c_double, zero_c_float
+use wrf_hydro_nwm_jedi_constants_mod, only: &
+     unopened_ncid, zero_c_double, zero_c_float, one_c_float
 use oops_variables_mod
 use netcdf
 ! use mpp_domains_mod,   only: east, north, center
@@ -20,7 +24,10 @@ implicit none
 
 private
 
-public :: wrf_hydro_nwm_jedi_fields, checksame, base_field !, &
+public :: &
+     wrf_hydro_nwm_jedi_fields, &
+     checksame, &
+     base_field !, &
 ! has_field, &
 ! long_name_to_wrf_hydro_name, &
 ! pointer_field, &
@@ -37,6 +44,7 @@ public :: wrf_hydro_nwm_jedi_fields, checksame, base_field !, &
 
 !-----------------------------------------------------------------------------
 ! Abstract definitions
+
 
 !> Abstract field definition
 ! @todo should this be public?
@@ -57,6 +65,7 @@ type, abstract, public :: base_field
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
    procedure (zero_interface), deferred :: zero
+   procedure (set_random_normal_interface), deferred :: set_random_normal
    procedure (dot_prod_interface), deferred :: dot_prod
    procedure (rms_interface), deferred :: rms
    procedure (add_incr_interface), pass(self), deferred :: add_incr
@@ -68,10 +77,11 @@ end type base_field
 
 
 abstract interface
-   subroutine print_field_interface(self, string)
+   subroutine print_field_interface(self, string, print_array)
      import base_field
-     class(base_field), intent(in) :: self
+     class(base_field),          intent(in ) :: self
      character(len=*), optional, intent(out) :: string
+     logical,          optional, intent(in ) :: print_array
    end subroutine print_field_interface
 
    subroutine print_field_dims_interface(self)
@@ -134,6 +144,12 @@ abstract interface
      class(base_field), intent(inout) :: self
    end subroutine zero_interface
 
+   subroutine set_random_normal_interface(self, seed)
+     import base_field
+     class(base_field), intent(inout) :: self
+     integer,           intent(in   ) :: seed
+   end subroutine set_random_normal_interface
+
    function dot_prod_interface(self, other) result(dot_prod)
      use iso_c_binding, only: c_double
      import base_field
@@ -149,6 +165,44 @@ abstract interface
      real(c_float)                 :: rms
    end function rms_interface
 end interface
+
+
+!> An elementary field. The function is twofold:
+! 1) It allows one to create an array of base class object
+! 2) It makes it possible to organize the element data structures
+! other than simple arrays (e.g. binary search tree, hash tables, etc...)
+type, private :: elem_field
+   class(base_field), allocatable :: field
+end type elem_field
+
+
+!> Fortran mirror of C class
+type, public :: wrf_hydro_nwm_jedi_fields
+   integer :: nf
+   ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
+   ! real(kind=c_float), allocatable :: array(:,:,:)
+   ! logical :: integerfield = .false.
+   type(elem_field), allocatable :: fields(:)
+ contains
+   procedure :: create
+   procedure :: search_field
+   procedure :: read_fields_from_file
+   procedure :: print_single_field
+   procedure :: print_all_fields
+   procedure :: add_increment
+   procedure :: difference
+   procedure :: scalar_mult
+   procedure :: zero
+   procedure :: set_random_normal
+   procedure :: rms
+   procedure :: dot_prod
+   ! procedure :: allocate_field
+   ! procedure :: equals
+   ! procedure :: copy => field_copy
+   ! generic :: assignment(=) => equals
+   procedure :: deallocate_field
+   ! procedure :: mean_stddev
+end type wrf_hydro_nwm_jedi_fields
 
 
 !-----------------------------------------------------------------------------
@@ -169,6 +223,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: diff => diff_1d
    procedure :: add_incr => add_incr_1d
    procedure :: zero => zero_1d
+   procedure :: set_random_normal => set_random_normal_1d
    procedure :: dot_prod => dot_prod_1d
    procedure, pass(self) :: rms => rms_1d
    procedure :: scalar_mul => scalar_mul_1d
@@ -194,6 +249,7 @@ type, private, extends(base_field) :: field_2d
    procedure :: add_incr => add_incr_2d
    procedure :: scalar_mul => scalar_mul_2d
    procedure :: zero => zero_2d
+   procedure :: set_random_normal => set_random_normal_2d
    procedure :: dot_prod => dot_prod_2d
    ! Destructor
    ! final :: destroy_field_2d
@@ -217,47 +273,11 @@ type, private, extends(base_field) :: field_3d
    procedure :: add_incr => add_incr_3d
    procedure :: scalar_mul => scalar_mul_3d
    procedure :: zero => zero_3d
+   procedure :: set_random_normal => set_random_normal_3d
    procedure :: dot_prod => dot_prod_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
-
-
-!> An elementary field. The function is twofold:  
-! 1) It allows one to create an array of base class object  
-! 2) It makes it possible to organize the element data structures  
-! other than simple arrays (e.g. binary search tree, hash tables, etc...)
-type, private :: elem_field
-   class(base_field), allocatable :: field
-end type elem_field
-
-
-!> Fortran mirror of C class
-type, public :: wrf_hydro_nwm_jedi_fields
-   integer :: nf
-   ! integer :: xdim_len, ydim_len, dim3_len !refer to geometry and depth
-   ! real(kind=c_float), allocatable :: array(:,:,:)
-   ! logical :: integerfield = .false.
-   type(elem_field), allocatable :: fields(:)
- contains
-   procedure :: create
-   procedure :: search_field
-   procedure :: read_fields_from_file
-   procedure :: print_single_field
-   procedure :: print_all_fields
-   procedure :: add_increment
-   procedure :: difference
-   procedure :: scalar_mult
-   procedure :: zeros
-   procedure :: rms
-   procedure :: dot_prod
-   ! procedure :: allocate_field
-   ! procedure :: equals
-   ! procedure :: copy => field_copy
-   ! generic :: assignment(=) => equals
-   procedure :: deallocate_field
-   ! procedure :: mean_stddev
-end type wrf_hydro_nwm_jedi_fields
 
 
 contains
@@ -519,7 +539,7 @@ subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
      wrf_hydro_nwm_name = long_name
   end if
   !linear search
-  do n = 1, size(self%fields)
+  do n = 1, self%nf
      if (trim(wrf_hydro_nwm_name) == trim(self%fields(n)%field%wrf_hydro_nwm_name)) then
         field_pointer => self%fields(n)%field
         return
@@ -602,11 +622,11 @@ subroutine checksame(self, other, method)
   character(len=*),                intent(in) :: method
   integer :: var
 
-  if (size(self%fields) .ne. size(other%fields)) then
+  if (self%nf .ne. other%nf) then
      call abor1_ftn(trim(method)//"(checksame): Different number of fields")
   endif
 
-  do var = 1,size(self%fields)
+  do var = 1, self%nf
      if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
         write(*,*) self%fields(var)%field%wrf_hydro_nwm_name, other%fields(var)%field%wrf_hydro_nwm_name
         call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
@@ -628,7 +648,7 @@ subroutine difference(self, f1, f2)
 
   integer :: ff
 
-  do ff = 1,size(self%fields)
+  do ff = 1, self%nf
      ! - operator is overloaded from the base_field
      self%fields(ff)%field = f1%fields(ff)%field - f2%fields(ff)%field
   end do
@@ -712,15 +732,15 @@ subroutine add_increment(self, inc)
   integer :: f
 
   write(*,*) "Increment invoked in Fields.F90"
-  do f = 1,size(self%fields)
-     call self%fields(f)%field%add_incr (inc%fields(f)%field)
+  do f = 1, self%nf
+     call self%fields(f)%field%add_incr(inc%fields(f)%field)
   end do
 end subroutine add_increment
 
 
 subroutine add_incr_1d(self, inc)
-  class(field_1d), intent(inout) :: self
-  class(base_field), intent(in) :: inc
+  class(field_1d),   intent(inout) :: self
+  class(base_field), intent(in)    :: inc
 
   select type(inc)
   type is (field_1d)
@@ -769,7 +789,7 @@ subroutine scalar_mult(self, scalar)
   integer :: ff
 
   write(*,*) "Scalar mult invoked in Fields.F90"
-  do ff = 1,size(self%fields)
+  do ff = 1, self%nf
      call self%fields(ff)%field%scalar_mul(scalar)
   end do
 end subroutine scalar_mult
@@ -799,16 +819,16 @@ end subroutine scalar_mul_3d
 !-----------------------------------------------------------------------------
 ! Zero fields
 
-subroutine zeros(self)
+subroutine zero(self)
   implicit none
   class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
 
   integer :: f
 
-  do f = 1,size(self%fields)
+  do f = 1, self%nf
      call self%fields(f)%field%zero()
   end do
-end subroutine zeros
+end subroutine zero
 
 
 subroutine zero_1d(self)
@@ -832,6 +852,60 @@ subroutine zero_3d(self)
 end subroutine zero_3d
 
 
+!-----------------------------------------------------------------------------
+! set_random_normal
+
+subroutine set_random_normal(self, seed)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  integer,                           intent(in)    :: seed
+
+  integer :: ff
+
+  do ff = 1, self%nf
+     call self%fields(ff)%field%set_random_normal(seed)
+  end do
+end subroutine set_random_normal
+
+
+subroutine set_random_normal_1d(self, seed)
+  class(field_1d), intent(inout) :: self
+  integer,         intent(in)    :: seed
+
+  call normal_distribution( &
+       self%array, &
+       zero_c_float, one_c_float, seed)
+end subroutine set_random_normal_1d
+
+
+subroutine set_random_normal_2d(self, seed)
+  class(field_2d), intent(inout) :: self
+  integer,         intent(in)    :: seed
+
+  integer :: jj
+  do jj = 1, size(self%array, 2)
+     call normal_distribution( &
+          self%array(:, jj), &
+          zero_c_float, one_c_float, seed)
+  end do
+end subroutine set_random_normal_2d
+
+
+subroutine set_random_normal_3d(self, seed)
+  class(field_3d), intent(inout) :: self
+  integer,         intent(in)    :: seed
+
+  integer :: jj, kk
+  do jj = 1, size(self%array, 2)
+     do kk = 1, size(self%array, 3)
+        call normal_distribution( &
+             self%array(:, jj, kk), &
+             zero_c_float, one_c_float, seed)
+     end do
+  end do
+end subroutine set_random_normal_3d
+
+
 ! -----------------------------------------------------------------------------
 ! Dot product
 
@@ -844,7 +918,7 @@ function dot_prod(self, other)
   integer :: ff
 
   dot_prod = zero_c_double
-  do ff = 1, size(self%fields)
+  do ff = 1, self%nf
      dot_prod = dot_prod + self%fields(ff)%field%dot_prod(other%fields(ff)%field)
   end do
 end function dot_prod
@@ -861,7 +935,7 @@ function dot_prod_1d(self, other)
 
   select type(other)
   type is (field_1d)
-     do ii = 1, size(self%array,1)
+     do ii = 1, size(self%array, 1)
         dot_prod_1d = dot_prod_1d + self%array(ii) * other%array(ii)
      end do
   class default
@@ -881,8 +955,8 @@ function dot_prod_2d(self, other)
   
   select type(other)
   type is (field_2d)
-     do ii = 1, size(self%array,1)
-        do jj = 1, size(self%array,2)
+     do ii = 1, size(self%array, 1)
+        do jj = 1, size(self%array, 2)
           dot_prod_2d = dot_prod_2d + self%array(ii, jj) * other%array(ii, jj)
         end do
      end do
@@ -927,21 +1001,21 @@ subroutine mean_stddev_1d(self, mean, stddev)
   real(c_float), intent(inout) :: mean, stddev
 
   real(c_double) :: tmp
-  integer :: n, i, j
+  integer :: nn, ii
 
-  n = size(self%array, 1)
+  nn = size(self%array, 1)
 
   tmp = zero_c_double
   tmp = sum(self%array(:))
-  tmp = tmp / n
+  tmp = tmp / nn
   mean = real(tmp, kind=c_float)
 
   !Computing stddev
   tmp = zero_c_double
-  do i=1, size(self%array, 1)
-        tmp = tmp + (self%array(i) - mean)**2
+  do ii = 1, size(self%array, 1)
+        tmp = tmp + (self%array(ii) - mean)**2
   end do
-  tmp = sqrt(tmp / n)
+  tmp = sqrt(tmp / nn)
   stddev = real(tmp, kind=c_float)
 end subroutine mean_stddev_1d
 
@@ -952,52 +1026,63 @@ subroutine mean_stddev_2d(self, mean, stddev)
   real(c_float), intent(inout) :: mean, stddev
 
   real(c_double) :: tmp
-  integer :: n, i, j
+  integer :: nn, ii, jj
 
-  n = size(self%array, 1) * size(self%array, 2)
+  nn = size(self%array, 1) * size(self%array, 2)
 
   ! Compute mean
   tmp = zero_c_double
   tmp = sum(self%array(:, :))
-  tmp = tmp / n
+  tmp = tmp / nn
   mean = real(tmp, kind=c_float)
 
   !Computing stddev
   tmp = zero_c_double
-  do i=1,size(self%array, 1)
-     do j=1,size(self%array, 2)
-        tmp = tmp + (self%array(i, j) - mean)**2
+  do ii = 1,size(self%array, 1)
+     do jj = 1,size(self%array, 2)
+        tmp = tmp + (self%array(ii, jj) - mean)**2
      end do
   end do
-  tmp = sqrt(tmp / n)
+  tmp = sqrt(tmp / nn)
   stddev = real(tmp, kind=c_float)
 end subroutine mean_stddev_2d
 
 
 subroutine mean_stddev_3d(self, mean, stddev, zlayer)
   implicit none
-  class(field_3d), target,  intent(in) :: self
-  real(c_float),intent(inout) :: mean,stddev
-  integer, intent(in) :: zlayer
+  class(field_3d), target, intent(in) :: self
+  real(c_float),           intent(inout) :: mean,stddev
+  integer, optional,       intent(in) :: zlayer
   real(c_double) :: tmp
-  integer :: n, i, j
+  integer :: nn, ii, jj, kk
 
-  n = size(self%array,1) * size(self%array,3)
+  ! TODO: make optional code for z layers.
+  ! nn = size(self%array,1) * size(self%array,3)
+  nn = size(self%array,1) * size(self%array,2) * size(self%array,3)
 
   ! Compute mean
   tmp = zero_c_double
-  tmp = sum(self%array(:,zlayer,:))
-  tmp = tmp/n
+  !tmp = sum(self%array(:,zlayer,:))
+  tmp = sum(self%array(:,:,:))
+  tmp = tmp / nn
   mean = real(tmp, kind=c_float)
 
   !Computing stddev
   tmp = zero_c_double
-  do i=1,size(self%array,1)
-     do j=1,size(self%array,2)
-        tmp = tmp + (self%array(i,zlayer,j) - mean)**2
+  ! do i=1,size(self%array,1)
+  !    do j=1,size(self%array,2)
+  !       tmp = tmp + (self%array(i,zlayer,j) - mean)**2
+  !    end do
+  ! end do
+  do ii=1,size(self%array, 1)
+     do jj=1,size(self%array, 2)
+        do kk=1,size(self%array, 3)
+           tmp = tmp + (self%array(ii, jj, kk) - mean)**2
+        end do
      end do
   end do
-  tmp = sqrt(tmp / n)
+
+  tmp = sqrt(tmp / nn)
   stddev = real(tmp, kind=c_float)
 end subroutine mean_stddev_3d
 
@@ -1128,7 +1213,7 @@ subroutine apply_cov_3d(self, in_f, scalar)
 
   select type(in_f)
   type is (field_3d)
-     do layer = 1, size(self%array,2) !zlayer is dim2
+     do layer = 1, size(self%array, 2) !zlayer is dim2
         self%array(:,layer,:) = in_f%array(:,layer,:) * scalar
      end do
   class default
@@ -1153,8 +1238,7 @@ subroutine print_field_dims_2d(self)
   implicit none
   class(field_2d), intent(in) :: self
 
-  write(*,*) 'Printing size ', self%xdim_len, &
-       self%ydim_len
+  write(*,*) 'Printing size ', self%xdim_len, self%ydim_len
 end subroutine print_field_dims_2d
 
 
@@ -1162,143 +1246,195 @@ subroutine print_field_dims_3d(self)
   implicit none
   class(field_3d), intent(in) :: self
 
-  write(*,*) 'Printing size ', self%xdim_len,&
-       self%zdim_len, self%ydim_len
+  write(*,*) 'Printing size ', self%xdim_len, self%zdim_len, self%ydim_len
 end subroutine print_field_dims_3d
 
 
 !-----------------------------------------------------------------------------
 ! Print
 
-subroutine print_single_field(self,long_name,string)
+subroutine print_single_field(self, long_name, string)
   implicit none
-  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
-  character(len=*),    intent(in)  :: long_name
-  character(len=*),optional,intent(out)  :: string
+  class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
+  character(len=*),                 intent(in)    :: long_name
+  character(len=*), optional,       intent(out)   :: string
+
   class(base_field), pointer :: field_pointer
-
-  call self%search_field(long_name,field_pointer)
-
+  call self%search_field(long_name, field_pointer)
   if(associated(field_pointer)) then
      call field_pointer%print_field(string)
   end if
 end subroutine print_single_field
 
 
-subroutine print_all_fields(self,string)
+!> Print all fields
+subroutine print_all_fields(self, string)
   use iso_c_binding, only : c_new_line
   implicit none
-  class(wrf_hydro_nwm_jedi_fields),  intent(in) :: self
-  character(len=*),optional,intent(out)  :: string
-  integer :: f
-  character(len=1024) :: local_str
+  class(wrf_hydro_nwm_jedi_fields),        intent(in ) :: self
+  character(len=1, kind=c_char), optional, intent(out) :: string(8192) !< The output string
+  integer :: ff, ii, s_len
+  character(len=8192) :: tmp_str, agg_str
 
-  string = ' '
-
-  do f = 1,size(self%fields)
-     if(present(string)) then
-        call self%fields(f)%field%print_field(local_str)
-        string = trim(string) // trim(local_str) // c_new_line
-     else
-        call self%fields(f)%field%print_field()
-     end if
-  end do
+  tmp_str = c_null_char
+  agg_str = ''
+  if(present(string)) then
+     do ff = 1, self%nf
+        call self%fields(ff)%field%print_field(tmp_str)
+        ! this aggregates the string over the passed fields
+        agg_str = trim(agg_str) // trim(tmp_str)
+     end do
+     ! To manually/visually check the aggregation of the string.
+     ! write(*,*) "[asdf "//trim(agg_str)//"asdf]"
+     s_len = len_trim(agg_str)
+     do ii = 1, s_len
+        string(ii:ii) = agg_str(ii:ii)
+     end do
+     string(s_len+1) = c_null_char
+  else
+     do ff = 1, self%nf
+        call self%fields(ff)%field%print_field()
+     end do
+  end if
 end subroutine print_all_fields
 
 
 !> Print method for a 1d field
-! @todo, this is identical to 2d?
-subroutine print_field_1d(self, string)
+subroutine print_field_1d(self, string, print_array)
   use iso_c_binding, only : c_new_line, c_float
   implicit none
-  class(field_1d), intent(in) :: self
-  integer :: str_len
+  class(field_1d),            intent(in ) :: self
   character(len=*), optional, intent(out) :: string
+  logical,          optional, intent(in ) :: print_array
 
+  logical :: print_array_
   real(kind=c_float) :: mean, stddev
   character(len=255) :: float_str1, float_str2, float_str3
+  character(len=255) :: int_str1
+  character(len=8192) :: message
+
+  if(.not.(present(print_array))) print_array_ = .FALSE.
 
   call self%mean_stddev(mean, stddev)
-
   write(float_str1, *) mean
   write(float_str2, *) stddev
   write(float_str3, *) self%rms()
+  write(int_str1, *) self%xdim_len
+
+  write(message,*) &
+       c_new_line//self%wrf_hydro_nwm_name // &
+       c_new_line//self%long_name //  &
+       c_new_line//'1D Field shape: ( ' // &
+       trim(int_str1) // ' )' // &
+       c_new_line//'Mean: '//trim(float_str1) // &
+       c_new_line//'Std Dev: '//trim(float_str2) // &
+       c_new_line//'RMS: '//trim(float_str3) // &
+       c_new_line
 
   if(present(string)) then
-     write(string,*) c_new_line//self%long_name //&
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(string, *) trim(message)
   else
-     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name
+     write(*, *) trim(message)
+     if(print_array_) write(*,*) self%array
   end if
 end subroutine print_field_1d
 
 
-subroutine print_field_2d(self, string)
+subroutine print_field_2d(self, string, print_array)
   use iso_c_binding, only : c_new_line, c_float
   implicit none
-  class(field_2d), intent(in) :: self
-  integer :: str_len
+  class(field_2d),            intent(in ) :: self
   character(len=*), optional, intent(out) :: string
+  logical,          optional, intent(in ) :: print_array
 
+  logical :: print_array_
   real(kind=c_float) :: mean, stddev
   character(len=255) :: float_str1, float_str2, float_str3
+  character(len=255) :: int_str1, int_str2
+  character(len=8192) :: message
+
+  if(.not.(present(print_array))) print_array_ = .FALSE.
 
   call self%mean_stddev(mean, stddev)
-
   write(float_str1,*) mean
   write(float_str2,*) stddev
   write(float_str3,*) self%rms()
 
+  write(int_str1, *) self%xdim_len
+  write(int_str2, *) self%ydim_len
+
+  write(message, *) &
+       c_new_line//self%wrf_hydro_nwm_name // &
+       c_new_line//self%long_name //  &
+       c_new_line//'2D Field shape: ( ' // &
+       trim(int_str1) // ', ' // &
+       trim(int_str2) // ' )' // &
+       c_new_line//'Mean: '//trim(float_str1) // &
+       c_new_line//'Std Dev: '//trim(float_str2) // &
+       c_new_line//'RMS: '//trim(float_str3) // &
+       c_new_line
+
   if(present(string)) then
-     write(string,*) c_new_line//self%long_name //&
-          c_new_line//'Mean: '//trim(float_str1) // &
-          c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
+     write(string, *) trim(message)
   else
-     write(*,*) 'Printing ', self%long_name, self%wrf_hydro_nwm_name, self%array
+     write(*,*) trim(message)
+     if(print_array_) write(*,*) self%array
   end if
 end subroutine print_field_2d
 
 
-subroutine print_field_3d(self, string)
+subroutine print_field_3d(self, string, print_array)
   use iso_c_binding, only : c_new_line
   implicit none
-  class(field_3d), intent(in) :: self
+  class(field_3d),            intent(in ) :: self
   character(len=*), optional, intent(out) :: string
+  logical,          optional, intent(in ) :: print_array
 
-  integer :: z_layer
+  logical :: print_array_
+  ! integer :: z_layer
   real(kind=c_float) :: mean, stddev
-  character(len=255) :: float_str1, float_str2, float_str3, zlayer_str
+  character(len=255) :: float_str1, float_str2, float_str3
+  character(len=255) :: int_str1, int_str2, int_str3, zlayer_str
+  character(len=8192) :: message
 
-  if(present(string)) then
-        write(string,*) c_new_line//self%long_name     
-  end if
-  
-  do z_layer = 1, self%ydim_len  !z is the 2nd dimension...
+  if(.not.(present(print_array))) print_array_ = .FALSE.
 
-     call self%mean_stddev(mean, stddev, z_layer)
+  !do z_layer = 1, self%ydim_len  !z is the 2nd dimension...
 
-     float_str1 = ' '
-     float_str2 = ' '
-     float_str3 = ' '
-     zlayer_str = ' '
-     write(float_str1, *) mean
-     write(float_str2, *) stddev
-     write(float_str3, *) self%rms()  ! (z_layer)
-     ! write(zlayer_str, *) z_layer
-     
-     if(present(string)) then
-        string = trim(string) // c_new_line //&
-             'Z Layer: ' // trim(zlayer_str) //&
+  call self%mean_stddev(mean, stddev)
+  ! , z_layer)
+
+  float_str1 = ' '
+  float_str2 = ' '
+  float_str3 = ' '
+  zlayer_str = ' '
+  write(float_str1, *) mean
+  write(float_str2, *) stddev
+  write(float_str3, *) self%rms()
+
+  write(int_str1, *) self%xdim_len
+  write(int_str2, *) self%ydim_len
+  write(int_str3, *) self%zdim_len
+  ! write(zlayer_str, *) z_layer
+
+  write(message, *) &
+          c_new_line//self%wrf_hydro_nwm_name // &
+          c_new_line//self%long_name //  &
+          c_new_line//'3D Field shape: ( ' // &
+          trim(int_str1) // ', ' // &
+          trim(int_str2) // ', ' // &
+          trim(int_str3) // ' )' // &
           c_new_line//'Mean: '//trim(float_str1) // &
           c_new_line//'Std Dev: '//trim(float_str2) // &
-          c_new_line//'RMS: '//trim(float_str3)
-     else
-        write(*,*) 'Printing 3d: ', self%long_name, self%wrf_hydro_nwm_name
-     end if
-  end do
+          c_new_line//'RMS: '//trim(float_str3) // &
+          c_new_line
+
+  if(present(string)) then
+     write(string,*) trim(message)
+  else
+     write(*,*) trim(message)
+     if(print_array_) write(*,*) self%array
+  end if
 end subroutine print_field_3d
 
 
@@ -1332,7 +1468,7 @@ subroutine read_fields_from_file(self, filename_lsm, filename_hydro, f_dt)
   !end if
 
   ncid_vector = (/ ncid_lsm, ncid_hydro /)
-  do n = 1, size(self%fields)
+  do n = 1, self%nf
      call self%fields(n)%field%read_file(ncid_vector)
   enddo
 
@@ -1370,7 +1506,7 @@ function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
      ncid_index = 2
   end if
 
-  do n = 1, size(self%fields)
+  do n = 1, self%nf
      if (self%fields(n)%field%ncid_index .eq. ncid_index) read_file = .true.
   enddo
   write(*, *) filename
@@ -1443,11 +1579,12 @@ end function get_hydro_file_time
 ! Read 1-d ----------------------
 subroutine read_file_1d(self, ncid_vector)
   class(field_1d),       intent(inout) :: self
-  integer, dimension(2), intent(in) :: ncid_vector
+  integer, dimension(2), intent(in)    :: ncid_vector
 
   call get_from_restart_1d_float( &
        ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
+       self%wrf_hydro_nwm_name, &
+       self%array)
 end subroutine read_file_1d
 
 
@@ -1476,7 +1613,8 @@ subroutine read_file_2d(self, ncid_vector)
 
   call get_from_restart_2d_float( &
        ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
+       self%wrf_hydro_nwm_name, &
+       self%array)
 end subroutine read_file_2d
 
 
@@ -1505,7 +1643,8 @@ subroutine read_file_3d(self, ncid_vector)
 
   call get_from_restart_3d_float( &
        ncid_vector(self%ncid_index), &
-       self%wrf_hydro_nwm_name, self%array)
+       self%wrf_hydro_nwm_name, &
+       self%array)
 end subroutine read_file_3d
 
 

@@ -151,7 +151,7 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
 
      !  call pointer_field(fields, wrf_hydro_nwm_name, field)
 
-     call fields_obj%search_field(trim(geovals%variables(gv)),field)
+     call fields_obj%search_field(trim(geovals%variables(gv)), field)
 
      !   ! Interpolation
      !   ! -------------

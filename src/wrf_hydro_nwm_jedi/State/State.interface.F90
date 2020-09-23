@@ -41,13 +41,13 @@ contains
 subroutine wrf_hydro_nwm_jedi_state_create_c(c_key_self, c_key_geom, c_vars) &
      bind(c,name='wrf_hydro_nwm_jedi_state_create_f90')
   implicit none
-  integer(c_int), intent(inout)  :: c_key_self
+  integer(c_int), intent(inout)  :: c_key_self !< State is self
   integer(c_int), intent(in)     :: c_key_geom !< Geometry
   type(c_ptr), value, intent(in) :: c_vars     !< List of variables
 
-  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state),    pointer :: self
   type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
-  type(oops_variables)         :: vars
+  type(oops_variables)                       :: vars
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   call wrf_hydro_nwm_jedi_state_registry%init()
@@ -300,23 +300,23 @@ subroutine wrf_hydro_nwm_jedi_state_print_c(c_key_self, string) &
   type(wrf_hydro_nwm_jedi_state), pointer :: self
 
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
-    call state_print(self,string)
+  call state_print(self, string=string)
 end subroutine wrf_hydro_nwm_jedi_state_print_c
 
 
-subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c( &
-     c_key_self, nf, pstat) &
-     bind(c,name='wrf_hydro_nwm_jedi_state_get_mean_stddev_f90')
-  implicit none
-  integer(c_int), intent(in)    :: c_key_self
-  integer(c_int), intent(in)    :: nf
-  real(c_float),  intent(inout) :: pstat(3, nf)
+! subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c( &
+!      c_key_self, nf, pstat) &
+!      bind(c,name='wrf_hydro_nwm_jedi_state_get_mean_stddev_f90')
+!   implicit none
+!   integer(c_int), intent(in)    :: c_key_self
+!   integer(c_int), intent(in)    :: nf
+!   real(c_float),  intent(inout) :: pstat(3, nf)
 
-  type(wrf_hydro_nwm_jedi_state), pointer :: self
+!   type(wrf_hydro_nwm_jedi_state), pointer :: self
 
-  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
-  call get_mean_stddev(self, nf, pstat)
-end subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c
+!   call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+!   call get_mean_stddev(self, nf, pstat)
+! end subroutine wrf_hydro_nwm_jedi_state_get_mean_stddev_c
 
 
 function wrf_hydro_nwm_jedi_state_rms_c(c_key_state) &
@@ -325,9 +325,7 @@ function wrf_hydro_nwm_jedi_state_rms_c(c_key_state) &
   integer(c_int), intent(in)    :: c_key_state      !> State key from C
   real(c_double) :: wrf_hydro_nwm_jedi_state_rms_c  !> return value
 
-  real(c_double) :: dot_prod
   type(wrf_hydro_nwm_jedi_state), pointer :: state
-
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
   wrf_hydro_nwm_jedi_state_rms_c = state%fields_obj%rms()
 end function wrf_hydro_nwm_jedi_state_rms_c

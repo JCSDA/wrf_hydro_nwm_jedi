@@ -27,7 +27,6 @@ namespace wrf_hydro_nwm_jedi {
     : vars_(conf, "state variables"),
       fields_(new Fields(geom, vars_)),
       time_(util::DateTime()) {
-    // time_(util::DateTime()) {
     oops::Log::trace() << "State::State 1 create from file." << std::endl;
     oops::Variables vars(vars_);
     wrf_hydro_nwm_jedi_state_create_f90(
@@ -57,7 +56,7 @@ namespace wrf_hydro_nwm_jedi {
 
 
   State::State(const Geometry & geom,
-              const State & other)
+               const State & other)
     : vars_ (other.vars_),
       fields_(new Fields(geom, other.vars_)),
       time_(other.time_) {
@@ -97,16 +96,10 @@ namespace wrf_hydro_nwm_jedi {
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_, string);
+    os << std::endl << "Print State (C++) ------------------------ ";
     os << string;
+    os << "End Print State (C++) -------------------- " << std::endl  << std::endl;
     delete[] string;
-    // os << *fields_;
-    // int const nf = 1;
-    // float pstat[3][nf];
-    // wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(keyState_,nf,pstat);
-    // os << std::endl;
-    // os << "Mean SNEQV: " << pstat[0][0] << std::endl;
-    // os << "Std.dev SNEQV: " << pstat[1][0] << std::endl;
-    // os << "RMS SNEQV: " << pstat[2][0] << std::endl;
   }
 
 
@@ -127,14 +120,16 @@ namespace wrf_hydro_nwm_jedi {
     // oops::Log::trace() << "before time_: " << time_ << std::endl;
     wrf_hydro_nwm_jedi_state_read_file_f90(
         fields_->geometry()->toFortran(),
-        keyState_, &conf,
+        keyState_,
+	&conf,
         &dtp);
     this->print(std::cout);
     // oops::Log::trace() << "after dtp: " << *dtp << std::endl;
-    time_ = *dtp;  // huh?? is not setting dtp the same as setting time_
+    time_ = *dtp;
     oops::Log::trace() << "after time_: " << time_ << std::endl;
     oops::Log::trace() << "State read done" << std::endl;
   }
+
 
   State & State::operator=(const State & rhs) {
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
@@ -167,8 +162,9 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 
-  const util::DateTime & State::validTime() const { return time_; }
-  util::DateTime & State::validTime() { return time_; }
+  // in State.h
+  // const util::DateTime & State::validTime() const { return time_; }
+  // util::DateTime & State::validTime() { return time_; }
 
 
   double State::norm() const {
@@ -184,3 +180,4 @@ namespace wrf_hydro_nwm_jedi {
 
 
 }  // namespace wrf_hydro_nwm_jedi
+

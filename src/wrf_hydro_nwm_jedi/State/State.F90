@@ -6,7 +6,7 @@
 !> State (a fields/variable manager) for wrf_hydro_nwm - jedi.
 module wrf_hydro_nwm_jedi_state_mod
 
-use iso_c_binding
+use iso_c_binding, only: c_char, c_float, c_ptr, c_null_char
 use fckit_configuration_module, only: fckit_configuration
 use datetime_mod
 use fckit_mpi_module
@@ -19,7 +19,6 @@ use wrf_hydro_nwm_jedi_util_mod,    only: error_handler, indices
 ! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
 ! use fv3jedi_interpolation_mod,   only: field2field_interp
 ! use fv3jedi_kinds_mod,           only: kind_real
-use iso_c_binding, only : c_float
 !use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
 !use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
 !use fv3jedi_getvalues_mod,       only: getvalues
@@ -31,20 +30,20 @@ use netcdf
 implicit none
 private
 
-public :: wrf_hydro_nwm_jedi_state, &
+public :: &
+     wrf_hydro_nwm_jedi_state, &
      create, &
      delete, &
      zeros, &
      copy,  &
-     axpy,&
      create_from_other, &
      add_incr, &
      read_state_from_file,  &
-     get_mean_stddev, &
      write_state_to_file, &
      change_resol, &
-     state_print, &
-     rms !&
+     state_print
+     ! get_mean_stddev, &
+     ! rms !&
      ! gpnorm, &
      ! getvalues, &
      ! analytic_IC,
@@ -62,7 +61,7 @@ type, public :: wrf_hydro_nwm_jedi_state
   logical :: have_agrid
   logical :: have_dgrid
   type(fckit_mpi_comm) :: f_comm
-  type(wrf_hydro_nwm_jedi_fields),allocatable :: fields_obj
+  type(wrf_hydro_nwm_jedi_fields), allocatable :: fields_obj
 end type wrf_hydro_nwm_jedi_state
 
 
@@ -80,18 +79,16 @@ subroutine create(self, geom, vars)
   self%nf = vars%nvars()
   allocate(self%fields_obj)
   call self%fields_obj%create(geom, vars)
+  call self%fields_obj%zero()
 end subroutine create
 
 
 subroutine create_from_other(self, other)
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields object
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields object
 
-  ! Create new state from other state
   write(*,*) "Calling create from other"
   self = other
-  ! Initialize all arrays to zero
-  !call zeros(self)
 end subroutine create_from_other
 
 
@@ -106,7 +103,7 @@ end subroutine delete
 function get_n_fields(self) result(nf)
   implicit none
   integer :: nf
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
 
   nf = self%nf
 end function get_n_fields
@@ -117,9 +114,7 @@ subroutine zeros(self)
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   integer :: var
   
-  ! do var = 1, self%nf
-  !   self%fields(var)%array = 0.d0
-  ! enddo
+  call self%fields_obj%zero()
 end subroutine zeros
 
 
@@ -131,7 +126,7 @@ subroutine copy(self, rhs)
   integer :: var
 
   call checksame( &
-       self%fields_obj,rhs%fields_obj, &
+       self%fields_obj, rhs%fields_obj, &
        "wrf_hydro_nwm_jedi_state_mod.copy")
   
   ! Deep copy
@@ -143,22 +138,6 @@ subroutine copy(self, rhs)
   ! call rhs%fields_obj%print_all_fields()
   ! call self%fields_obj%print_all_fields()
 end subroutine copy
-
-
-subroutine axpy(self, zz, rhs)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state),  intent(inout) :: self
-  real(kind=c_float), intent(in)    :: zz
-  type(wrf_hydro_nwm_jedi_state),  intent(in)    :: rhs
-  
-  ! integer :: var
-  
-  ! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.axpy")
-  
-  ! do var = 1, self%nf
-  !   self%fields(var)%array = self%fields(var)%array + zz * rhs%fields(var)%array
-  ! enddo
-end subroutine axpy
 
 
 subroutine add_incr(self, rhs)
@@ -182,7 +161,7 @@ subroutine change_resol(self, geom, rhs, geom_rhs)
   !type(field2field_interp) :: interp
   !logical :: integer_interp = .false.
   
-  ! call checksame(self%fields,rhs%fields,"wrf_hydro_nwm_jedi_state_mod.change_resol")
+  ! call checksame(self%fields_obj,rhs%fields_obj,"wrf_hydro_nwm_jedi_state_mod.change_resol")
   
   ! if ((rhs%iec-rhs%isc+1)-(self%iec-self%isc+1) == 0) then
   
@@ -192,11 +171,11 @@ subroutine change_resol(self, geom, rhs, geom_rhs)
   
   !   ! Check if integer interp needed
   !   do var = 1, self%nf
-  !     if (rhs%fields(var)%integerfield) integer_interp = .true.
+  !     if (rhs%fields_obj(var)%integerfield) integer_interp = .true.
   !   enddo
   
   !   call interp%create(geom%interp_method, integer_interp, geom_rhs, geom)
-  !   call interp%apply(self%nf, geom_rhs, rhs%fields, geom, self%fields)
+  !   call interp%apply(self%nf, geom_rhs, rhs%fields_obj, geom, self%fields_obj)
   !   call interp%delete()
   
   !   self%calendar_type = rhs%calendar_type
@@ -342,59 +321,57 @@ end function genfilename
 
 !> Print state
 subroutine state_print(self, string)
-  use iso_c_binding, only : c_null_char
+  use iso_c_binding, only : c_null_char, c_new_line
   implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(in)  :: self  !< State
-  character(len=1, kind=c_char),  intent(out) :: string(8192) !< The output string
+  type(wrf_hydro_nwm_jedi_state),           intent(in)  :: self         !< State
+  character(len=1, kind=c_char),  optional, intent(out) :: string(8192) !< The output string
 
-  character(len=8192) :: tmp_str
-  integer :: s_len, i
+  character(len=1, kind=c_char) :: local_string(8192)
 
-  ! call self%fields_obj%print_single_field("swe",tmp_str)
-  call self%fields_obj%print_all_fields(tmp_str)
-  s_len = len_trim(tmp_str)
-  do i = 1, s_len
-     string(i:i) = tmp_str(i:i)
-  end do
-  string(s_len+1) = c_null_char
+  if(present(string)) then
+     call self%fields_obj%print_all_fields(string)
+  else
+     write(*,*) c_new_line
+     !                      "Print State (C++) ------------------------ ";
+     write(*,*) c_new_line//"Print State (Fortran) -------------------- "
+     call self%fields_obj%print_all_fields()
+     write(*,*) c_new_line//"End Print State (Fortran) ---------------- "
+     write(*,*) c_new_line//c_new_line
+  end if
 end subroutine state_print
 
 
-subroutine get_mean_stddev(self, nf, pstat)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(in)    :: self
-  real(kind=c_float),             intent(inout) :: pstat(3, nf)
+! subroutine get_mean_stddev(self, mean, stddev)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state), intent(in ) :: self
+!   real(kind=c_float),             intent(out) :: mean
+!   real(kind=c_float),             intent(out) :: stddev
 
-  integer :: nf
-
-  ! pstat(1,1) = 0.0
-  ! pstat(2,1) = 0.0
-  ! pstat(3,1) = 0.0
-  ! call self%fields(1)%mean_stddev(pstat(1,1), pstat(2,1), pstat(3,1))
-end subroutine get_mean_stddev
+!   call self%fields_obj%mean_stddev())
+! end subroutine get_mean_stddev
 
 
-subroutine rms(self, prms)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
-  real(kind=c_float),             intent(out) :: prms
+! subroutine rms(self, prms)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
+!   real(kind=c_float),             intent(out) :: prms
 
-  ! call fields_rms(self%nf, self%fields, prms, self%f_comm)
-end subroutine rms
+!   ! call fields_rms(self%nf, self%fields_obj, prms, self%f_comm)
+! end subroutine rms
 
 
-subroutine gpnorm(self, nf, pstat)
-  implicit none
-  type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
-  integer,                         intent(in)    :: nf
-  real(kind=c_float),              intent(inout) :: pstat(3, nf)
+! subroutine gpnorm(self, nf, pstat)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
+!   integer,                         intent(in)    :: nf
+!   real(kind=c_float),              intent(inout) :: pstat(3, nf)
 
-  ! if (nf .ne. self%nf) then
-  !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
-  ! endif
+!   ! if (nf .ne. self%nf) then
+!   !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
+!   ! endif
 
-  ! call fields_gpnorm(nf, self%fields, pstat, self%f_comm)
-end subroutine gpnorm
+!   ! call fields_gpnorm(nf, self%fields_obj, pstat, self%f_comm)
+! end subroutine gpnorm
 
 
 end module wrf_hydro_nwm_jedi_state_mod

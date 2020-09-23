@@ -37,6 +37,7 @@ subroutine error_handler(status, failure, success)
   if (present(success)) write(*,'(A)') success
 end subroutine error_handler
 
+
 !> Date time equality function. Shorthand.
 logical function datetime_eq(dt1, dt2)
   implicit none
