@@ -13,6 +13,7 @@
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "oops/util/Serializable.h"
 
 // forward declarations
 namespace eckit {
@@ -28,8 +29,11 @@ namespace wrf_hydro_nwm_jedi {
 namespace wrf_hydro_nwm_jedi {
 
   // ModelAuxIncrement class
-  class ModelAuxIncrement : public util::Printable,
-                            private util::ObjectCounter<ModelAuxIncrement> {
+  class ModelAuxIncrement :
+    public util::Printable,
+    private util::ObjectCounter<ModelAuxIncrement>,
+    public util::Serializable {
+    
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::ModelAuxIncrement";}
 
@@ -48,6 +52,11 @@ namespace wrf_hydro_nwm_jedi {
     void axpy(const double, const ModelAuxIncrement &);
     double dot_product_with(const ModelAuxIncrement &) const;
 
+    /// Serialize and deserialize
+    size_t serialSize() const {return 0;}
+    void serialize(std::vector<double> &) const {}
+    void deserialize(const std::vector<double> &, size_t &) {}
+    
    private:
     void print(std::ostream &) const;
   };

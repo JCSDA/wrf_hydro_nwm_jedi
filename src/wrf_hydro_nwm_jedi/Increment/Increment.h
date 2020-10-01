@@ -19,6 +19,7 @@
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
+#include "oops/util/Serializable.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/IncrementFortran.h"
@@ -49,7 +50,9 @@ namespace wrf_hydro_nwm_jedi {
 namespace wrf_hydro_nwm_jedi {
 
   // Increment class
-  class Increment : public util::Printable
+  class Increment :
+    public util::Printable,
+    public util::Serializable
     // public oops::GeneralizedDepartures,
     // public util::Printable,
     // private util::ObjectCounter<IncrementSW> {
@@ -104,6 +107,12 @@ namespace wrf_hydro_nwm_jedi {
     /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
+    /// Serialize and deserialize
+    size_t serialSize() const {return 0;}
+    void serialize(std::vector<double> &) const {}
+    void deserialize(const std::vector<double> &, size_t &) {}
+
+    /// Other / utils
     void accumul(const double &, const State &);
     
     boost::shared_ptr<const Geometry> geometry() const;
