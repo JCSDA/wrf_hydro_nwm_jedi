@@ -28,6 +28,7 @@ namespace wrf_hydro_nwm_jedi {
 extern "C" {
 
   void wrf_hydro_nwm_jedi_b_setup_f90(F90bmat &,
+				      const F90state &,
 				      const eckit::Configuration * const *,
 				      const oops::Variables &);
   void wrf_hydro_nwm_jedi_b_delete_f90(F90bmat &);
