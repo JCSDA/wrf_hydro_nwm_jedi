@@ -60,14 +60,17 @@ namespace wrf_hydro_nwm_jedi {
     : vars_ (other.vars_),
       fields_(new Fields(geom, other.vars_)),
       time_(other.time_) {
+    oops::Log::trace() << "State::State 3 create from existing geom and state." << std::endl;
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), other.vars_);
-    oops::Log::trace() << "State::State created from existing state." << std::endl;
+    wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
+    wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
+    time_ = other.time_;
   }
 
 
   State::State(const State & other)
     : fields_(new Fields(*other.fields_)) {
-    std::cout << "State::State 3 create_from_other from State " << std::endl;
+    std::cout << "State::State 4 create_from_other from State " << std::endl;
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
     time_ = other.time_;

@@ -58,8 +58,8 @@ ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git" 
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE TAG 06fe37851cc59524e071863ce19d177984a80aa)
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH develop)
 
-#ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE BRANCH develop )
-ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG 5168c6fbdf4d2b0ef9ee51dba39ca32bd2f6ccea)
+ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE BRANCH develop )
+# ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG 5168c6fbdf4d2b0ef9ee51dba39ca32bd2f6ccea)
 
 ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE BRANCH develop )
 # ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE TAG 6b12a99fbb5945b4ee0a054697388b4c33753187)

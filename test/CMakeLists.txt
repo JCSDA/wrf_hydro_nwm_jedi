@@ -5,6 +5,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/interface.yml
   testinput/model.yaml
   testinput/increment.yaml
+  testinput/error_covariance.yaml
   testinput/hofx_nomodel.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
@@ -67,7 +68,7 @@ ecbuild_add_test(
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_errorcovariance
   SOURCES executables/TestErrorCovariance.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/error_covariance.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(

@@ -84,8 +84,8 @@ end subroutine create
 
 
 subroutine create_from_other(self, other)
-  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Fields object
-  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other fields object
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Self State object
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other State object
 
   write(*,*) "Calling create from other"
   self = other
