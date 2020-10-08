@@ -6,6 +6,10 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/model.yaml
   testinput/increment.yaml
   testinput/error_covariance.yaml
+  testinput/model_aux_control.yaml
+  #  testinput/model_aux_covariance.yaml
+  #  testinput/model_aux_increment.yaml
+  testinput/linear_model.yaml
   testinput/hofx_nomodel.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
@@ -50,7 +54,7 @@ ecbuild_add_test(
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_modelauxcontrol
   SOURCES executables/TestModelAuxControl.cc
-  ARGS    testinput/model.yaml
+  ARGS    testinput/model_aux_control.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
@@ -71,22 +75,22 @@ ecbuild_add_test(
   ARGS    testinput/error_covariance.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
-ecbuild_add_test(
-  TARGET  test_wrf_hydro_nwm_jedi_modelauxcovariance
-  SOURCES executables/TestModelAuxCovariance.cc
-  ARGS    testinput/interface.yml
-  LIBS    wrf_hydro_nwm_jedi )
+# ecbuild_add_test(
+#   TARGET  test_wrf_hydro_nwm_jedi_modelauxcovariance
+#   SOURCES executables/TestModelAuxCovariance.cc
+#   ARGS    testinput/model_aux_covariance.yaml
+#   LIBS    wrf_hydro_nwm_jedi )
 
-ecbuild_add_test(
-  TARGET  test_wrf_hydro_nwm_jedi_modelauxincrement
-  SOURCES executables/TestModelAuxIncrement.cc
-  ARGS    testinput/interface.yml
-  LIBS    wrf_hydro_nwm_jedi )
+# ecbuild_add_test(
+#   TARGET  test_wrf_hydro_nwm_jedi_modelauxincrement
+#   SOURCES executables/TestModelAuxIncrement.cc
+#   ARGS    testinput/model_aux_increment.yaml
+#   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
   TARGET  test_wrf_hydro_nwm_jedi_linearmodel
   SOURCES executables/TestLinearModel.cc
-  ARGS    testinput/interface.yml
+  ARGS    testinput/linear_model.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
 # ecbuild_add_test(

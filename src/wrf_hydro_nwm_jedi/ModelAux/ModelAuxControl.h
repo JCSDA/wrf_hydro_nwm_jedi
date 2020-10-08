@@ -27,21 +27,21 @@ namespace wrf_hydro_nwm_jedi {
 
 namespace wrf_hydro_nwm_jedi {
 
-  // ModelAuxControl class
   class ModelAuxControl : public util::Printable,
+			  private boost::noncopyable,
                           private util::ObjectCounter<ModelAuxControl> {
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::ModelAuxControl";}
 
-    ModelAuxControl(const Geometry &, const eckit::Configuration &);
-    ModelAuxControl(const Geometry &, const ModelAuxControl &);
-    ModelAuxControl(const ModelAuxControl &, const bool);
-    ~ModelAuxControl();
+    ModelAuxControl(const Geometry &, const eckit::Configuration &) {}
+    ModelAuxControl(const Geometry &, const ModelAuxControl &) {}
+    ModelAuxControl(const ModelAuxControl &, const bool) {}
+    ~ModelAuxControl() {}
 
     ModelAuxControl & operator+=(const ModelAuxIncrement &) {return *this;}
 
    private:
-    void print(std::ostream & os) const;
+    void print(std::ostream & os) const {}
   };
 }  // namespace wrf_hydro_nwm_jedi
 #endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_CONTROL_H_

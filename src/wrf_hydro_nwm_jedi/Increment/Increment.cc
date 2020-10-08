@@ -15,9 +15,13 @@
 //#include "oops/base/GridPoint.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
+#include "oops/util/Logger.h"
 
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
+
+using oops::Log;
+
 
 namespace wrf_hydro_nwm_jedi {
 
@@ -28,11 +32,12 @@ namespace wrf_hydro_nwm_jedi {
       vars_(vars),
       time_(time)
   {
-    std::cout << "Increment::Increment 1 constructor " << std::endl;
+    Log::trace() << "Increment::Increment 1 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_f90(
 	keyInc_,
 	fields_->geometry()->toFortran(),
 	vars_);
+    Log::trace() << "Increment::Increment 1 constructor END " << std::endl;
   }
 
 
@@ -112,13 +117,13 @@ namespace wrf_hydro_nwm_jedi {
 
 
   void Increment::zero() {
-    std::cout << "Zero function in Increment needs to be implemented" << std::endl;
+    wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
   }
 
 
-  void Increment::zero(const util::DateTime & vt) {
-    time_ = vt;
-    // sw_increment_zero_f90(keyInc_);
+  void Increment::zero(const util::DateTime & time) {
+    wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
+    time_ = time;
   }
 
 
@@ -186,7 +191,9 @@ namespace wrf_hydro_nwm_jedi {
   util::DateTime & Increment::validTime() { return time_; }
 
 
-  void Increment::updateTime(const util::Duration & dt) { fields_->time() += dt;}
+  void Increment::updateTime(const util::Duration & dt) {
+    // fields_->time() += dt;}
+    time_ += dt;}
 
 
   boost::shared_ptr<const Geometry> Increment::geometry() const {

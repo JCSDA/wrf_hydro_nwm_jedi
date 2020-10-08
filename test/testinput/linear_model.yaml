@@ -1,0 +1,43 @@
+model:
+  name: 'WRF_HYDRO_NWM_JEDI'
+  tstep: PT1H
+  model variables: &model_vars ['SNEQV']
+
+geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+initial condition:
+  read_from_file: 1
+  date: &date 2017-01-01T00:00:00Z
+  basename: "./INPUT/"
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+  state variables: *model_vars
+
+analysis variables: &analysis_vars ['SNEQV']
+
+background error:
+  covariance model: "wrf_hydro_nwm_jediCovar"
+  date: *date
+  normfactor: 1
+  analysis variables: *analysis_vars
+
+linear model:
+  name: 'WRF_HYDRO_NWM_IdTLM'
+  tstep: PT1H
+  tlm variables: *model_vars
+  trajectory:
+    tstep: PT1H
+    model variables: *model_vars
+
+linear model test:
+  forecast length: PT1H
+  first multiplier TL: 0.01
+  iterations TL: 10
+  tolerance AD: 1.0e-11
+  tolerance TL: 1e-3  # 1.0e-7  # JLM TODO
+
+model aux control: null
+model aux error: 200.0
+
+varchange: 'Identity'

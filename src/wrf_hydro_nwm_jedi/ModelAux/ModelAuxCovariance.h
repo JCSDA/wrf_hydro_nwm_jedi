@@ -30,22 +30,22 @@ namespace wrf_hydro_nwm_jedi {
 class ModelAuxCovariance : public util::Printable,
                            private util::ObjectCounter<ModelAuxCovariance> {
  public:
-  static const std::string classname() {return "wrf_hydro_nwm-jedi::ModelBiasCovariance";}
+  static const std::string classname() {return "wrf_hydro_nwm-jedi::ModelAuxCovariance";}
 
 /// Constructor, destructor
-  ModelAuxCovariance(const eckit::Configuration &, const Geometry &);
-  ~ModelAuxCovariance();
+  ModelAuxCovariance(const eckit::Configuration & conf, const Geometry &): conf_(conf) {}
+  ~ModelAuxCovariance() {}
 
 /// Linear algebra operators
-  void linearize(const ModelAuxControl &, const Geometry &);
-  void multiply(const ModelAuxIncrement &, ModelAuxIncrement &);
-  void inverseMultiply(const ModelAuxIncrement &, ModelAuxIncrement &) const;
-  void randomize(ModelAuxIncrement &) const;
+  void linearize(const ModelAuxControl &, const Geometry &) {}
+  void multiply(const ModelAuxIncrement &, ModelAuxIncrement &) const {}
+  void inverseMultiply(const ModelAuxIncrement &, ModelAuxIncrement &) const {}
+  void randomize(ModelAuxIncrement &) const {}
+
   const eckit::Configuration & config() const {return conf_;}
 
  private:
-  void print(std::ostream & os) const;
-
+  void print(std::ostream & os) const {}
   const eckit::LocalConfiguration conf_;
 };
 

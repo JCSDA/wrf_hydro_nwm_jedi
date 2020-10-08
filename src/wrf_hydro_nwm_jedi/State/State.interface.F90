@@ -144,15 +144,16 @@ end subroutine wrf_hydro_nwm_jedi_state_axpy_c
 
 
 subroutine wrf_hydro_nwm_jedi_state_add_incr_c( &
-     c_key_geom, c_key_self, c_key_rhs) &
+     ! c_key_geom,
+     c_key_self, c_key_rhs) &
      bind(c, name='wrf_hydro_nwm_jedi_state_add_incr_f90')
 
   implicit none
-  integer(c_int), intent(in) :: c_key_geom
+  ! integer(c_int), intent(in) :: c_key_geom
   integer(c_int), intent(in) :: c_key_self
   integer(c_int), intent(in) :: c_key_rhs
 
-  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+  ! type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   type(wrf_hydro_nwm_jedi_state), pointer :: rhs
 

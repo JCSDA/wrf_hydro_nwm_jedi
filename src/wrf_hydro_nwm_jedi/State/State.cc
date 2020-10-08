@@ -143,12 +143,10 @@ namespace wrf_hydro_nwm_jedi {
 
   State & State::operator+=(const Increment & dx)
   {
-    // oops::Log::trace() << "State add increment starting" << std::endl;
-    // ASSERT(this->validTime() == dx.validTime());
-    // wrf_hydro_nwm_jedi_state_add_incr_f90(geom_->toFortran(), keyState_, dx.toFortran());
-    // oops::Log::trace() << "State add increment done" << std::endl;
-    util::abor1_cpp("State::operator+=(Increment) needs to be implemented.",
-                    __FILE__, __LINE__);
+    oops::Log::trace() << "State add increment starting" << std::endl;
+    ASSERT(this->validTime() == dx.validTime());
+    wrf_hydro_nwm_jedi_state_add_incr_f90(keyState_, dx.toFortran());
+    oops::Log::trace() << "State add increment done" << std::endl;
     return *this;
   }
 

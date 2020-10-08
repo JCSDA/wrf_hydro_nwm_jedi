@@ -34,10 +34,10 @@ public :: &
      self_mul, &
      axpy_inc, &
      dot_prod, &
-     random_normal
+     random_normal, &
+     zeros
 ! create_from_other, &
 ! delete, &
-! zeros, &
 ! copy, &
 ! self_add, &
 ! self_schur, &
@@ -184,27 +184,10 @@ end subroutine diff_incr
 ! end subroutine delete
 
 
-! subroutine zeros(self)
-!   type(shallow_water_state_type), intent(inout) :: self
-
-!   type(shallow_water_geometry_type) :: geom
-!   real(r8kind), pointer             :: u(:,:), v(:,:), h(:,:)
-!   integer                           :: i, j
-
-!   call self%get_u_ptr(u)
-!   call self%get_v_ptr(v)
-!   call self%get_h_ptr(h)
-
-!   geom = self%get_geometry()
-
-!   do j=geom%get_yps(), geom%get_ype()
-!     do i=geom%get_xps(), geom%get_xpe()
-!       u(i,j) = 0.0_r8kind
-!       v(i,j) = 0.0_r8kind
-!       h(i,j) = 0.0_r8kind
-!     end do
-!   end do
-! end subroutine zeros
+subroutine zeros(self)
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  call self%fields_obj%zero()
+end subroutine zeros
 
 
 ! subroutine copy(self, rhs)
