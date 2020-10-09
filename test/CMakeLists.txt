@@ -10,6 +10,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   #  testinput/model_aux_covariance.yaml
   #  testinput/model_aux_increment.yaml
   testinput/linear_model.yaml
+  testinput/make_obs_3d.yaml
   testinput/hofx_nomodel.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
@@ -28,6 +29,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testinput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/wrf_hydro_nwm_files)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/make_obs)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
@@ -100,27 +102,34 @@ ecbuild_add_test(
 #   LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_make_obs_3d
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx.x
+   ARGS         testinput/make_obs_3d.yaml testoutput/make_obs_3d.log.out
+   MPI          1 )
+
+ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_exe
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
-   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.run
+   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.log.out
    MPI          1 )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_cmp
    TYPE		SCRIPT
    COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
-   ARGS         testoutput/hofx_nomodel_identity.run testoutput/hofx_nomodel_identity.ref)
+   ARGS         testoutput/hofx_nomodel_identity.log.out testoutput/hofx_nomodel_identity.ref)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_exe
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_var.x
-   ARGS         testinput/3dvar.yaml testoutput/3dvar.run
+   ARGS         testinput/3dvar.yaml testoutput/3dvar.log.out
    MPI          1 )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_cmp
    TYPE		SCRIPT
    COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
-   ARGS         testoutput/3dvar.run testoutput/3dvar.ref)
+   ARGS         testoutput/3dvar.log.out testoutput/3dvar.ref)

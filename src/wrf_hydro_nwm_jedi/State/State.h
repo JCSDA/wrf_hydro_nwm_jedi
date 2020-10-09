@@ -82,7 +82,8 @@ namespace wrf_hydro_nwm_jedi {
     void write(const eckit::Configuration &) const;
     void zero();
     void accumul(const double &, const State &);
-    void read_state_from_file(const eckit::Configuration &);
+    // void read_state_from_file(const eckit::Configuration &);
+    void read(const eckit::Configuration &);
 
     boost::shared_ptr<const Geometry> geometry() const; // {return fields_->geometry();}
 
@@ -91,6 +92,9 @@ namespace wrf_hydro_nwm_jedi {
     // time()
     const util::DateTime & time() const {return time_;}
     util::DateTime & time() {return time_;}
+
+    // Needed by PseudoModel
+    void updateTime(const util::Duration & dt) {time_ += dt;}
 
     // validTime()
     const util::DateTime & validTime() const { return time_; }

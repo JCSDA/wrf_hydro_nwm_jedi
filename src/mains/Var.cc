@@ -16,6 +16,5 @@ int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
   oops::Variational<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> var;
-  run.execute(var);
-  return 0;
+  return run.execute(var);
 }

@@ -12,6 +12,5 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   oops::StaticBInit<wrf_hydro_nwm_jedi::Traits> bmat;
-  run.execute(bmat);
-  return 0;
+  return run.execute(bmat);
 }

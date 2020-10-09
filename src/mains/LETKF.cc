@@ -15,6 +15,5 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   oops::LETKF<wrf_hydro_nwm_jedi::Traits> letkf;
-  run.execute(letkf);
-  return 0;
+  return run.execute(letkf);
 }

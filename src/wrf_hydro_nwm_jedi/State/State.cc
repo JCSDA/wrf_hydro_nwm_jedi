@@ -34,7 +34,7 @@ namespace wrf_hydro_nwm_jedi {
        fields_->geometry()->toFortran(),
        vars);
     util::DateTime * dtp = &time_;
-    this->read_state_from_file(conf);
+    this->read(conf);
     oops::Log::trace() << "State::State 1 create from file done." << std::endl;
   }
 
@@ -116,20 +116,17 @@ namespace wrf_hydro_nwm_jedi {
   }
   
 
-  void State::read_state_from_file(const eckit::Configuration & config) {
-    oops::Log::trace() << "State read starting" << std::endl;
+  void State::read(const eckit::Configuration & config) {
+    oops::Log::trace() << "State::State read start" << std::endl;
     const eckit::Configuration * conf = &config;
     util::DateTime * dtp = &time_;
-    // oops::Log::trace() << "before time_: " << time_ << std::endl;
     wrf_hydro_nwm_jedi_state_read_file_f90(
         fields_->geometry()->toFortran(),
         keyState_,
 	&conf,
         &dtp);
     this->print(std::cout);
-    // oops::Log::trace() << "after dtp: " << *dtp << std::endl;
     time_ = *dtp;
-    oops::Log::trace() << "after time_: " << time_ << std::endl;
     oops::Log::trace() << "State read done" << std::endl;
   }
 
