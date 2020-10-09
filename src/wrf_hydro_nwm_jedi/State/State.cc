@@ -149,33 +149,28 @@ namespace wrf_hydro_nwm_jedi {
 
 
   void State::zero() {
-    util::abor1_cpp("State::zero() needs to be implemented.",
-                    __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_state_zero_f90(keyState_);
   }
 
+  void State::zero(const util::DateTime & time) {
+    wrf_hydro_nwm_jedi_state_zero_f90(keyState_);
+    time_ = time;
+  }
+
+  void State::ones() {
+    wrf_hydro_nwm_jedi_state_ones_f90(keyState_);
+  }
 
   void State::accumul(const double &, const State &) {
     util::abor1_cpp("State::accumul() needs to be implemented.",
                     __FILE__, __LINE__);
   }
 
-
-  // in State.h
-  // const util::DateTime & State::validTime() const { return time_; }
-  // util::DateTime & State::validTime() { return time_; }
-
-
   double State::norm() const {
     double norm = 0.0;
     norm = wrf_hydro_nwm_jedi_state_rms_f90(toFortran());
     return norm;
   }
-
-
-  boost::shared_ptr<const Geometry> State::geometry() const {
-    return fields_->geometry();
-  }
-
 
 }  // namespace wrf_hydro_nwm_jedi
 

@@ -65,6 +65,7 @@ type, abstract, public :: base_field
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
    procedure (difference_interface), deferred :: diff
    procedure (zero_interface), deferred :: zero
+   procedure (one_interface), deferred :: one
    procedure (set_random_normal_interface), deferred :: set_random_normal
    procedure (dot_prod_interface), deferred :: dot_prod
    procedure (rms_interface), deferred :: rms
@@ -144,6 +145,11 @@ abstract interface
      class(base_field), intent(inout) :: self
    end subroutine zero_interface
 
+   subroutine one_interface(self)
+     import base_field
+     class(base_field), intent(inout) :: self
+   end subroutine one_interface
+
    subroutine set_random_normal_interface(self, seed)
      import base_field
      class(base_field), intent(inout) :: self
@@ -193,6 +199,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: difference
    procedure :: scalar_mult
    procedure :: zero
+   procedure :: one
    procedure :: set_random_normal
    procedure :: rms
    procedure :: dot_prod
@@ -223,6 +230,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: diff => diff_1d
    procedure :: add_incr => add_incr_1d
    procedure :: zero => zero_1d
+   procedure :: one => one_1d
    procedure :: set_random_normal => set_random_normal_1d
    procedure :: dot_prod => dot_prod_1d
    procedure, pass(self) :: rms => rms_1d
@@ -249,6 +257,7 @@ type, private, extends(base_field) :: field_2d
    procedure :: add_incr => add_incr_2d
    procedure :: scalar_mul => scalar_mul_2d
    procedure :: zero => zero_2d
+   procedure :: one => one_2d
    procedure :: set_random_normal => set_random_normal_2d
    procedure :: dot_prod => dot_prod_2d
    ! Destructor
@@ -273,6 +282,7 @@ type, private, extends(base_field) :: field_3d
    procedure :: add_incr => add_incr_3d
    procedure :: scalar_mul => scalar_mul_3d
    procedure :: zero => zero_3d
+   procedure :: one => one_3d
    procedure :: set_random_normal => set_random_normal_3d
    procedure :: dot_prod => dot_prod_3d
    ! Destructor
@@ -850,6 +860,42 @@ subroutine zero_3d(self)
 
   self%array = zero_c_float
 end subroutine zero_3d
+
+
+!-----------------------------------------------------------------------------
+! One (identity) fields
+
+subroutine one(self)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+
+  integer :: f
+
+  do f = 1, self%nf
+     call self%fields(f)%field%one()
+  end do
+end subroutine one
+
+
+subroutine one_1d(self)
+  class(field_1d), intent(inout) :: self
+
+  self%array = one_c_float
+end subroutine one_1d
+
+
+subroutine one_2d(self)
+  class(field_2d), intent(inout) :: self
+
+  self%array = one_c_float
+end subroutine one_2d
+
+
+subroutine one_3d(self)
+  class(field_3d), intent(inout) :: self
+
+  self%array = one_c_float
+end subroutine one_3d
 
 
 !-----------------------------------------------------------------------------

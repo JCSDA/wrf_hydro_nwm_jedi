@@ -72,6 +72,7 @@ namespace wrf_hydro_nwm_jedi {
     void diff(const State &, const State &);
     void zero();
     void zero(const util::DateTime &);
+    void ones();
     Increment & operator =(const Increment &);
     Increment & operator-=(const Increment &);
     Increment & operator+=(const Increment &);
@@ -115,7 +116,7 @@ namespace wrf_hydro_nwm_jedi {
     /// Other / utils
     void accumul(const double &, const State &);
     
-    boost::shared_ptr<const Geometry> geometry() const;
+    std::shared_ptr<const Geometry> geometry() const;
 
     F90inc & toFortran() {return keyInc_;}
     const F90inc & toFortran() const {return keyInc_;}

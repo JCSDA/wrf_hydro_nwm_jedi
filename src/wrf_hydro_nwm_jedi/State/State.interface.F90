@@ -96,14 +96,25 @@ end subroutine wrf_hydro_nwm_jedi_state_delete_c
 
 
 subroutine wrf_hydro_nwm_jedi_state_zero_c(c_key_self) &
-     bind(c,name='wrf_hydro_nwm_jedi_state_zero_f90')
+     bind(c, name='wrf_hydro_nwm_jedi_state_zero_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_self
-  ! type(wrf_hydro_nwm_jedi_state), pointer :: self
 
-  ! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
-  ! call zeros(self)
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+  call zeros(self)
 end subroutine wrf_hydro_nwm_jedi_state_zero_c
+
+
+subroutine wrf_hydro_nwm_jedi_state_ones_c(c_key_self) &
+     bind(c, name='wrf_hydro_nwm_jedi_state_ones_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+  call ones(self)
+end subroutine wrf_hydro_nwm_jedi_state_ones_c
 
 
 subroutine wrf_hydro_nwm_jedi_state_copy_c(c_key_self,c_key_rhs) &

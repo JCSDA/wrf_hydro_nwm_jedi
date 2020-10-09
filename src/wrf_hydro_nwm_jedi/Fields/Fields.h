@@ -58,7 +58,7 @@ namespace wrf_hydro_nwm_jedi {
 
     double norm() const;
 
-    boost::shared_ptr<const Geometry> geometry() const;
+    std::shared_ptr<const Geometry> geometry() const;
 
     // To be used to access Fields from Fortran, currently not needed
     F90flds & toFortran() {return keyFlds_;}
@@ -66,7 +66,7 @@ namespace wrf_hydro_nwm_jedi {
 
    private:
     void print(std::ostream &) const;
-    boost::shared_ptr<const Geometry> geom_;
+    std::shared_ptr<const Geometry> geom_;
     oops::Variables vars_;
     F90flds keyFlds_;
     util::DateTime time_;

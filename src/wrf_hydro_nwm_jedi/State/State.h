@@ -17,14 +17,16 @@
 
 #include "eckit/mpi/Comm.h"
 
+#include "oops/base/Variables.h"
+
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "oops/util/Serializable.h"
 
-#include "oops/base/Variables.h"
+#include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-//#include "fv3jedi/Increment/Increment.h"
-//#include "wrf_hydro_nwm_jedi/State/State.interface.h"
+#include "fv3jedi/Increment/Increment.h"
 
 // forward declarations
 namespace eckit {
@@ -81,11 +83,13 @@ namespace wrf_hydro_nwm_jedi {
     double norm() const;
     void write(const eckit::Configuration &) const;
     void zero();
+    void zero(const util::DateTime &);
+    void ones();
     void accumul(const double &, const State &);
     // void read_state_from_file(const eckit::Configuration &);
     void read(const eckit::Configuration &);
 
-    boost::shared_ptr<const Geometry> geometry() const; // {return fields_->geometry();}
+    std::shared_ptr<const Geometry> geometry() const {return fields_->geometry();}
 
     const oops::Variables & variables() const {return vars_;}
 
@@ -95,6 +99,11 @@ namespace wrf_hydro_nwm_jedi {
 
     // Needed by PseudoModel
     void updateTime(const util::Duration & dt) {time_ += dt;}
+
+    /// Serialize and deserialize
+    size_t serialSize() const {return 0;}
+    void serialize(std::vector<double> &) const {}
+    void deserialize(const std::vector<double> &, size_t &) {}
 
     // validTime()
     const util::DateTime & validTime() const { return time_; }
@@ -106,11 +115,10 @@ namespace wrf_hydro_nwm_jedi {
   private:
     void print(std::ostream &) const;
     F90state keyState_;
-    // boost::shared_ptr<const Geometry> geom_;
     oops::Variables vars_;
     boost::scoped_ptr<Fields> fields_;
     util::DateTime time_;
-  }; // state class
+  };
 
 }  // namespace wrf_hydro_nwm_jedi
 

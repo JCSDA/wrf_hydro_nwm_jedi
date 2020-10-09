@@ -14,7 +14,8 @@ use oops_variables_mod
 use wrf_hydro_nwm_jedi_fields_mod,    only: wrf_hydro_nwm_jedi_fields, checksame
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
-use wrf_hydro_nwm_jedi_constants_mod, only: zero_c_double, zero_c_float, one_c_float
+use wrf_hydro_nwm_jedi_constants_mod, only: &
+     zero_c_double, zero_c_float, one_c_double, one_c_float
 
 use iso_c_binding, only : c_float
 use wrf_hydro_nwm_jedi_state_mod, only: &
@@ -35,7 +36,8 @@ public :: &
      axpy_inc, &
      dot_prod, &
      random_normal, &
-     zeros
+     zeros, &
+     ones
 ! create_from_other, &
 ! delete, &
 ! copy, &
@@ -188,6 +190,12 @@ subroutine zeros(self)
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   call self%fields_obj%zero()
 end subroutine zeros
+
+
+subroutine ones(self)
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  call self%fields_obj%one()
+end subroutine ones
 
 
 ! subroutine copy(self, rhs)

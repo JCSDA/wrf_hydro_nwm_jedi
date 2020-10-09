@@ -35,6 +35,7 @@ public :: &
      create, &
      delete, &
      zeros, &
+     ones,  &
      copy,  &
      create_from_other, &
      add_incr, &
@@ -116,6 +117,12 @@ subroutine zeros(self)
   
   call self%fields_obj%zero()
 end subroutine zeros
+
+
+subroutine ones(self)
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  call self%fields_obj%one()
+end subroutine ones
 
 
 subroutine copy(self, rhs)

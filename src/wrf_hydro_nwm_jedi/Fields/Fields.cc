@@ -15,40 +15,6 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-// ----------------------------------------------------------------------------
-
-  // before newyaml
-  // Fields::Fields(const Geometry & geom, const oops::Variables & vars,
-  //              const eckit::Configuration & conf)
-  //   : geom_(new Geometry(geom)) {
-
-  //   if(conf.has("date"))
-  //     {
-  // 	std::cout << "Supposed to read from file"<<std::endl;
-  // 	std::string current_date;
-  // 	conf.get("date", current_date);
-  // 	time_ = util::DateTime(current_date);
-  //     }
-  //   else
-  //     {
-  // 	std::cout << "Time statically configured"<<std::endl;
-  // 	time_ = util::DateTime("2018-04-15T00:00:00Z");
-  //     }
-
-  //   vars_ = vars;
-  // }
-
-  // Used by Increment
-  // Fields::Fields(const Geometry & geom,
-  // 		 const oops::Variables & vars,
-  // 		 const util::DateTime & vt)
-  //   : geom_(new Geometry(geom)),
-  //     time_(vt),
-  //     vars_(vars)
-  // {
-  // }
-
-
   Fields::Fields(const Geometry & geom,
 		 const oops::Variables & vars)
     : geom_(new Geometry(geom)) {
@@ -65,36 +31,24 @@ namespace wrf_hydro_nwm_jedi {
     time_ = util::DateTime(current_date);
    }
   
-// ----------------------------------------------------------------------------
 
   Fields::~Fields() {
     // util::abor1_cpp("Fields::~Fields() needs to be implemented.",
     //                 __FILE__, __LINE__);
   }
 
-// ----------------------------------------------------------------------------
 
   void Fields::print(std::ostream & os) const {
-
     os << "PRINTING FIELDS WITHIN FIELDS.CC" << std::endl;
     os << "(TODO, print diagnostic info about the fields here)"
        << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
-  double Fields::norm() const {
-    // util::abor1_cpp("Fields::norm() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-    return 10.0;
-  }
+  double Fields::norm() const {return 10.0;}
 
-// ----------------------------------------------------------------------------
 
-  boost::shared_ptr<const Geometry> Fields::geometry() const {
-    return geom_;
-  }
+  std::shared_ptr<const Geometry> Fields::geometry() const {return geom_;}
 
-// ----------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi

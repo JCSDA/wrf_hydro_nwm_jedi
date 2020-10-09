@@ -26,6 +26,7 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_increment_dot_prod_f90(const F90inc &, const F90inc &, double &);
     void wrf_hydro_nwm_jedi_increment_random_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_zero_f90(const F90inc &);
+    void wrf_hydro_nwm_jedi_increment_ones_f90(const F90inc &);
     double wrf_hydro_nwm_jedi_increment_rms_f90(const F90inc &);
     /* void wrf_hydro_nwm_jedi_state_read_file_f90(const F90geom &, const F90state &, const eckit::Configuration * const *, util::DateTime * const *); */
     void wrf_hydro_nwm_jedi_increment_print_f90(const F90inc &, char *string);

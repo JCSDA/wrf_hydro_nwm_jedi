@@ -243,6 +243,17 @@ subroutine wrf_hydro_nwm_jedi_increment_zero_c(c_key_self) &
 end subroutine wrf_hydro_nwm_jedi_increment_zero_c
 
 
+subroutine wrf_hydro_nwm_jedi_increment_ones_c(c_key_self) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_ones_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+  call ones(self)
+end subroutine wrf_hydro_nwm_jedi_increment_ones_c
+
+
 function wrf_hydro_nwm_jedi_increment_rms_c(c_key_inc) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_rms_f90')
   implicit none

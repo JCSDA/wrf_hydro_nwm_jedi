@@ -115,17 +115,18 @@ namespace wrf_hydro_nwm_jedi {
     return result;
   }
 
-
   void Increment::zero() {
     wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
   }
-
 
   void Increment::zero(const util::DateTime & time) {
     wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
     time_ = time;
   }
 
+  void Increment::ones() {
+    wrf_hydro_nwm_jedi_increment_ones_f90(keyInc_);
+  }
 
   void Increment::diff(const State & x1, const State & x2) {
     ASSERT(this->validTime() == x1.validTime());
@@ -196,9 +197,7 @@ namespace wrf_hydro_nwm_jedi {
     time_ += dt;}
 
 
-  boost::shared_ptr<const Geometry> Increment::geometry() const {
-    return fields_->geometry();
-  }
+  std::shared_ptr<const Geometry> Increment::geometry() const {return fields_->geometry();}
 
 
   void Increment::read(const eckit::Configuration & conf) {
