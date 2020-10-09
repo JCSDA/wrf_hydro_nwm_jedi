@@ -86,7 +86,7 @@ namespace wrf_hydro_nwm_jedi {
     void zero(const util::DateTime &);
     void ones();
     void accumul(const double &, const State &);
-    // void read_state_from_file(const eckit::Configuration &);
+
     void read(const eckit::Configuration &);
 
     std::shared_ptr<const Geometry> geometry() const {return fields_->geometry();}

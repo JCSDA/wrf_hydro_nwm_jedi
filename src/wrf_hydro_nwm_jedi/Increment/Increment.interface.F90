@@ -26,6 +26,7 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      self_mul, &
      axpy_inc, &
      dot_prod, &
+     schur_prod, &
      random_normal
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: &
      wrf_hydro_nwm_jedi_increment_registry
@@ -175,9 +176,9 @@ subroutine wrf_hydro_nwm_jedi_increment_mul_c(c_key_self, c_zz) &
 end subroutine wrf_hydro_nwm_jedi_increment_mul_c
 
 
-subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c( &
+subroutine wrf_hydro_nwm_jedi_increment_axpy_c( &
      c_key_self, c_aa, c_key_yy) &
-     bind(c, name='wrf_hydro_nwm_jedi_axpy_inc_f90')
+     bind(c, name='wrf_hydro_nwm_jedi_increment_axpy_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_self
   real(c_float),  intent(in) :: c_aa
@@ -190,7 +191,25 @@ subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c( &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_yy, yy)
 
   call axpy_inc(self, c_aa, yy)
-end subroutine wrf_hydro_nwm_jedi_increment_axpy_inc_c
+end subroutine wrf_hydro_nwm_jedi_increment_axpy_c
+
+
+subroutine wrf_hydro_nwm_jedi_increment_accumul_c( &
+     c_key_self, c_aa, c_key_yy) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_accumul_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+  real(c_float),  intent(in) :: c_aa
+  integer(c_int), intent(in) :: c_key_yy
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: yy
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_yy, yy)
+
+  call axpy_inc(self, c_aa, yy)
+end subroutine wrf_hydro_nwm_jedi_increment_accumul_c
 
 
 subroutine wrf_hydro_nwm_jedi_increment_dot_prod_c( &
@@ -264,6 +283,21 @@ function wrf_hydro_nwm_jedi_increment_rms_c(c_key_inc) &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, increment)
   wrf_hydro_nwm_jedi_increment_rms_c = increment%fields_obj%rms()
 end function wrf_hydro_nwm_jedi_increment_rms_c
+
+
+subroutine wrf_hydro_nwm_jedi_increment_schur_c(c_key_self, c_key_rhs) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_schur_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+  integer(c_int), intent(in) :: c_key_rhs
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_rhs, rhs)
+  call schur_prod(self, rhs)
+end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 
 
 ! subroutine sw_increment_delete_c(c_key_self) bind(c, name='sw_increment_delete_f90')
@@ -349,23 +383,6 @@ end function wrf_hydro_nwm_jedi_increment_rms_c
 !   call increment_from_ug(inc, ug, its)
 
 ! end subroutine sw_increment_increment_from_ug_c
-
-
-! subroutine sw_increment_self_schur_c(c_key_self, c_key_rhs) bind(c, name='sw_increment_self_schur_f90')
-
-!   implicit none
-
-!   integer(c_int), intent(in) :: c_key_self
-!   integer(c_int), intent(in) :: c_key_rhs
-
-!   type(shallow_water_state_type), pointer :: self
-!   type(shallow_water_state_type), pointer :: rhs
-
-!   call sw_increment_registry%get(c_key_self, self)
-!   call sw_increment_registry%get(c_key_rhs, rhs)
-
-!   call self_schur(self, rhs)
-! end subroutine sw_increment_self_schur_c
 
 
 ! subroutine sw_increment_change_resol_c(c_key_inc, c_key_rhs) bind(c, name='sw_increment_change_resol_f90')

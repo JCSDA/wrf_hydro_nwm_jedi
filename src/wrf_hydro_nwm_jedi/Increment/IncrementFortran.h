@@ -17,17 +17,20 @@ namespace wrf_hydro_nwm_jedi {
 
   extern "C" {
     void wrf_hydro_nwm_jedi_increment_create_f90(F90inc &, const F90geom &, const oops::Variables &);
-    void wrf_hydro_nwm_jedi_increment_diff_incr_f90(F90inc &, const F90state &, const F90state &);
+    void wrf_hydro_nwm_jedi_increment_diff_incr_f90(F90state &, const F90state &, const F90state &);
     void wrf_hydro_nwm_jedi_increment_create_from_other_f90(F90inc &, const F90inc &);
     void wrf_hydro_nwm_jedi_increment_sub_f90(const F90inc &, const F90inc &);
     void wrf_hydro_nwm_jedi_increment_add_f90(const F90inc &, const F90inc &);
     void wrf_hydro_nwm_jedi_increment_mul_f90(const F90inc &, const float &);
-    void wrf_hydro_nwm_jedi_axpy_inc_f90(const F90inc &, const float &, const F90inc &);
+
     void wrf_hydro_nwm_jedi_increment_dot_prod_f90(const F90inc &, const F90inc &, double &);
     void wrf_hydro_nwm_jedi_increment_random_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_zero_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_ones_f90(const F90inc &);
     double wrf_hydro_nwm_jedi_increment_rms_f90(const F90inc &);
+    void wrf_hydro_nwm_jedi_increment_axpy_f90(const F90inc &, const double &, const F90inc &);
+    void wrf_hydro_nwm_jedi_increment_accumul_f90(const F90inc &, const double &, const F90state &);
+    void wrf_hydro_nwm_jedi_increment_schur_f90(const F90inc &, const F90inc &);
     /* void wrf_hydro_nwm_jedi_state_read_file_f90(const F90geom &, const F90state &, const eckit::Configuration * const *, util::DateTime * const *); */
     void wrf_hydro_nwm_jedi_increment_print_f90(const F90inc &, char *string);
     /* void wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(const F90state &, int nf, float pstat[][1]); */
@@ -37,4 +40,4 @@ namespace wrf_hydro_nwm_jedi {
   }
 }  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM_JEDI_STATE_STATEFORTRAN_H_
+#endif  // WRF_HYDRO_NWM_JEDI_INCREMENT_FORTRAN_H_

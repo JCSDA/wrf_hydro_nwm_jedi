@@ -46,7 +46,7 @@ namespace wrf_hydro_nwm_jedi {
     : fields_(new Fields(*other.fields_->geometry(), other.vars_)),
       vars_(other.vars_),
       time_(other.time_) {
-    std::cout << "Increment::Increment 2 constructor " << std::endl;
+    Log::trace() << "Increment::Increment 2 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
     if(copy) {
       wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, other.keyInc_);
@@ -54,12 +54,21 @@ namespace wrf_hydro_nwm_jedi {
       wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
     }
     // this->print(std::cout);
+    Log::trace() << "Increment::Increment 2 constructor END" << std::endl;
   }
 
 
-  Increment::Increment(const Geometry &, Increment & other) {
-    util::abor1_cpp("Increment::Increment() needs to be implemented.",
-                     __FILE__, __LINE__);
+  Increment::Increment(const Geometry &,
+		       Increment & other)
+    : time_(other.time_),
+      vars_(other.vars_),
+      fields_(new Fields(*other.fields_->geometry(), other.vars_))
+  {
+    Log::trace() << "Increment::Increment 3 constructed from other" << std::endl;
+    // wrf_hydro_nwm_increment_create_f90(keyInc_, geom_->toFortran(), vars_);
+    wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
+    //wrf_hydro_nwm_increment_change_resol_f90(toFortran(), other.keyFlds_);
+    Log::trace() << "Increment::Increment 3 constructed from other END" << std::endl;
   }
 
   Increment::~Increment() {
@@ -101,7 +110,7 @@ namespace wrf_hydro_nwm_jedi {
 		       const Increment &other,
 		       const bool check) {
     ASSERT(this->validTime() == other.validTime());
-    wrf_hydro_nwm_jedi_axpy_inc_f90(
+    wrf_hydro_nwm_jedi_increment_axpy_f90(
 	keyInc_, static_cast<float>(scalar), other.keyInc_);
   }
 
@@ -115,32 +124,33 @@ namespace wrf_hydro_nwm_jedi {
     return result;
   }
 
+
   void Increment::zero() {
     wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
   }
+
 
   void Increment::zero(const util::DateTime & time) {
     wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
     time_ = time;
   }
 
+
   void Increment::ones() {
     wrf_hydro_nwm_jedi_increment_ones_f90(keyInc_);
   }
+
 
   void Increment::diff(const State & x1, const State & x2) {
     ASSERT(this->validTime() == x1.validTime());
     ASSERT(this->validTime() == x2.validTime());
     wrf_hydro_nwm_jedi_increment_diff_incr_f90(
 	keyInc_, x1.toFortran(), x2.toFortran());
-    // util::abor1_cpp("Increment::diff() needs to be implemented.",
-    //                 __FILE__, __LINE__);
   }
 
 
-  void Increment::schur_product_with(const Increment & ) {
-    util::abor1_cpp("Increment::schur_product_with() needs to be implemented.",
-                    __FILE__, __LINE__);
+  void Increment::schur_product_with(const Increment & dx) {
+    wrf_hydro_nwm_jedi_increment_schur_f90(toFortran(), dx.toFortran());
   }
 
 
@@ -242,10 +252,9 @@ namespace wrf_hydro_nwm_jedi {
 
 
   void Increment::accumul(const double & zz, const State & xx) {
-    //sw_increment_axpy_state_f90(keyInc_, zz, xx.toFortran());
-
-    util::abor1_cpp("Increment::accumul() needs to be implemented.",
-                    __FILE__, __LINE__);
+    oops::Log::trace() << "Increment accumul starting" << std::endl;
+    wrf_hydro_nwm_jedi_increment_accumul_f90(keyInc_, zz, xx.toFortran());
+    oops::Log::trace() << "Increment accumul END" << std::endl;
   }
 
 

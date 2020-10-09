@@ -68,6 +68,7 @@ type, abstract, public :: base_field
    procedure (one_interface), deferred :: one
    procedure (set_random_normal_interface), deferred :: set_random_normal
    procedure (dot_prod_interface), deferred :: dot_prod
+   procedure (schur_prod_interface), deferred :: schur_prod
    procedure (rms_interface), deferred :: rms
    procedure (add_incr_interface), pass(self), deferred :: add_incr
    procedure (scalar_mul_interface), pass(self), deferred :: scalar_mul
@@ -164,6 +165,12 @@ abstract interface
      real(c_double)                :: dot_prod
    end function dot_prod_interface
 
+   subroutine schur_prod_interface(self, other)
+     import base_field
+     class(base_field), intent(inout) :: self
+     class(base_field), intent(in) :: other
+   end subroutine schur_prod_interface
+
    function rms_interface(self) result(rms)
      use iso_c_binding, only: c_float
      import base_field
@@ -203,6 +210,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: set_random_normal
    procedure :: rms
    procedure :: dot_prod
+   procedure :: schur_prod
    ! procedure :: allocate_field
    ! procedure :: equals
    ! procedure :: copy => field_copy
@@ -233,6 +241,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: one => one_1d
    procedure :: set_random_normal => set_random_normal_1d
    procedure :: dot_prod => dot_prod_1d
+   procedure, pass(self) :: schur_prod => schur_prod_1d
    procedure, pass(self) :: rms => rms_1d
    procedure :: scalar_mul => scalar_mul_1d
    ! Destructor
@@ -260,6 +269,7 @@ type, private, extends(base_field) :: field_2d
    procedure :: one => one_2d
    procedure :: set_random_normal => set_random_normal_2d
    procedure :: dot_prod => dot_prod_2d
+   procedure, pass(self) :: schur_prod => schur_prod_2d
    ! Destructor
    ! final :: destroy_field_2d
 end type field_2d
@@ -285,6 +295,7 @@ type, private, extends(base_field) :: field_3d
    procedure :: one => one_3d
    procedure :: set_random_normal => set_random_normal_3d
    procedure :: dot_prod => dot_prod_3d
+   procedure, pass(self) :: schur_prod => schur_prod_3d
    ! Destructor
    ! final :: destroy_field_3d
 end type field_3d
@@ -1217,6 +1228,63 @@ function rms_3d(self) result(rms)
   ! call f_comm%allreduce(zz,rms,fckit_mpi_sum())
   ! call f_comm%allreduce(ii,iisum,fckit_mpi_sum())
 end function rms_3d
+
+
+! -----------------------------------------------------------------------------
+! Schur product
+
+subroutine schur_prod(self, other)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
+  class(wrf_hydro_nwm_jedi_fields),  intent(in   ) :: other
+  integer :: ff
+
+  do ff = 1, self%nf
+     call self%fields(ff)%field%schur_prod( other%fields(ff)%field )
+  end do
+end subroutine schur_prod
+
+
+subroutine schur_prod_1d(self, other)
+  implicit none
+  class(field_1d),   intent(inout) :: self
+  class(base_field), intent(in) :: other
+
+  select type(other)
+  type is (field_1d)
+     self%array = self%array * other%array
+  class default
+     call abor1_ftn("schur_prod_1d: other is not a 1d_field")
+  end select
+end subroutine schur_prod_1d
+
+
+subroutine schur_prod_2d(self, other)
+  implicit none
+  class(field_2d),   intent(inout) :: self         !> This field
+  class(base_field), intent(in) :: other        !> The other field
+
+  select type(other)
+  type is (field_2d)
+     self%array = self%array * other%array
+  class default
+     call abor1_ftn("schur_prod_2d: other is not a 2d_field")
+  end select
+end subroutine schur_prod_2d
+
+
+subroutine schur_prod_3d(self, other)
+  implicit none
+  class(field_3d),   intent(inout) :: self
+  class(base_field), intent(in) :: other
+
+  select type(other)
+  type is (field_3d)
+     self%array = self%array * other%array
+  class default
+     call abor1_ftn("schur_prod_3d: other is not a 3d_field")
+  end select
+end subroutine schur_prod_3d
 
 
 !-----------------------------------------------------------------------------

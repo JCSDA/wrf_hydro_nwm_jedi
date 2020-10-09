@@ -35,6 +35,7 @@ public :: &
      self_mul, &
      axpy_inc, &
      dot_prod, &
+     schur_prod, &
      random_normal, &
      zeros, &
      ones
@@ -187,15 +188,25 @@ end subroutine diff_incr
 
 
 subroutine zeros(self)
+  implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   call self%fields_obj%zero()
 end subroutine zeros
 
 
 subroutine ones(self)
+  implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   call self%fields_obj%one()
 end subroutine ones
+
+
+subroutine schur_prod(self, rhs)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: rhs
+  call self%fields_obj%schur_prod(rhs%fields_obj)
+end subroutine schur_prod
 
 
 ! subroutine copy(self, rhs)
@@ -206,47 +217,6 @@ end subroutine ones
 
 !   self = rhs
 ! end subroutine copy
-
-
-! subroutine self_schur(self, rhs)
-!   type(shallow_water_state_type), intent(inout) :: self
-!   type(shallow_water_state_type), intent(   in) :: rhs
-
-!   type(shallow_water_geometry_type) :: geom_self, geom_rhs
-!   real(r8kind), pointer             :: self_u(:,:), self_v(:,:), self_h(:,:)
-!   real(r8kind), pointer             :: rhs_u(:,:), rhs_v(:,:), rhs_h(:,:)
-!   integer                           :: i, j
-!   logical                           :: check
-
-!   ! Get geometries
-!   geom_self = self%get_geometry()
-!   geom_rhs = self%get_geometry()
-
-!   ! Check for matching resolution
-!   check = (geom_self%get_nx() == geom_rhs%get_nx()     .and. &
-!            geom_self%get_ny() == geom_rhs%get_ny()     .and. &
-!            geom_self%get_xmax() == geom_rhs%get_xmax() .and. &
-!            geom_self%get_ymax() == geom_rhs%get_ymax())
-
-!   if (check) then
-!     call self%get_u_ptr(self_u)
-!     call self%get_v_ptr(self_v)
-!     call self%get_h_ptr(self_h)
-!     call rhs%get_u_ptr(rhs_u)
-!     call rhs%get_v_ptr(rhs_v)
-!     call rhs%get_h_ptr(rhs_h)
-
-!     do j=geom_self%get_yps(), geom_self%get_ype()
-!        do i=geom_self%get_xps(), geom_self%get_xpe()
-!           self_u(i,j) = self_u(i,j) * rhs_u(i,j)
-!           self_v(i,j) = self_v(i,j) * rhs_v(i,j)
-!           self_h(i,j) = self_h(i,j) * rhs_h(i,j)
-!        end do
-!     end do
-!   else
-!      call abor1_ftn("sw increment:  self_schur not implemented for mismatched resolutions")
-!   endif
-! end subroutine self_schur
 
 
 ! subroutine self_sub(self, rhs)
