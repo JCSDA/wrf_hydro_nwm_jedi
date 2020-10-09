@@ -26,7 +26,7 @@
 
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-#include "fv3jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
 // forward declarations
 namespace eckit {
