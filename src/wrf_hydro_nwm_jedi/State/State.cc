@@ -69,7 +69,8 @@ namespace wrf_hydro_nwm_jedi {
 
 
   State::State(const State & other)
-    : fields_(new Fields(*other.fields_)) {
+    : vars_ (other.vars_),
+      fields_(new Fields(*other.fields_)) {
     std::cout << "State::State 4 create_from_other from State " << std::endl;
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
@@ -161,9 +162,10 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_state_ones_f90(keyState_);
   }
 
-  void State::accumul(const double &, const State &) {
-    util::abor1_cpp("State::accumul() needs to be implemented.",
-                    __FILE__, __LINE__);
+  void State::accumul(const double & zz, const State & xx) {
+    oops::Log::trace() << "State accumul starting" << std::endl;
+    wrf_hydro_nwm_jedi_state_axpy_f90(keyState_, zz, xx.keyState_);
+    oops::Log::trace() << "State accumul done" << std::endl;
   }
 
   double State::norm() const {

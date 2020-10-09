@@ -133,24 +133,20 @@ subroutine wrf_hydro_nwm_jedi_state_copy_c(c_key_self,c_key_rhs) &
 end subroutine wrf_hydro_nwm_jedi_state_copy_c
 
 
-subroutine wrf_hydro_nwm_jedi_state_axpy_c( &
-     c_key_self,c_zz,c_key_rhs) &
+subroutine wrf_hydro_nwm_jedi_state_axpy_c(c_key_self, c_zz, c_key_rhs) &
      bind(c,name='wrf_hydro_nwm_jedi_state_axpy_f90')
-
-  implicit none
   integer(c_int), intent(in) :: c_key_self
-  real(c_float), intent(in) :: c_zz
+  real(c_double), intent(in) :: c_zz
   integer(c_int), intent(in) :: c_key_rhs
 
-  ! type(wrf_hydro_nwm_jedi_state), pointer :: self
-  ! type(wrf_hydro_nwm_jedi_state), pointer :: rhs
-  ! real(kind=kind_real) :: zz
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(wrf_hydro_nwm_jedi_state), pointer :: rhs
+  real(kind=c_float)                      :: zz_float
 
-  ! call wrf_hydro_nwm_jedi_state_registry%get(c_key_self,self)
-  ! call wrf_hydro_nwm_jedi_state_registry%get(c_key_rhs,rhs)
-  ! zz = c_zz
-
-  ! call axpy(self,zz,rhs)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+  call wrf_hydro_nwm_jedi_state_registry%get(c_key_rhs, rhs)
+  zz_float = c_zz
+  call axpy(self, zz_float, rhs)
 end subroutine wrf_hydro_nwm_jedi_state_axpy_c
 
 

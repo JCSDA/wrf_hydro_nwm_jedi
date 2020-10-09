@@ -28,6 +28,7 @@ namespace wrf_hydro_nwm_jedi {
     double wrf_hydro_nwm_jedi_state_rms_f90(const F90state &);
     void wrf_hydro_nwm_jedi_state_zero_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_state_ones_f90(const F90inc &);
+    void wrf_hydro_nwm_jedi_state_axpy_f90 (const F90state &, const double &, const F90state &);
     /* void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &); */
     /* void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &); */
   }

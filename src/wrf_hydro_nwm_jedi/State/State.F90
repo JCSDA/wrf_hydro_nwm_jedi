@@ -42,7 +42,8 @@ public :: &
      read_state_from_file,  &
      write_state_to_file, &
      change_resol, &
-     state_print
+     state_print, &
+     axpy
      ! get_mean_stddev, &
      ! rms !&
      ! gpnorm, &
@@ -346,6 +347,21 @@ subroutine state_print(self, string)
      write(*,*) c_new_line//c_new_line
   end if
 end subroutine state_print
+
+
+subroutine axpy(self, scalar, other_in)
+  use iso_c_binding, only: c_float
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  real(kind=c_float),             intent(   in) :: scalar
+  type(wrf_hydro_nwm_jedi_state), intent(   in) :: other_in
+
+  type(wrf_hydro_nwm_jedi_state) :: other
+
+  call create_from_other(other, other_in)
+  call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
+  call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
+end subroutine axpy
 
 
 ! subroutine get_mean_stddev(self, mean, stddev)
