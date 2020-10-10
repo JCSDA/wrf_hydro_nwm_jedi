@@ -3,9 +3,6 @@ geometry:
 
 inc variables: &model_vars ['SNEQV']  # , 'SNOWH']
   
-# This depends on OOPS:feature/inc_test_tolerance which is
-# pending merge 2020-10-02
 increment test:
   date: &date 2017-01-01T00:00:00Z
   tolerance: 4e-7
-

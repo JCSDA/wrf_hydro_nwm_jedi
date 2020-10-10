@@ -71,7 +71,7 @@ type, abstract, public :: base_field
    procedure (schur_prod_interface), deferred :: schur_prod
    procedure (rms_interface), deferred :: rms
    procedure (add_incr_interface), pass(self), deferred :: add_incr
-   procedure (scalar_mul_interface), pass(self), deferred :: scalar_mul
+   procedure (scalar_mult_interface), pass(self), deferred :: scalar_mult
    ! OVERLOADED OPERATORS
    generic, public :: operator(-) => diff
    ! generic, public :: operator(+) => add_incr
@@ -134,12 +134,12 @@ abstract interface
      class(base_field), intent(in) :: inc
    end subroutine add_incr_interface
 
-   subroutine scalar_mul_interface(self, scalar)
+   subroutine scalar_mult_interface(self, scalar)
      use iso_c_binding, only: c_float
      import base_field
      class(base_field), intent(inout) :: self
-     real(c_float), intent(in) :: scalar
-   end subroutine scalar_mul_interface
+     real(c_float),     intent(in   ) :: scalar
+   end subroutine scalar_mult_interface
 
    subroutine zero_interface(self)
      import base_field
@@ -243,7 +243,7 @@ type, private, extends(base_field) :: field_1d
    procedure :: dot_prod => dot_prod_1d
    procedure, pass(self) :: schur_prod => schur_prod_1d
    procedure, pass(self) :: rms => rms_1d
-   procedure :: scalar_mul => scalar_mul_1d
+   procedure :: scalar_mult => scalar_mult_1d
    ! Destructor
    ! final :: destroy_field_1d
 end type field_1d
@@ -264,7 +264,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: apply_cov => apply_cov_2d
    procedure :: diff => diff_2d
    procedure :: add_incr => add_incr_2d
-   procedure :: scalar_mul => scalar_mul_2d
+   procedure :: scalar_mult => scalar_mult_2d
    procedure :: zero => zero_2d
    procedure :: one => one_2d
    procedure :: set_random_normal => set_random_normal_2d
@@ -290,7 +290,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: apply_cov => apply_cov_3d
    procedure :: diff => diff_3d
    procedure :: add_incr => add_incr_3d
-   procedure :: scalar_mul => scalar_mul_3d
+   procedure :: scalar_mult => scalar_mult_3d
    procedure :: zero => zero_3d
    procedure :: one => one_3d
    procedure :: set_random_normal => set_random_normal_3d
@@ -430,7 +430,7 @@ subroutine deallocate_field(self)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
 
-  write(*,*) "Deallocating fields"
+  ! write(*,*) "Deallocating fields"
   if(allocated(self%fields)) deallocate(self%fields)
   ! self%lalloc = .false.
 end subroutine deallocate_field
@@ -750,11 +750,11 @@ subroutine add_increment(self, inc)
   class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
   class(wrf_hydro_nwm_jedi_fields),  intent(in) :: inc
 
-  integer :: f
+  integer :: ff
 
-  write(*,*) "Increment invoked in Fields.F90"
-  do f = 1, self%nf
-     call self%fields(f)%field%add_incr(inc%fields(f)%field)
+  ! write(*,*) "Increment invoked in Fields.F90"
+  do ff = 1, self%nf
+     call self%fields(ff)%field%add_incr(inc%fields(ff)%field)
   end do
 end subroutine add_increment
 
@@ -805,36 +805,36 @@ subroutine scalar_mult(self, scalar)
   use iso_c_binding, only: c_float
   implicit none
   class(wrf_hydro_nwm_jedi_fields),  intent(inout) :: self
-  real(c_float),  intent(in) :: scalar
+  real(c_float),                     intent(in   ) :: scalar
 
   integer :: ff
 
-  write(*,*) "Scalar mult invoked in Fields.F90"
   do ff = 1, self%nf
-     call self%fields(ff)%field%scalar_mul(scalar)
+     ! write(*,*) ff, scalar
+     call self%fields(ff)%field%scalar_mult(scalar)
   end do
 end subroutine scalar_mult
 
 
-subroutine scalar_mul_1d(self, scalar)
+subroutine scalar_mult_1d(self, scalar)
   class(field_1d), intent(inout) :: self
-  real(c_float), intent(in) :: scalar
+  real(c_float),   intent(in   ) :: scalar
   self%array = self%array * scalar
-end subroutine scalar_mul_1d
+end subroutine scalar_mult_1d
 
 
-subroutine scalar_mul_2d(self, scalar)
+subroutine scalar_mult_2d(self, scalar)
   class(field_2d), intent(inout) :: self
-  real(c_float), intent(in) :: scalar
+  real(c_float),   intent(in   ) :: scalar
   self%array = self%array * scalar
-end subroutine scalar_mul_2d
+end subroutine scalar_mult_2d
 
 
-subroutine scalar_mul_3d(self, scalar)
+subroutine scalar_mult_3d(self, scalar)
   class(field_3d), intent(inout) :: self
-  real(c_float), intent(in) :: scalar
+  real(c_float),   intent(in   ) :: scalar
   self%array = self%array * scalar
-end subroutine scalar_mul_3d
+end subroutine scalar_mult_3d
 
 
 !-----------------------------------------------------------------------------

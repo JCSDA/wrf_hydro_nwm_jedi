@@ -23,7 +23,7 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      increment_create, &
      increment_print, &
      diff_incr, &
-     self_mul, &
+     self_mult, &
      axpy_inc, &
      dot_prod, &
      schur_prod, &
@@ -172,7 +172,7 @@ subroutine wrf_hydro_nwm_jedi_increment_mul_c(c_key_self, c_zz) &
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self,self)
-  call self_mul(self, c_zz)
+  call self_mult(self, c_zz)
 end subroutine wrf_hydro_nwm_jedi_increment_mul_c
 
 
@@ -181,16 +181,18 @@ subroutine wrf_hydro_nwm_jedi_increment_axpy_c( &
      bind(c, name='wrf_hydro_nwm_jedi_increment_axpy_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_self
-  real(c_float),  intent(in) :: c_aa
+  real(c_double), intent(in) :: c_aa
   integer(c_int), intent(in) :: c_key_yy
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   type(wrf_hydro_nwm_jedi_state), pointer :: yy
+  real(c_float) :: scalar
+  scalar = c_aa
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_yy, yy)
 
-  call axpy_inc(self, c_aa, yy)
+  call axpy_inc(self, scalar, yy)
 end subroutine wrf_hydro_nwm_jedi_increment_axpy_c
 
 
@@ -199,16 +201,17 @@ subroutine wrf_hydro_nwm_jedi_increment_accumul_c( &
      bind(c, name='wrf_hydro_nwm_jedi_increment_accumul_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_self
-  real(c_float),  intent(in) :: c_aa
+  real(c_double), intent(in) :: c_aa
   integer(c_int), intent(in) :: c_key_yy
 
   type(wrf_hydro_nwm_jedi_state), pointer :: self
   type(wrf_hydro_nwm_jedi_state), pointer :: yy
+  real(c_float) ::  aa_float
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
   call wrf_hydro_nwm_jedi_state_registry%get(c_key_yy, yy)
-
-  call axpy_inc(self, c_aa, yy)
+  aa_float = c_aa
+  call axpy_inc(self, aa_float, yy)
 end subroutine wrf_hydro_nwm_jedi_increment_accumul_c
 
 
