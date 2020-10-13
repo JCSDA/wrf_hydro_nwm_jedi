@@ -129,7 +129,7 @@ end subroutine ones
 subroutine copy(self, rhs)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
-  type(wrf_hydro_nwm_jedi_state), intent(in)    :: rhs
+  type(wrf_hydro_nwm_jedi_state), intent(in   ) :: rhs
 
   integer :: var
 

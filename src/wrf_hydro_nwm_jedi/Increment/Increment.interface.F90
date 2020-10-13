@@ -69,7 +69,6 @@ subroutine wrf_hydro_nwm_jedi_increment_create_c( &
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
 
   vars = oops_variables(c_vars)
-  write(*,*) "Invoking create from Increment ",trim(vars%variable(1))
   call increment_create(self, geom, vars)
 end subroutine wrf_hydro_nwm_jedi_increment_create_c
 

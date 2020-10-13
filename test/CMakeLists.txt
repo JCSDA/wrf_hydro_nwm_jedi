@@ -30,6 +30,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/wrf_hydro_nwm_files)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/make_obs)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/hofx)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/3dvar)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}

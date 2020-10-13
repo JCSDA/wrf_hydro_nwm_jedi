@@ -35,6 +35,8 @@ observations:
       obsfile: 'Data/make_obs/make_obs_3d.swe.nc'
   obs operator:
     name: 'Identity'
+  obs error:
+    covariance model: diagonal
 - obs space:
     name: 'Simulate'
     simulated variables: ['snow_depth']
@@ -51,7 +53,9 @@ observations:
       obsfile: 'Data/make_obs/make_obs_3d.snow_depth.nc'
   obs operator:
     name: 'Identity'
+  obs error:
+    covariance model: diagonal
 
 make obs: true
 
-obs perturbations: false
+obs perturbations: true
