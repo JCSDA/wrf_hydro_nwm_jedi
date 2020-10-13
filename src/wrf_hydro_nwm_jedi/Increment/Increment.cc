@@ -119,8 +119,6 @@ namespace wrf_hydro_nwm_jedi {
     double result = 0.0;
     wrf_hydro_nwm_jedi_increment_dot_prod_f90(keyInc_, other.keyInc_, result);
     std::cout << "dot product result: " << result << std::endl;
-    this->print(std::cout);
-    other.print(std::cout);
     return result;
   }
 

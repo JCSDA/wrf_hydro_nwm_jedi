@@ -35,7 +35,7 @@ namespace wrf_hydro_nwm_jedi {
        vars);
     util::DateTime * dtp = &time_;
     this->read(conf);
-    oops::Log::trace() << "State::State 1 create from file done." << std::endl;
+    oops::Log::trace() << "State::State 1 create from file END." << std::endl;
   }
 
 
@@ -46,12 +46,11 @@ namespace wrf_hydro_nwm_jedi {
       fields_(new Fields(geom, vars_)),
       time_(time) {
     oops::Log::trace() << "State::State 2 create from file." << std::endl;
-    oops::Log::trace() << "State::State 2 time_: " << time_ << std::endl;
     wrf_hydro_nwm_jedi_state_create_f90(
 	keyState_,
 	fields_->geometry()->toFortran(),
 	vars);
-    oops::Log::trace() << "State::State 2 create from file DONE." << std::endl;
+    oops::Log::trace() << "State::State 2 create from file END." << std::endl;
   }
 
 
@@ -60,21 +59,27 @@ namespace wrf_hydro_nwm_jedi {
     : vars_ (other.vars_),
       fields_(new Fields(geom, other.vars_)),
       time_(other.time_) {
-    oops::Log::trace() << "State::State 3 create from existing geom and state." << std::endl;
+    oops::Log::trace() <<
+      "State::State 3 create from existing geom and state." << std::endl;
     wrf_hydro_nwm_jedi_state_create_f90(keyState_, geom.toFortran(), other.vars_);
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
     time_ = other.time_;
+    oops::Log::trace() <<
+      "State::State 3 create from existing geom and state END." << std::endl;
   }
 
 
   State::State(const State & other)
     : vars_ (other.vars_),
       fields_(new Fields(*other.fields_)) {
-    std::cout << "State::State 4 create_from_other from State " << std::endl;
+    oops::Log::trace() <<
+      "State::State 4 create_from_other from State " << std::endl;
     wrf_hydro_nwm_jedi_state_create_from_other_f90(keyState_, other.keyState_);
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, other.keyState_);
     time_ = other.time_;
+    oops::Log::trace() <<
+      "State::State 4 create_from_other from State End" << std::endl;
   }
 
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
@@ -126,7 +131,7 @@ namespace wrf_hydro_nwm_jedi {
         keyState_,
 	&conf,
         &dtp);
-    this->print(std::cout);
+    // this->print(std::cout);
     time_ = *dtp;
     oops::Log::trace() << "State read done" << std::endl;
   }

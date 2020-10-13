@@ -30,7 +30,7 @@ observations:
         lon1: -360
         lon2: 360
         random seed: 29837
-      obs errors: [1]
+      obs errors: [5]
     obsdataout:
       obsfile: 'Data/make_obs/make_obs_3d.swe.nc'
   obs operator:
