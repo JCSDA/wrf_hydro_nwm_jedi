@@ -1,4 +1,4 @@
-# (C) COPYRIGHT 2018-2019 UCAR
+# (C) COPYRIGHT 2018-2019 UCAR:
 #
 # THIS SOFTWARE IS LICENSED UNDER THE TERMS OF THE APACHE LICENCE VERSION 2.0
 # WHICH CAN BE OBTAINED AT HTTP://WWW.APACHE.ORG/LICENSES/LICENSE-2.0.
@@ -50,9 +50,9 @@ endif ()
 
 # -----------------------------------------------------------------------------
 # feature/dev_3dvar_catchup
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA/fckit.git"           UPDATE BRANCH release-stable )
-ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA/atlas.git"           UPDATE BRANCH release-stable )
-ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA/ioda-converters.git" UPDATE BRANCH develop )
+ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA-internal/fckit.git"           UPDATE BRANCH release-stable )
+ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA-internal/atlas.git"           UPDATE BRANCH release-stable )
+ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA-internal/ioda-converters.git" UPDATE BRANCH develop )
 
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH feature/inc_test_tolerance )
 ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH bugfix/inc_test_tol )
