@@ -213,6 +213,10 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
+ void Increment::write(const eckit::Configuration & conf) {
+    util::abor1_cpp("Increment::write() needs to be implemented.",
+                    __FILE__, __LINE__);
+  }
 
   void Increment::ug_coord(oops::UnstructuredGrid &) const {
     util::abor1_cpp("Increment::ug_coord() needs to be implemented.",

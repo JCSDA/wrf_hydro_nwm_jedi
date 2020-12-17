@@ -67,6 +67,7 @@ namespace wrf_hydro_nwm_jedi {
     ~Increment();
 
     void read(const eckit::Configuration &);
+    void write(const eckit::Configuration &);
     double norm() const;
 
     void diff(const State &, const State &);
