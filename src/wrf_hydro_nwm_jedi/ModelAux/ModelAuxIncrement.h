@@ -54,6 +54,9 @@ namespace wrf_hydro_nwm_jedi {
     // JLM TODO: zero dot product?
     double dot_product_with(const ModelAuxIncrement &) const {return 0.0;}
 
+    void read(const eckit::Configuration&) {}
+    void write(const eckit::Configuration&) {}
+
     double norm() const {return 0.0;}
 
     /// Serialize and deserialize
