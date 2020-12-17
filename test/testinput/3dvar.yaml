@@ -57,6 +57,8 @@ output:
   first: PT0H
   frequency: PT1H
   type: 'an'
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
 
 variational:
   minimizer:

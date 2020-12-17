@@ -81,13 +81,14 @@ namespace wrf_hydro_nwm_jedi {
     State & operator+=(const Increment &);
 
     double norm() const;
-    void write(const eckit::Configuration &) const;
     void zero();
     void zero(const util::DateTime &);
     void ones();
     void accumul(const double &, const State &);
 
     void read(const eckit::Configuration &);
+    void write(const eckit::Configuration &);
+    // void write(const eckit::Configuration &) const;
 
     std::shared_ptr<const Geometry> geometry() const {return fields_->geometry();}
 

@@ -115,7 +115,7 @@ subroutine zeros(self)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   integer :: var
-  
+
   call self%fields_obj%zero()
 end subroutine zeros
 
@@ -136,7 +136,7 @@ subroutine copy(self, rhs)
   call checksame( &
        self%fields_obj, rhs%fields_obj, &
        "wrf_hydro_nwm_jedi_state_mod.copy")
-  
+
   ! Deep copy
   self%fields_obj = rhs%fields_obj
   self%calendar_type = rhs%calendar_type
@@ -152,7 +152,7 @@ subroutine add_incr(self, rhs)
   implicit none
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self
   type(wrf_hydro_nwm_jedi_state),    intent(in)    :: rhs
-  
+
   call self%fields_obj%add_increment(rhs%fields_obj)
 end subroutine add_incr
 
@@ -168,27 +168,27 @@ subroutine change_resol(self, geom, rhs, geom_rhs)
   integer :: var
   !type(field2field_interp) :: interp
   !logical :: integer_interp = .false.
-  
+
   ! call checksame(self%fields_obj,rhs%fields_obj,"wrf_hydro_nwm_jedi_state_mod.change_resol")
-  
+
   ! if ((rhs%iec-rhs%isc+1)-(self%iec-self%isc+1) == 0) then
-  
+
   !   call copy(self, rhs)
-  
+
   ! else
-  
+
   !   ! Check if integer interp needed
   !   do var = 1, self%nf
   !     if (rhs%fields_obj(var)%integerfield) integer_interp = .true.
   !   enddo
-  
+
   !   call interp%create(geom%interp_method, integer_interp, geom_rhs, geom)
   !   call interp%apply(self%nf, geom_rhs, rhs%fields_obj, geom, self%fields_obj)
   !   call interp%delete()
-  
+
   !   self%calendar_type = rhs%calendar_type
   !   self%date_init = rhs%date_init
-  
+
   ! endif
 end subroutine change_resol
 
@@ -200,14 +200,14 @@ subroutine read_state_from_file(self, c_conf, f_dt)
   type(wrf_hydro_nwm_jedi_state),    intent(inout) :: self   !< State
   type(c_ptr),                       intent(in)    :: c_conf !< Configuration
   type(datetime),                    intent(inout) :: f_dt   !< DateTime
-  
+
   character(len=10) :: filetype
   character(len=255) :: filename_lsm, filename_hydro
-  integer :: flipvert
   type(fckit_configuration) :: f_conf
   character(len=:), allocatable :: str
-  integer :: ixfull, jxfull, var
   character(len=30) :: fstring
+  ! integer :: flipvert
+  ! integer :: ixfull, jxfull, var
 
   f_conf = fckit_configuration(c_conf)
 
@@ -234,29 +234,25 @@ subroutine write_state_to_file(self, c_conf, f_dt)
 
   character(len=10) :: filetype
   character(len=255) :: filename_lsm, filename_hydro
-  character(len=255) :: validitydate
-  integer :: flipvert
   type(fckit_configuration) :: f_conf
   character(len=:), allocatable :: str
-  integer :: ixfull, jxfull, var
-
+  character(len=30) :: fstring
+  ! integer :: flipvert
+  ! integer :: ixfull, jxfull, var
+ 
   f_conf = fckit_configuration(c_conf)
 
-  call datetime_to_string(f_dt, validitydate)
+  call f_conf%get_or_die("filename_lsm", str)
+  filename_lsm = str
+  deallocate(str)
 
-  filename_lsm = "lsm."//validitydate
-  filename_hydro = "hydro."//validitydate
+  call f_conf%get_or_die("filename_hydro", str)
+  filename_hydro = str
+  deallocate(str)
 
-  ! call f_conf%get_or_die("filename_lsm", str)
-  ! filename_lsm = str
-  ! deallocate(str)
-
-  ! call f_conf%get_or_die("filename_hydro", str)
-  ! filename_hydro = str
-  ! deallocate(str)
-  write(*,*) "State written in ",filename_lsm,filename_hydro
-  !  call self%fields_obj%read_fields_from_file(filename_lsm, filename_hydro)
-  !call self%fields_obj%write_state_to_file(trim(filename_lsm),trim(filename_hydro))
+  call self%fields_obj%write_fields_to_file(filename_lsm, filename_hydro, f_dt)
+  call datetime_to_string(f_dt, fstring)
+  write(*,*) 'write_state_to_file f_dt to string: '//fstring
 end subroutine write_state_to_file
 
 

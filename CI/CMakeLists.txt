@@ -50,23 +50,33 @@ endif ()
 
 # -----------------------------------------------------------------------------
 # feature/dev_3dvar_catchup
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA/fckit.git"           UPDATE BRANCH release-stable )
+# ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA/fckit.git"           UPDATE BRANCH release-stable )
+ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA/fckit.git"           UPDATE TAG 8502aaeec5b3012ab337b8b3f696733037d4072b)
+
 ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA/atlas.git"           UPDATE BRANCH release-stable )
+# /home/vagrant/jedi/bundle-nwm-dev-3dv-catchup/wrf_hydro_nwm_jedi/CI/atlas e0b77091009dbc3281796b9e4b9d2a023fe28a5e
+
 ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA/ioda-converters.git" UPDATE BRANCH develop )
+# /home/vagrant/jedi/bundle-nwm-dev-3dv-catchup/wrf_hydro_nwm_jedi/CI/ioda-converters 35c317ba4ab51066085289cc55bddad89eeb663a
 
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH feature/inc_test_tolerance )
-ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH bugfix/inc_test_tol )
+# ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH bugfix/inc_test_tol )
+ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE TAG e772c1ff569ef1ff1623d0516e7b1537fee56e3a)
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE TAG 06fe37851cc59524e071863ce19d177984a80aa)
 # ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA/oops.git"            UPDATE BRANCH develop)
 
 ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE BRANCH develop )
-# ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG 5168c6fbdf4d2b0ef9ee51dba39ca32bd2f6ccea)
+#Xecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG 5168c6fbdf4d2b0ef9ee51dba39ca32bd2f6ccea)
+#X  ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA/saber.git"           UPDATE TAG 45fd9f68ea830b499bf29d0655c1f20979e4f8e4)
 
-ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE BRANCH develop )
+# ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE BRANCH develop )
 # ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE TAG 6b12a99fbb5945b4ee0a054697388b4c33753187)
+ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA/ioda.git"            UPDATE TAG e1bdef99fc092f1a10c2210ffc8c498a6e18d2d1)
 
-ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE BRANCH develop )
+# ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE BRANCH develop )
 # ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE TAG af1ea5a6cee3081caa671917bc7d4d734b0ff65b)
+ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA/ufo.git"             UPDATE TAG 8bf8d5d1b282c25d091e6f27d3cf5bc2ee8a90ba)
+
 
 
 # -----------------------------------------------------------------------------

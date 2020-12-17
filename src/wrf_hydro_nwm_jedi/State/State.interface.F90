@@ -216,10 +216,10 @@ subroutine wrf_hydro_nwm_jedi_state_write_file_c( &
      bind(c,name='wrf_hydro_nwm_jedi_state_write_file_f90')
 
   implicit none
+  integer(c_int), intent(in) :: c_key_geom  !< Geometry
   integer(c_int), intent(in) :: c_key_state  !< State
   type(c_ptr), intent(in)    :: c_conf !< Configuration
   type(c_ptr), intent(inout) :: c_dt   !< DateTime
-  integer(c_int), intent(in) :: c_key_geom  !< Geometry
 
   type(wrf_hydro_nwm_jedi_state), pointer :: state
   type(datetime) :: fdate
@@ -250,26 +250,6 @@ subroutine wrf_hydro_nwm_jedi_state_analytic_init_c( &
   call c_f_datetime(c_dt, fdate)
   !call analytic_IC(state, geom, c_conf, fdate)
 end subroutine wrf_hydro_nwm_jedi_state_analytic_init_c
-
-
-! subroutine wrf_hydro_nwm_jedi_state_write_file_c(c_key_geom, c_key_state, c_conf, c_dt) &
-!      bind(c,name='wrf_hydro_nwm_jedi_state_write_file_f90')
-
-!   implicit none
-!   integer(c_int), intent(in) :: c_key_state  !< State
-!   type(c_ptr), intent(in) :: c_conf !< Configuration
-!   type(c_ptr), intent(in) :: c_dt   !< DateTime
-!   integer(c_int), intent(in) :: c_key_geom  !< Geometry
-  
-!   type(wrf_hydro_nwm_jedi_state), pointer :: state
-!   type(datetime) :: fdate
-!   type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
-  
-!   call wrf_hydro_nwm_jedi_geom_registry%get(c_key_geom, geom)
-!   call wrf_hydro_nwm_jedi_state_registry%get(c_key_state,state)
-!   call c_f_datetime(c_dt, fdate)
-!   call write_state_to_file(geom, state, c_conf, fdate)
-! end subroutine wrf_hydro_nwm_jedi_state_write_file_c
 
 
 subroutine wrf_hydro_nwm_jedi_state_gpnorm_c(c_key_state, kf, pstat) &

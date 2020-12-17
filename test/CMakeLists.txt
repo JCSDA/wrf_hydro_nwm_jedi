@@ -18,9 +18,12 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testoutput/3dvar.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+  Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
+  )
+
+list( APPEND wrf_hydro_nwm_jedi_test_input_cp
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-  Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   )
 
 
@@ -33,6 +36,11 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/hofx)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/3dvar)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+    ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
+    ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
+endforeach()
+foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input_cp})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
     ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
 endforeach()

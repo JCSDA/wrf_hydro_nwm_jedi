@@ -55,11 +55,12 @@ type, abstract, public :: base_field
    character(len=32) :: units = "null"        !< Units for the field
    integer :: ncid_index                      !< Index for restart file (1=lsm, 2=hydro)
    logical :: tracer = .false.                !< Tracer or not?
-   ! class(cov_obj) :: covariance   
+   ! class(cov_obj) :: covariance
  contains
    procedure (print_field_interface),     pass(self), deferred :: print_field
    procedure (print_field_dims_interface),pass(self), deferred :: print_field_dims
    procedure (read_file_interface),       pass(self), deferred :: read_file
+   procedure (read_file_interface),       pass(self), deferred :: write_file
    procedure (get_value_field_interface), pass(self), deferred :: get_value
    procedure (set_value_field_interface), pass(self), deferred :: set_value
    procedure (apply_covariance_mult_interface), pass(self), deferred :: apply_cov
@@ -96,6 +97,12 @@ abstract interface
      class(base_field),     intent(inout) :: self
      integer, dimension(2), intent(in) :: ncid_vector
    end subroutine read_file_interface
+
+   subroutine write_file_interface(self, ncid_vector)
+     import base_field
+     class(base_field),     intent(inout) :: self
+     integer, dimension(2), intent(in) :: ncid_vector
+   end subroutine write_file_interface
 
    function get_value_field_interface(self, ind) result(val)
      use iso_c_binding, only : c_float
@@ -200,6 +207,7 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: create
    procedure :: search_field
    procedure :: read_fields_from_file
+   procedure :: write_fields_to_file
    procedure :: print_single_field
    procedure :: print_all_fields
    procedure :: add_increment
@@ -230,6 +238,7 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: print_field => print_field_1d
    procedure, pass(self) :: print_field_dims => print_field_dims_1d
    procedure, pass(self) :: read_file => read_file_1d
+   procedure, pass(self) :: write_file => write_file_1d
    procedure, pass(self) :: get_value => get_value_1d
    procedure, pass(self) :: set_value => set_value_1d
    procedure, pass(self) :: fill => fill_field_1d
@@ -256,6 +265,7 @@ type, private, extends(base_field) :: field_2d
    procedure, pass(self) :: print_field => print_field_2d
    procedure, pass(self) :: print_field_dims => print_field_dims_2d
    procedure, pass(self) :: read_file => read_file_2d
+   procedure, pass(self) :: write_file => write_file_2d
    procedure, pass(self) :: get_value => get_value_2d
    procedure, pass(self) :: set_value => set_value_2d
    procedure, pass(self) :: fill => fill_field_2d
@@ -282,6 +292,7 @@ type, private, extends(base_field) :: field_3d
    procedure, pass(self) :: print_field => print_field_3d
    procedure, pass(self) :: print_field_dims => print_field_dims_3d
    procedure, pass(self) :: read_file => read_file_3d
+   procedure, pass(self) :: write_file => write_file_3d
    procedure, pass(self) :: get_value => get_value_3d
    procedure, pass(self) :: set_value => set_value_3d
    procedure, pass(self) :: fill => fill_field_3d
@@ -703,7 +714,7 @@ function diff_2d(a, b) result(val)
   class(base_field), allocatable :: val
 
   class(field_2d), allocatable :: tmp
-  
+
   select type(b)
   type is (field_2d)
      allocate(tmp)
@@ -725,7 +736,7 @@ function diff_3d(a, b) result(val)
   class(base_field), allocatable :: val
 
   class(field_3d), allocatable :: tmp
-  
+
   select type(b)
   type is (field_3d)
      allocate(tmp)
@@ -775,7 +786,7 @@ end subroutine add_incr_1d
 subroutine add_incr_2d(self, inc)
   class(field_2d), intent(inout) :: self
   class(base_field), intent(in) :: inc
-  
+
   select type(inc)
   type is (field_2d)
      self%array = self%array + inc%array
@@ -788,7 +799,7 @@ end subroutine add_incr_2d
 subroutine add_incr_3d(self, inc)
   class(field_3d), intent(inout) :: self
   class(base_field), intent(in) :: inc
-  
+
   select type(inc)
   type is (field_3d)
      self%array = self%array + inc%array
@@ -1009,7 +1020,7 @@ function dot_prod_2d(self, other)
 
   integer :: ii, jj
   dot_prod_2d = zero_c_double
-  
+
   select type(other)
   type is (field_2d)
      do ii = 1, size(self%array, 1)
@@ -1033,7 +1044,7 @@ function dot_prod_3d(self, other)
 
   integer :: ii, jj, kk
   dot_prod_3d = zero_c_double
-  
+
   select type(other)
   type is (field_3d)
      do ii = 1, size(self%array, 1)
@@ -1191,9 +1202,9 @@ function rms_2d(self) result(rms)
   class(field_2d), intent(in) :: self
   real(kind=c_float) :: rms
   !type(fckit_mpi_comm), intent(in)    :: f_comm
-  
+
   real(kind=c_double) :: dot_prod_w_self, rms_double
-  
+
   ! do j = 1, self%ydim_len
   !    do i = 1, self%xdim_len
   !       zz = zz + self%array(i, j)**2
@@ -1592,15 +1603,53 @@ subroutine read_fields_from_file(self, filename_lsm, filename_hydro, f_dt)
 end subroutine read_fields_from_file
 
 
+subroutine write_fields_to_file(self, filename_lsm, filename_hydro, f_dt)
+  class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
+  character(len=*),                         intent(in   ) :: filename_lsm, filename_hydro
+  type(datetime),                           intent(out  ) :: f_dt
+
+  integer :: ncid_lsm, ncid_hydro, n, ierr
+  integer, dimension(2) :: ncid_vector
+  logical :: write_file_lsm, write_file_hydro
+  type(datetime)  :: file_time_lsm, file_time_hydro
+
+  ! open files here and pass ncids
+  ! check if lsm geom is defined: open the RESTART file
+  ncid_lsm = open_get_restart_ncid(self, filename_lsm=filename_lsm, mode=nf90_write)
+  ! check if any hydro variables are defined: open the HYDRO_RST file
+  ncid_hydro = open_get_restart_ncid(self, filename_hydro=filename_hydro, mode=nf90_write)
+
+  ! verify that the files are at the same time if both are being used.
+  file_time_lsm = get_lsm_file_time(ncid_lsm)
+  !file_time_hydro = get_lsm_file_time(ncid_hydro)
+
+  !if (datetime_eq(file_time_lsm, file_time_hydro)) then
+  f_dt = file_time_lsm
+  !else
+  !   call abor1_ftn("read_fields_from_file: lsm and hydryo restart files have different times")
+  !end if
+
+  ncid_vector = (/ ncid_lsm, ncid_hydro /)
+  do n = 1, self%nf
+     call self%fields(n)%field%write_file(ncid_vector)
+  enddo
+
+  ! close nc files
+  call close_restart_ncid(ncid_lsm, filename_lsm)
+  call close_restart_ncid(ncid_hydro, filename_hydro)
+end subroutine write_fields_to_file
+
+
 !> Helper function get get ncids for the two restart files (RESTART and
 !> HYDRO_RST. Contains harded coded information RESTART is index 1 and
 !> RESTART is index 2. If a file is not returned, the unopened_ncid
 !> constant is returned.
-function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
+function open_get_restart_ncid(self, filename_lsm, filename_hydro, mode) result(ncid)
   class(wrf_hydro_nwm_jedi_fields), target, intent(inout) :: self
   character(len=*), optional, intent(in) :: filename_lsm, filename_hydro
-  integer :: ncid
+  integer, optional, intent(in) :: mode
 
+  integer :: ncid, mode_local
   logical :: read_file = .false.
   character(len=256) :: filename
   integer :: ierr, n, ncid_index
@@ -1620,6 +1669,13 @@ function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
      ncid_index = 2
   end if
 
+  ! Can this be removed?
+  if (.not. present(mode)) then
+     mode_local = nf90_nowrite
+  else
+     mode_local = mode
+  end if
+
   do n = 1, self%nf
      if (self%fields(n)%field%ncid_index .eq. ncid_index) read_file = .true.
   enddo
@@ -1627,7 +1683,7 @@ function open_get_restart_ncid(self, filename_lsm, filename_hydro) result(ncid)
   write(*, *) read_file
 
   if (read_file) then
-     ierr = nf90_open(filename, NF90_NOWRITE, ncid)
+     ierr = nf90_open(filename, mode_local, ncid)
      call error_handler(ierr, "STOP: file can not be opened: "//trim(filename))
      write(*, *) filename
   else
@@ -1690,7 +1746,8 @@ function get_hydro_file_time(ncid) result(f_dt)
   !write(*,*) "time_char: "//time_char
 end function get_hydro_file_time
 
-! Read 1-d ----------------------
+
+! read/write 1-d ----------------------
 subroutine read_file_1d(self, ncid_vector)
   class(field_1d),       intent(inout) :: self
   integer, dimension(2), intent(in)    :: ncid_vector
@@ -1700,6 +1757,17 @@ subroutine read_file_1d(self, ncid_vector)
        self%wrf_hydro_nwm_name, &
        self%array)
 end subroutine read_file_1d
+
+
+subroutine write_file_1d(self, ncid_vector)
+  class(field_1d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
+
+  call write_to_restart_1d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, &
+       self%array)
+end subroutine write_file_1d
 
 
 subroutine get_from_restart_1d_float(ncid, name, array)
@@ -1720,7 +1788,25 @@ subroutine get_from_restart_1d_float(ncid, name, array)
 end subroutine get_from_restart_1d_float
 
 
-! Read 2-d ----------------------
+subroutine write_to_restart_1d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in) :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:),                 intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_put_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem writing variable in restart file: '"//trim(name)//"'")
+end subroutine write_to_restart_1d_float
+
+
+! read/write 2-d ----------------------
 subroutine read_file_2d(self, ncid_vector)
   class(field_2d),       intent(inout) :: self
   integer, dimension(2), intent(in)    :: ncid_vector
@@ -1730,6 +1816,17 @@ subroutine read_file_2d(self, ncid_vector)
        self%wrf_hydro_nwm_name, &
        self%array)
 end subroutine read_file_2d
+
+
+subroutine write_file_2d(self, ncid_vector)
+  class(field_2d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
+
+  call write_to_restart_2d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, &
+       self%array)
+end subroutine write_file_2d
 
 
 subroutine get_from_restart_2d_float(ncid, name, array)
@@ -1750,7 +1847,25 @@ subroutine get_from_restart_2d_float(ncid, name, array)
 end subroutine get_from_restart_2d_float
 
 
-! Read 3-d ----------------------
+subroutine write_to_restart_2d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in)  :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:, :),              intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_put_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem writing variable in restart file: '"//trim(name)//"'")
+end subroutine write_to_restart_2d_float
+
+
+! read/write 3-d ----------------------
 subroutine read_file_3d(self, ncid_vector)
   class(field_3d),       intent(inout) :: self
   integer, dimension(2), intent(in)    :: ncid_vector
@@ -1760,6 +1875,17 @@ subroutine read_file_3d(self, ncid_vector)
        self%wrf_hydro_nwm_name, &
        self%array)
 end subroutine read_file_3d
+
+
+subroutine write_file_3d(self, ncid_vector)
+  class(field_3d),       intent(inout) :: self
+  integer, dimension(2), intent(in)    :: ncid_vector
+
+  call get_from_restart_3d_float( &
+       ncid_vector(self%ncid_index), &
+       self%wrf_hydro_nwm_name, &
+       self%array)
+end subroutine write_file_3d
 
 
 subroutine get_from_restart_3d_float(ncid, name, array)
@@ -1778,6 +1904,24 @@ subroutine get_from_restart_3d_float(ncid, name, array)
   call error_handler(ierr, &
        "Problem finding variable in restart file: '"//trim(name)//"'")
 end subroutine get_from_restart_3d_float
+
+
+subroutine write_to_restart_3d_float(ncid, name, array)
+  implicit none
+  integer,                            intent(in)  :: ncid
+  character(len=*),                   intent(in)  :: name
+  real, dimension(:, :, :),           intent(out) :: array
+
+  integer :: ierr
+  integer :: varid
+
+  ierr = nf90_inq_varid(ncid, name, varid)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file '"//trim(name)//"'")
+  ierr = nf90_put_var(ncid, varid, array)
+  call error_handler(ierr, &
+       "Problem finding variable in restart file: '"//trim(name)//"'")
+end subroutine write_to_restart_3d_float
 
 
 ! --------------------------------------------------------------------------------------------------
