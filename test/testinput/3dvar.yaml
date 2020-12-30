@@ -3,6 +3,7 @@ cost function:
 
   analysis variables: ['SNEQV'] # , 'SNOWH']  #seg faults if snowh not in state variables
   window begin: '2016-12-31T23:30:00Z'
+  # window begin: '2017-01-01T00:00:00Z'
   window length: PT1H
 
   geometry:
@@ -52,7 +53,7 @@ final:
     departures: 'oman'
 
 output:
-  datadir: 'Data/3dvar'
+  datadir: 'Data/3dvar/'
   exp: '3dvar'
   first: PT0H
   frequency: PT1H
