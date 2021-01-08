@@ -38,8 +38,7 @@ use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registr
 !use unstructured_grid_mod,     only: unstructured_grid, unstructured_grid_registry
 
 !GetValues
-use ufo_locs_mod
-use ufo_locs_mod_c,         only: ufo_locs_registry
+use ufo_locations_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c,      only: ufo_geovals_registry
 

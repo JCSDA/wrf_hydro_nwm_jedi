@@ -12,12 +12,9 @@ use iso_c_binding
 
 ! oops dependencies
 use datetime_mod
-use duration_mod
-use oops_variables_mod
 
 ! ufo dependencies
-use ufo_locs_mod
-use ufo_locs_mod_c, only: ufo_locs_registry
+use ufo_locations_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 
@@ -137,15 +134,15 @@ contains
 subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_c( &
      c_key_self, c_key_geom, c_key_state, &
      c_t1, c_t2, &
-     c_key_locs, c_key_geovals) &
+     c_locs, c_key_geovals) &
      bind (c, name='wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_f90')
 
   integer(c_int), intent(in) :: c_key_self
   integer(c_int), intent(in) :: c_key_geom
   integer(c_int), intent(in) :: c_key_state
-  type(c_ptr),    intent(in) :: c_t1
-  type(c_ptr),    intent(in) :: c_t2
-  integer(c_int), intent(in) :: c_key_locs
+  type(c_ptr), value, intent(in) :: c_t1
+  type(c_ptr), value, intent(in) :: c_t2
+  type(c_ptr), value, intent(in) :: c_locs
   integer(c_int), intent(in) :: c_key_geovals
 
   type(wrf_hydro_nwm_jedi_getvalues), pointer :: self
@@ -153,7 +150,7 @@ subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_c( &
   type(wrf_hydro_nwm_jedi_state),     pointer :: state
   type(datetime)                   :: t1
   type(datetime)                   :: t2
-  type(ufo_locs),          pointer :: locs
+  type(ufo_locations)              :: locs
   type(ufo_geovals),       pointer :: geovals
 
   ! Get objects
@@ -165,8 +162,9 @@ subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_c( &
   write(*,*) "After increment registry"
   call c_f_datetime(c_t1, t1)
   call c_f_datetime(c_t2, t2)
-  call ufo_locs_registry%get(c_key_locs, locs)
-  write(*,*) "After ufo_locs registry"
+  
+  locs = ufo_locations(c_locs)
+  
   call ufo_geovals_registry%get(c_key_geovals, geovals)
   write(*,*) "After ufo_geovals registry"
   ! Call method
@@ -177,15 +175,15 @@ end subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_c
 subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_c( &
      c_key_self, c_key_geom, c_key_state, &
      c_t1, c_t2, &
-     c_key_locs, c_key_geovals) &
+     c_locs, c_key_geovals) &
      bind (c, name='wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90')
 
   integer(c_int), intent(in) :: c_key_self
   integer(c_int), intent(in) :: c_key_geom
   integer(c_int), intent(in) :: c_key_state
-  type(c_ptr),    intent(in) :: c_t1
-  type(c_ptr),    intent(in) :: c_t2
-  integer(c_int), intent(in) :: c_key_locs
+  type(c_ptr), value, intent(in) :: c_t1
+  type(c_ptr), value, intent(in) :: c_t2
+  type(c_ptr), value, intent(in) :: c_locs
   integer(c_int), intent(in) :: c_key_geovals
 
   type(wrf_hydro_nwm_jedi_getvalues), pointer :: self
@@ -193,7 +191,7 @@ subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_c( &
   type(wrf_hydro_nwm_jedi_state),     pointer :: state
   type(datetime)                   :: t1
   type(datetime)                   :: t2
-  type(ufo_locs),          pointer :: locs
+  type(ufo_locations)              :: locs
   type(ufo_geovals),       pointer :: geovals
 
   ! Get objects
@@ -205,7 +203,7 @@ subroutine wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_c( &
   write(*,*) "After increment registry"
   call c_f_datetime(c_t1, t1)
   call c_f_datetime(c_t2, t2)
-  call ufo_locs_registry%get(c_key_locs, locs)
+  locs = ufo_locations(c_locs)
   write(*,*) "After ufo_locs registry"
   call ufo_geovals_registry%get(c_key_geovals, geovals)
   write(*,*) "After ufo_geovals registry"

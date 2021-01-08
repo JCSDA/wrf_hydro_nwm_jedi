@@ -17,6 +17,8 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
+#include "eckit/exception/Exceptions.h"
+
 #include "ufo/GeoVaLs.h"
 #include "ufo/Locations.h"
 

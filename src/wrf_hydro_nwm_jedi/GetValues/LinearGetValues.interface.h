@@ -15,7 +15,10 @@ namespace eckit {
 
 namespace util {
   class DateTime;
-  class Duration;
+}
+
+namespace ufo {
+  class Locations;
 }
 
 namespace wrf_hydro_nwm_jedi {
@@ -28,13 +31,13 @@ extern "C" {
 
   void wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_f90(
          const F90getvalues &, const F90geom &, const F90inc &,
-         const util::DateTime **, const util::DateTime **,
-         const F90locs &, const F90goms &);
+         const util::DateTime &, const util::DateTime &,
+         const ufo::Locations &, const F90goms &);
 
   void wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90(
         const F90getvalues &, const F90geom &, const F90inc &,
-        const util::DateTime **, const util::DateTime **,
-        const F90locs &, const F90goms &);
+        const util::DateTime &, const util::DateTime &,
+        const ufo::Locations &, const F90goms &);
 
 };  // extern "C"
 

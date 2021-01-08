@@ -22,7 +22,7 @@ use wrf_hydro_nwm_jedi_state_mod, only: &
      wrf_hydro_nwm_jedi_state, create_from_other, state_print
 
 !GetValues
-use ufo_locs_mod,          only: ufo_locs
+use ufo_locations_mod
 use ufo_geovals_mod,       only: ufo_geovals
 
 implicit none
