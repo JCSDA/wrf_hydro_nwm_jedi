@@ -22,8 +22,7 @@ use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registr
 !use fv3jedi_increment_utils_mod, only: fv3jedi_increment, fv3jedi_increment_registry
 
 !GetValues
-use ufo_locs_mod
-use ufo_locs_mod_c, only: ufo_locs_registry
+use ufo_locations_mod
 use ufo_geovals_mod
 use ufo_geovals_mod_c, only: ufo_geovals_registry
 !use fv3jedi_getvalues_traj_mod, only: fv3jedi_getvalues_traj, fv3jedi_getvalues_traj_registry

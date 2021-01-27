@@ -41,6 +41,10 @@ namespace ufo {
   class Locations;
 }
 
+namespace oops {
+  class Variables;
+}
+
 namespace wrf_hydro_nwm_jedi {
   class State;
   class Geometry;

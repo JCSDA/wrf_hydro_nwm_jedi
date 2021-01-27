@@ -7,6 +7,9 @@
 project( WRF_HYDRO_NWM_JEDI C CXX Fortran )
 
 cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
+
+find_package(ecbuild)
+
 include( ecbuild_bundle )
 
 set( ECBUILD_DEFAULT_BUILD_TYPE RelWithDebInfo )
