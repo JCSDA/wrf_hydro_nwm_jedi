@@ -29,12 +29,12 @@ namespace wrf_hydro_nwm_jedi {
                          const oops::Variables & vars,
                          const eckit::Configuration & conf,
                          const State & bkg,
-			 const State & traj) {
+                         const State & traj) {
     // time_ = util::DateTime(conf.getString("date"));
     const eckit::Configuration * configc = &conf;
     vars_ = oops::Variables(conf, "analysis variables");
     wrf_hydro_nwm_jedi_b_setup_f90(
-	keyFtnConfig_, bkg.toFortran(), &configc, vars_);
+        keyFtnConfig_, bkg.toFortran(), &configc, vars_);
     oops::Log::trace() << "Covariance created" << std::endl;
   }
 
@@ -49,13 +49,13 @@ namespace wrf_hydro_nwm_jedi {
 
   void Covariance::multiply(const Increment & dxin, Increment & dxout) const {
     wrf_hydro_nwm_jedi_b_mult_f90(keyFtnConfig_, dxin.toFortran(),
-				  dxout.toFortran());
+                                  dxout.toFortran());
   }
 
 // ----------------------------------------------------------------------------
 
   void Covariance::inverseMultiply(const Increment & dxin,
-				   Increment & dxout) const {
+                                   Increment & dxout) const {
     dxout = dxin;
   }
 

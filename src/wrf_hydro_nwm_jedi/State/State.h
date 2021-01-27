@@ -11,6 +11,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -59,8 +60,8 @@ namespace wrf_hydro_nwm_jedi {
 
     // constructor, destructor
     State(const Geometry &,
-	  const oops::Variables &,
-	  const util::DateTime &);
+          const oops::Variables &,
+          const util::DateTime &);
     State(const Geometry &,
           const eckit::Configuration &);
     State(const Geometry &, const State &);
@@ -113,12 +114,12 @@ namespace wrf_hydro_nwm_jedi {
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}
 
-  private:
-    void print(std::ostream &) const;
-    F90state keyState_;
-    oops::Variables vars_;
-    boost::scoped_ptr<Fields> fields_;
-    util::DateTime time_;
+   private:
+     void print(std::ostream &) const;
+     F90state keyState_;
+     oops::Variables vars_;
+     boost::scoped_ptr<Fields> fields_;
+     util::DateTime time_;
   };
 
 }  // namespace wrf_hydro_nwm_jedi

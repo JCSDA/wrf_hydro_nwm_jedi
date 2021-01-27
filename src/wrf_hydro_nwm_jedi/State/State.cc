@@ -7,9 +7,9 @@
 
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 #include "wrf_hydro_nwm_jedi/State/StateFortran.h"
-#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
 #include "eckit/config/Configuration.h"
 
@@ -40,23 +40,23 @@ namespace wrf_hydro_nwm_jedi {
 
 
   State::State(const Geometry & geom,
-	       const oops::Variables & vars,
+               const oops::Variables & vars,
                const util::DateTime & time)
     : vars_(vars),
       fields_(new Fields(geom, vars_)),
       time_(time) {
     oops::Log::trace() << "State::State 2 create from file." << std::endl;
     wrf_hydro_nwm_jedi_state_create_f90(
-	keyState_,
-	fields_->geometry()->toFortran(),
-	vars);
+        keyState_,
+        fields_->geometry()->toFortran(),
+        vars);
     oops::Log::trace() << "State::State 2 create from file END." << std::endl;
   }
 
 
   State::State(const Geometry & geom,
                const State & other)
-    : vars_ (other.vars_),
+    : vars_(other.vars_),
       fields_(new Fields(geom, other.vars_)),
       time_(other.time_) {
     oops::Log::trace() <<
@@ -71,7 +71,7 @@ namespace wrf_hydro_nwm_jedi {
 
 
   State::State(const State & other)
-    : vars_ (other.vars_),
+    : vars_(other.vars_),
       fields_(new Fields(*other.fields_)) {
     oops::Log::trace() <<
       "State::State 4 create_from_other from State " << std::endl;
@@ -115,7 +115,8 @@ namespace wrf_hydro_nwm_jedi {
   // void State::write(const eckit::Configuration & config) const {
   //   const util::DateTime * dtp = &time_;
   //   const eckit::Configuration * conf = &config;
-  //   wrf_hydro_nwm_jedi_state_write_file_f90(fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
+  //   wrf_hydro_nwm_jedi_state_write_file_f90(
+  //   fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
   void State::write(const eckit::Configuration & config) {  // const {
     oops::Log::trace() << "State::State write start" << std::endl;
     const eckit::Configuration * conf = &config;
@@ -123,13 +124,13 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_state_write_file_f90(
         fields_->geometry()->toFortran(),
         keyState_,
-	&conf,
+        &conf,
         &dtp);
     // this->print(std::cout);
     time_ = *dtp;
     oops::Log::trace() << "State write done" << std::endl;
   }
-  
+
 
   void State::read(const eckit::Configuration & config) {
     oops::Log::trace() << "State::State read start" << std::endl;
@@ -138,7 +139,7 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_state_read_file_f90(
         fields_->geometry()->toFortran(),
         keyState_,
-	&conf,
+        &conf,
         &dtp);
     // this->print(std::cout);
     time_ = *dtp;

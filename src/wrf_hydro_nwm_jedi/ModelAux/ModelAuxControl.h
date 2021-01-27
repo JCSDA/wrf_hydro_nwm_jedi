@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_CONTROL_H_
-#define WRF_HYDRO_NWM_JEDI_MODELAUX_CONTROL_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_
 
 #include <ostream>
 #include <string>
@@ -28,7 +28,7 @@ namespace wrf_hydro_nwm_jedi {
 namespace wrf_hydro_nwm_jedi {
 
   class ModelAuxControl : public util::Printable,
-			  private boost::noncopyable,
+                          private boost::noncopyable,
                           private util::ObjectCounter<ModelAuxControl> {
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::ModelAuxControl";}
@@ -44,4 +44,4 @@ namespace wrf_hydro_nwm_jedi {
     void print(std::ostream & os) const {}
   };
 }  // namespace wrf_hydro_nwm_jedi
-#endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_CONTROL_H_
+#endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCONTROL_H_

@@ -5,13 +5,13 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_INCREMENT_H_
-#define WRF_HYDRO_NWM_JEDI_MODELAUX_INCREMENT_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXINCREMENT_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXINCREMENT_H_
 
 #include <ostream>
 #include <string>
+#include <vector>
 
-// #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 #include "oops/util/Serializable.h"
 
@@ -25,15 +25,11 @@ namespace wrf_hydro_nwm_jedi {
   class Geometry;
 }
 
-//-----------------------------------------------------------------------------
-
 namespace wrf_hydro_nwm_jedi {
-
   class ModelAuxIncrement :
     public util::Printable,
     // private util::ObjectCounter<ModelAuxIncrement>,
     public util::Serializable {
-
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::ModelAuxIncrement";}
 
@@ -45,7 +41,7 @@ namespace wrf_hydro_nwm_jedi {
     // Linear algebra operators
     void diff(const ModelAuxControl &, const ModelAuxControl &) {}
     void zero() {}
-    ModelAuxIncrement & operator=(const ModelAuxIncrement &) {return *this;}    
+    ModelAuxIncrement & operator=(const ModelAuxIncrement &) {return *this;}
     ModelAuxIncrement & operator+=(const ModelAuxIncrement &) {return *this;}
     ModelAuxIncrement & operator-=(const ModelAuxIncrement &) {return *this;}
     ModelAuxIncrement & operator*=(const double) {return *this;}
@@ -63,10 +59,10 @@ namespace wrf_hydro_nwm_jedi {
     size_t serialSize() const {return 0;}
     void serialize(std::vector<double> &) const override {}
     void deserialize(const std::vector<double> &, size_t &) override {}
-    
+
    private:
     explicit ModelAuxIncrement(const ModelAuxCovariance &);
     void print(std::ostream & os) const override {}
   };
 }  // namespace wrf_hydro_nwm_jedi
-#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_INCREMENT_H_
+#endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXINCREMENT_H_

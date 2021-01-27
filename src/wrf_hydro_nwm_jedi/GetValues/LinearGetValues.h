@@ -5,9 +5,10 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_LINEARGETVALUES_H_
-#define WRF_HYDRO_NWM_JEDI_LINEARGETVALUES_H_
+#ifndef WRF_HYDRO_NWM_JEDI_GETVALUES_LINEARGETVALUES_H_
+#define WRF_HYDRO_NWM_JEDI_GETVALUES_LINEARGETVALUES_H_
 
+#include <memory>
 #include <ostream>
 
 #include "oops/util/DateTime.h"
@@ -40,21 +41,21 @@ namespace wrf_hydro_nwm_jedi {
   // LinearGetValues class
   class LinearGetValues : public util::Printable {
    public:
-    //LinearGetValues();
+    // LinearGetValues();
     LinearGetValues(const Geometry &, const ufo::Locations &);
     virtual ~LinearGetValues();
     void setTrajectory(const State & state,
-		       const util::DateTime & t1,
-		       const util::DateTime & t2,
-		       ufo::GeoVaLs & geovals);
+                       const util::DateTime & t1,
+                       const util::DateTime & t2,
+                       ufo::GeoVaLs & geovals);
     void fillGeoVaLsTL(const Increment & inc,
-		       const util::DateTime & t1,
-		       const util::DateTime & t2,
-		       ufo::GeoVaLs & geovals) const;
+                       const util::DateTime & t1,
+                       const util::DateTime & t2,
+                       ufo::GeoVaLs & geovals) const;
     void fillGeoVaLsAD(Increment & inc,
-		       const util::DateTime & t1,
-		       const util::DateTime & t2,
-		       const ufo::GeoVaLs & geovals) const;
+                       const util::DateTime & t1,
+                       const util::DateTime & t2,
+                       const ufo::GeoVaLs & geovals) const;
    private:
     void print(std::ostream & os) const;
     F90getvalues keyGetValues_;
@@ -65,4 +66,4 @@ namespace wrf_hydro_nwm_jedi {
 
 }  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_LINEARGETVALUES_H_
+#endif  // WRF_HYDRO_NWM_JEDI_GETVALUES_LINEARGETVALUES_H_

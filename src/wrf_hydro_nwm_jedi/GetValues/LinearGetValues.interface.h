@@ -22,7 +22,8 @@ namespace wrf_hydro_nwm_jedi {
 
 extern "C" {
 
-  /* void wrf_hydro_nwm_jedi_getvalues_create_f90(F90getvalues &, const F90geom &, const F90locs &); */
+  /* void wrf_hydro_nwm_jedi_getvalues_create_f90(F90getvalues &, const F90geom &,
+     const F90locs &); */
 
   /* void wrf_hydro_nwm_jedi_getvalues_delete_f90(F90getvalues &); */
 

@@ -5,9 +5,9 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/runs/Run.h"
 #include "oops/runs/StaticBInit.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);

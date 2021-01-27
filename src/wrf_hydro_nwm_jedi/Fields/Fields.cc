@@ -5,6 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <memory>
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 
@@ -16,21 +17,21 @@
 namespace wrf_hydro_nwm_jedi {
 
   Fields::Fields(const Geometry & geom,
-		 const oops::Variables & vars)
+                 const oops::Variables & vars)
     : geom_(new Geometry(geom)) {
     // time_ = util::DateTime("2000-01-01T00:00:00Z");
   }
- 
+
   Fields::Fields(const Geometry & geom,
-		 const eckit::Configuration & conf)
+                 const eckit::Configuration & conf)
     : geom_(new Geometry(geom))
   {
     std::cout << "Supposed to read from file" << std::endl;
     std::string current_date;
     conf.get("date", current_date);
     time_ = util::DateTime(current_date);
-   }
-  
+  }
+
 
   Fields::~Fields() {
     // util::abor1_cpp("Fields::~Fields() needs to be implemented.",

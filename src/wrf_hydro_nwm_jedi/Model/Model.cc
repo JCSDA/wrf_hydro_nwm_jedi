@@ -4,11 +4,11 @@
  * This software is licensed under the terms of the Apache Licence Version 2.0
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Model/Model.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 
 #include "oops/util/abor1_cpp.h"
 
@@ -17,12 +17,12 @@ namespace wrf_hydro_nwm_jedi {
   static oops::ModelMaker<Traits, Model> modelmaker_("WRF_HYDRO_NWM_JEDI");
 
   Model::Model(const Geometry & geom,
-	       const eckit::Configuration & conf)
+               const eckit::Configuration & conf)
     : keyConfig_(0),
       tstep_("PT1H"),
       geom_(new Geometry(geom)),
       vars_(conf, "model variables") {
-    std::cout << "Creating model"<<std::endl;
+    std::cout << "Creating model" << std::endl;
 
     // adapted from soca
     // Log::trace() << "Model::Model" << std::endl;

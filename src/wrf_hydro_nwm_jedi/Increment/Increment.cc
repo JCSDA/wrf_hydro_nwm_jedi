@@ -5,6 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include <string>
 #include <vector>
 
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
@@ -12,7 +13,6 @@
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 
-//#include "oops/base/GridPoint.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -34,21 +34,21 @@ namespace wrf_hydro_nwm_jedi {
   {
     Log::trace() << "Increment::Increment 1 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_f90(
-	keyInc_,
-	fields_->geometry()->toFortran(),
-	vars_);
+        keyInc_,
+        fields_->geometry()->toFortran(),
+        vars_);
     Log::trace() << "Increment::Increment 1 constructor END " << std::endl;
   }
 
 
   Increment::Increment(const Increment & other,
-		       const bool copy)
+                       const bool copy)
     : fields_(new Fields(*other.fields_->geometry(), other.vars_)),
       vars_(other.vars_),
       time_(other.time_) {
     Log::trace() << "Increment::Increment 2 constructor " << std::endl;
     wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
-    if(copy) {
+    if (copy) {
       wrf_hydro_nwm_jedi_increment_copy_f90(keyInc_, other.keyInc_);
     } else {
       wrf_hydro_nwm_jedi_increment_zero_f90(keyInc_);
@@ -59,7 +59,7 @@ namespace wrf_hydro_nwm_jedi {
 
 
   Increment::Increment(const Geometry &,
-		       Increment & other)
+                       Increment & other)
     : time_(other.time_),
       vars_(other.vars_),
       fields_(new Fields(*other.fields_->geometry(), other.vars_))
@@ -67,12 +67,12 @@ namespace wrf_hydro_nwm_jedi {
     Log::trace() << "Increment::Increment 3 constructed from other" << std::endl;
     // wrf_hydro_nwm_increment_create_f90(keyInc_, geom_->toFortran(), vars_);
     wrf_hydro_nwm_jedi_increment_create_from_other_f90(keyInc_, other.keyInc_);
-    //wrf_hydro_nwm_increment_change_resol_f90(toFortran(), other.keyFlds_);
+    // wrf_hydro_nwm_increment_change_resol_f90(toFortran(), other.keyFlds_);
     Log::trace() << "Increment::Increment 3 constructed from other END" << std::endl;
   }
 
   Increment::~Increment() {
-    //util::abor1_cpp("Increment::~Increment() needs to be implemented.",
+    // util::abor1_cpp("Increment::~Increment() needs to be implemented.",
     //                __FILE__, __LINE__);
   }
 
@@ -107,11 +107,11 @@ namespace wrf_hydro_nwm_jedi {
 
 
   void Increment::axpy(const double &scalar,
-		       const Increment &other,
-		       const bool check) {
+                       const Increment &other,
+                       const bool check) {
     ASSERT(this->validTime() == other.validTime());
     wrf_hydro_nwm_jedi_increment_axpy_f90(
-	keyInc_, static_cast<float>(scalar), other.keyInc_);
+        keyInc_, static_cast<float>(scalar), other.keyInc_);
   }
 
 
@@ -143,7 +143,7 @@ namespace wrf_hydro_nwm_jedi {
     ASSERT(this->validTime() == x1.validTime());
     ASSERT(this->validTime() == x2.validTime());
     wrf_hydro_nwm_jedi_increment_diff_incr_f90(
-	keyInc_, x1.toFortran(), x2.toFortran());
+        keyInc_, x1.toFortran(), x2.toFortran());
   }
 
 
@@ -213,7 +213,7 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
- void Increment::write(const eckit::Configuration & conf) {
+  void Increment::write(const eckit::Configuration & conf) {
     util::abor1_cpp("Increment::write() needs to be implemented.",
                     __FILE__, __LINE__);
   }

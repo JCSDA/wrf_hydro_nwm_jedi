@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_COVARIANCE_H_
-#define WRF_HYDRO_NWM_JEDI_COVARIANCE_H_
+#ifndef WRF_HYDRO_NWM_JEDI_COVARIANCE_COVARIANCE_H_
+#define WRF_HYDRO_NWM_JEDI_COVARIANCE_COVARIANCE_H_
 
 #include <ostream>
 #include <string>
@@ -44,10 +44,10 @@ namespace wrf_hydro_nwm_jedi {
     static const std::string classname() {return "wrf_hydro_nwm-jedi::Covariance";}
 
     Covariance(const Geometry &,
-	       const oops::Variables &,
-	       const eckit::Configuration &,
-	       const State &,
-	       const State &);
+               const oops::Variables &,
+               const eckit::Configuration &,
+               const State &,
+               const State &);
     ~Covariance();
 
     void multiply(const Increment &, Increment &) const;
@@ -64,4 +64,4 @@ namespace wrf_hydro_nwm_jedi {
 
 }  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_COVARIANCE_H_
+#endif  // WRF_HYDRO_NWM_JEDI_COVARIANCE_COVARIANCE_H_

@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <ostream>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -60,7 +61,7 @@ namespace wrf_hydro_nwm_jedi {
    public:
     // Constructor, destructor
     Increment(const Geometry &,
-	      const oops::Variables &,
+              const oops::Variables &,
               const util::DateTime &);
     Increment(const Geometry &, Increment &);
     Increment(const Increment &, const bool);
@@ -99,7 +100,7 @@ namespace wrf_hydro_nwm_jedi {
     const util::DateTime & validTime() const;
     util::DateTime & validTime();
     void updateTime(const util::Duration &);
-    
+
     // unstructured grid conversions
     void ug_coord(oops::UnstructuredGrid &) const;
     void field_to_ug(oops::UnstructuredGrid &, const int &) const;
@@ -116,13 +117,13 @@ namespace wrf_hydro_nwm_jedi {
 
     /// Other / utils
     void accumul(const double &, const State &);
-    
+
     std::shared_ptr<const Geometry> geometry() const;
 
     F90inc & toFortran() {return keyInc_;}
     const F90inc & toFortran() const {return keyInc_;}
 
-  private:
+   private:
     oops::Variables vars_;
     util::DateTime time_;
     F90inc keyInc_;

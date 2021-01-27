@@ -8,9 +8,9 @@
  * does it submit to any jurisdiction.
  */
 
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/runs/LETKF.h"
 #include "oops/runs/Run.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);

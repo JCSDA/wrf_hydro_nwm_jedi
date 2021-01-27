@@ -26,10 +26,12 @@ extern "C" {
   /* void fv3jedi_vc_model2geovals_create_f90(const F90vcd2a &, const F90geom &, */
   /*                                          const eckit::Configuration * const *); */
   /* void fv3jedi_vc_model2geovals_delete_f90(F90vcd2a &); */
-  /* void fv3jedi_vc_model2geovals_changevar_f90(const F90vcd2a &, const F90geom &, const F90state &, */
+  /* void fv3jedi_vc_model2geovals_changevar_f90(
+  /*     const F90vcd2a &, const F90geom &, const F90state &, */
   /*                                             const F90state &); */
-  /* void fv3jedi_vc_model2geovals_changevarinverse_f90(const F90vcd2a &, const F90geom &, */
-  /*                                                    const F90state &, const F90state &); */
+  /* void fv3jedi_vc_model2geovals_changevarinverse_f90(
+  /*     const F90vcd2a &, const F90geom &, */
+  /*     const F90state &, const F90state &); */
 
 }  // extern "C"
 // -----------------------------------------------------------------------------

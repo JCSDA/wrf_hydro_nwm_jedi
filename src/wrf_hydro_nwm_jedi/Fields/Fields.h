@@ -8,16 +8,17 @@
 #ifndef WRF_HYDRO_NWM_JEDI_FIELDS_FIELDS_H_
 #define WRF_HYDRO_NWM_JEDI_FIELDS_FIELDS_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 
 #include <boost/shared_ptr.hpp>
 
+#include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
-#include "oops/base/Variables.h"
 
 // forward declarations
 namespace eckit {
@@ -43,14 +44,14 @@ namespace wrf_hydro_nwm_jedi {
 
     Fields(const Geometry &, const oops::Variables &);
     Fields(const Geometry &, const eckit::Configuration &);
-    
+
     // Fields(const Geometry &,
-    // 	   const oops::Variables &,
+    //     const oops::Variables &,
     //        const eckit::Configuration &);
     // Fields(const Geometry & geom,
-    // 	   const oops::Variables & vars,
-    // 	   const util::DateTime & vt);
-    
+    //     const oops::Variables & vars,
+    //     const util::DateTime & vt);
+
     ~Fields();
 
     const util::DateTime & time() const { return time_; }

@@ -5,15 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_MODEL_H_
-#define WRF_HYDRO_NWM_JEDI_MODEL_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODEL_MODEL_H_
+#define WRF_HYDRO_NWM_JEDI_MODEL_MODEL_H_
 
 #include <memory>
 #include <ostream>
 
-#include "oops/util/Duration.h"
 #include "oops/base/ModelBase.h"
 #include "oops/base/Variables.h"
+#include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 
 // forward declarations
@@ -51,4 +51,4 @@ namespace wrf_hydro_nwm_jedi {
   };
 
 }  // namespace wrf_hydro_nwm_jedi
-#endif  // WRF_HYDRO_NWM-JEDI_MODEL_H_
+#endif  // WRF_HYDRO_NWM_JEDI_MODEL_MODEL_H_

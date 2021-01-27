@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_COVARIANCE_H_
-#define WRF_HYDRO_NWM_JEDI_MODELAUX_COVARIANCE_H_
+#ifndef WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
+#define WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
 
 #include <ostream>
 #include <string>
@@ -53,5 +53,4 @@ class ModelAuxCovariance : public util::Printable,
 
 }  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_MODELAUX_COVARIANCE_H_
-
+#endif  // WRF_HYDRO_NWM_JEDI_MODELAUX_MODELAUXCOVARIANCE_H_
