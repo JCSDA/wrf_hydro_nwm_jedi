@@ -25,7 +25,7 @@ observations:
       simulated variables: ['swe']
       generate:
         random:
-          nobs: 1000
+          nobs: 100
           lat1: 38.84555
           lat2: 39.07063
           lon1: -106.78723
@@ -43,7 +43,7 @@ observations:
       simulated variables: ['snow_depth']
       generate:
         random:
-          nobs: 250
+          nobs: 200
           lat1: 38.84555
           lat2: 39.07063
           lon1: -106.78723
