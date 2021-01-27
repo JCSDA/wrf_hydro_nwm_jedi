@@ -16,6 +16,8 @@
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 
+#include "wrf_hydro_nwm_jedi/Traits.h"
+
 // forward declarations
 namespace wrf_hydro_nwm_jedi {
   class Geometry;
