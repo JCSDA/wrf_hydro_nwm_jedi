@@ -1,5 +1,6 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
   compare.sh
+  cp_file.sh
   testinput/geometry.yaml
   testinput/state.yaml
   testinput/interface.yml
@@ -21,11 +22,12 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-  )
-
-list( APPEND wrf_hydro_nwm_jedi_test_input_cp
   Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1  
   )
+
+#list( APPEND wrf_hydro_nwm_jedi_test_input_cp
+#  Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
+#  )
 
 
 # link the input files for the tests
@@ -40,11 +42,12 @@ foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
     ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
 endforeach()
-foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input_cp})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy
-    ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
-    ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
-endforeach()
+
+#foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input_cp})
+#  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#    ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
+#    ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME} )
+#endforeach()
 
 
 #================================================================================
@@ -130,6 +133,12 @@ ecbuild_add_test(
    TYPE		SCRIPT
    COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
    ARGS         testoutput/hofx_nomodel_identity.log.out testoutput/hofx_nomodel_identity.ref)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_var_stage
+   TYPE		SCRIPT
+   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh"
+   ARGS         Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_exe
