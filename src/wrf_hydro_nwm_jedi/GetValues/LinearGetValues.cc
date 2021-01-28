@@ -17,14 +17,10 @@
 #include "ufo/Locations.h"
 
 namespace wrf_hydro_nwm_jedi {
-
-  // ----------------------------------------------------------------------------
-
   // LinearGetValues::LinearGetValues() {
   //   util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
   //                   __FILE__, __LINE__);
   // }
-
   LinearGetValues::LinearGetValues(
       const Geometry & geom, const ufo::Locations & locs) :
     locs_(locs), geom_(new Geometry(geom)), model2geovals_() {
@@ -45,7 +41,6 @@ namespace wrf_hydro_nwm_jedi {
                                       const util::DateTime & t2,
                                       ufo::GeoVaLs & geovals)
   {
-
     // wrf_hydro_nwm_jedi_lineargetvalues_set_trajectory_f90(keyLinearGetValues_,
     //                                                    geom_->toFortran(),
     //                                                    state.toFortran(),
@@ -53,14 +48,14 @@ namespace wrf_hydro_nwm_jedi {
     //                                                    &t2p,
     //                                                    locs_.toFortran(),
     //                                                    geovals.toFortran());
-
     wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_,
-    						  state.geometry()->toFortran(),
-    						  state.toFortran(),
-    						  t1, t2,
-    						  locs_,
-    						  geovals.toFortran());
-    // util::abor1_cpp("LinearGetValues::setTrajectory() needs to be implemented.", __FILE__, __LINE__);
+                                                  state.geometry()->toFortran(),
+                                                  state.toFortran(),
+                                                  t1, t2,
+                                                  locs_,
+                                                  geovals.toFortran());
+    // util::abor1_cpp(
+    //     "LinearGetValues::setTrajectory() needs to be implemented.", __FILE__, __LINE__);
   }
 
 
@@ -69,16 +64,16 @@ namespace wrf_hydro_nwm_jedi {
                                       const util::DateTime & t2,
                                       ufo::GeoVaLs & geovals) const {
     oops::Log::trace() << "LinearGetValues::fillGeovalsTL starting"
-		       << std::endl;
- 
+                       << std::endl;
+
     std::cout << "Before invoking lineargetvalues" << std::endl;
 
     wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_f90(keyGetValues_,
-							geom_->toFortran(),
-							inc.toFortran(),
-							t1, t2,
-							locs_,
-							geovals.toFortran());
+                                                        geom_->toFortran(),
+                                                        inc.toFortran(),
+                                                        t1, t2,
+                                                        locs_,
+                                                        geovals.toFortran());
     oops::Log::trace() << "LinearGetValues::fillGeovalsTL done" << std::endl;
   }
 
@@ -98,11 +93,11 @@ namespace wrf_hydro_nwm_jedi {
     //                                        geovals.toFortran());
 
     wrf_hydro_nwm_jedi_lineargetvalues_fill_geovals_ad_f90(keyGetValues_,
-							   geom_->toFortran(),
-							   inc.toFortran(),
-							   t1, t2,
-							   locs_,
-							   geovals.toFortran());
+                                                           geom_->toFortran(),
+                                                           inc.toFortran(),
+                                                           t1, t2,
+                                                           locs_,
+                                                           geovals.toFortran());
 
     oops::Log::trace() << "LinearGetValues::fillGeovalsAD done" << std::endl;
   }

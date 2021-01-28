@@ -55,7 +55,8 @@ class GetValues : public util::Printable, private util::ObjectCounter<GetValues>
  public:
   static const std::string classname() {return "wrf_hydro_nwm_jedi::GetValues";}
 
-  GetValues(const Geometry &, const ufo::Locations &);
+  GetValues(const Geometry &, const ufo::Locations & locs,
+            const eckit::Configuration & config);
   virtual ~GetValues();
 
   void fillGeoVaLs(const State &, const util::DateTime &, const util::DateTime &,

@@ -57,8 +57,8 @@ namespace wrf_hydro_nwm_jedi {
 // ----------------------------------------------------------------------------
 
   void Model::print(std::ostream & os) const {
-    util::abor1_cpp("Model::print() needs to be implemented.",
-                    __FILE__, __LINE__);
+    // util::abor1_cpp("Model::print() needs to be implemented.",
+    //                 __FILE__, __LINE__);
     os << "Geometry: "
        << "(TODO, print diagnostic info about the geometry here)"
        << std::endl;
