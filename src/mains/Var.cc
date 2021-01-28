@@ -5,15 +5,16 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm_jedi/Traits.h"
-#include "ufo/instantiateObsFilterFactory.h"
 #include "oops/runs/Run.h"
 #include "oops/runs/Variational.h"
+#include "ufo/instantiateObsFilterFactory.h"
+#include "ufo/ObsTraits.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
+
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::instantiateObsFilterFactory<wrf_hydro_nwm_jedi::Traits>();
-  oops::Variational<wrf_hydro_nwm_jedi::Traits> var;
-  run.execute(var);
-  return 0;
+  ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
+  oops::Variational<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> var;
+  return run.execute(var);
 }

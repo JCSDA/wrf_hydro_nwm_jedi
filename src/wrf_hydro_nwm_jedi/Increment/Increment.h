@@ -13,12 +13,14 @@
 
 #include <memory>
 #include <ostream>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
+#include "oops/util/Serializable.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/IncrementFortran.h"
@@ -29,10 +31,12 @@ namespace oops {
   class UnstructuredGrid;
   class Variables;
 }
+
 namespace ufo {
   class GeoVaLs;
   class Locations;
 }
+
 namespace wrf_hydro_nwm_jedi {
   class Fields;
   class Geometry;
@@ -41,34 +45,45 @@ namespace wrf_hydro_nwm_jedi {
   typedef int F90inc;
 }
 
+
 // ----------------------------------------------------------------------------
 
 namespace wrf_hydro_nwm_jedi {
 
   // Increment class
-  class Increment : public util::Printable {
+  class Increment :
+    public util::Printable,
+    public util::Serializable
+    // public oops::GeneralizedDepartures,
+    // public util::Printable,
+    // private util::ObjectCounter<IncrementSW> {
+  {
    public:
     // Constructor, destructor
-    Increment(const Geometry &, const oops::Variables &,
+    Increment(const Geometry &,
+              const oops::Variables &,
               const util::DateTime &);
     Increment(const Geometry &, Increment &);
     Increment(const Increment &, const bool);
     ~Increment();
 
     void read(const eckit::Configuration &);
+    void write(const eckit::Configuration &);
     double norm() const;
-    void random();
 
+    void diff(const State &, const State &);
+    void zero();
+    void zero(const util::DateTime &);
+    void ones();
     Increment & operator =(const Increment &);
     Increment & operator-=(const Increment &);
     Increment & operator+=(const Increment &);
     Increment & operator*=(const double &);
     void axpy(const double &, const Increment &, const bool check = true);
     double dot_product_with(const Increment &) const;
-    void zero();
-    void zero(const util::DateTime &);
-    void diff(const State &, const State &);
     void schur_product_with(const Increment &);
+    void random();
+    // void dirac(const eckit::Configuration &);
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,
@@ -85,7 +100,7 @@ namespace wrf_hydro_nwm_jedi {
     const util::DateTime & validTime() const;
     util::DateTime & validTime();
     void updateTime(const util::Duration &);
-    
+
     // unstructured grid conversions
     void ug_coord(oops::UnstructuredGrid &) const;
     void field_to_ug(oops::UnstructuredGrid &, const int &) const;
@@ -95,21 +110,27 @@ namespace wrf_hydro_nwm_jedi {
     /* oops::GridPoint getPoint(const GeometryIterator &) const; */
     void setPoint(const oops::GridPoint &, const GeometryIterator &);
 
+    /// Serialize and deserialize
+    size_t serialSize() const {return 0;}
+    void serialize(std::vector<double> &) const {}
+    void deserialize(const std::vector<double> &, size_t &) {}
+
+    /// Other / utils
     void accumul(const double &, const State &);
-    
-    boost::shared_ptr<const Geometry> geometry() const;
+
+    std::shared_ptr<const Geometry> geometry() const;
 
     F90inc & toFortran() {return keyInc_;}
     const F90inc & toFortran() const {return keyInc_;}
 
-  private:
-    
+   private:
     oops::Variables vars_;
     util::DateTime time_;
     F90inc keyInc_;
     void print(std::ostream &) const;
     std::unique_ptr<Fields> fields_;
   };
+
 }  // namespace wrf_hydro_nwm_jedi
 
 #endif  // WRF_HYDRO_NWM_JEDI_INCREMENT_INCREMENT_H_

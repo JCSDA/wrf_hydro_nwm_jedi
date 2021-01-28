@@ -64,15 +64,12 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Model/Model.h
   Model/Model.cc
 
-  # # ModelAux
+  # ModelAux
   ModelAux/ModelAuxControl.h
-  ModelAux/ModelAuxControl.cc
   ModelAux/ModelAuxIncrement.h
-  ModelAux/ModelAuxIncrement.cc
   ModelAux/ModelAuxCovariance.h
-  ModelAux/ModelAuxCovariance.cc
   
-  # # State
+  # State
   State/State.h
   State/State.cc
   State/State_utils.F90

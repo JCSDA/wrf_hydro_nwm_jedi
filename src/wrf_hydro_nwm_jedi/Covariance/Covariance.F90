@@ -9,64 +9,54 @@ use iso_c_binding
 use fckit_configuration_module, only: fckit_configuration
 use oops_variables_mod
 
-!use Shallow_Water_kind,     only : r8kind
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
-use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_mod, only: wrf_hydro_nwm_jedi_state
-use wrf_hydro_nwm_jedi_field_mod, only: base_field
+use wrf_hydro_nwm_jedi_fields_mod, only: base_field
 
 implicit none
 
+private
+public :: &
+     wrf_hydro_nwm_jedi_covar, &
+     wrf_hydro_nwm_jedi_covar_setup, &
+     wrf_hydro_nwm_jedi_covar_delete, &
+     wrf_hydro_nwm_jedi_covar_mult
+
 !> Fortran derived type to hold configuration data for the background/model covariance
 type :: wrf_hydro_nwm_jedi_covar
-  type(oops_variables)         :: vars
+  type(oops_variables) :: vars
   real :: normfactor
 end type wrf_hydro_nwm_jedi_covar
 
-! ------------------------------------------------------------------------------
+
 contains
 
-! ------------------------------------------------------------------------------
 
-!> Setup for the model's 3d error covariance matrices (B and Q_i)
-
+!> Setup for the model's error covariance matrices (B and Q_i)
 !> This routine queries the configuration for the parameters that define the
-!! covariance matrix, and stores the relevant values in the
-!! error covariance structure.
-
-subroutine wrf_hydro_nwm_jedi_covar_setup(self, c_conf, vars)
-
+!> covariance matrix, and stores the relevant values in the
+!> error covariance structure.
+subroutine wrf_hydro_nwm_jedi_covar_setup(self, bkg, f_conf, vars)
   implicit none
   type(wrf_hydro_nwm_jedi_covar),  intent(inout) :: self    !< Covariance structure
-  type(c_ptr),  intent(   in) :: c_conf  !< Configuration
+  type(wrf_hydro_nwm_jedi_state),  intent(in   ) :: bkg     !< Background
+  type(fckit_configuration),       intent(in   ) :: f_conf  !< Configuration
+  type(oops_variables),            intent(in   ) :: vars    ! Variables
   ! type(wrf_hydro_nwm_jedi_geometry), intent(   in) :: geom    !< Geometry
-  type(oops_variables),      intent(in) :: vars
-
-  type(fckit_configuration)  :: f_conf
-  real              :: distnorm
-
-  f_conf = fckit_configuration(c_conf)
 
   self%vars = vars
-
   ! Get field normalization factors from configuration
   call f_conf%get_or_die("normfactor", self%normfactor)
-
 end subroutine wrf_hydro_nwm_jedi_covar_setup
 
-! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_covar_delete(self)
-
   implicit none
   type(wrf_hydro_nwm_jedi_covar), intent(inout) :: self  !< Covariance structure
-
 end subroutine wrf_hydro_nwm_jedi_covar_delete
 
-! ------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_covar_mult(self, xin, xout)
-
   implicit none
   type(wrf_hydro_nwm_jedi_covar), intent(   in) :: self
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: xin
@@ -78,16 +68,17 @@ subroutine wrf_hydro_nwm_jedi_covar_mult(self, xin, xout)
   integer :: i
 
   ! Currently applying a simple scalar multiplication to all variables
-  ! listed in the yaml file
-  
+  ! listed in the yaml file  
   do i = 1, self%vars%nvars()
-     call xin%fields_obj%search_field(trim(self%vars%variable(i)),in_f,.true.)
-     call xout%fields_obj%search_field(trim(self%vars%variable(i)),out_f,.true.)
-     call out_f%apply_cov(in_f,self%normfactor)
+     call xin%fields_obj%search_field( &
+              trim(self%vars%variable(i)), in_f, .true.)
+     call xout%fields_obj%search_field( &
+              trim(self%vars%variable(i)), out_f, .true.)
+     write(*,*) "norm factor"
+     write(*,*) self%normfactor
+     call out_f%apply_cov(in_f, self%normfactor)
   end do
-
 end subroutine wrf_hydro_nwm_jedi_covar_mult
 
-! ------------------------------------------------------------------------------
 
 end module wrf_hydro_nwm_jedi_covariance_mod

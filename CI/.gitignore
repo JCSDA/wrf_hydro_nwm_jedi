@@ -1,0 +1,12 @@
+eckit/
+atlas/
+fckit/
+ioda-converters/
+ioda/
+oops/
+saber/
+ufo/
+wrf_hydro_nwm_jedi
+build/
+.repo_hash_log
+.repo_hash_log_previous

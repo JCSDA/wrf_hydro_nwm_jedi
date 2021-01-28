@@ -2,6 +2,7 @@
 module wrf_hydro_nwm_jedi_util_mod
 
 use netcdf
+use datetime_mod
 
 implicit none
 
@@ -35,6 +36,19 @@ subroutine error_handler(status, failure, success)
   
   if (present(success)) write(*,'(A)') success
 end subroutine error_handler
+
+
+!> Date time equality function. Shorthand.
+logical function datetime_eq(dt1, dt2)
+  implicit none
+  type(datetime), intent(in) :: dt1, dt2
+
+  if( (dt1 <= dt2) .and. (dt1 >= dt2)) then
+     datetime_eq = .TRUE.
+  else
+     datetime_eq = .FALSE.
+  end if
+end function datetime_eq
 
   
 end module wrf_hydro_nwm_jedi_util_mod

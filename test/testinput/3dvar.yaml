@@ -1,70 +1,81 @@
-cost_function:
-  cost_type: '3D-Var'
-  Jb:
-    Background:
-      state:
-      - date: '2017-01-01T00:00:00Z'
-        filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
-        filename_hydro: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
-        variables: ['SNEQV']
-    Covariance:
-      covariance: 'wrf_hydro_nwm_jediCovar'
-      date: '2017-01-01T00:00:00Z'
-      normfactor: 0.2
-  Jo:
-    ObsTypes:
-    - Covariance:
-        covariance: 'diagonal'
-      ObsOperator:
-        name: 'Identity'
-      ObsSpace:
-        ObsDataIn:
-          obsfile: ./Data/wrf_hydro_nwm_files/makeobs_3dvar_0000.nc
-        ObsDataOut:
-          obsfile: ./Data/wrf_hydro_nwm_files/3dvar_test_output.nc
-        name: 'Simulate'
-        simulate:
-          variables: ['swe']
-    ObsPert: true
-    member: 1
+cost function:
+  cost type: '3D-Var'
 
-  varchange: 'Identity'
-  variables: ['SNEQV']
-  window_begin: '2016-12-31T12:00:00Z'
-  window_length: P1D
+  analysis variables: ['SNEQV'] # , 'SNOWH']  #seg faults if snowh not in state variables
+  window begin: '2016-12-31T23:30:00Z'
+  # window begin: '2017-01-01T00:00:00Z'
+  window length: PT1H
+
+  geometry:
+    input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+  background:
+    read_from_file: 1
+    date: &date 2017-01-01T00:00:00Z
+    basename: "./INPUT/"
+    filename_lsm: &RESTART ./Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input
+    filename_hydro: &HYDRO_RST ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+    state variables: ['SNEQV']  #, 'SNOWH']
+
+  background error:
+    covariance model: "wrf_hydro_nwm_jediCovar"
+    date: *date
+    normfactor: 1
+    analysis variables: ['SNEQV']
+
+  variable change: 'Identity'
+  observations:
+  - obs error:
+      covariance model: 'diagonal'
+    obs operator:
+      name: 'Identity'
+    obs space:
+      obsdatain:
+        obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
+      obsdataout:
+        obsfile: 'Data/3dvar/3dvar.swe.nc'
+      name: 'Simulate'
+      simulated variables: ['swe']
+  # - obs error:
+  #     covariance model: 'diagonal'
+  #   obs operator:
+  #     name: 'Identity'
+  #   obs space:
+  #     obsdatain:
+  #       obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
+  #     obsdataout:
+  #       obsfile: 'Data/3dvar/3dvar.snow_depth.nc'
+  #     name: 'Simulate'
+  #     simulated variables: ['snow_depth']
+
 final:
   diagnostics:
     departures: 'oman'
-minimizer:
-  algorithm: 'DRIPCG'
-model:
-  name: 'WRF_HYDRO_NWM_JEDI'
-  tstep: P1D #PT24H
-  variables: ['SNEQV']
+
 output:
-  datadir: 'Data/OUTPUTS'
+  datadir: 'Data/3dvar/'
   exp: '3dvar'
-  frequency: P1D #PT24H
+  first: PT0H
+  frequency: PT1H
   type: 'an'
-resolution:
-  input_file: ./Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+  filename_lsm: *RESTART
+  filename_hydro: *HYDRO_RST
+
 variational:
-  iteration:
+  minimizer:
+    algorithm: 'DRIPCG'
+  iterations:
   - diagnostics:
       departures: 'ombg'
-    gradient_norm_reduction: 1.0e-10
-    linearmodel:
-      trajectory:
-        tstep: P1D #PT24H
-      tstep: P1D #PT24H
-      varchange: 'Identity'
-      variables: ['SNEQV']
-      version: 'WRF_HYDRO_NWM_IdTLM'
+    gradient norm reduction: 1.0e-10
     ninner: 10
-    resolution:
-      input_file: ./Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
-      # nx: 25
-      # ny: 25
-      # xmax: 100000.0
-      # ymax: 100000.0
+    geometry:
+      input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+    test: 'on'
+  - diagnostics:
+      departures: 'ombg'
+    gradient norm reduction: 1.0e-10
+    ninner: 10
+    geometry:
+      input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
     test: 'on'

@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#ifndef WRF_HYDRO_NWM-JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_
-#define WRF_HYDRO_NWM-JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_
+#ifndef WRF_HYDRO_NWM_JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_
+#define WRF_HYDRO_NWM_JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_
 
 #include <ostream>
 
@@ -14,7 +14,7 @@
 
 // ----------------------------------------------------------------------------
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
   // GetValuesTraj class
   class GetValuesTraj : public util::Printable {
@@ -26,6 +26,6 @@ namespace wrf_hydro_nwm-jedi {
     void print(std::ostream & os) const;
   };
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi
 
-#endif  // WRF_HYDRO_NWM-JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_
+#endif  // WRF_HYDRO_NWM_JEDI_GETVALUESTRAJ_GETVALUESTRAJ_H_

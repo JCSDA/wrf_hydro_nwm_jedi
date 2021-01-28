@@ -8,15 +8,19 @@
  * does it submit to any jurisdiction.
  */
 
-#include "wrf_hydro_nwm_jedi/Traits.h"
+#include "oops/generic/instantiateModelFactory.h"
 #include "oops/runs/HofX.h"
 #include "oops/runs/Run.h"
 #include "ufo/instantiateObsFilterFactory.h"
+#include "ufo/ObsTraits.h"
+
+#include "wrf_hydro_nwm_jedi/Traits.h"
+
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
-  ufo::instantiateObsFilterFactory<wrf_hydro_nwm_jedi::Traits>();
-  oops::HofX<wrf_hydro_nwm_jedi::Traits> hofx;
-  run.execute(hofx);
-  return 0;
+  oops::instantiateModelFactory<wrf_hydro_nwm_jedi::Traits>();
+  ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
+  oops::HofX<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> hofx;
+  return run.execute(hofx);
 }
