@@ -1,0 +1,81 @@
+cost function:
+  cost type: '3D-Var'
+
+  analysis variables: ['SNEQV'] # , 'SNOWH']  #seg faults if snowh not in state variables
+  window begin: '2016-12-31T23:30:00Z'
+  # window begin: '2017-01-01T00:00:00Z'
+  window length: PT1H
+
+  geometry:
+    input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+  background:
+    read_from_file: 1
+    date: &date 2017-01-01T00:00:00Z
+    basename: "./INPUT/"
+    filename_lsm: &RESTART ./Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input
+    filename_hydro: &HYDRO_RST ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+    state variables: ['SNEQV']  #, 'SNOWH']
+
+  background error:
+    covariance model: "wrf_hydro_nwm_jediCovar"
+    date: *date
+    normfactor: 1
+    analysis variables: ['SNEQV']
+
+  variable change: 'Identity'
+  observations:
+  - obs error:
+      covariance model: 'diagonal'
+    obs operator:
+      name: 'Identity'
+    obs space:
+      obsdatain:
+        obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
+      obsdataout:
+        obsfile: 'Data/3dvar/3dvar.swe.nc'
+      name: 'Simulate'
+      simulated variables: ['swe']
+  # - obs error:
+  #     covariance model: 'diagonal'
+  #   obs operator:
+  #     name: 'Identity'
+  #   obs space:
+  #     obsdatain:
+  #       obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
+  #     obsdataout:
+  #       obsfile: 'Data/3dvar/3dvar.snow_depth.nc'
+  #     name: 'Simulate'
+  #     simulated variables: ['snow_depth']
+
+final:
+  diagnostics:
+    departures: 'oman'
+
+output:
+  datadir: 'Data/3dvar/'
+  exp: '3dvar'
+  first: PT0H
+  frequency: PT1H
+  type: 'an'
+  filename_lsm: *RESTART
+  filename_hydro: *HYDRO_RST
+
+variational:
+  minimizer:
+    algorithm: 'DRIPCG'
+  iterations:
+  - diagnostics:
+      departures: 'ombg'
+    gradient norm reduction: 1.0e-10
+    ninner: 10
+    geometry:
+      input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+    test: 'on'
+  - diagnostics:
+      departures: 'ombg'
+    gradient norm reduction: 1.0e-10
+    ninner: 10
+    geometry:
+      input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+    test: 'on'

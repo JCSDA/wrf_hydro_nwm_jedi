@@ -12,6 +12,5 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   test::Model<wrf_hydro_nwm_jedi::Traits> tests;
-  run.execute(tests);
-  return 0;
+  return run.execute(tests);
 }

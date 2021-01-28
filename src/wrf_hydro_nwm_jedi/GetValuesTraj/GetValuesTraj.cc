@@ -8,12 +8,12 @@
 #include <ostream>
 #include <string>
 
-#include "wrf_hydro_nwm-jedi/GetValuesTraj/GetValuesTraj.h"
+#include "wrf_hydro_nwm_jedi/GetValuesTraj/GetValuesTraj.h"
 
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
-namespace wrf_hydro_nwm-jedi {
+namespace wrf_hydro_nwm_jedi {
 
 // ----------------------------------------------------------------------------
 
@@ -40,4 +40,4 @@ namespace wrf_hydro_nwm-jedi {
 
 // ----------------------------------------------------------------------------
 
-}  // namespace wrf_hydro_nwm-jedi
+}  // namespace wrf_hydro_nwm_jedi

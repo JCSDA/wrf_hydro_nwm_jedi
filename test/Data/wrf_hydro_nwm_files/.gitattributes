@@ -1,3 +1,6 @@
 RESTART.2017011000_DOMAIN1 filter=lfs diff=lfs merge=lfs -text
 nwm_osse_ioda.nc filter=lfs diff=lfs merge=lfs -text
 RESTART.2017010100_DOMAIN1 filter=lfs diff=lfs merge=lfs -text
+HYDRO_RST*DOMAIN1 filter=lfs diff=lfs merge=lfs -text
+makeobs_3dvar_0000.nc filter=lfs diff=lfs merge=lfs -text
+RESTART.*_DOMAIN1 filter=lfs diff=lfs merge=lfs -text

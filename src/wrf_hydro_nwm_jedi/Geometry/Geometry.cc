@@ -15,8 +15,6 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-// ----------------------------------------------------------------------------
-
   Geometry::Geometry(const eckit::Configuration & conf,
                      const eckit::mpi::Comm & comm)
     : comm_(comm) {
@@ -24,34 +22,30 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_geometry_setup_f90(keyGeom_, &configc);
   }
 
-// ----------------------------------------------------------------------------
 
   Geometry::Geometry(const Geometry & other)
     : comm_(other.comm_) {
     wrf_hydro_nwm_jedi_geometry_clone_f90(keyGeom_, other.keyGeom_);
   }
 
-// ----------------------------------------------------------------------------
 
   Geometry::~Geometry() {
     wrf_hydro_nwm_jedi_geometry_delete_f90(keyGeom_);
   }
 
-// ----------------------------------------------------------------------------
 
   void Geometry::print(std::ostream & os) const {
-    float dx,dy;
-    int npx,npy,npz;
+    float dx, dy;
+    int npx, npy, npz;
     // util::abor1_cpp("Geometry::print() needs to be implemented.",
     //                 __FILE__, __LINE__);
     os << "Geometry: "
        << "(TODO, print diagnostic info about the geometry here)"
        << std::endl;
-    wrf_hydro_nwm_jedi_geometry_info_f90 (keyGeom_, &dx, &dy, &npx, &npy, &npz);
+    wrf_hydro_nwm_jedi_geometry_info_f90(keyGeom_, &dx, &dy, &npx, &npy, &npz);
     os << "dx = " << dx << ", dy = " << dy << std::endl;
   }
 
-// ----------------------------------------------------------------------------
 
   // GeometryIterator Geometry::begin() const {
   //   util::abor1_cpp("Geometry::begin() needs to be implemented.",
@@ -59,7 +53,6 @@ namespace wrf_hydro_nwm_jedi {
   //   return GeometryIterator();
   // }
 
-// ----------------------------------------------------------------------------
 
   // GeometryIterator Geometry::end() const {
   //   util::abor1_cpp("Geometry::end() needs to be implemented.",
@@ -67,6 +60,5 @@ namespace wrf_hydro_nwm_jedi {
   //   return GeometryIterator();
   // }
 
-// ----------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi

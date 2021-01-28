@@ -77,7 +77,7 @@ before_install:
   - cd $REPO_SOURCE_DIR
 
 #  clone the testing branch of wrf_hydro_nwm_jedi
-  - git clone -b $BRANCH https://github.com/jcsda/wrf_hydro_nwm_jedi.git ${REPO_SOURCE_DIR}/wrf-hydro-bundle/wrf_hydro_nwm_jedi
+  - git clone -b $BRANCH https://github.com/jcsda-internal/wrf_hydro_nwm_jedi.git ${REPO_SOURCE_DIR}/wrf-hydro-bundle/wrf_hydro_nwm_jedi
 
 #  do no switch to develop branch by removing 
 #  develop UPDATE in CMakeLists.txt in wrf-hydro-bundle

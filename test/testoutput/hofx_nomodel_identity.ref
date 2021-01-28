@@ -1,13 +1,36 @@
-Test     : Initial state:  
+Test     : Initial state: 
+Test     : Print State (C++) ------------------------   
+Test     : SNEQV     
 Test     : snow_water_equivalent                                           
+Test     : 2D Field shape: (           30,           24 )
 Test     : Mean:    122.326637
-Test     : Std Dev:    1850.28406
+Test     : Std Dev:    43.0149269
 Test     : RMS:    129.669205
-Test     : Final state:  
+Test     :   
+Test     : SNOWH     
+Test     : snow_depth                                                      
+Test     : 2D Field shape: (           30,           24 )
+Test     : Mean:   0.491032660
+Test     : Std Dev:   0.143128335
+Test     : RMS:   0.511467278
+Test     : End Print State (C++) -------------------- 
+Test     : Final state: 
+Test     : Print State (C++) ------------------------   
+Test     : SNEQV     
 Test     : snow_water_equivalent                                           
+Test     : 2D Field shape: (           30,           24 )
 Test     : Mean:    122.326637
-Test     : Std Dev:    1850.28406
+Test     : Std Dev:    43.0149269
 Test     : RMS:    129.669205
+Test     :   
+Test     : SNOWH     
+Test     : snow_depth                                                      
+Test     : 2D Field shape: (           30,           24 )
+Test     : Mean:   0.491032660
+Test     : Std Dev:   0.143128335
+Test     : RMS:   0.511467278
+Test     : End Print State (C++) -------------------- 
 Test     : H(x): 
-Test     : SnowWaterEquivalent nobs= 720 Min=60.5652, Max=271.791, RMS=129.669
+Test     : Simulate nobs= 100 Min=0, Max=216.684, RMS=75.38
+Test     : Simulate nobs= 200 Min=0, Max=0.806835, RMS=0.338554
 Test     : End H(x)
