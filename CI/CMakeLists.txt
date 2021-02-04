@@ -38,16 +38,16 @@ endif ()
 # required repositories: sets for different branches when things get out of sync
 # Formula for specific commits. See recent hashes in .repo_hash_log
 # ecbuild_bundle( PROJECT repo            GIT "https://github.com/JCSDA-internal/repo.git"          UPDATE TAG    24f7b4815f6dda0eb9116611570f69025f202d72 )
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA-internal/fckit.git"           UPDATE BRANCH release-stable )
-ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA-internal/atlas.git"           UPDATE BRANCH release-stable )
-ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA-internal/ioda-converters.git" UPDATE BRANCH develop )
-ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA-internal/oops.git"            UPDATE BRANCH develop )
-ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA-internal/saber.git"           UPDATE BRANCH develop )
-ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA-internal/ioda.git"            UPDATE BRANCH develop )
-ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA-internal/ufo.git"             UPDATE BRANCH develop )
+ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA-internal/fckit.git" )
+ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA-internal/atlas.git" )
+ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA-internal/ioda-converters.git" )
+ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA-internal/oops.git" )
+ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA-internal/saber.git" )
+ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA-internal/ioda.git" )
+ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA-internal/ufo.git" )
 
 # This repo
-ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi      SOURCE "../"             )
+ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  GIT "https://github.com/JCSDA-internal/wrf_hydro_nwm_jedi" )
 
 
 ecbuild_bundle_finalize()
