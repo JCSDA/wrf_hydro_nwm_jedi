@@ -1,5 +1,4 @@
-# FROM  jcsda/docker-gnu-openmpi-dev
-FROM  jcsda/docker-clang-mpich-dev
+FROM  jcsda/docker-gnu-openmpi-dev
 
 RUN touch /env.txt
 RUN printenv > /env.txt
