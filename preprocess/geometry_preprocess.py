@@ -48,7 +48,7 @@ def geometry_preprocess(
     wrfinput_ds = xr.open_dataset(wrfinput_file)
     # variables
     wrfinput_vars = [vv for vv in wrfinput_ds.variables]
-    wrfinput_keep_vars = ['XLAT', 'XLONG', 'ZS']
+    wrfinput_keep_vars = ['XLAT', 'XLONG', 'ZS', 'HGT']
     wrfinput_drop_list = list(
         set(wrfinput_vars).difference(wrfinput_keep_vars))
     lsm_geom = (
@@ -75,6 +75,8 @@ def geometry_preprocess(
     lsm_attrs['lsm_lat_name'] = 'XLAT'
     lsm_attrs['lsm_lon_name'] = 'XLONG'
     lsm_attrs['lsm_z_name'] = 'ZS'
+    lsm_attrs['lsm_sfc_elev_name'] = 'HGT'
+    
     lsm_attrs['lsm_src_file'] = str(wrfinput_file.absolute())
     lsm_attrs['lsm_src_md5'] = (
         wrfhydropy.core.ioutils.md5(wrfinput_file))
