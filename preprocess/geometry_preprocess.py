@@ -76,7 +76,6 @@ def geometry_preprocess(
     lsm_attrs['lsm_lon_name'] = 'XLONG'
     lsm_attrs['lsm_z_name'] = 'ZS'
     lsm_attrs['lsm_sfc_elev_name'] = 'HGT'
-    
     lsm_attrs['lsm_src_file'] = str(wrfinput_file.absolute())
     lsm_attrs['lsm_src_md5'] = (
         wrfhydropy.core.ioutils.md5(wrfinput_file))
