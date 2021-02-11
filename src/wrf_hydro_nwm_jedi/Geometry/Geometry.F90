@@ -23,7 +23,7 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: xdim_len, ydim_len, zdim_len
    integer :: n_snow_layers
    real    :: dx, dy
-   real, allocatable :: lat(:,:), lon(:,:)
+   real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
 end type wrf_hydro_nwm_lsm_geometry
 
 
@@ -181,10 +181,12 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   ! Positon data
   allocate( &
        self%lsm%lat(self%lsm%xdim_len, self%lsm%ydim_len), &
-       self%lsm%lon(self%lsm%xdim_len, self%lsm%ydim_len))
+       self%lsm%lon(self%lsm%xdim_len, self%lsm%ydim_len), &
+       self%lsm%sfc_elev(self%lsm%xdim_len, self%lsm%ydim_len))
   ! Could this be polymorphic?
   call get_geom_data_2d("lsm_lat_name", ncid, self%lsm%lat)
   call get_geom_data_2d("lsm_lon_name", ncid, self%lsm%lon)
+  call get_geom_data_2d("lsm_sfc_elev_name", ncid, self%lsm%sfc_elev)
 end subroutine wrf_hydro_nwm_jedi_lsm_geometry_init
 
 

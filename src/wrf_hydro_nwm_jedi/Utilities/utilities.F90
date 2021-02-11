@@ -31,7 +31,8 @@ subroutine error_handler(status, failure, success)
         write(*,'(/," ***** ", A)') failure
      endif
      write(*,'(" ***** ",A,/)') nf90_strerror(status)
-     stop 'FATAL ERROR: In module_wrfinputfile.F -- Stopped'
+     write(*,*) 'FATAL ERROR: Stopped'
+     stop 123
   endif
   
   if (present(success)) write(*,'(A)') success

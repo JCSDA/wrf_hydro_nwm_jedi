@@ -1655,9 +1655,12 @@ function open_get_restart_ncid(self, filename_lsm, filename_hydro, mode) result(
   integer :: ierr, n, ncid_index
 
   if (present(filename_lsm) .and. present(filename_hydro)) then
-     stop "FATAL ERROR: get_restart_ncid: both optional file arguments not allowed."
+     write(*,*) "FATAL ERROR: get_restart_ncid: both optional file arguments not allowed."
+     stop 124
   else if (.not.(present(filename_lsm)) .and. .not.(present(filename_hydro))) then
-     stop "FATAL ERROR: get_restart_ncid: at least one optional file argument required."
+     write(*,*) &
+          "FATAL ERROR: get_restart_ncid: at least one optional file argument required."
+     stop 125
   endif
 
   ! Hard coded association. A dictionary/hashtable could be used (code in utilties).
