@@ -1,6 +1,7 @@
 # WRF-Hydro/NWM JEDI Implementation
 
-[![Develop Branch Build Status](https://travis-ci.com/JCSDA-internal/wrf_hydro_nwm_jedi.svg?token=QgVvMwYPGMz47yDxuega&branch=develop)](https://travis-ci.com/JCSDA-internal/wrf_hydro_nwm_jedi)
+Develop Branch: [![ Build Status](https://travis-ci.com/JCSDA-internal/wrf_hydro_nwm_jedi.svg?token=QgVvMwYPGMz47yDxuega&branch=develop)](https://travis-ci.com/JCSDA-internal/wrf_hydro_nwm_jedi)
+
 
 ----
 ##  Overview
