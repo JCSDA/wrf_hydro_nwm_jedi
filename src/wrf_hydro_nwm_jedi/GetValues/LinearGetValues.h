@@ -42,7 +42,8 @@ namespace wrf_hydro_nwm_jedi {
   class LinearGetValues : public util::Printable {
    public:
     // LinearGetValues();
-    LinearGetValues(const Geometry &, const ufo::Locations &);
+    LinearGetValues(const Geometry &, const ufo::Locations &,
+                    const eckit::Configuration &);
     virtual ~LinearGetValues();
     void setTrajectory(const State & state,
                        const util::DateTime & t1,

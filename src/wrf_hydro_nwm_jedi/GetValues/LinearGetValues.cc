@@ -22,7 +22,9 @@ namespace wrf_hydro_nwm_jedi {
   //                   __FILE__, __LINE__);
   // }
   LinearGetValues::LinearGetValues(
-      const Geometry & geom, const ufo::Locations & locs) :
+      const Geometry & geom, 
+      const ufo::Locations & locs,
+      const eckit::Configuration &) :
     locs_(locs), geom_(new Geometry(geom)), model2geovals_() {
     wrf_hydro_nwm_jedi_getvalues_create_f90(
         keyGetValues_, geom.toFortran(), locs_);
