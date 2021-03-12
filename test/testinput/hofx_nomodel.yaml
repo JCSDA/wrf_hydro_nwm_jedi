@@ -11,7 +11,7 @@ model:
   tstep: PT1H
   model variables: &model_vars ['SNEQV', 'SNOWH']
 
-forecasts:
+state:
   state variables: ['SNEQV', 'SNOWH']
   date: *date
   read_from_file: 1
