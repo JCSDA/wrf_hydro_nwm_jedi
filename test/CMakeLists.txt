@@ -124,7 +124,7 @@ ecbuild_add_test(
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_exe
    TYPE         EXE
-   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
    ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.log.out
    MPI          1 )
 
