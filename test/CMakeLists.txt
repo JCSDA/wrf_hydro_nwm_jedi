@@ -12,10 +12,10 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   #  testinput/model_aux_increment.yaml
   testinput/linear_model.yaml
   testinput/make_obs_3d.yaml
-  testinput/hofx_nomodel.yaml
+  testinput/hofx3d.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
-  testoutput/hofx_nomodel_identity.ref
+  testoutput/hofx3d_identity.ref
   testoutput/3dvar.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
@@ -122,17 +122,17 @@ ecbuild_add_test(
    MPI          1 )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_exe
+   TARGET       test_wrf_hydro_jedi_hofx3d_identity_exe
    TYPE         EXE
-   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofxnomodel.x
-   ARGS         testinput/hofx_nomodel.yaml testoutput/hofx_nomodel_identity.log.out
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
+   ARGS         testinput/hofx3d.yaml testoutput/hofx3d_identity.log.out
    MPI          1 )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx_nomodel_identity_cmp
+   TARGET       test_wrf_hydro_jedi_hofx3d_identity_cmp
    TYPE		SCRIPT
    COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
-   ARGS         testoutput/hofx_nomodel_identity.log.out testoutput/hofx_nomodel_identity.ref)
+   ARGS         testoutput/hofx3d_identity.log.out testoutput/hofx3d_identity.ref)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_stage

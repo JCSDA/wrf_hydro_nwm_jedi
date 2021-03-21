@@ -5,7 +5,7 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "oops/runs/HofXNoModel.h"
+#include "oops/runs/HofX3Dslow.h"
 #include "oops/runs/Run.h"
 #include "ufo/instantiateObsFilterFactory.h"
 #include "ufo/ObsTraits.h"
@@ -16,6 +16,6 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
-  oops::HofXNoModel<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> hofx;
+  oops::HofX3Dslow<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> hofx;
   return run.execute(hofx);
 }
