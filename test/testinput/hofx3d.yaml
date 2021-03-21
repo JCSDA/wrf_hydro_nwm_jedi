@@ -32,7 +32,7 @@ observations:
     obsdatain:
       obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
     obsdataout:
-      obsfile: 'Data/hofx/hofx_nomodel.swe.nc'
+      obsfile: 'Data/hofx/hofx3d.swe.nc'
   obs operator:
       name: 'Identity'
 - obs space:
@@ -41,7 +41,7 @@ observations:
     obsdatain:
       obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
     obsdataout:
-      obsfile: 'Data/hofx/hofx_nomodel.snow_depth.nc'
+      obsfile: 'Data/hofx/hofx3d.snow_depth.nc'
   obs operator:
       name: 'Identity'
 
