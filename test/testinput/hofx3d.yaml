@@ -24,12 +24,6 @@ observations:
     name: 'Simulate'
     simulated variables: ['swe']
     obsdatain:
-
-observations:
-- obs space:
-    name: 'Simulate'
-    simulated variables: ['swe']
-    obsdatain:
       obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
     obsdataout:
       obsfile: 'Data/hofx/hofx3d.swe.nc'
