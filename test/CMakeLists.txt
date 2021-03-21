@@ -122,7 +122,7 @@ ecbuild_add_test(
    MPI          1 )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx_hofx3d_identity_exe
+   TARGET       test_wrf_hydro_jedi_hofx3d_identity_exe
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
    ARGS         testinput/hofx3d.yaml testoutput/hofx3d_identity.log.out
