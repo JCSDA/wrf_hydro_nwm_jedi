@@ -3,13 +3,12 @@
 # THIS SOFTWARE IS LICENSED UNDER THE TERMS OF THE APACHE LICENCE VERSION 2.0
 # WHICH CAN BE OBTAINED AT HTTP://WWW.APACHE.ORG/LICENSES/LICENSE-2.0.
 
-
-find_package(ecbuild 3.5 REQUIRED)
+cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
 
 # WRF_HYDRO_NWM_JEDI
-project( WRF_HYDRO_NWM_JEDI LANGUAGES C CXX Fortran )
+find_package( ecbuild 3.5 REQUIRED)
 
-cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
+project( WRF_HYDRO_NWM_JEDI VERSION 0.1 LANGUAGES C CXX Fortran )
 
 include( ecbuild_bundle )
 
