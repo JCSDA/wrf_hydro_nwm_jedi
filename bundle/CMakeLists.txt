@@ -3,18 +3,19 @@
 # THIS SOFTWARE IS LICENSED UNDER THE TERMS OF THE APACHE LICENCE VERSION 2.0
 # WHICH CAN BE OBTAINED AT HTTP://WWW.APACHE.ORG/LICENSES/LICENSE-2.0.
 
+
+find_package(ecbuild 3.5 REQUIRED)
+
 # WRF_HYDRO_NWM_JEDI
-project( WRF_HYDRO_NWM_JEDI C CXX Fortran )
+project( WRF_HYDRO_NWM_JEDI LANGUAGES C CXX Fortran )
 
 cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
-
-find_package(ecbuild)
 
 include( ecbuild_bundle )
 
 set( ECBUILD_DEFAULT_BUILD_TYPE RelWithDebInfo )
 # set( ECBUILD_DEFAULT_BUILD_TYPE Release )
-set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
+set( ENABLE_MPI ON CACHE BOOL "Compile with MPI")
 
 ecbuild_bundle_initialize()
 ecbuild_requires_macro_version( 2.7 )
@@ -32,14 +33,14 @@ ecbuild_add_option( FEATURE BUILD_ECKIT
 # -----------------------------------------------------------------------------
 # Optional repositories
 if ( BUILD_ECKIT )
-   ecbuild_bundle( PROJECT eckit         GIT "https://github.com/JCSDA/eckit.git"           UPDATE BRANCH release-stable )
+   ecbuild_bundle( PROJECT eckit         GIT "https://github.com/ecmwf/eckit.git" TAG 1.16.0 )
 endif ()
 
 # required repositories: sets for different branches when things get out of sync
 # Formula for specific commits. See recent hashes in .repo_hash_log
 # ecbuild_bundle( PROJECT repo            GIT "https://github.com/JCSDA-internal/repo.git"          UPDATE TAG    24f7b4815f6dda0eb9116611570f69025f202d72 )
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA-internal/fckit.git"           UPDATE BRANCH release-stable )
-ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA-internal/atlas.git"           UPDATE BRANCH release-stable )
+ecbuild_bundle( PROJECT fckit           GIT "https://github.com/ecmwf/fckit.git" TAG 0.9.2 )
+ecbuild_bundle( PROJECT atlas           GIT "https://github.com/ecmwf/atlas.git" TAG 0.24.1 )
 ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA-internal/ioda-converters.git" UPDATE BRANCH develop )
 ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA-internal/oops.git"            UPDATE BRANCH develop )
 ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA-internal/saber.git"           UPDATE BRANCH develop )
