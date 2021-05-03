@@ -49,7 +49,7 @@ ecbuild_bundle( PROJECT ufo-data  GIT "https://github.com/jcsda-internal/ufo-dat
 ecbuild_bundle( PROJECT fv3-jedi-data  GIT "https://github.com/jcsda-internal/fv3-jedi-data.git"  BRANCH develop UPDATE )
 
 # This repo
-ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  GIT "https://github.com/JCSDA-internal/wrf_hydro_nwm_jedi.git"  BRANCH feature/EcbuildUpdate UPDATE )
+ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  SOURCE "../"  )
 
 # Build Doxygen documentation
 # ---------------------------
