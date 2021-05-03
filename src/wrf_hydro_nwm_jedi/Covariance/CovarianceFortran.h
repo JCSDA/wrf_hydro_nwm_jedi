@@ -8,7 +8,7 @@
 #ifndef WRF_HYDRO_NWM_JEDI_COVARIANCE_COVARIANCEFORTRAN_H_
 #define WRF_HYDRO_NWM_JEDI_COVARIANCE_COVARIANCEFORTRAN_H_
 
-#include "Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 
 // Forward declarations
 namespace eckit {
