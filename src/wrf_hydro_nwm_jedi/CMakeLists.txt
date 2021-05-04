@@ -85,20 +85,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
 
 ecbuild_add_library( TARGET   wrf_hydro_nwm_jedi
                      SOURCES  ${wrf_hydro_nwm_jedi_src_files}
+                     LIBS     ${NETCDF_LIBRARIES}
+                              eckit eckit_mpi fckit oops ioda ufo
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${WRF_HYDRO_NWM_JEDI_LINKER_LANGUAGE}
                     )
-
-target_include_directories(wrf_hydro_nwm_jedi PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
-  $<INSTALL_INTERFACE:include/wrf_hydro_nwm_jedi>)
-
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC eckit)  
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC fckit)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC atlas)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC atlas_f)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC NetCDF::NetCDF_Fortran)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC oops)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC saber)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC ioda)
-target_link_libraries(wrf_hydro_nwm_jedi PUBLIC ufo)

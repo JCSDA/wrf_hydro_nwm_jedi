@@ -22,7 +22,6 @@ set( ENABLE_MPI ON CACHE BOOL "Compile with MPI")
 
 # Initialize
 ecbuild_bundle_initialize()
-ecbuild_bundle( PROJECT jedicmake GIT "https://github.com/jcsda-internal/jedi-cmake.git" BRANCH bugfix/netcdf-static UPDATE )
 
 # ECMWF libs
 # ----------
