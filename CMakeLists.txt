@@ -10,21 +10,22 @@
 cmake_minimum_required( VERSION 3.12 )
 project( wrf_hydro_nwm_jedi VERSION 0.1 LANGUAGES C CXX Fortran)
 
-# ecbuild integratoin
+# ecbuild integration
 find_package(ecbuild 3.3.2 REQUIRED)
 include( ecbuild_system NO_POLICY_SCOPE )
 ecbuild_declare_project()
 
 set( CMAKE_DIRECTORY_LABELS ${PROJECT_NAME} )
 list( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include( wrf_hydro_nwm_jedi_compiler_flags )
+
+## Configuration options
+include( ${PROJECT_NAME}_compiler_flags )
 
 ################################################################################
 # Dependencies
 ################################################################################
-# Boost Headers
-include_directories( ${Boost_INCLUDE_DIR} )
 
+find_package( Boost REQUIRED )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
 find_package( eckit  1.11.6     REQUIRED )
 find_package( fckit  0.7.0      REQUIRED )
