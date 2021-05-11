@@ -16,6 +16,6 @@
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsFilterFactory<ufo::ObsTraits>();
-  oops::HofX3Dslow<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> hofx;
+  oops::HofX3D<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> hofx;
   return run.execute(hofx);
 }

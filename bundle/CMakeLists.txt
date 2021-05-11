@@ -40,12 +40,11 @@ ecbuild_bundle( PROJECT crtm GIT "https://github.com/jcsda-internal/crtm.git" BR
 
 # Core JEDI repositories
 # ----------------------
-ecbuild_bundle( PROJECT oops  GIT "https://github.com/jcsda-internal/oops.git"  BRANCH develop UPDATE )
+ecbuild_bundle( PROJECT oops  GIT "/home/jedi/data/whnwm_jedi_branch_test/wrf_hydro_nwm_jedi/bundle/oops"  BRANCH develop )
 ecbuild_bundle( PROJECT saber GIT "https://github.com/jcsda-internal/saber.git" BRANCH develop UPDATE )
 ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git"  BRANCH develop UPDATE )
 ecbuild_bundle( PROJECT ufo   GIT "https://github.com/jcsda-internal/ufo.git"   BRANCH develop UPDATE )
 ecbuild_bundle( PROJECT ufo-data  GIT "https://github.com/jcsda-internal/ufo-data.git"  BRANCH develop UPDATE )
-ecbuild_bundle( PROJECT fv3-jedi-data  GIT "https://github.com/jcsda-internal/fv3-jedi-data.git"  BRANCH develop UPDATE )
 
 # This repo
 ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  SOURCE "../"  )
