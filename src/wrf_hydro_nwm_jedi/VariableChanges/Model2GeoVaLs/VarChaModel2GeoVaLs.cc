@@ -40,7 +40,7 @@ VarChaModel2GeoVaLs::~VarChaModel2GeoVaLs() {
 }
 void VarChaModel2GeoVaLs::changeVar(const State & xin, State & xout) const {
   oops::Log::trace() << classname() << "VarChaModel2GeoVaLs::changeVar starting" << std::endl;
-  wrf_hydro_nwm_jedi_varcharmodel2geovaLs_changevar_f90(geom_->toFortran(),
+  wrf_hydro_nwm_jedi_varchamodel2geovals_changevar_f90(keyFtnConfig_, geom_->toFortran(),
                                    xin.toFortran(), xout.toFortran());
   xout.validTime() = xin.validTime();
   oops::Log::trace() << classname() << "VarChaModel2GeoVaLs::changeVar done" << std::endl;

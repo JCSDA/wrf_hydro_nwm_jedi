@@ -16,10 +16,10 @@
 #include "oops/util/Printable.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm_jedi/Traits.h
+#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "VarChaModel2GeoVaLsFortran.h"
 #include "oops/base/VariableChangeBase.h"
-#include "VarChaModel2GeoVaLs.interface.h"
+#include "VarChaModel2GeoVaLsFortran.h"
 
 // Forward declarations
 namespace eckit {
@@ -27,13 +27,10 @@ namespace eckit {
 }
 
 namespace wrf_hydro_nwm_jedi {
-  class Geometry;
-  class State;
 
 // -------------------------------------------------------------------------------------------------
 
-class VarChaModel2GeoVaLs: public util::Printable,
-                           public oops::VariableChangeBase<Traits>, 
+class VarChaModel2GeoVaLs: public oops::VariableChangeBase<Traits>, 
                            private util::ObjectCounter<VarChaModel2GeoVaLs> {
  public:
   static const std::string classname() {return "wrf_hydro_nwm_jedi::VarChaModel2GeoVaLs";}
