@@ -13,26 +13,26 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     use fckit_configuration_module, only: fckit_configuration
     
-    use wrf_hydro_nwm_jedi_geom_mod,                only: wrf_hydro_nwm_jedi_geom
-    use wrf_hydro_nwm_jedi_geom_interface_mod,      only: wrf_hydro_nwm_jedi_geom_registry
+    use wrf_hydro_nwm_jedi_geometry_mod,            only: wrf_hydro_nwm_jedi_geometry
+    use wrf_hydro_nwm_jedi_geometry_mod_c,          only : wrf_hydro_nwm_jedi_geometry_registry
     use wrf_hydro_nwm_jedi_state_mod,               only: wrf_hydro_nwm_jedi_state
     use wrf_hydro_nwm_jedi_state_interface_mod,     only: wrf_hydro_nwm_jedi_state_registry
     use wrf_hydro_nwm_jedi_varchamodel2geovals_mod, only: wrf_hydro_nwm_jedi_varchamodel2geovals
-    
+     
     implicit none
     
     private
-    public :: fv3jedi_vc_model2geovals_registry
+    public :: wrf_hydro_nwm_jedi_varchamodel2geovals_registry
     
     ! --------------------------------------------------------------------------------------------------
     
-    #define LISTED_TYPE fv3jedi_vc_model2geovals
+    #define LISTED_TYPE wrf_hydro_nwm_jedi_varchamodel2geovals
     
     !> Linked list interface - defines registry_t type
     #include "oops/util/linkedList_i.f"
     
     !> Global registry
-    type(registry_t) :: fv3jedi_vc_model2geovals_registry
+    type(registry_t) :: wrf_hydro_nwm_jedi_varchamodel2geovals_registry
     
     ! --------------------------------------------------------------------------------------------------
     
@@ -45,24 +45,24 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     ! --------------------------------------------------------------------------------------------------
     
-    subroutine c_fv3jedi_vc_model2geovals_create(c_key_self, c_key_geom, c_conf) &
-               bind (c, name='fv3jedi_vc_model2geovals_create_f90')
+    subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_create(c_key_self, c_key_geom, c_conf) &
+               bind (c, name='wrf_hydro_nwm_jedi_varchamodel2geovals_create_f90')
     
     implicit none
     integer(c_int), intent(inout) :: c_key_self
     integer(c_int), intent(in)    :: c_key_geom
     type(c_ptr),    intent(in)    :: c_conf
     
-    type(fv3jedi_vc_model2geovals), pointer :: self
-    type(fv3jedi_geom),             pointer :: geom
-    type(fckit_configuration)               :: conf
+    type(wrf_hydro_nwm_jedi_varchamodel2geovals), pointer :: self
+    type(wrf_hydro_nwm_jedi_geometry),            pointer :: geom
+    type(fckit_configuration)                             :: conf
     
     ! Linked list
     ! -----------
-    call fv3jedi_vc_model2geovals_registry%init()
-    call fv3jedi_vc_model2geovals_registry%add(c_key_self)
-    call fv3jedi_vc_model2geovals_registry%get(c_key_self, self)
-    call fv3jedi_geom_registry%get(c_key_geom,geom)
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%init()
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%add(c_key_self)
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%get(c_key_self, self)
+    call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom,geom)
     
     ! APIs
     ! ----
@@ -72,21 +72,21 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     ! --------------
     call self%create(geom, conf)
     
-    end subroutine c_fv3jedi_vc_model2geovals_create
+    end subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_create
     
     ! --------------------------------------------------------------------------------------------------
     
-    subroutine c_fv3jedi_vc_model2geovals_delete(c_key_self) &
-               bind (c, name='fv3jedi_vc_model2geovals_delete_f90')
+    subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_delete(c_key_self) &
+               bind (c, name='wrf_hydro_nwm_jedi_varchamodel2geovals_delete_f90')
     
     implicit none
     integer(c_int), intent(inout) :: c_key_self  !< Change variable structure
     
-    type(fv3jedi_vc_model2geovals), pointer :: self
+    type(wrf_hydro_nwm_jedi_varchamodel2geovals), pointer :: self
     
     ! Linked list
     ! -----------
-    call fv3jedi_vc_model2geovals_registry%get(c_key_self,self)
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%get(c_key_self,self)
     
     ! Implementation
     ! --------------
@@ -94,14 +94,14 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     ! Linked list
     ! -----------
-    call fv3jedi_vc_model2geovals_registry%remove(c_key_self)
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%remove(c_key_self)
     
-    end subroutine c_fv3jedi_vc_model2geovals_delete
+    end subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_delete
     
     ! --------------------------------------------------------------------------------------------------
     
-    subroutine c_fv3jedi_vc_model2geovals_changevar(c_key_self, c_key_geom, c_key_xm, c_key_xg) &
-               bind (c, name='fv3jedi_vc_model2geovals_changevar_f90')
+    subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_changevar(c_key_self, c_key_geom, c_key_xm, c_key_xg) &
+               bind (c, name='wrf_hydro_nwm_jedi_varchamodel2geovals_changevar_f90')
     
     implicit none
     integer(c_int), intent(in) :: c_key_self
@@ -109,25 +109,25 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     integer(c_int), intent(in) :: c_key_xm
     integer(c_int), intent(in) :: c_key_xg
     
-    type(fv3jedi_vc_model2geovals), pointer :: self
-    type(fv3jedi_geom),             pointer :: geom
-    type(fv3jedi_state),            pointer :: xm
-    type(fv3jedi_state),            pointer :: xg
+    type(wrf_hydro_nwm_jedi_varchamodel2geovals), pointer :: self
+    type(wrf_hydro_nwm_jedi_geometry),            pointer :: geom
+    type(wrf_hydro_nwm_jedi_state),               pointer :: xm
+    type(wrf_hydro_nwm_jedi_state),               pointer :: xg
     
     ! Linked list
     ! -----------
-    call fv3jedi_vc_model2geovals_registry%get(c_key_self,self)
-    call fv3jedi_state_registry%get(c_key_xm,xm)
-    call fv3jedi_state_registry%get(c_key_xg,xg)
-    call fv3jedi_geom_registry%get(c_key_geom,geom)
+    call wrf_hydro_nwm_jedi_varchamodel2geovals_registry%get(c_key_self,self)
+    call wrf_hydro_nwm_jedi_state_registry%get(c_key_xm,xm)
+    call wrf_hydro_nwm_jedi_state_registry%get(c_key_xg,xg)
+    call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom,geom)
     
     ! Implementation
     ! --------------
     call self%changevar(geom, xm, xg)
     
-    end subroutine c_fv3jedi_vc_model2geovals_changevar
+    end subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_changevar
     
     ! --------------------------------------------------------------------------------------------------
     
-    end module fv3jedi_vc_model2geovals_interface_mod
+    end module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
