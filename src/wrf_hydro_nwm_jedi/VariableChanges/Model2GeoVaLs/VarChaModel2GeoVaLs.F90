@@ -58,9 +58,9 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_mod
       
       class(wrf_hydro_nwm_jedi_varchamodel2geovals), intent(inout) :: self
       type(wrf_hydro_nwm_jedi_geometry),             intent(in)    :: geom
-      type(fv3jedi_state),                           intent(in)    :: xm
-      type(fv3jedi_state),                           intent(inout) :: xg
+      type(wrf_hydro_nwm_jedi_state),                intent(in)    :: xm
+      type(wrf_hydro_nwm_jedi_state),                intent(inout) :: xg
 
-      call copy(xg%fields, xm%fields)
+      call copy(xg, xm)
 
     end subroutine changevar
