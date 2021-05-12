@@ -64,3 +64,5 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_mod
       call copy(xg, xm)
 
     end subroutine changevar
+
+end module wrf_hydro_nwm_jedi_varchamodel2geovals_mod
