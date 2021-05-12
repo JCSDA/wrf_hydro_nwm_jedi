@@ -10,6 +10,8 @@
 
 #include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
 
+#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
+
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 

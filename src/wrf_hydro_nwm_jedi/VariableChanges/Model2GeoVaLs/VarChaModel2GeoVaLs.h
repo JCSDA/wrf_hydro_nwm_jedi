@@ -12,14 +12,11 @@
 #include <string>
 
 #include "eckit/config/Configuration.h"
-
-#include "oops/util/Printable.h"
-
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 #include "VarChaModel2GeoVaLsFortran.h"
 #include "oops/base/VariableChangeBase.h"
-#include "VarChaModel2GeoVaLsFortran.h"
+
 
 // Forward declarations
 namespace eckit {
