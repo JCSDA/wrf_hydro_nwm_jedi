@@ -29,7 +29,7 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     #define LISTED_TYPE wrf_hydro_nwm_jedi_varchamodel2geovals
     
     !> Linked list interface - defines registry_t type
-    #include "oops/util/linkedList_i.f"
+    !include "oops/util/linkedList_i.f"
     
     !> Global registry
     type(registry_t) :: wrf_hydro_nwm_jedi_varchamodel2geovals_registry
@@ -41,7 +41,7 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     ! --------------------------------------------------------------------------------------------------
     
     !> Linked list implementation
-    #include "oops/util/linkedList_c.f"
+    !include "oops/util/linkedList_c.f"
     
     ! --------------------------------------------------------------------------------------------------
     
