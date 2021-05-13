@@ -48,6 +48,7 @@ namespace oops {
 namespace wrf_hydro_nwm_jedi {
   class State;
   class Geometry;
+  class VarChaModel2GeoVaLs;
 
 // -------------------------------------------------------------------------------------------------
 

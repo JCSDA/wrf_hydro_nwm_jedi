@@ -19,17 +19,30 @@
 #include "ufo/Locations.h"
 
 namespace wrf_hydro_nwm_jedi {
-  // LinearGetValues::LinearGetValues() {
-  //   util::abor1_cpp("LinearGetValues::LinearGetValues() needs to be implemented.",
-  //                   __FILE__, __LINE__);
-  // }
+
   LinearGetValues::LinearGetValues(
       const Geometry & geom, 
       const ufo::Locations & locs,
-      const eckit::Configuration &) :
+      const eckit::Configuration & config) :
     locs_(locs), geom_(new Geometry(geom)), model2geovals_() {
+
+
+  // Create the variable change object
+  {
+  util::Timer timervc(classname(), "VarChaModel2GeoVaLs");
+  model2geovals_.reset(new VarChaModel2GeoVaLs(geom, config));
+  }
+
+  // Call GetValues consructor
+  {
+  util::Timer timergv(classname(), "LinearGetValues");
+
+  // Pointer to configuration
+  const eckit::Configuration * pconf = &config;
+
+
     wrf_hydro_nwm_jedi_getvalues_create_f90(
-        keyGetValues_, geom.toFortran(), locs_);
+        keyLinearGetValues_, geom.toFortran(), locs_);
     oops::Log::trace() << "LinearGetValues::LinearGetValues done" << std::endl;
   }
 

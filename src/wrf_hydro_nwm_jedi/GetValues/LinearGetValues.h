@@ -32,6 +32,7 @@ namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class State;
   class Increment;
+  class VarChaModel2GeoVaLs;
 }
 
 // ----------------------------------------------------------------------------
