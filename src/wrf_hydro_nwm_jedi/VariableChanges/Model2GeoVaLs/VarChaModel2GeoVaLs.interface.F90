@@ -14,7 +14,7 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     use fckit_configuration_module, only: fckit_configuration
     
     use wrf_hydro_nwm_jedi_geometry_mod,            only: wrf_hydro_nwm_jedi_geometry
-    use wrf_hydro_nwm_jedi_geometry_mod_c,          only : wrf_hydro_nwm_jedi_geometry_registry
+    use wrf_hydro_nwm_jedi_geometry_mod_c,          only: wrf_hydro_nwm_jedi_geometry_registry
     use wrf_hydro_nwm_jedi_state_mod,               only: wrf_hydro_nwm_jedi_state
     use wrf_hydro_nwm_jedi_state_interface_mod,     only: wrf_hydro_nwm_jedi_state_registry
     use wrf_hydro_nwm_jedi_varchamodel2geovals_mod, only: wrf_hydro_nwm_jedi_varchamodel2geovals
@@ -26,10 +26,9 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     ! --------------------------------------------------------------------------------------------------
     
-    #define LISTED_TYPE wrf_hydro_nwm_jedi_varchamodel2geovals
-    
-    !> Linked list interface - defines registry_t type
-    !include "oops/util/linkedList_i.f"
+#define LISTED_TYPE wrf_hydro_nwm_jedi_varchamodel2geovals
+!> Linked list interface - defines registry_t type
+#include "oops/util/linkedList_i.f"
     
     !> Global registry
     type(registry_t) :: wrf_hydro_nwm_jedi_varchamodel2geovals_registry
@@ -37,11 +36,12 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     ! --------------------------------------------------------------------------------------------------
     
     contains
-    
+
+      
     ! --------------------------------------------------------------------------------------------------
     
-    !> Linked list implementation
-    !include "oops/util/linkedList_c.f"
+!> Linked list implementation
+#include "oops/util/linkedList_c.f"
     
     ! --------------------------------------------------------------------------------------------------
     

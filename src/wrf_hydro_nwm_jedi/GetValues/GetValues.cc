@@ -7,7 +7,6 @@
 
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
 #include "oops/util/Logger.h"
-
 #include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
 namespace wrf_hydro_nwm_jedi {

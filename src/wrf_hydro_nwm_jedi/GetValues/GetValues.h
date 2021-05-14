@@ -28,7 +28,6 @@
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.interface.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
-#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
 // -------------------------------------------------------------------------------------------------
 
@@ -48,28 +47,29 @@ namespace oops {
 namespace wrf_hydro_nwm_jedi {
   class State;
   class Geometry;
-
+  class VarChaModel2GeoVaLs;
+  
 // -------------------------------------------------------------------------------------------------
 
-class GetValues : public util::Printable, private util::ObjectCounter<GetValues> {
- public:
-  static const std::string classname() {return "wrf_hydro_nwm_jedi::GetValues";}
+  class GetValues : public util::Printable, private util::ObjectCounter<GetValues> {
+  public:
+    static const std::string classname() {return "wrf_hydro_nwm_jedi::GetValues";}
+    
+    GetValues(const Geometry &, const ufo::Locations & locs,
+	      const eckit::Configuration & config);
+    virtual ~GetValues();
+    
+    void fillGeoVaLs(const State &, const util::DateTime &, const util::DateTime &,
+		     ufo::GeoVaLs &) const;
 
-  GetValues(const Geometry &, const ufo::Locations & locs,
-            const eckit::Configuration & config);
-  virtual ~GetValues();
+  private:
+    void print(std::ostream &) const;
+    F90getvalues keyGetValues_;
+    ufo::Locations locs_;
+    std::shared_ptr<const Geometry> geom_;
+    std::unique_ptr<VarChaModel2GeoVaLs> model2geovals_;
+  };
 
-  void fillGeoVaLs(const State &, const util::DateTime &, const util::DateTime &,
-                   ufo::GeoVaLs &) const;
-
- private:
-  void print(std::ostream &) const;
-  F90getvalues keyGetValues_;
-  ufo::Locations locs_;
-  std::shared_ptr<const Geometry> geom_;
-  std::unique_ptr<VarChaModel2GeoVaLs> model2geovals_;
-};
-
-// -------------------------------------------------------------------------------------------------
+  // -------------------------------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi
