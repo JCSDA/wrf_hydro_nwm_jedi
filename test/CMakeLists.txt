@@ -117,7 +117,7 @@ ecbuild_add_test(
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_make_obs_3d
    TYPE         EXE
-   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx.x
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
    ARGS         testinput/make_obs_3d.yaml testoutput/make_obs_3d.log.out
    MPI          1 )
 
