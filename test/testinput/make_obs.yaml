@@ -13,7 +13,7 @@ initial condition:
   basename: "./INPUT/"
   filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-  state variables: *model_vars 
+  state variables: *model_vars
 
 forecast length: PT1H
 window begin: *date
@@ -56,5 +56,7 @@ observations:
       name: 'Identity'
     obs error:
       covariance model: diagonal
+
 make obs: true
+
 obs perturbations: true
