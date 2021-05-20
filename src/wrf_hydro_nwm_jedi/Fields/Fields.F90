@@ -683,7 +683,7 @@ subroutine checksame(self, other, method)
   integer :: var
 
   if (self%nf .ne. other%nf) then
-   write(*,*) self%nf, other,%nf
+   write(*,*) self%nf, other,%nfvi 
 !     call abor1_ftn(trim(method)//"(checksame): Different number of fields")
   endif
 
