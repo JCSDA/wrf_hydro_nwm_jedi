@@ -2,7 +2,7 @@
 
 list( APPEND wrf_hydro_nwm_jedi_src_files
   Traits.h
-  
+
   # # Covariance
   Covariance/Covariance.h
   Covariance/Covariance.cc
@@ -37,8 +37,11 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   GetValues/LinearGetValues.interface.F90
   
   # VariableChanges
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.interface.F90
+  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.F90
 
   # # LinearGetValues
   #LinearGetValues/LinearGetValues.h

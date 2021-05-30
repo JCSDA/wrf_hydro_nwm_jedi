@@ -21,7 +21,6 @@
 #include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.interface.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
-#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
 namespace ufo {
   class GeoVaLs;
@@ -32,6 +31,7 @@ namespace wrf_hydro_nwm_jedi {
   class Geometry;
   class State;
   class Increment;
+  class VarChaModel2GeoVaLs;
 }
 
 // ----------------------------------------------------------------------------
