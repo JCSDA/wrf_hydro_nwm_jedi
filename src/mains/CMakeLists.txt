@@ -1,5 +1,5 @@
 ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_hofx3d.x
-                        SOURCES HofX3Dslow.cc
+                        SOURCES HofX3D.cc
                         LIBS    wrf_hydro_nwm_jedi )
 
 # ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_forecast.x

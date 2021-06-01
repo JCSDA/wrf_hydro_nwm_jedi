@@ -6,11 +6,6 @@ window length: PT1H
 geometry:
   input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
-model:
-  name: 'WRF_HYDRO_NWM_JEDI'
-  tstep: PT1H
-  model variables: &model_vars ['SNEQV', 'SNOWH']
-
 state:
   state variables: ['SNEQV', 'SNOWH']
   date: *date

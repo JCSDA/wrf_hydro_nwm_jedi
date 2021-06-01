@@ -3,55 +3,63 @@
 # THIS SOFTWARE IS LICENSED UNDER THE TERMS OF THE APACHE LICENCE VERSION 2.0
 # WHICH CAN BE OBTAINED AT HTTP://WWW.APACHE.ORG/LICENSES/LICENSE-2.0.
 
+cmake_minimum_required( VERSION 3.12 FATAL_ERROR )
+
+find_package( ecbuild 3.5 REQUIRED HINTS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild)
+
 # WRF_HYDRO_NWM_JEDI
-project( WRF_HYDRO_NWM_JEDI C CXX Fortran )
+project( WRF_HYDRO_NWM_JEDI VERSION 1.0.0 LANGUAGES C CXX Fortran )
 
-cmake_minimum_required( VERSION 3.3.2 FATAL_ERROR )
-
-find_package(ecbuild)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include( ecbuild_bundle )
 
-set( ECBUILD_DEFAULT_BUILD_TYPE RelWithDebInfo )
 # set( ECBUILD_DEFAULT_BUILD_TYPE Release )
-set( ENABLE_MPI ON CACHE BOOL "Compile with MPI" )
+set( ECBUILD_DEFAULT_BUILD_TYPE RelWithDebInfo )
 
+# Enable MPI
+set( ENABLE_MPI ON CACHE BOOL "Compile with MPI")
+
+# Initialize
 ecbuild_bundle_initialize()
-ecbuild_requires_macro_version( 2.7 )
-
-#ecbuild_add_option( FEATURE OMP
-#                    DEFAULT ON
-#                    DESCRIPTION "Use OpenMP" )
-
-ecbuild_add_option( FEATURE BUILD_ECKIT
-                    DEFAULT OFF
-                    DESCRIPTION "download and build eckit (not needed if in a jedi container)" )
+ecbuild_bundle( PROJECT jedicmake GIT "https://github.com/jcsda-internal/jedi-cmake.git" )
+include( jedicmake/cmake/Functions/git_functions.cmake  )
 
 
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# Optional repositories
-if ( BUILD_ECKIT )
-   ecbuild_bundle( PROJECT eckit         GIT "https://github.com/JCSDA/eckit.git"           UPDATE BRANCH release-stable )
-endif ()
+# ECMWF libs
+# ----------
+option("BUNDLE_SKIP_ECKIT" "Don't build eckit" "ON" ) # Skip eckit build unless user passes -DBUNDLE_SKIP_ECKIT=OFF
+option("BUNDLE_SKIP_FCKIT" "Don't build fckit" "ON") # Skip eckit build unless user passes -DBUNDLE_SKIP_FCKIT=OFF
+option("BUNDLE_SKIP_ATLAS" "Don't build atlas" "ON") # Skip eckit build unless user passes -DBUNDLE_SKIP_ATLAS=OFF
 
-# required repositories: sets for different branches when things get out of sync
-# Formula for specific commits. See recent hashes in .repo_hash_log
-# ecbuild_bundle( PROJECT repo            GIT "https://github.com/JCSDA-internal/repo.git"          UPDATE TAG    24f7b4815f6dda0eb9116611570f69025f202d72 )
-ecbuild_bundle( PROJECT fckit           GIT "https://github.com/JCSDA-internal/fckit.git" )
-ecbuild_bundle( PROJECT atlas           GIT "https://github.com/JCSDA-internal/atlas.git" )
-ecbuild_bundle( PROJECT ioda-converters GIT "https://github.com/JCSDA-internal/ioda-converters.git" )
-ecbuild_bundle( PROJECT oops            GIT "https://github.com/JCSDA-internal/oops.git" )
-ecbuild_bundle( PROJECT saber           GIT "https://github.com/JCSDA-internal/saber.git" )
-ecbuild_bundle( PROJECT ioda            GIT "https://github.com/JCSDA-internal/ioda.git" )
-ecbuild_bundle( PROJECT ufo             GIT "https://github.com/JCSDA-internal/ufo.git" )
+ecbuild_bundle( PROJECT eckit GIT "https://github.com/ecmwf/eckit.git" )
+ecbuild_bundle( PROJECT fckit GIT "https://github.com/ecmwf/fckit.git" )
+ecbuild_bundle( PROJECT atlas GIT "https://github.com/ecmwf/atlas.git" )
+
+# External (required) observation operators
+# ------------------------------
+option("BUNDLE_SKIP_CRTM" "Don't build CRTM" "ON") # Skip crtm build unless user passes -DBUNDLE_SKIP_CRTM=OFF
+ecbuild_bundle( PROJECT crtm GIT "https://github.com/jcsda-internal/crtm.git" )
+
+# Core JEDI repositories
+# ----------------------
+ecbuild_bundle( PROJECT oops  GIT "https://github.com/jcsda-internal/oops.git" )
+ecbuild_bundle( PROJECT saber GIT "https://github.com/jcsda-internal/saber.git" )
+ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git" )
+ecbuild_bundle( PROJECT ufo   GIT "https://github.com/jcsda-internal/ufo.git" )
+ecbuild_bundle( PROJECT ufo-data  GIT "https://github.com/jcsda-internal/ufo-data.git" )
 
 # This repo
-ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  GIT "https://github.com/JCSDA-internal/wrf_hydro_nwm_jedi" )
+ecbuild_bundle( PROJECT wrf_hydro_nwm_jedi  GIT "https://github.com/jcsda-internal/wrf_hydro_nwm_jedi.git" )
 
+# Build Doxygen documentation
+# ---------------------------
+option(BUILD_FV3_BUNDLE_DOC "Build documentation" OFF)
+if(BUILD_FV3_BUNDLE_DOC)
+   add_subdirectory( Documentation )
+endif(BUILD_FV3_BUNDLE_DOC)
 
 ecbuild_bundle_finalize()
-
 
 # cache repo hashes in a log file in the bundle.
 execute_process ( COMMAND bash -c "${CMAKE_CURRENT_LIST_DIR}/log_repo_hashes.sh ${CMAKE_CURRENT_LIST_DIR}" )

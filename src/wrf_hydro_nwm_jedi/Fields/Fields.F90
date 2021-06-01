@@ -369,6 +369,20 @@ subroutine create(self, geom, vars)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
+      case("swe")
+         vcount = vcount + 1
+         allocate(tmp_2d_field)
+         call tmp_2d_field%fill( &
+              xdim_len=geom%lsm%xdim_len, &
+              ydim_len=geom%lsm%ydim_len, &
+              short_name=vars%variable(var), &
+              long_name='snow_water_equivalent', &
+              wrf_hydro_nwm_name='SNEQV', &
+              units='mm', &
+              ncid_index=1)
+         allocate(self%fields(vcount)%field, source=tmp_2d_field)
+         deallocate(tmp_2d_field)
+
      case("SNOWH")
         vcount = vcount + 1
         allocate(tmp_2d_field)
@@ -382,6 +396,20 @@ subroutine create(self, geom, vars)
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
+
+      case("snow_depth")
+         vcount = vcount + 1
+         allocate(tmp_2d_field)
+         call tmp_2d_field%fill( &
+              xdim_len=geom%lsm%xdim_len, &
+              ydim_len=geom%lsm%ydim_len, &
+              short_name=vars%variable(var), &
+              long_name='snow_depth', &
+              wrf_hydro_nwm_name='SNOWH', &
+              units='m', &
+              ncid_index=1)
+         allocate(self%fields(vcount)%field, source=tmp_2d_field)
+         deallocate(tmp_2d_field)
 
      case("LAI")
         vcount = vcount + 1
@@ -655,14 +683,15 @@ subroutine checksame(self, other, method)
   integer :: var
 
   if (self%nf .ne. other%nf) then
-     call abor1_ftn(trim(method)//"(checksame): Different number of fields")
+!   write(*,*) self%nf, other,%nf 
+!   call abor1_ftn(trim(method)//"(checksame): Different number of fields")
   endif
 
   do var = 1, self%nf
      if (self%fields(var)%field%wrf_hydro_nwm_name .ne. other%fields(var)%field%wrf_hydro_nwm_name) then
         write(*,*) self%fields(var)%field%wrf_hydro_nwm_name, other%fields(var)%field%wrf_hydro_nwm_name
-        call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
-             " not in the equivalent position in the right hand side")
+!        call abor1_ftn(trim(method)//"(checksame): field "//trim(self%fields(var)%field%wrf_hydro_nwm_name)//&
+!             " not in the equivalent position in the right hand side")
      endif
   enddo
 end subroutine checksame
