@@ -25,6 +25,9 @@ namespace eckit {
 namespace wrf_hydro_nwm_jedi {
   class GeometryIterator;
 }
+namespace oops {
+  class Variables;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -39,6 +42,8 @@ namespace wrf_hydro_nwm_jedi {
     explicit Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
     Geometry(const Geometry &);
     ~Geometry();
+
+    std::vector<size_t> variableSizes(const oops::Variables &) const;
 
     const eckit::mpi::Comm & getComm() const {return comm_;}
 
