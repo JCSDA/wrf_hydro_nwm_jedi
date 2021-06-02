@@ -37,9 +37,10 @@ namespace wrf_hydro_nwm_jedi {
 // -----------------------------------------------------------------------------
 std::vector<size_t> Geometry::variableSizes(const oops::Variables &
                                                     vars) const {
-  // This model always has exactly one level
-  std::vector<size_t> sizes(vars.size(), 1);
-  return sizes;
+    std::vector<size_t> varSizes(vars.size());
+    wrf_hydro_nwm_jedi_geoval_levels_f90(keyGeom_, vars, vars.size(),  varSizes[0]);
+  
+  return varSizes;
 }
 // -----------------------------------------------------------------------------
 

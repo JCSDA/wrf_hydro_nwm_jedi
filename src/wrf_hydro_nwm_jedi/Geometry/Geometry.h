@@ -43,7 +43,7 @@ namespace wrf_hydro_nwm_jedi {
     Geometry(const Geometry &);
     ~Geometry();
    
-    //const eckit::mpi::Comm & getComm() const {return comm_;}
+    const eckit::mpi::Comm & getComm() const {return comm_;}
 
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;

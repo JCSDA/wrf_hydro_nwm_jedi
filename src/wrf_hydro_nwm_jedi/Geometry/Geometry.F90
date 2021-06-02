@@ -244,6 +244,50 @@ subroutine get_lsm_info( &
   zdim_len = self%lsm%zdim_len
 end subroutine get_lsm_info
 
+!> Get lsm geoval levels
+subroutine get_geoval_levels(self, vars, nvars, nlevels)
+
+  use, intrinsic :: iso_c_binding, only: c_size_t
+  use oops_variables_mod,          only: oops_variables
+
+  class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self  !< geom object
+  type(oops_variables),      intent(in) :: vars
+  integer(c_size_t),         intent(in) :: nvars
+  integer(c_size_t),      intent(inout) :: nlevels(nvars)
+  character(len=*),           parameter :: myname = &
+                                  & "geometry_mod:get_geoval_levels"
+  ! local variables
+  integer :: ivar
+
+  call fckit_log%debug(myname // ' : start')
+
+  nlevels = 0
+  do ivar = 1, nvars
+
+    select case (vars%variable(ivar))
+
+      case ( "SNICE", "SNLIQ" )
+
+        nlevels(ivar) = 3
+        call fckit_log%debug("Found "//trim(myname)//":" &
+                                   & //trim(vars%variable(ivar)))
+
+      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI")
+
+        nlevels(ivar) = 1
+        call fckit_log%debug("Found "//trim(myname)//":" &
+                                   & //trim(vars%variable(ivar)))
+
+      case default
+        call abor1_ftn(trim(myname)//":"//trim(vars%variable(ivar)) &
+                                 & //" not found")
+    end select
+  end do
+
+  call fckit_log%debug(myname // ' : end')
+
+end subroutine get_geoval_levels
+
 
 !-----------------------------------------------------------------------------
 ! Streamflow section
