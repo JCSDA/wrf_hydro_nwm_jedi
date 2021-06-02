@@ -10,11 +10,13 @@
 
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include "eckit/mpi/Comm.h"
 
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
+#include "oops/base/Variables.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
 
@@ -42,14 +44,12 @@ namespace wrf_hydro_nwm_jedi {
     explicit Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
     Geometry(const Geometry &);
     ~Geometry();
-   
-    const eckit::mpi::Comm & getComm() const {return comm_;}
-
+      
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;
     // GeometryIterator end() const;
     const F90geom & toFortran() const {return keyGeom_;}
-
+    const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
 
    private:

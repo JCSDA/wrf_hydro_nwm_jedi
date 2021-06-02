@@ -11,7 +11,7 @@ implicit none
 private
 
 ! For doxygen purposes, this public statement is just a summary for the code reader?
-public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn
+public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn, get_geoval_levels
 
 
 ! General:
@@ -46,6 +46,7 @@ type, public :: wrf_hydro_nwm_jedi_geometry
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete  !< delete
    procedure :: get_lsm_info => get_lsm_info  !< get lsm info
    procedure :: get_lsm_nn => get_lsm_nn  !< get lsm nearest neighbor
+   procedure :: get_geoval_levels => get_geoval_levels
    ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
    ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
    procedure :: lsm_active => lsm_active  !< query if the lsm component is active/allocated

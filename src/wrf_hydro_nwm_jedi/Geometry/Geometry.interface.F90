@@ -8,8 +8,7 @@ module wrf_hydro_nwm_jedi_geometry_mod_c
 use iso_c_binding
 
 use fckit_configuration_module, only: fckit_configuration
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, &
-                                           &  get_geoval_levels
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 
 use oops_variables_mod,          only: oops_variables
 
@@ -115,9 +114,9 @@ subroutine c_wrf_hydro_nwm_jedi_geoval_levels(c_key_self, c_vars, c_nvars, c_nle
   type(wrf_hydro_nwm_jedi_geometry), pointer :: self
   type(oops_variables)                       :: vars
 
-  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self,self)
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   vars = oops_variables(c_vars)
-  call get_geoval_levels(self, vars, c_nvars, c_nlevels)
+  call self%get_geoval_levels(vars, c_nvars, c_nlevels)
 
 end subroutine c_wrf_hydro_nwm_jedi_geoval_levels
 
