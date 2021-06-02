@@ -5,6 +5,7 @@ module wrf_hydro_nwm_jedi_geometry_mod
 use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
+use fckit_log_module,            only: fckit_log
 
 implicit none
 private
