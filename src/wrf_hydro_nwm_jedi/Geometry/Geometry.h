@@ -42,15 +42,15 @@ namespace wrf_hydro_nwm_jedi {
     explicit Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
     Geometry(const Geometry &);
     ~Geometry();
-
-    std::vector<size_t> variableSizes(const oops::Variables &) const;
-
-    const eckit::mpi::Comm & getComm() const {return comm_;}
+   
+    //const eckit::mpi::Comm & getComm() const {return comm_;}
 
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;
     // GeometryIterator end() const;
     const F90geom & toFortran() const {return keyGeom_;}
+
+    std::vector<size_t> variableSizes(const oops::Variables &) const;
 
    private:
     void print(std::ostream &) const;

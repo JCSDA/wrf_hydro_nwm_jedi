@@ -12,7 +12,7 @@
 #include "eckit/config/Configuration.h"
 
 #include "oops/util/abor1_cpp.h"
-#include "opps/base/Variables.h"
+#include "oops/base/Variables.h"
 
 namespace wrf_hydro_nwm_jedi {
 
