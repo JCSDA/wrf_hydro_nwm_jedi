@@ -136,14 +136,14 @@ subroutine fill_geovals(self, geom, fields_obj, t1, t2, locs, geovals)
 
   ! Allocate geovals
   ! ----------------
-  if (.not. geovals%linit) then
-     do gv = 1, geovals%nvar
-        geovals%geovals(gv)%nval = 1!fields(gv)%dim3_len
-        allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
-        geovals%geovals(gv)%vals = 0.0
-     enddo
-  endif
-  geovals%linit = .true.
+  !if (.not. geovals%linit) then
+  !   do gv = 1, geovals%nvar
+  !      geovals%geovals(gv)%nval = 1!fields(gv)%dim3_len
+  !      allocate(geovals%geovals(gv)%vals(geovals%geovals(gv)%nval, geovals%geovals(gv)%nlocs))
+  !      geovals%geovals(gv)%vals = 0.0
+  !   enddo
+  !endif
+  !geovals%linit = .true.
 
   self%ngrid = 1
 

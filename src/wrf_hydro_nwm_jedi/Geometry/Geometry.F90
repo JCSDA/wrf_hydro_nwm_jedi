@@ -5,12 +5,13 @@ module wrf_hydro_nwm_jedi_geometry_mod
 use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
+use fckit_log_module,            only: fckit_log
 
 implicit none
 private
 
 ! For doxygen purposes, this public statement is just a summary for the code reader?
-public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn
+public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn, get_geoval_levels
 
 
 ! General:
@@ -45,6 +46,7 @@ type, public :: wrf_hydro_nwm_jedi_geometry
    procedure :: delete => wrf_hydro_nwm_jedi_geometry_delete  !< delete
    procedure :: get_lsm_info => get_lsm_info  !< get lsm info
    procedure :: get_lsm_nn => get_lsm_nn  !< get lsm nearest neighbor
+   procedure :: get_geoval_levels => get_geoval_levels
    ! procedure :: get_stream_info => wrf_hydro_nwm_jedi_geometry_get_stream_info
    ! procedure :: get_stream_nn => wrf_hydro_nwm_jedi_geometry_get_stream_nn
    procedure :: lsm_active => lsm_active  !< query if the lsm component is active/allocated
@@ -243,6 +245,50 @@ subroutine get_lsm_info( &
   ydim_len = self%lsm%ydim_len
   zdim_len = self%lsm%zdim_len
 end subroutine get_lsm_info
+
+!> Get lsm geoval levels
+subroutine get_geoval_levels(self, vars, nvars, nlevels)
+
+  use, intrinsic :: iso_c_binding, only: c_size_t
+  use oops_variables_mod,          only: oops_variables
+
+  class(wrf_hydro_nwm_jedi_geometry),  intent(in) :: self  !< geom object
+  type(oops_variables),      intent(in) :: vars
+  integer(c_size_t),         intent(in) :: nvars
+  integer(c_size_t),      intent(inout) :: nlevels(nvars)
+  character(len=*),           parameter :: myname = &
+                                  & "geometry_mod:get_geoval_levels"
+  ! local variables
+  integer :: ivar
+
+  call fckit_log%debug(myname // ' : start')
+
+  nlevels = 0
+  do ivar = 1, nvars
+
+    select case (vars%variable(ivar))
+
+      case ( "SNICE", "SNLIQ" )
+
+        nlevels(ivar) = 3
+        call fckit_log%debug("Found "//trim(myname)//":" &
+                                   & //trim(vars%variable(ivar)))
+
+      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI")
+
+        nlevels(ivar) = 1
+        call fckit_log%debug("Found "//trim(myname)//":" &
+                                   & //trim(vars%variable(ivar)))
+
+      case default
+        call abor1_ftn(trim(myname)//":"//trim(vars%variable(ivar)) &
+                                 & //" not found")
+    end select
+  end do
+
+  call fckit_log%debug(myname // ' : end')
+
+end subroutine get_geoval_levels
 
 
 !-----------------------------------------------------------------------------

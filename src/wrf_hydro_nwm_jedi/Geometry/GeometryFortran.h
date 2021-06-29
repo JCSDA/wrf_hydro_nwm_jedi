@@ -10,6 +10,8 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "oops/base/Variables.h"
+
 namespace wrf_hydro_nwm_jedi {
 
   typedef int F90geom;
@@ -21,6 +23,10 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &);
     void wrf_hydro_nwm_jedi_geometry_info_f90(F90geom, float *, float *, int *, int *, int *);
     void wrf_hydro_nwm_jedi_geometry_get_nn_f90(F90geom, float, float, int, int);
+    void wrf_hydro_nwm_jedi_geoval_levels_f90(const F90geom &,
+                                   const oops::Variables &,
+                                   const std::size_t &,
+                                   std::size_t &);
   }
 }  // namespace wrf_hydro_nwm_jedi
 
