@@ -22,6 +22,8 @@
 #include "oops/util/Printable.h"
 #include "oops/util/Serializable.h"
 
+#include "atlas/field.h"
+
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/IncrementFortran.h"
 
@@ -84,6 +86,11 @@ namespace wrf_hydro_nwm_jedi {
     void schur_product_with(const Increment &);
     void random();
     // void dirac(const eckit::Configuration &);
+
+    // ATLAS
+    void setAtlas(atlas::FieldSet *) const;
+    void toAtlas(atlas::FieldSet *) const;
+    void fromAtlas(atlas::FieldSet *);
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,

@@ -21,7 +21,7 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-  static oops::LinearModelMaker<Traits, TlmId>
+  static oops::interface::LinearModelMaker<Traits, TlmId>
   makerIdTLM_("WRF_HYDRO_NWM_IdTLM");
 
   TlmId::TlmId(const Geometry & resol,

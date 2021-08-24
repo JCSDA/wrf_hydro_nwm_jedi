@@ -14,7 +14,7 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-  static oops::ModelMaker<Traits, Model> modelmaker_("WRF_HYDRO_NWM_JEDI");
+  static oops::interface::ModelMaker<Traits, Model> modelmaker_("WRF_HYDRO_NWM_JEDI");
 
   Model::Model(const Geometry & geom,
                const eckit::Configuration & conf)

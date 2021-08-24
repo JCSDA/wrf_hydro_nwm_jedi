@@ -12,7 +12,7 @@
 
 #include <boost/noncopyable.hpp>
 
-#include "oops/base/LinearModelBase.h"
+#include "oops/interface/LinearModelBase.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
@@ -39,7 +39,7 @@ namespace wrf_hydro_nwm_jedi {
 
   /// Linear identity model definition.
 
-  class TlmId: public oops::LinearModelBase<Traits>,
+  class TlmId: public oops::interface::LinearModelBase<Traits>,
                private util::ObjectCounter<TlmId>
   {
    public:
