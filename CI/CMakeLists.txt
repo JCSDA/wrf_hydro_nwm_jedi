@@ -62,4 +62,5 @@ endif(BUILD_FV3_BUNDLE_DOC)
 ecbuild_bundle_finalize()
 
 # cache repo hashes in a log file in the bundle.
-execute_process ( COMMAND bash -c "${CMAKE_CURRENT_LIST_DIR}/log_repo_hashes.sh ${CMAKE_CURRENT_LIST_DIR}" )
+find_program( BASH_PROGRAM bash )
+execute_process ( COMMAND ${BASH_PROGRAM} -c "${CMAKE_CURRENT_LIST_DIR}/log_repo_hashes.sh ${CMAKE_CURRENT_LIST_DIR}" )

@@ -22,7 +22,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-  Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1  
+  Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
   )
 
 #list( APPEND wrf_hydro_nwm_jedi_test_input_cp
@@ -130,15 +130,15 @@ ecbuild_add_test(
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx3d_identity_cmp
-   TYPE		SCRIPT
-   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
-   ARGS         testoutput/hofx3d_identity.log.out testoutput/hofx3d_identity.ref)
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/compare.sh testoutput/hofx3d_identity.log.out testoutput/hofx3d_identity.ref)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_stage
-   TYPE		SCRIPT
-   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh"
-   ARGS         Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input)
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_exe
@@ -149,6 +149,6 @@ ecbuild_add_test(
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_cmp
-   TYPE		SCRIPT
-   COMMAND	"${CMAKE_CURRENT_BINARY_DIR}/compare.sh"
-   ARGS         testoutput/3dvar.log.out testoutput/3dvar.ref)
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/compare.sh testoutput/3dvar.log.out testoutput/3dvar.ref)

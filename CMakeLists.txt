@@ -24,6 +24,7 @@ include( ecbuild_system NO_POLICY_SCOPE )
 
 ecbuild_requires_macro_version( 2.5 )
 
+find_program( BASH_PROGRAM bash )
 
 ################################################################################
 # Project
