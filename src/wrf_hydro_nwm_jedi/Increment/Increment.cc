@@ -261,5 +261,19 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "Increment accumul END" << std::endl;
   }
 
+  // -----------------------------------------------------------------------------
+  /// Convert to/from ATLAS fieldset
+  // -----------------------------------------------------------------------------
+  void Increment::setAtlas(atlas::FieldSet *) const {
+    ABORT("Increment setAtlas not implemented");
+  }
+  // -----------------------------------------------------------------------------
+  void Increment::toAtlas(atlas::FieldSet *) const {
+    ABORT("Increment toAtlas not implemented");
+  }
+  // -----------------------------------------------------------------------------
+  void Increment::fromAtlas(atlas::FieldSet *) {
+    ABORT("Increment fromAtlas not implemented");
+  }
 
 }  // namespace wrf_hydro_nwm_jedi

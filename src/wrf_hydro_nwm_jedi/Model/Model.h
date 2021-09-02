@@ -11,7 +11,7 @@
 #include <memory>
 #include <ostream>
 
-#include "oops/base/ModelBase.h"
+#include "oops/interface/ModelBase.h"
 #include "oops/base/Variables.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
@@ -30,7 +30,7 @@ namespace wrf_hydro_nwm_jedi {
 namespace wrf_hydro_nwm_jedi {
 
   // Model class
-  class Model : public oops::ModelBase<Traits>,
+  class Model : public oops::interface::ModelBase<Traits>,
                 private util::ObjectCounter<Model>
   {
    public:
