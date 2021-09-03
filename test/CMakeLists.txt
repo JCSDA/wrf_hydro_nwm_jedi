@@ -118,6 +118,7 @@ ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_make_obs_3d
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx.x
+   DEPENDS      wrf_hydro_nwm_jedi_hofx.x
    ARGS         testinput/make_obs_3d.yaml testoutput/make_obs_3d.log.out
    MPI          1 )
 
@@ -125,6 +126,7 @@ ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_hofx3d_identity_exe
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
+   DEPENDS      wrf_hydro_nwm_jedi_hofx3d.x
    ARGS         testinput/hofx3d.yaml testoutput/hofx3d_identity.log.out
    MPI          1 )
 
@@ -144,6 +146,7 @@ ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_exe
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_var.x
+   DEPENDS      wrf_hydro_nwm_jedi_var.x
    ARGS         testinput/3dvar.yaml testoutput/3dvar.log.out
    MPI          1 )
 
