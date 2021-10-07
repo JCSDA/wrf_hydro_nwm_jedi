@@ -9,9 +9,9 @@
 #include <string>
 
 #include "eckit/config/Configuration.h"
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Timer.h"
-#include "oops/util/abor1_cpp.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
@@ -27,7 +27,7 @@ static oops::VariableChangeMaker<Traits, VarChaModel2GeoVaLs> makerVarChaDefault
 // -------------------------------------------------------------------------------------------------
 
 VarChaModel2GeoVaLs::VarChaModel2GeoVaLs(const Geometry & geom, const eckit::Configuration & conf) :
-  geom_(new Geometry(geom)) 
+  geom_(new Geometry(geom))
 {
   oops::Log::trace() << "VarChaModel2GeoVaLs::VarChaModel2GeoVaLs start" << std::endl;
   const eckit::Configuration * configc = &conf;

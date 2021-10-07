@@ -20,7 +20,7 @@ GetValues::GetValues(const Geometry & geom,
   oops::Log::trace() << "GetValues::GetValues starting" << std::endl;
 
   // // Create the variable change object
- {
+  {
   util::Timer timervc(classname(), "VarChaModel2GeoVaLs");
   model2geovals_.reset(new VarChaModel2GeoVaLs(geom, config));
   }
@@ -53,8 +53,8 @@ void GetValues::fillGeoVaLs(const State & state, const util::DateTime & t1,
 
   if (geovals.getVars() <= state.variables()) {
     util::Timer timergv(classname(), "fillGeoVaLs");
-    wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_, geom_->toFortran(), state.toFortran(),
-                                       t1, t2, locs_, geovals.toFortran());
+    wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_, geom_->toFortran(),
+                                       state.toFortran(), t1, t2, locs_, geovals.toFortran());
   } else {
     // Create state with geovals variables
     State stategeovalvars(*geom_, geovals.getVars(), state.validTime());

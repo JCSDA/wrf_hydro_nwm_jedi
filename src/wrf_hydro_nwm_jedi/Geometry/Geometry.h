@@ -14,9 +14,9 @@
 
 #include "eckit/mpi/Comm.h"
 
+#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
-#include "oops/base/Variables.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
 
@@ -44,7 +44,7 @@ namespace wrf_hydro_nwm_jedi {
     explicit Geometry(const eckit::Configuration &, const eckit::mpi::Comm &);
     Geometry(const Geometry &);
     ~Geometry();
-      
+
     // //These are needed for the GeometryIterator Interface
     // GeometryIterator begin() const;
     // GeometryIterator end() const;

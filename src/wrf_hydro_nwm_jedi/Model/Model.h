@@ -11,8 +11,8 @@
 #include <memory>
 #include <ostream>
 
-#include "oops/interface/ModelBase.h"
 #include "oops/base/Variables.h"
+#include "oops/interface/ModelBase.h"
 #include "oops/util/Duration.h"
 #include "oops/util/ObjectCounter.h"
 

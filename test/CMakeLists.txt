@@ -1,5 +1,4 @@
 list( APPEND wrf_hydro_nwm_jedi_test_input
-  compare.sh
   cp_file.sh
   testinput/geometry.yaml
   testinput/state.yaml
@@ -123,18 +122,12 @@ ecbuild_add_test(
    MPI          1 )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx3d_identity_exe
+   TARGET       test_wrf_hydro_jedi_hofx3d_identity
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx3d.x
    DEPENDS      wrf_hydro_nwm_jedi_hofx3d.x
-   ARGS         testinput/hofx3d.yaml testoutput/hofx3d_identity.log.out
+   ARGS         testinput/hofx3d.yaml
    MPI          1 )
-
-ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_hofx3d_identity_cmp
-   TYPE         SCRIPT
-   COMMAND      ${BASH_PROGRAM}
-   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/compare.sh testoutput/hofx3d_identity.log.out testoutput/hofx3d_identity.ref)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var_stage
@@ -143,15 +136,9 @@ ecbuild_add_test(
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input)
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_var_exe
+   TARGET       test_wrf_hydro_jedi_var
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_var.x
    DEPENDS      wrf_hydro_nwm_jedi_var.x
-   ARGS         testinput/3dvar.yaml testoutput/3dvar.log.out
+   ARGS         testinput/3dvar.yaml
    MPI          1 )
-
-ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_var_cmp
-   TYPE         SCRIPT
-   COMMAND      ${BASH_PROGRAM}
-   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/compare.sh testoutput/3dvar.log.out testoutput/3dvar.ref)
