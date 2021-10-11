@@ -14,6 +14,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/hofx3d.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
+  testoutput/make_obs_3d.ref
   testoutput/hofx3d_identity.ref
   testoutput/3dvar.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
@@ -118,7 +119,7 @@ ecbuild_add_test(
    TYPE         EXE
    COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_hofx.x
    DEPENDS      wrf_hydro_nwm_jedi_hofx.x
-   ARGS         testinput/make_obs_3d.yaml testoutput/make_obs_3d.log.out
+   ARGS         testinput/make_obs_3d.yaml
    MPI          1 )
 
 ecbuild_add_test(

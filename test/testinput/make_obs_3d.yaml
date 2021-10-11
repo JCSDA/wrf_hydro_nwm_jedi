@@ -58,3 +58,7 @@ observations:
       covariance model: diagonal
 make obs: true
 obs perturbations: true
+
+test:
+  reference filename: testoutput/make_obs_3d.ref
+  test output filename: testoutput/make_obs_3d.log.out
