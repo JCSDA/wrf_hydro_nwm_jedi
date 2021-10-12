@@ -11,8 +11,8 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "oops/util/abor1_cpp.h"
 #include "oops/base/Variables.h"
+#include "oops/util/abor1_cpp.h"
 
 namespace wrf_hydro_nwm_jedi {
 
@@ -39,7 +39,7 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
                                                     vars) const {
     std::vector<size_t> varSizes(vars.size());
     wrf_hydro_nwm_jedi_geoval_levels_f90(keyGeom_, vars, vars.size(),  varSizes[0]);
-  
+
   return varSizes;
 }
 // -----------------------------------------------------------------------------
