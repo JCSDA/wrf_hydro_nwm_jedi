@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "atlas/field.h"
+
 #include "eckit/config/Configuration.h"
 
 namespace wrf_hydro_nwm_jedi {
@@ -20,6 +22,15 @@ namespace wrf_hydro_nwm_jedi {
   extern "C" {
     void wrf_hydro_nwm_jedi_increment_create_f90(
         F90inc &, const F90geom &, const oops::Variables &);
+    void wrf_hydro_nwm_jedi_increment_read_file_f90(
+        const F90geom &, const F90inc &,
+        const eckit::Configuration * const *,
+        const util::DateTime * const *);
+    void wrf_hydro_nwm_jedi_increment_write_file_f90(
+        const F90geom &,
+        const F90inc &,
+        const eckit::Configuration * const *,
+        const util::DateTime * const *);
     void wrf_hydro_nwm_jedi_increment_diff_incr_f90(
         F90state &, const F90state &, const F90state &);
     void wrf_hydro_nwm_jedi_increment_create_from_other_f90(F90inc &, const F90inc &);
@@ -29,22 +40,27 @@ namespace wrf_hydro_nwm_jedi {
 
     void wrf_hydro_nwm_jedi_increment_dot_prod_f90(const F90inc &, const F90inc &, double &);
     void wrf_hydro_nwm_jedi_increment_random_f90(const F90inc &);
+
     void wrf_hydro_nwm_jedi_increment_zero_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_ones_f90(const F90inc &);
+    void wrf_hydro_nwm_jedi_increment_dirac_f90(const F90inc &, const eckit::Configuration * const *);
     double wrf_hydro_nwm_jedi_increment_rms_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_axpy_f90(const F90inc &, const double &, const F90inc &);
     void wrf_hydro_nwm_jedi_increment_accumul_f90(
         const F90inc &, const double &, const F90state &);
     void wrf_hydro_nwm_jedi_increment_schur_f90(const F90inc &, const F90inc &);
-    /* void wrf_hydro_nwm_jedi_state_read_file_f90(
-       const F90geom &, const F90state &, const
-       eckit::Configuration * const *, util::DateTime * const *); */
     void wrf_hydro_nwm_jedi_increment_print_f90(const F90inc &, char *string);
     /* void wrf_hydro_nwm_jedi_state_get_mean_stddev_f90(
             const F90state &, int nf, float pstat[][1]); */
     void wrf_hydro_nwm_jedi_increment_copy_f90(const F90inc &, const F90inc &);
     /* void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &); */
     /* void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &); */
+    void wrf_hydro_nwm_jedi_increment_set_atlas_f90(const F90inc &, const F90geom &,
+        const oops::Variables &, atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_increment_to_atlas_f90(const F90inc &, const F90geom &,
+        const oops::Variables &, atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_increment_from_atlas_f90(const F90inc &, const oops::Variables &,
+        atlas::field::FieldSetImpl *);
   }
 }  // namespace wrf_hydro_nwm_jedi
 

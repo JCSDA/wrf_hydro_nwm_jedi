@@ -2,6 +2,9 @@
 !> Geometry (location information) implementation for wrf_hydro_nwm - jedi integration.
 module wrf_hydro_nwm_jedi_geometry_mod
 
+use iso_c_binding, only: c_double
+
+use atlas_module, only: atlas_field, atlas_fieldset, atlas_real, atlas_functionspace_pointcloud
 use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
@@ -11,7 +14,7 @@ implicit none
 private
 
 ! For doxygen purposes, this public statement is just a summary for the code reader?
-public :: wrf_hydro_nwm_jedi_geometry, get_lsm_nn, get_geoval_levels
+public :: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat, wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset, get_lsm_nn, get_geoval_levels
 
 
 ! General:
@@ -25,6 +28,7 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
+  type(atlas_functionspace_pointcloud) :: afunctionspace
 end type wrf_hydro_nwm_lsm_geometry
 
 
@@ -82,6 +86,42 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
   call error_handler(ierr, "STOP: geometry file can not be closed")
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
+!> Set ATLAS lon/lat field
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
+  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  integer :: ix,iy,inode
+  real(c_double), pointer :: real_ptr(:,:)
+  type(atlas_field) :: afield
+
+  if (self%lsm_active()) then
+    ! Create lon/lat field
+    afield = atlas_field(name="lonlat", kind=atlas_real(c_double), shape=(/2, self%lsm%xdim_len*self%lsm%ydim_len/))
+    call afield%data(real_ptr)
+    inode = 0
+    do iy=self%lsm%ystart,self%lsm%yend
+      do ix=self%lsm%xstart,self%lsm%xend
+        inode = inode+1
+        real_ptr(1,inode) = real(self%lsm%lon(ix,iy), c_double)
+        real_ptr(2,inode) = real(self%lsm%lat(ix,iy), c_double)
+print*, inode, real_ptr(:,inode)
+      end do
+    end do
+    call afieldset%add(afield)
+    call afield%final()
+  end if
+
+end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat
+
+!> Fill ATLAS fieldset
+subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
+  type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  ! TODO
+
+end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
 
 !> Clone the geometry object
 subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)

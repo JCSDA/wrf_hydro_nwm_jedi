@@ -7,6 +7,9 @@
 
 #include "oops/runs/Run.h"
 #include "oops/runs/Variational.h"
+#include "saber/oops/instantiateCovarFactory.h"
+#include "saber/oops/instantiateLocalizationFactory.h"
+#include "saber/oops/instantiateVariableChangeFactory.h"
 #include "ufo/instantiateObsFilterFactory.h"
 #include "ufo/ObsTraits.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
@@ -14,6 +17,9 @@
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
+  saber::instantiateCovarFactory<wrf_hydro_nwm_jedi::Traits>();
+  saber::instantiateLocalizationFactory<wrf_hydro_nwm_jedi::Traits>();
+  saber::instantiateVariableChangeFactory<wrf_hydro_nwm_jedi::Traits>();
   ufo::instantiateObsFilterFactory();
   oops::Variational<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> var;
   return run.execute(var);

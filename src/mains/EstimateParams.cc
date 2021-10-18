@@ -5,17 +5,19 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/runs/Run.h"
+#include "saber/oops/EstimateParams.h"
 #include "saber/oops/instantiateCovarFactory.h"
 #include "saber/oops/instantiateLocalizationFactory.h"
-#include "test/interface/ErrorCovariance.h"
+#include "saber/oops/instantiateVariableChangeFactory.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
+
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   saber::instantiateCovarFactory<wrf_hydro_nwm_jedi::Traits>();
   saber::instantiateLocalizationFactory<wrf_hydro_nwm_jedi::Traits>();
-  test::ErrorCovariance<wrf_hydro_nwm_jedi::Traits> tests;
-  return run.execute(tests);
+  saber::instantiateVariableChangeFactory<wrf_hydro_nwm_jedi::Traits>();
+  saber::EstimateParams<wrf_hydro_nwm_jedi::Traits> dir;
+  return run.execute(dir);
 }
-

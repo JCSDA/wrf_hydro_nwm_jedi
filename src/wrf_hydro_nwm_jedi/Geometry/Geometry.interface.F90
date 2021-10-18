@@ -7,8 +7,9 @@ module wrf_hydro_nwm_jedi_geometry_mod_c
 
 use iso_c_binding
 
+use atlas_module, only: atlas_fieldset, atlas_functionspace_pointcloud
 use fckit_configuration_module, only: fckit_configuration
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat, wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
 
 use oops_variables_mod,          only: oops_variables
 
@@ -43,6 +44,51 @@ subroutine c_wrf_hydro_nwm_jedi_geometry_setup(c_key_self, c_conf) bind(c,name='
   call self%init(fckit_configuration(c_conf))
   
 end subroutine c_wrf_hydro_nwm_jedi_geometry_setup
+
+! ------------------------------------------------------------------------------
+
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c(c_key_self, c_afieldset) bind(c,name='wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90')
+  integer(c_int), intent(in) :: c_key_self
+  type(c_ptr), intent(in), value :: c_afieldset
+
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: self
+  type(atlas_fieldset) :: afieldset
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
+  afieldset = atlas_fieldset(c_afieldset)
+  call wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
+
+end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c
+
+! ------------------------------------------------------------------------------
+
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c(c_key_self, c_afunctionspace) &
+ & bind(c,name='wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90')
+  integer(c_int), intent(in) :: c_key_self
+  type(c_ptr), intent(in), value :: c_afunctionspace
+
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: self
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
+  self%lsm%afunctionspace = atlas_functionspace_pointcloud(c_afunctionspace)
+
+end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c
+
+! ------------------------------------------------------------------------------
+
+subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c(c_key_self, c_afieldset) &
+ & bind(c,name='wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90')
+  integer(c_int),intent(in) :: c_key_self     !< Geometry
+  type(c_ptr),intent(in),value :: c_afieldset !< ATLAS fieldset pointer
+
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: self
+  type(atlas_fieldset) :: afieldset
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
+  afieldset = atlas_fieldset(c_afieldset)
+  call wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
+
+end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c
 
 ! -----------------------------------------------------------------------------
 

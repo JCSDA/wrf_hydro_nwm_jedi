@@ -1,9 +1,8 @@
 #!/bin/bash
 
-
-# cp ${path}/Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 \
-#    ${path}/Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input
-
-cp $1 $2
+# Copy first argument into further ones
+for ((i = 2; i <= $#; i++ )); do
+  cp $1 ${!i}
+done
 
 exit $?

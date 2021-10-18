@@ -8,9 +8,13 @@
 #ifndef WRF_HYDRO_NWM_JEDI_GEOMETRY_GEOMETRY_H_
 #define WRF_HYDRO_NWM_JEDI_GEOMETRY_GEOMETRY_H_
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <vector>
+
+#include "atlas/field.h"
+#include "atlas/functionspace.h"
 
 #include "eckit/mpi/Comm.h"
 
@@ -51,12 +55,17 @@ namespace wrf_hydro_nwm_jedi {
     const F90geom & toFortran() const {return keyGeom_;}
     const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
+    atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
+    atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
+
 
    private:
     void print(std::ostream &) const;
     Geometry & operator=(const Geometry &);
     F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
+    std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpace_;
+    std::unique_ptr<atlas::FieldSet> atlasFieldSet_;
   };
 }  // namespace wrf_hydro_nwm_jedi
 
