@@ -28,7 +28,7 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
-  type(atlas_functionspace_pointcloud) :: afunctionspace
+   type(atlas_functionspace_pointcloud) :: afunctionspace
 end type wrf_hydro_nwm_lsm_geometry
 
 
@@ -105,7 +105,6 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
         inode = inode+1
         real_ptr(1,inode) = real(self%lsm%lon(ix,iy), c_double)
         real_ptr(2,inode) = real(self%lsm%lat(ix,iy), c_double)
-print*, inode, real_ptr(:,inode)
       end do
     end do
     call afieldset%add(afield)

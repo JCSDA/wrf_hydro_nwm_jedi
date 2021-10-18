@@ -12,9 +12,9 @@ B * Increment: Print Increment (C++) --------------------
 SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
-Mean:    7.10107833E-02
-Std Dev:   0.197221518
-RMS:   0.209615976
+Mean:   0.139314055
+Std Dev:   0.228973627
+RMS:   0.268024832
 End Print Increment (C++) ---------------- 
 
 

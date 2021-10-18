@@ -23,7 +23,7 @@ bump:
   forced_var: true
   stddev:
     snow_water_equivalent: [4.0]
-  resol: 6
+  resol: 10
   forced_radii: true
   rh:
     snow_water_equivalent: [15.0e3]

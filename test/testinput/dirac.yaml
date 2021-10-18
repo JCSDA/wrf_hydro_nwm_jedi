@@ -23,8 +23,8 @@ output B:
 
 dirac:
   ndir: 1
-  ix: [1]
-  iy: [1]
+  ix: [15]
+  iy: [12]
   iz: [1]
   field: [snow_water_equivalent]
 
