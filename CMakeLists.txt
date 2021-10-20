@@ -46,11 +46,11 @@ include_directories( ${Boost_INCLUDE_DIR} )
 find_package( NetCDF REQUIRED COMPONENTS Fortran )
 find_package( eckit  1.11.6     REQUIRED )
 find_package( fckit  0.7.0      REQUIRED )
-find_package( oops   0.1.0      REQUIRED )
+find_package( atlas  0.20.2     REQUIRED )
+find_package( oops   1.0.0      REQUIRED )
 find_package( saber  1.0.0      REQUIRED )
-find_package( saber  0.0.1      REQUIRED )
-find_package( ioda   0.1.0      REQUIRED )
-find_package( ufo    0.1.0      REQUIRED )
+find_package( ioda   1.0.0      REQUIRED )
+find_package( ufo    1.0.0      REQUIRED )
 
 
 ################################################################################
