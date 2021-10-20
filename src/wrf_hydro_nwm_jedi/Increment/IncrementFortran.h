@@ -43,7 +43,8 @@ namespace wrf_hydro_nwm_jedi {
 
     void wrf_hydro_nwm_jedi_increment_zero_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_ones_f90(const F90inc &);
-    void wrf_hydro_nwm_jedi_increment_dirac_f90(const F90inc &, const eckit::Configuration * const *);
+    void wrf_hydro_nwm_jedi_increment_dirac_f90(const F90inc &,
+         const eckit::Configuration * const *);
     double wrf_hydro_nwm_jedi_increment_rms_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_increment_axpy_f90(const F90inc &, const double &, const F90inc &);
     void wrf_hydro_nwm_jedi_increment_accumul_f90(

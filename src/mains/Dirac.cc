@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "oops/runs/Run.h"
 #include "oops/runs/Dirac.h"
+#include "oops/runs/Run.h"
 #include "saber/oops/instantiateCovarFactory.h"
 #include "saber/oops/instantiateLocalizationFactory.h"
 #include "saber/oops/instantiateVariableChangeFactory.h"
