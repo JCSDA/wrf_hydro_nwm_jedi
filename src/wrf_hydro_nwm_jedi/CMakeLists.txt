@@ -42,6 +42,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.interface.F90
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.F90
+  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.cc
+  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h
 
   # # LinearGetValues
   #LinearGetValues/LinearGetValues.h
