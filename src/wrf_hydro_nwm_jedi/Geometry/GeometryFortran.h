@@ -10,6 +10,9 @@
 
 #include "eckit/config/Configuration.h"
 
+#include "atlas/field.h"
+#include "atlas/functionspace.h"
+
 #include "oops/base/Variables.h"
 
 namespace wrf_hydro_nwm_jedi {
@@ -19,6 +22,13 @@ namespace wrf_hydro_nwm_jedi {
   extern "C" {
     void wrf_hydro_nwm_jedi_geometry_setup_f90(F90geom &,
                                     const eckit::Configuration * const *);
+    void wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(const F90geom &,
+        atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(const F90geom &,
+        atlas::functionspace::FunctionSpaceImpl *);
+    void wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90(const F90geom &,
+        atlas::field::FieldSetImpl *);
+
     void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &);
     void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &);
     void wrf_hydro_nwm_jedi_geometry_info_f90(F90geom, float *, float *, int *, int *, int *);

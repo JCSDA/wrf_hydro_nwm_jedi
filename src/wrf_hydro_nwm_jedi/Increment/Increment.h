@@ -85,7 +85,7 @@ namespace wrf_hydro_nwm_jedi {
     double dot_product_with(const Increment &) const;
     void schur_product_with(const Increment &);
     void random();
-    // void dirac(const eckit::Configuration &);
+    void dirac(const eckit::Configuration &);
 
     // ATLAS
     void setAtlas(atlas::FieldSet *) const;

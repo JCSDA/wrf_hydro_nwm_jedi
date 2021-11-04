@@ -1,39 +1,39 @@
 CostJb   : Nonlinear Jb = 0
 CostJo   : Nonlinear Jo(Simulate) = 4.87502e+10, nobs = 39, Jo/n = 1.25e+09, err = 0.0001
 CostFunction: Nonlinear J = 4.87502e+10
-DRIPCGMinimizer: reduction in residual norm = 2.92004e-09
+DRIPCGMinimizer: reduction in residual norm = 0.0179258
 CostFunction::addIncrement: Analysis: 
 Print State (C++) ------------------------   
 SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
-Mean:    126.823273
-Std Dev:    43.1501465
-RMS:    133.963013
+Mean:    124.176163
+Std Dev:    43.1576424
+RMS:    131.462143
 End Print State (C++) -------------------- 
 
 
 
 
 
-CostJb   : Nonlinear Jb = 1730.28
-CostJo   : Nonlinear Jo(Simulate) = 4.04155e+10, nobs = 39, Jo/n = 1.0363e+09, err = 0.0001
-CostFunction: Nonlinear J = 4.04155e+10
-DRIPCGMinimizer: reduction in residual norm = 6.86053e-09
+CostJb   : Nonlinear Jb = 73.7663
+CostJo   : Nonlinear Jo(Simulate) = 1.86884e+07, nobs = 39, Jo/n = 479188, err = 0.0001
+CostFunction: Nonlinear J = 1.86884e+07
+DRIPCGMinimizer: reduction in residual norm = 0.701432
 CostFunction::addIncrement: Analysis: 
 Print State (C++) ------------------------   
 SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
-Mean:    127.832130
-Std Dev:    42.9736748
-RMS:    134.862152
+Mean:    124.125328
+Std Dev:    43.1534920
+RMS:    131.412796
 End Print State (C++) -------------------- 
 
 
 
 
 
-CostJb   : Nonlinear Jb = 2011.21
-CostJo   : Nonlinear Jo(Simulate) = 4.46233e+11, nobs = 39, Jo/n = 1.14419e+10, err = 0.0001
-CostFunction: Nonlinear J = 4.46233e+11
+CostJb   : Nonlinear Jb = 76.9864
+CostJo   : Nonlinear Jo(Simulate) = 1.07542e+07, nobs = 39, Jo/n = 275750, err = 0.0001
+CostFunction: Nonlinear J = 1.07543e+07

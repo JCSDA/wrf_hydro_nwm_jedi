@@ -12,10 +12,14 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/linear_model.yaml
   testinput/make_obs_3d.yaml
   testinput/hofx3d.yaml
+  testinput/staticb.yaml
+  testinput/dirac.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
   testoutput/make_obs_3d.ref
   testoutput/hofx3d_identity.ref
+  testoutput/staticb.ref
+  testoutput/dirac.ref
   testoutput/3dvar.ref
   Data/wrf_hydro_nwm_files/wrfinput.nc
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
@@ -36,6 +40,8 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/testoutput)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/wrf_hydro_nwm_files)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/make_obs)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/hofx)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/staticb)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/dirac)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/3dvar)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -131,10 +137,42 @@ ecbuild_add_test(
    MPI          1 )
 
 ecbuild_add_test(
-   TARGET       test_wrf_hydro_jedi_var_stage
+   TARGET       test_wrf_hydro_jedi_stage_lsm
    TYPE         SCRIPT
    COMMAND      ${BASH_PROGRAM}
-   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1_3dvar_input)
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
+                Data/staticb/stddev_lsm.nc
+                Data/staticb/rh_lsm.nc
+                Data/dirac/dirac_lsm_BUMP.nc
+                Data/3dvar/3dvar_lsm.nc )
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_hydro
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+                Data/staticb/stddev_hydro.nc
+                Data/staticb/rh_hydro.nc
+                Data/dirac/dirac_hydro_BUMP.nc
+                Data/3dvar/3dvar_hydro.nc )
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_staticb
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_estimate_params.x
+   DEPENDS      wrf_hydro_nwm_jedi_estimate_params.x
+   ARGS         testinput/staticb.yaml
+   MPI          1 )
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_dirac
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_dirac.x
+   DEPENDS      wrf_hydro_nwm_jedi_dirac.x
+   ARGS         testinput/dirac.yaml
+   MPI          1 )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_var

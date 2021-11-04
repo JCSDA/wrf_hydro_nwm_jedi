@@ -1,0 +1,20 @@
+Input Dirac increment: Print Increment (C++) --------------------   
+SNEQV     
+snow_water_equivalent                                           
+2D Field shape: (           30,           24 )
+Mean:    1.38888892E-03
+Std Dev:    3.72419097E-02
+RMS:    3.72678004E-02
+End Print Increment (C++) ---------------- 
+
+
+Covariance(BUMP) * Increment: Print Increment (C++) --------------------   
+SNEQV     
+snow_water_equivalent                                           
+2D Field shape: (           30,           24 )
+Mean:   0.145093247
+Std Dev:   0.233098507
+RMS:   0.274566889
+End Print Increment (C++) ---------------- 
+
+

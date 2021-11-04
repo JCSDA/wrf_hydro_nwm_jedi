@@ -159,6 +159,11 @@ namespace wrf_hydro_nwm_jedi {
   }
 
 
+  void Increment::dirac(const eckit::Configuration & config) {
+    const eckit::Configuration * conf = &config;
+    wrf_hydro_nwm_jedi_increment_dirac_f90(keyInc_, &conf);
+  }
+
   double Increment::norm() const {
     double norm = 0.0;
     norm = wrf_hydro_nwm_jedi_increment_rms_f90(toFortran());
@@ -215,9 +220,18 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
-  void Increment::write(const eckit::Configuration & conf) {
-    util::abor1_cpp("Increment::write() needs to be implemented.",
-                    __FILE__, __LINE__);
+  void Increment::write(const eckit::Configuration & config) {
+    oops::Log::trace() << "Increment::Increment write start" << std::endl;
+    const eckit::Configuration * conf = &config;
+    util::DateTime * dtp = &time_;
+    wrf_hydro_nwm_jedi_increment_write_file_f90(
+        fields_->geometry()->toFortran(),
+        keyInc_,
+        &conf,
+        &dtp);
+    // this->print(std::cout);
+    time_ = *dtp;
+    oops::Log::trace() << "Increment write done" << std::endl;
   }
 
   void Increment::ug_coord(oops::UnstructuredGrid &) const {
@@ -264,16 +278,18 @@ namespace wrf_hydro_nwm_jedi {
   // -----------------------------------------------------------------------------
   /// Convert to/from ATLAS fieldset
   // -----------------------------------------------------------------------------
-  void Increment::setAtlas(atlas::FieldSet *) const {
-    ABORT("Increment setAtlas not implemented");
+  void Increment::setAtlas(atlas::FieldSet * afieldset) const {
+    wrf_hydro_nwm_jedi_increment_set_atlas_f90(keyInc_, fields_->geometry()->toFortran(),
+                                               vars_, afieldset->get());
   }
   // -----------------------------------------------------------------------------
-  void Increment::toAtlas(atlas::FieldSet *) const {
-    ABORT("Increment toAtlas not implemented");
+  void Increment::toAtlas(atlas::FieldSet * afieldset) const {
+    wrf_hydro_nwm_jedi_increment_to_atlas_f90(keyInc_, fields_->geometry()->toFortran(),
+                                              vars_, afieldset->get());
   }
   // -----------------------------------------------------------------------------
-  void Increment::fromAtlas(atlas::FieldSet *) {
-    ABORT("Increment fromAtlas not implemented");
+  void Increment::fromAtlas(atlas::FieldSet * afieldset) {
+    wrf_hydro_nwm_jedi_increment_from_atlas_f90(keyInc_, vars_, afieldset->get());
   }
 
 }  // namespace wrf_hydro_nwm_jedi
