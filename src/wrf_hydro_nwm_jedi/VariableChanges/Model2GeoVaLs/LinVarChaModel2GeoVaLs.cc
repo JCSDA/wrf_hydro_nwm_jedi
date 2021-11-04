@@ -63,7 +63,7 @@ void LinVarChaModel2GeoVaLs::multiplyInverse(const Increment &,
 
 void LinVarChaModel2GeoVaLs::multiplyAD(const Increment &dxin,
                                            Increment &dxout) const {
-  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiplyAD not implemented");
+//  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiplyAD not implemented");
 }
 
 // -----------------------------------------------------------------------------
