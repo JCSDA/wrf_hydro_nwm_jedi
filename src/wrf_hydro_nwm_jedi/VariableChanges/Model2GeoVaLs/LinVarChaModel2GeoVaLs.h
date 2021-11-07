@@ -15,6 +15,7 @@
 
 #include "oops/util/Printable.h"
 
+#include "VarChaModel2GeoVaLsFortran.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 
