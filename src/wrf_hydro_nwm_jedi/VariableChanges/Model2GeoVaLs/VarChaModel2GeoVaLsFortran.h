@@ -30,7 +30,7 @@ namespace wrf_hydro_nwm_jedi {
                                                             const F90geom &,
                                                             const F90state &,
                                                             const F90state &);
-  void wrf_hydro_nwm_jedi_model2geovals_linear_changevarAD_f90(const F90geom &,
+  void wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90(const F90geom &,
                                                                const F90inc &,
                                                                F90inc &);
 }  // extern "C"
