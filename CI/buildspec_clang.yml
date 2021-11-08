@@ -1,0 +1,132 @@
+
+version: 0.2
+
+env:
+  shell: bash
+  parameter-store:
+    GIT_USER: "/CodeBuild/Git_USER"
+    GIT_PASS: "/CodeBuild/Git_PASS"
+
+phases:
+  install:
+    commands:
+      - echo Executing install phase
+      - echo Executing install phase
+      - echo $CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo $CODEBUILD_SOURCE_REPO_URL
+      - echo $CODEBUILD_SOURCE_VERSION
+
+      - echo $CODEBUILD_WEBHOOK_MERGE_COMMIT
+      - echo $CODEBUILD_WEBHOOK_PREV_COMMIT
+      - echo $CODEBUILD_WEBHOOK_HEAD_REF
+      - echo $CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID
+      - echo $CODEBUILD_WEBHOOK_EVENT
+      - echo $CODEBUILD_WEBHOOK_TRIGGER
+      - echo $CODEBUILD_WEBHOOK_BASE_REF
+
+      # Codebuild only runs on PUSH events if HEAD_REF
+      # is refs/heads/develop (merge to develop). In this
+      # case CODEBUILD_GIT_BRANCH="develop"
+
+      - if [ "$CODEBUILD_WEBHOOK_EVENT" = "PUSH" ];
+        then export CODEBUILD_GIT_BRANCH="develop";
+        echo "Merging to develop";
+        else export CODEBUILD_GIT_BRANCH=${CODEBUILD_WEBHOOK_HEAD_REF#refs/heads/};
+        fi
+
+      - echo "CODEBUILD_GIT_BRANCH=${CODEBUILD_GIT_BRANCH}"
+      - echo "CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}"
+
+  pre_build:
+    commands:
+      - echo Executing pre_build phase
+      - mkdir /build_container
+      - mkdir /jcsda
+      - cd CI
+
+      - git lfs install # creates .gitconfig
+
+      # Upload branch name and commit sha as CodeBuild artifact to S3
+      - mkdir -p /jcsda/artifacts
+      - echo ${CODEBUILD_GIT_BRANCH} > /jcsda/artifacts/branch_name.txt
+      - echo ${CODEBUILD_RESOLVED_SOURCE_VERSION} > /jcsda/artifacts/commit_sha.txt
+
+      ##  core repos
+      # oops
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/oops $CODEBUILD_GIT_BRANCH oops /jcsda/wrf_hydro_nwm-bundle develop
+
+      # saber
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/saber $CODEBUILD_GIT_BRANCH saber /jcsda/wrf_hydro_nwm-bundle develop
+
+      # ioda
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ioda $CODEBUILD_GIT_BRANCH ioda /jcsda/wrf_hydro_nwm-bundle develop
+
+      # ufo
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo $CODEBUILD_GIT_BRANCH ufo /jcsda/wrf_hydro_nwm-bundle develop
+
+      # ufo-data
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/ufo-data $CODEBUILD_GIT_BRANCH ufo-data /jcsda/wrf_hydro_nwm-bundle develop
+
+      # wrf_hydro_nwm_jedi
+      - ./clone.sh $GIT_USER $GIT_PASS jcsda-internal/wrf_hydro_nwm_jedi $CODEBUILD_GIT_BRANCH wrf_hydro_nwm_jedi /jcsda/wrf_hydro_nwm-bundle develop
+
+      # move CMakeLists.txt
+      - cp CMakeLists.txt /jcsda/wrf_hydro_nwm-bundle
+      - cp -r cmake /jcsda/wrf_hydro_nwm-bundle/
+      - cp /jcsda/wrf_hydro_nwm-bundle/cmake/CTestConfig.cmake /jcsda/wrf_hydro_nwm-bundle
+
+      - cd /jcsda/wrf_hydro_nwm-bundle
+      - ls
+
+  build:
+    on-failure: CONTINUE
+    commands:
+      - echo Executing build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - export BUILD_STATUS="0"
+      - echo $BUILD_STATUS
+
+      # configure and build
+      - cd /build_container
+      - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/wrf_hydro_nwm-bundle
+      - cd wrf_hydro_nwm_jedi
+      - cp ../DartConfiguration.tcl .
+      - sed -i 's/wrf_hydro_nwm-bundle/wrf_hydro_nwm-bundle\/wrf_hydro_nwm_jedi/' DartConfiguration.tcl
+      - sed -i 's/build_container/build_container\/wrf_hydro_nwm_jedi/' DartConfiguration.tcl
+      - cat DartConfiguration.tcl
+      - make -j4
+
+      - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "1" ];
+        then export BUILD_STATUS="1";
+        echo "Build passed";
+        fi
+      - echo $BUILD_STATUS
+
+      # run ctest
+      - cd /build_container/wrf_hydro_nwm_jedi
+      - ctest -C RelWithDebInfo -D ExperimentalTest
+    finally:
+      - cd /build_container/wrf_hydro_nwm_jedi
+      - ctest -C RelWithDebInfo -D ExperimentalSubmit -M Continuous -- --track Continuous --group Continuous
+
+  post_build:
+    commands:
+      - echo Executing post_build phase
+      - echo $CODEBUILD_BUILD_SUCCEEDING
+      - echo $BUILD_STATUS
+
+      # upload find cdash url and upload it as CodeBuild artifact to S3
+      - if [ "$BUILD_STATUS" = "1" ];
+        then echo "Build & tests passed, find cdash url";
+        bash /jcsda/wrf_hydro_nwm-bundle/wrf_hydro_nwm_jedi/CI/cdash-url.sh /build_container/wrf_hydro_nwm_jedi/Testing;
+        url=$(bash /jcsda/wrf_hydro_nwm-bundle/wrf_hydro_nwm_jedi/CI/cdash-url.sh /build_container/wrf_hydro_nwm_jedi/Testing);
+        echo $url;
+        echo ${url} > /jcsda/artifacts/cdash-url.txt;
+        cat /jcsda/artifacts/cdash-url.txt;
+        else echo "Build failed";
+        fi
+
+artifacts:
+  files:
+    - '/jcsda/artifacts/*'
+  name: wrf_hydro_nwm_jedi-clang-url
