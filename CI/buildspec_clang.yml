@@ -76,6 +76,7 @@ phases:
 
       # move CMakeLists.txt
       - cp CMakeLists.txt /jcsda/wrf_hydro_nwm-bundle
+      - cp log_repo_hashes.sh /jcsda/wrf_hydro_nwm-bundle
       - cp -r cmake /jcsda/wrf_hydro_nwm-bundle/
       - cp /jcsda/wrf_hydro_nwm-bundle/cmake/CTestConfig.cmake /jcsda/wrf_hydro_nwm-bundle
 
