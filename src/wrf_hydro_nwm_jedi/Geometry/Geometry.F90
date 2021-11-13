@@ -88,7 +88,7 @@ end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 !> Set ATLAS lon/lat field
 subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
-  class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
+  class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
 
   integer :: ix,iy,inode
