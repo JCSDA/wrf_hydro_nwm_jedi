@@ -8,16 +8,12 @@
 #include "oops/runs/Dirac.h"
 #include "oops/runs/Run.h"
 #include "saber/oops/instantiateCovarFactory.h"
-#include "saber/oops/instantiateLocalizationFactory.h"
-#include "saber/oops/instantiateSaberBlockFactory.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   saber::instantiateCovarFactory<wrf_hydro_nwm_jedi::Traits>();
-  saber::instantiateLocalizationFactory<wrf_hydro_nwm_jedi::Traits>();
-  saber::instantiateSaberBlockFactory<wrf_hydro_nwm_jedi::Traits>();
   oops::Dirac<wrf_hydro_nwm_jedi::Traits> dir;
   return run.execute(dir);
 }
