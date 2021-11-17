@@ -22,9 +22,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   Fields/Fields.cc
   Fields/Fields.F90
 
-  # # GeometryIterator
-  # GeometryIterator/GeometryIterator.h
-  # GeometryIterator/GeometryIterator.cc
+  # GeometryIterator
+  GeometryIterator/GeometryIterator.h
+  GeometryIterator/GeometryIterator.cc
 
   # GetValues
   GetValues/GetValues.h

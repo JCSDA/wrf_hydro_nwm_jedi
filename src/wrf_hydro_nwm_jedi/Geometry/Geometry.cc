@@ -69,6 +69,20 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_geometry_delete_f90(keyGeom_);
   }
 
+
+  GeometryIterator Geometry::begin() const {
+    util::abor1_cpp("Geometry::begin() needs to be implemented.",
+                    __FILE__, __LINE__);
+    return GeometryIterator(*this, 0, 0);
+  }
+
+
+  GeometryIterator Geometry::end() const {
+    util::abor1_cpp("Geometry::end() needs to be implemented.",
+                    __FILE__, __LINE__);
+    return GeometryIterator(*this, 0, 0);
+  }
+
 // -----------------------------------------------------------------------------
 std::vector<size_t> Geometry::variableSizes(const oops::Variables &
                                                     vars) const {
@@ -90,20 +104,6 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
     wrf_hydro_nwm_jedi_geometry_info_f90(keyGeom_, &dx, &dy, &npx, &npy, &npz);
     os << "dx = " << dx << ", dy = " << dy << std::endl;
   }
-
-
-  // GeometryIterator Geometry::begin() const {
-  //   util::abor1_cpp("Geometry::begin() needs to be implemented.",
-  //                   __FILE__, __LINE__);
-  //   return GeometryIterator();
-  // }
-
-
-  // GeometryIterator Geometry::end() const {
-  //   util::abor1_cpp("Geometry::end() needs to be implemented.",
-  //                   __FILE__, __LINE__);
-  //   return GeometryIterator();
-  // }
 
 
 }  // namespace wrf_hydro_nwm_jedi

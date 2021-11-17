@@ -5,8 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-#include "wrf_hydro_nwm-jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm-jedi/Geometry/GeometryFortran.h"
+#include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
+#include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 
 #include "eckit/config/Configuration.h"
@@ -17,8 +17,37 @@
 namespace wrf_hydro_nwm_jedi {
 
 
+// -----------------------------------------------------------------------------
+
+GeometryIterator::GeometryIterator(const GeometryIterator& iter) {
+  util::abor1_cpp("GeometryIterator:: needs to be implemented.",
+                    __FILE__, __LINE__);
+}
+
+// -----------------------------------------------------------------------------
+
+GeometryIterator::GeometryIterator(const Geometry& geom,
+                                       const int & iindex, const int & jindex) {
+  util::abor1_cpp("GeometryIterator:: needs to be implemented.",
+                    __FILE__, __LINE__);
+}
+
+
+// -----------------------------------------------------------------------------
+
+GeometryIterator::~GeometryIterator() {
+  util::abor1_cpp("GeometryIterator::destructor needs to be implemented.",
+                    __FILE__, __LINE__);
+}
+
 // ----------------------------------------------------------------------------
-// ----------------------------------------------------------------------------
+
+  bool GeometryIterator::operator==(const GeometryIterator &) const {
+    util::abor1_cpp("GeometryIterator::operator==() needs to be implemented.",
+                    __FILE__, __LINE__);
+    return false;
+  }
+
 // ----------------------------------------------------------------------------
 
   bool GeometryIterator::operator!=(const GeometryIterator &) const {
@@ -32,6 +61,7 @@ namespace wrf_hydro_nwm_jedi {
   GeometryIterator& GeometryIterator::operator++() {
     util::abor1_cpp("GeometryIterator::operator++() needs to be implemented.",
                     __FILE__, __LINE__);
+    return *this;
   }
 
 // ----------------------------------------------------------------------------

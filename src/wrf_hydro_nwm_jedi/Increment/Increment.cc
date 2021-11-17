@@ -13,6 +13,7 @@
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 
+#include "oops/base/LocalIncrement.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -268,11 +269,27 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
-
   void Increment::accumul(const double & zz, const State & xx) {
     oops::Log::trace() << "Increment accumul starting" << std::endl;
     wrf_hydro_nwm_jedi_increment_accumul_f90(keyInc_, zz, xx.toFortran());
     oops::Log::trace() << "Increment accumul END" << std::endl;
+  }
+
+  // -----------------------------------------------------------------------------
+  oops::LocalIncrement Increment::getLocal(
+                        const GeometryIterator & iter) const {
+    util::abor1_cpp("Increment::getLocal() needs to be implemented.",
+                    __FILE__, __LINE__);
+    std::vector<double> vals;
+    std::vector<int> varlens;
+    return oops::LocalIncrement(vars_, vals, varlens);
+  }
+
+  // -----------------------------------------------------------------------------
+  void Increment::setLocal(const oops::LocalIncrement & values,
+                             const GeometryIterator & iter) {
+    util::abor1_cpp("Increment::setPoint() needs to be implemented.",
+                    __FILE__, __LINE__);
   }
 
   // -----------------------------------------------------------------------------

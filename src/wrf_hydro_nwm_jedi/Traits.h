@@ -12,7 +12,7 @@
 
 #include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-// #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
+#include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 // #include "wrf_hydro_nwm_jedi/GetValuesTraj/GetValuesTraj.h"
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
 #include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
@@ -35,7 +35,7 @@ namespace wrf_hydro_nwm_jedi {
     // ---------------------------------------------------
     typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
     typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
-    // typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
+    typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
     // typedef wrf_hydro_nwm_jedi::GetValuesTraj       InterpolatorTraj;
     typedef wrf_hydro_nwm_jedi::GetValues           GetValues;
     typedef wrf_hydro_nwm_jedi::LinearGetValues     LinearGetValues;

@@ -16,6 +16,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/dirac.yaml
   testinput/3dvar.yaml
   testinput/makeobs.yaml
+  testinput/geometry_iterator.yaml
   testoutput/make_obs_3d.ref
   testoutput/hofx3d_identity.ref
   testoutput/staticb.ref
@@ -114,11 +115,11 @@ ecbuild_add_test(
   ARGS    testinput/linear_model.yaml
   LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_test(
-#   TARGET  test_wrf_hydro_nwm_jedi_geometryiterator
-#   SOURCES executables/TestGeometryIterator.cc
-#   ARGS    testinput/interface.yml
-#   LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_test(
+  TARGET  test_wrf_hydro_nwm_jedi_geometryiterator
+  SOURCES executables/TestGeometryIterator.cc
+  ARGS    testinput/geometry_iterator.yaml
+  LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_make_obs_3d

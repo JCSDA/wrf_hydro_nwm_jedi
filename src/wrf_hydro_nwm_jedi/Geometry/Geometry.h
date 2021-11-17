@@ -23,14 +23,15 @@
 #include "oops/util/Printable.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
+#include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 
 // forward declarations
 namespace eckit {
   class Configuration;
 }
-namespace wrf_hydro_nwm_jedi {
-  class GeometryIterator;
-}
+// namespace wrf_hydro_nwm_jedi {
+//   class GeometryIterator;
+// }
 namespace oops {
   class Variables;
 }
@@ -49,9 +50,10 @@ namespace wrf_hydro_nwm_jedi {
     Geometry(const Geometry &);
     ~Geometry();
 
-    // //These are needed for the GeometryIterator Interface
-    // GeometryIterator begin() const;
-    // GeometryIterator end() const;
+    // These are needed for the GeometryIterator Interface
+    GeometryIterator begin() const;
+    GeometryIterator end() const;
+
     const F90geom & toFortran() const {return keyGeom_;}
     const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
