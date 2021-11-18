@@ -20,8 +20,7 @@ namespace wrf_hydro_nwm_jedi {
 // -----------------------------------------------------------------------------
 
 GeometryIterator::GeometryIterator(const GeometryIterator& iter) {
-  util::abor1_cpp("GeometryIterator:: clone needs to be implemented.",
-                    __FILE__, __LINE__);
+  wrf_hydro_nwm_jedi_geom_iter_clone_f90(keyIter_, iter.toFortran());
 }
 
 // -----------------------------------------------------------------------------
@@ -35,8 +34,7 @@ GeometryIterator::GeometryIterator(const Geometry& geom,
 // -----------------------------------------------------------------------------
 
 GeometryIterator::~GeometryIterator() {
-  util::abor1_cpp("GeometryIterator::destructor needs to be implemented.",
-                    __FILE__, __LINE__);
+  wrf_hydro_nwm_jedi_geom_iter_delete_f90(keyIter_);
 }
 
 // ----------------------------------------------------------------------------

@@ -36,7 +36,7 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
       procedure :: init => wrf_hydro_nwm_jedi_geometry_iter_init
     
       !> \copybrief soca_geom_iter_clone \see soca_geom_iter_clone
-!      procedure :: clone => soca_geom_iter_clone
+      procedure :: clone => wrf_hydro_nwm_jedi_geometry_iter_clone
     
       !> \copybrief soca_geom_iter_equals \see soca_geom_iter_equals
 !      procedure :: equals => soca_geom_iter_equals
@@ -56,8 +56,7 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
     
     ! ------------------------------------------------------------------------------
     !> Setup for the geometry iterator
-    !!
-    !! \relates soca_geom_iter_mod::soca_geom_iter
+    
     subroutine wrf_hydro_nwm_jedi_geometry_iter_init(self, geom, iind, jind)
       class(wrf_hydro_nwm_jedi_geometry_iter),    intent(inout) :: self
       type(wrf_hydro_nwm_jedi_geometry), pointer, intent(   in) :: geom !< Pointer to geometry
@@ -71,5 +70,21 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
       self%jind = jind
     
     end subroutine wrf_hydro_nwm_jedi_geometry_iter_init
+
+    ! ------------------------------------------------------------------------------
+!> Clone for the geometry iterator from \p other to \p self
+
+subroutine wrf_hydro_nwm_jedi_geometry_iter_clone(self, other)
+    class(wrf_hydro_nwm_jedi_geometry_iter), intent(inout) :: self
+    type(wrf_hydro_nwm_jedi_geometry_iter),  intent(   in) :: other !< Other geometry iterator to clone from
+  
+    ! Associate geometry
+    self%geom => other%geom
+  
+    ! Copy iind/jind
+    self%iind = other%iind
+    self%jind = other%jind
+  
+  end subroutine wrf_hydro_nwm_jedi_geometry_iter_clone
 
 end module wrf_hydro_nwm_jedi_geometry_iter_mod
