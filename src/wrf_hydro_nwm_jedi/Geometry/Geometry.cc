@@ -71,16 +71,19 @@ namespace wrf_hydro_nwm_jedi {
 
 
   GeometryIterator Geometry::begin() const {
-    util::abor1_cpp("Geometry::begin() needs to be implemented.",
-                    __FILE__, __LINE__);
+//    util::abor1_cpp("Geometry::begin() needs to be implemented.",
+//                    __FILE__, __LINE__);
     return GeometryIterator(*this, 0, 0);
   }
 
 
   GeometryIterator Geometry::end() const {
-    util::abor1_cpp("Geometry::end() needs to be implemented.",
-                    __FILE__, __LINE__);
-    return GeometryIterator(*this, 0, 0);
+    float dx, dy;
+    int npx, npy, npz;
+
+    wrf_hydro_nwm_jedi_geometry_info_f90(keyGeom_, &dx, &dy, &npx, &npy, &npz);
+
+    return GeometryIterator(*this, npx, npy);
   }
 
 // -----------------------------------------------------------------------------

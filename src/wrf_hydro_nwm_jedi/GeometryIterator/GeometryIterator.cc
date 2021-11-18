@@ -6,8 +6,8 @@
  */
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
-#include "wrf_hydro_nwm_jedi/Geometry/GeometryFortran.h"
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
+#include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIteratorFortran.h"
 
 #include "eckit/config/Configuration.h"
 #include "eckit/geometry/Point2.h"
@@ -20,7 +20,7 @@ namespace wrf_hydro_nwm_jedi {
 // -----------------------------------------------------------------------------
 
 GeometryIterator::GeometryIterator(const GeometryIterator& iter) {
-  util::abor1_cpp("GeometryIterator:: needs to be implemented.",
+  util::abor1_cpp("GeometryIterator:: clone needs to be implemented.",
                     __FILE__, __LINE__);
 }
 
@@ -28,8 +28,7 @@ GeometryIterator::GeometryIterator(const GeometryIterator& iter) {
 
 GeometryIterator::GeometryIterator(const Geometry& geom,
                                        const int & iindex, const int & jindex) {
-  util::abor1_cpp("GeometryIterator:: needs to be implemented.",
-                    __FILE__, __LINE__);
+  wrf_hydro_nwm_jedi_geom_iter_setup_f90(keyIter_, geom.toFortran(), iindex, jindex);
 }
 
 

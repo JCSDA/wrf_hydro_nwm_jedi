@@ -14,6 +14,8 @@
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
+#include "wrf_hydro_nwm_jedi/Utilities/interface.h"
+
 // forward declarations
 namespace eckit {
   class Configuration;
@@ -31,7 +33,9 @@ namespace wrf_hydro_nwm_jedi {
 namespace wrf_hydro_nwm_jedi {
 
   // Geometry class
-  class GeometryIterator : public util::Printable,
+  class GeometryIterator : public std::iterator<std::forward_iterator_tag,
+                                               eckit::geometry::Point2>,
+                           public util::Printable,
                            private util::ObjectCounter<GeometryIterator> {
    public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::GeometryIterator";}
@@ -46,8 +50,12 @@ namespace wrf_hydro_nwm_jedi {
     GeometryIterator& operator++();
     eckit::geometry::Point2 operator*() const;
 
+    F90iter & toFortran() {return keyIter_;}
+    const F90iter & toFortran() const {return keyIter_;}
+
    private:
     void print(std::ostream &) const;
+    F90iter keyIter_;
   };
 }  // namespace wrf_hydro_nwm_jedi
 

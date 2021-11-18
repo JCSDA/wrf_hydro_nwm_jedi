@@ -25,6 +25,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # GeometryIterator
   GeometryIterator/GeometryIterator.h
   GeometryIterator/GeometryIterator.cc
+  GeometryIterator/GeometryIteratorFortran.h
+  GeometryIterator/GeometryIterator.interface.F90
+  GeometryIterator/GeometryIterator.F90
 
   # GetValues
   GetValues/GetValues.h
