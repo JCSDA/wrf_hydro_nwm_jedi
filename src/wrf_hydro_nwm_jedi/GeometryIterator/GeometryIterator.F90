@@ -39,7 +39,7 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
       procedure :: clone => wrf_hydro_nwm_jedi_geometry_iter_clone
     
       !> \copybrief soca_geom_iter_equals \see soca_geom_iter_equals
-!      procedure :: equals => soca_geom_iter_equals
+      procedure :: equals => wrf_hydro_nwm_jedi_geometry_iter_equals
     
       !> \copybrief soca_geom_iter_current \see soca_geom_iter_current
 !      procedure :: current => soca_geom_iter_current
@@ -86,5 +86,24 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_clone(self, other)
     self%jind = other%jind
   
   end subroutine wrf_hydro_nwm_jedi_geometry_iter_clone
+
+! ------------------------------------------------------------------------------
+!> Check for the geometry iterator equality (pointing to same i/j location)
+!!
+!! \relates soca_geom_iter_mod::soca_geom_iter
+subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
+    class(wrf_hydro_nwm_jedi_geometry_iter), intent( in) :: self
+    type(wrf_hydro_nwm_jedi_geometry_iter),  intent( in) :: other  !< Other geometry iterator
+    integer,               intent(out) :: equals !< Equality flag
+  
+    ! Initialization
+    equals = 0
+  
+    ! Check equality
+    if (associated(self%geom, other%geom) .and. (self%iind==other%iind) &
+        .and. (self%jind==other%jind)) equals = 1
+  
+  end subroutine wrf_hydro_nwm_jedi_geometry_iter_equals  
+
 
 end module wrf_hydro_nwm_jedi_geometry_iter_mod

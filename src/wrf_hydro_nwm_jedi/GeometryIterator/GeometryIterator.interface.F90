@@ -82,5 +82,23 @@ subroutine c_wrf_hydro_nwm_jedi_geom_iter_delete(c_key_self) bind(c, name='wrf_h
 
 end subroutine c_wrf_hydro_nwm_jedi_geom_iter_delete
 
+! ------------------------------------------------------------------------------
+!> C++ interface for wrf_hydro_nwm_jedi_geometry_iter_mod::wrf_hydro_nwm_jedi_geometry_iter::equals()
+subroutine c_wrf_hydro_nwm_jedi_geom_iter_equals(c_key_self, c_key_other, c_equals) bind(c, name='wrf_hydro_nwm_jedi_geom_iter_equals_f90')
+  integer(c_int), intent(inout) :: c_key_self  !< Geometry iterator
+  integer(c_int), intent(   in) :: c_key_other !< Other geometry iterator
+  integer(c_int), intent(inout) :: c_equals    !< Equality flag
+
+  ! Local variables
+  type(wrf_hydro_nwm_jedi_geometry_iter),pointer :: self,other
+
+  ! Interface
+  call wrf_hydro_nwm_jedi_geometry_iter_registry%get(c_key_self, self)
+  call wrf_hydro_nwm_jedi_geometry_iter_registry%get(c_key_other, other)
+
+  ! Call Fortran
+  call self%equals(other, c_equals)
+
+end subroutine c_wrf_hydro_nwm_jedi_geom_iter_equals
 
 end module

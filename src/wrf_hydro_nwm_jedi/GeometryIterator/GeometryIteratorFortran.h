@@ -18,6 +18,7 @@ namespace wrf_hydro_nwm_jedi {
                                   const int &, const int &);
     void wrf_hydro_nwm_jedi_geom_iter_clone_f90(F90iter &, const F90iter &);
     void wrf_hydro_nwm_jedi_geom_iter_delete_f90(F90iter &);
+    void wrf_hydro_nwm_jedi_geom_iter_equals_f90(const F90iter &, const F90iter&, int &);
   }
 }  // namespace wrf_hydro_nwm_jedi
 

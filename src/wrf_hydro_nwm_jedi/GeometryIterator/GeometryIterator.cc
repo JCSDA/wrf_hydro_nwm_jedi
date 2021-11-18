@@ -39,18 +39,18 @@ GeometryIterator::~GeometryIterator() {
 
 // ----------------------------------------------------------------------------
 
-  bool GeometryIterator::operator==(const GeometryIterator &) const {
-    util::abor1_cpp("GeometryIterator::operator==() needs to be implemented.",
-                    __FILE__, __LINE__);
-    return false;
+  bool GeometryIterator::operator==(const GeometryIterator & other) const {
+    int equals = 0;
+    wrf_hydro_nwm_jedi_geom_iter_equals_f90(keyIter_, other.toFortran(), equals);
+    return (equals == 1);
   }
 
 // ----------------------------------------------------------------------------
 
-  bool GeometryIterator::operator!=(const GeometryIterator &) const {
-    util::abor1_cpp("GeometryIterator::operator!=() needs to be implemented.",
-                    __FILE__, __LINE__);
-    return false;
+  bool GeometryIterator::operator!=(const GeometryIterator & other) const {
+    int equals = 0;
+    wrf_hydro_nwm_jedi_geom_iter_equals_f90(keyIter_, other.toFortran(), equals);
+    return (equals == 0);
   }
 
 // ----------------------------------------------------------------------------
