@@ -42,7 +42,7 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
       procedure :: equals => wrf_hydro_nwm_jedi_geometry_iter_equals
     
       !> \copybrief soca_geom_iter_current \see soca_geom_iter_current
-!      procedure :: current => soca_geom_iter_current
+      procedure :: current => wrf_hydro_nwm_jedi_geometry_iter_current
     
       !> \copybrief soca_geom_iter_next \see soca_geom_iter_next
 !      procedure :: next => soca_geom_iter_next
@@ -104,6 +104,33 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
         .and. (self%jind==other%jind)) equals = 1
   
   end subroutine wrf_hydro_nwm_jedi_geometry_iter_equals  
+
+! ------------------------------------------------------------------------------
+!> Get geometry iterator current lat/lon
+!!
+!! \throws abor1_ftn aborts if iterator is out of bounds
+!! \relates soca_geom_iter_mod::soca_geom_iter
+  subroutine wrf_hydro_nwm_jedi_geometry_iter_current(self, lon, lat)
+    class(wrf_hydro_nwm_jedi_geometry_iter), intent( in) :: self
+    real(kind_real),                         intent(out) :: lat  !< Latitude
+    real(kind_real),                         intent(out) :: lon  !< Longitude
+  
+    ! Check iind/jind
+    if (self%iind == -1 .AND. self%jind == -1) then
+      ! special case of {-1,-1} means end of the grid
+      lat = self%geom%lsm%lat(self%geom%lsm%xdim_len,self%geom%lsm%ydim_len)
+      lon = self%geom%lsm%lon(self%geom%lsm%xdim_len,self%geom%lsm%ydim_len)
+    elseif (self%iind < 0 .OR. self%iind > self%geom%lsm%xdim_len .OR. &
+            self%jind < 0 .OR. self%jind > self%geom%lsm%ydim_len) then
+      ! outside of the grid
+      call abor1_ftn('wrf_hydro_nwm_jedi_geometry_iter_current: iterator out of bounds')
+    else
+      ! inside of the grid
+      lat = self%geom%lsm%lat(self%iind,self%jind)
+      lon = self%geom%lsm%lon(self%iind,self%jind)
+    endif
+  
+  end subroutine wrf_hydro_nwm_jedi_geometry_iter_current  
 
 
 end module wrf_hydro_nwm_jedi_geometry_iter_mod

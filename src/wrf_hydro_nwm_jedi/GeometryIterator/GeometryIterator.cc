@@ -64,10 +64,9 @@ GeometryIterator::~GeometryIterator() {
 // ----------------------------------------------------------------------------
 
   void GeometryIterator::print(std::ostream  & os) const {
-    util::abor1_cpp("GeometryIterator::print() needs to be implemented.",
-                    __FILE__, __LINE__);
-    os << "(TODO, print diagnostic info about the GeometryIterator here)"
-       << std::endl;
+  double lat, lon;
+  wrf_hydro_nwm_jedi_geom_iter_current_f90(keyIter_, lon, lat);
+  os << "GeometryIterator, lat/lon: " << lat << " / " << lon << std::endl;
   }
 
 // ----------------------------------------------------------------------------

@@ -101,4 +101,22 @@ subroutine c_wrf_hydro_nwm_jedi_geom_iter_equals(c_key_self, c_key_other, c_equa
 
 end subroutine c_wrf_hydro_nwm_jedi_geom_iter_equals
 
+! ------------------------------------------------------------------------------
+!> C++ interface for wrf_hydro_nwm_jedi_geometry_iter_mod::wrf_hydro_nwm_jedi_geometry_iter::current()
+subroutine c_wrf_hydro_nwm_jedi_geom_iter_current(c_key_self, c_lon, c_lat) bind(c, name='wrf_hydro_nwm_jedi_geom_iter_current_f90')
+  integer(c_int), intent(   in) :: c_key_self !< Geometry iterator
+  real(c_double), intent(inout) :: c_lat      !< Latitude
+  real(c_double), intent(inout) :: c_lon      !< Longitude
+
+  ! Local variables
+  type(wrf_hydro_nwm_jedi_geometry_iter), pointer :: self
+
+  ! Interface
+  call wrf_hydro_nwm_jedi_geometry_iter_registry%get(c_key_self, self)
+
+  ! Call Fortran
+  call self%current(c_lon, c_lat)
+
+end subroutine c_wrf_hydro_nwm_jedi_geom_iter_current
+
 end module
