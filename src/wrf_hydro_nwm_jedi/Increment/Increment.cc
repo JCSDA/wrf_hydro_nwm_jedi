@@ -278,11 +278,20 @@ namespace wrf_hydro_nwm_jedi {
   // -----------------------------------------------------------------------------
   oops::LocalIncrement Increment::getLocal(
                         const GeometryIterator & iter) const {
-    util::abor1_cpp("Increment::getLocal() needs to be implemented.",
-                    __FILE__, __LINE__);
-    std::vector<double> vals;
-    std::vector<int> varlens;
-    return oops::LocalIncrement(vars_, vals, varlens);
+                          std::vector<int> varlens(vars_.size());
+
+    // TODO(Travis) remove the hardcoded variable names
+    for (int ii = 0; ii < vars_.size(); ii++) {
+      varlens[ii] = 1;
+    }
+
+    int lenvalues = std::accumulate(varlens.begin(), varlens.end(), 0);
+    std::vector<double> values(lenvalues);
+
+    wrf_hydro_nwm_jedi_increment_getpoint_f90(keyInc_, iter.toFortran(), values[0],
+                            values.size());
+
+    return oops::LocalIncrement(vars_, values, varlens);
   }
 
   // -----------------------------------------------------------------------------
