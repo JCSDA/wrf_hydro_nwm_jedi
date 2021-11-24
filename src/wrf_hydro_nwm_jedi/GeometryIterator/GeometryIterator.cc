@@ -71,9 +71,9 @@ GeometryIterator::~GeometryIterator() {
 
 // ----------------------------------------------------------------------------
   eckit::geometry::Point2 GeometryIterator::operator*() const {
-    util::abor1_cpp("GeometryIterator::operator*() needs to be implemented.",
-                    __FILE__, __LINE__);
-    return eckit::geometry::Point2(0.0, 0.0);
+    double lat, lon;
+    wrf_hydro_nwm_jedi_geom_iter_current_f90(keyIter_, lon, lat);
+    return eckit::geometry::Point2(lon, lat);
   }
 
 // ----------------------------------------------------------------------------

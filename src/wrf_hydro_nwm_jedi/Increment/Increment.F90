@@ -45,7 +45,8 @@ public :: &
      set_atlas, &
      to_atlas, &
      from_atlas, &
-     getpoint
+     getpoint, &
+     setpoint
 ! create_from_other, &
 ! delete, &
 ! copy, &
@@ -232,12 +233,23 @@ end subroutine from_atlas
 subroutine getpoint(self, geoiter, values_len, values)
   use iso_c_binding, only: c_float, c_int 
   implicit none
-  type(wrf_hydro_nwm_jedi_state),      intent(inout)  :: self
+  type(wrf_hydro_nwm_jedi_state),      intent(in)  :: self
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter !< iterator pointing to desired gridpoint
   !> return values for every field in a vertical column
   integer(c_int),   intent(in) :: values_len
   real(c_float), intent(inout) :: values(values_len)
   call self%fields_obj%get_point(geoiter, values_len, values)
 end subroutine getpoint
+
+subroutine setpoint(self, geoiter, values_len, values)
+  use iso_c_binding, only: c_float, c_int 
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),      intent(inout)  :: self
+  type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter !< iterator pointing to desired gridpoint
+  !> return values for every field in a vertical column
+  integer(c_int),   intent(in) :: values_len
+  real(c_float), intent(in) :: values(values_len)
+  call self%fields_obj%set_point(geoiter, values_len, values)
+end subroutine setpoint
 
 end module wrf_hydro_nwm_jedi_increment_mod

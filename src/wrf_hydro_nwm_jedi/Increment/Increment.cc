@@ -297,8 +297,9 @@ namespace wrf_hydro_nwm_jedi {
   // -----------------------------------------------------------------------------
   void Increment::setLocal(const oops::LocalIncrement & values,
                              const GeometryIterator & iter) {
-    util::abor1_cpp("Increment::setPoint() needs to be implemented.",
-                    __FILE__, __LINE__);
+    const std::vector<double> vals = values.getVals();
+    wrf_hydro_nwm_jedi_increment_setpoint_f90(keyInc_, iter.toFortran(), vals[0],
+                            vals.size());
   }
 
   // -----------------------------------------------------------------------------
