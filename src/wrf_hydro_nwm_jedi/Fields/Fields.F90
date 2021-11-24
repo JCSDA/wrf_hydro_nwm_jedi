@@ -52,7 +52,7 @@ public :: &
 ! @todo should this be public?
 type, abstract, public :: base_field
    character(len=32) :: short_name = "null"   !< Short name (to match file name)
-   character(len=10) :: wrf_hydro_nwm_name = "null" !< Common name
+   character(len=20) :: wrf_hydro_nwm_name = "null" !< Common name
    character(len=64) :: long_name = "null"    !< More descriptive name
    character(len=32) :: units = "null"        !< Units for the field
    integer :: ncid_index                      !< Index for restart file (1=lsm, 2=hydro)
@@ -468,6 +468,48 @@ subroutine create(self, geom, vars)
               ncid_index=1)
          allocate(self%fields(vcount)%field, source=tmp_2d_field)
          deallocate(tmp_2d_field)
+
+     case("BULK_SNICE")
+        vcount = vcount + 1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill( &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
+             short_name=vars%variable(var), &
+             long_name='bulk_snow_ice', &
+             wrf_hydro_nwm_name='BULK_SNICE', &
+             units='mm', &  ! TODO JLM CHECK
+             ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
+        deallocate(tmp_2d_field)
+
+     case("BULK_SNLIQ")
+        vcount = vcount + 1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill( &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
+             short_name=vars%variable(var), &
+             long_name='bulk_snow_liquid', &
+             wrf_hydro_nwm_name='BULK_SNLIQ', &
+             units='mm', &  ! TODO JLM CHECK
+             ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
+        deallocate(tmp_2d_field)
+
+     case("BULK_SNOW_T")
+        vcount = vcount + 1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill( &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
+             short_name=vars%variable(var), &
+             long_name='bulk_mass_weighted_snow_temp', &
+             wrf_hydro_nwm_name='BULK_SNOW_T', &
+             units='degK', &  ! TODO JLM CHECK
+             ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
+        deallocate(tmp_2d_field)
 
      case("LAI")
         vcount = vcount + 1
