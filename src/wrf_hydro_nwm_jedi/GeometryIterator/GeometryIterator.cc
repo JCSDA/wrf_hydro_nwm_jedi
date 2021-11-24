@@ -30,7 +30,6 @@ GeometryIterator::GeometryIterator(const Geometry& geom,
   wrf_hydro_nwm_jedi_geom_iter_setup_f90(keyIter_, geom.toFortran(), iindex, jindex);
 }
 
-
 // -----------------------------------------------------------------------------
 
 GeometryIterator::~GeometryIterator() {
@@ -56,8 +55,7 @@ GeometryIterator::~GeometryIterator() {
 // ----------------------------------------------------------------------------
 
   GeometryIterator& GeometryIterator::operator++() {
-    util::abor1_cpp("GeometryIterator::operator++() needs to be implemented.",
-                    __FILE__, __LINE__);
+    wrf_hydro_nwm_jedi_geom_iter_next_f90(keyIter_);
     return *this;
   }
 

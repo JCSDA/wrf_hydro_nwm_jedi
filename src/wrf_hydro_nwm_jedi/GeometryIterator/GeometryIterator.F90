@@ -32,20 +32,20 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
     
     contains
     
-      !> \copybrief soca_geom_iter_setup \see soca_geom_iter_setup
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_setup \see wrf_hydro_nwm_jedi_geom_iter_setup
       procedure :: init => wrf_hydro_nwm_jedi_geometry_iter_init
     
-      !> \copybrief soca_geom_iter_clone \see soca_geom_iter_clone
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_clone \see wrf_hydro_nwm_jedi_geom_iter_clone
       procedure :: clone => wrf_hydro_nwm_jedi_geometry_iter_clone
     
-      !> \copybrief soca_geom_iter_equals \see soca_geom_iter_equals
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_equals \see wrf_hydro_nwm_jedi_geom_iter_equals
       procedure :: equals => wrf_hydro_nwm_jedi_geometry_iter_equals
     
-      !> \copybrief soca_geom_iter_current \see soca_geom_iter_current
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_current \see wrf_hydro_nwm_jedi_geom_iter_current
       procedure :: current => wrf_hydro_nwm_jedi_geometry_iter_current
     
-      !> \copybrief soca_geom_iter_next \see soca_geom_iter_next
-!      procedure :: next => soca_geom_iter_next
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_next \see wrf_hydro_nwm_jedi_geom_iter_next
+      procedure :: next => wrf_hydro_nwm_jedi_geom_iter_next
     
     end type wrf_hydro_nwm_jedi_geometry_iter
         
@@ -109,7 +109,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
 !> Get geometry iterator current lat/lon
 !!
 !! \throws abor1_ftn aborts if iterator is out of bounds
-!! \relates soca_geom_iter_mod::soca_geom_iter
+!! \relates wrf_hydro_nwm_jedi_geom_iter_mod::wrf_hydro_nwm_jedi_geom_iter
   subroutine wrf_hydro_nwm_jedi_geometry_iter_current(self, lon, lat)
     class(wrf_hydro_nwm_jedi_geometry_iter), intent( in) :: self
     real(kind_real),                         intent(out) :: lat  !< Latitude
@@ -131,6 +131,47 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
     endif
   
   end subroutine wrf_hydro_nwm_jedi_geometry_iter_current  
+
+! ------------------------------------------------------------------------------
+!> Update geometry iterator to next point
+!!
+!! \todo skip over masked points
+!! \relates _geom_iter_mod::soca_geom_iter
+  subroutine wrf_hydro_nwm_jedi_geom_iter_next(self)
+    class(wrf_hydro_nwm_jedi_geometry_iter), intent(inout) :: self
+    integer :: iind, jind
+  
+    iind = self%iind
+    jind = self%jind
+  
+    ! do while ((iind.lt.self%geom%iec).and.(jind.lt.self%geom%jec))
+  
+      ! increment by 1
+      if (iind.lt.self%geom%lsm%xdim_len) then
+        iind = iind + 1
+      elseif (iind.eq.self%geom%lsm%xdim_len) then
+        iind = self%geom%lsm%xdim_len
+        jind = jind + 1
+      end if
+  
+      ! ! skip this point if it is on land
+      ! if (self%geom%mask2d(iind,jind).lt.1) then
+      !   cycle
+      ! else
+      !   exit
+      ! endif
+  
+    ! end do
+  
+    if (jind > self%geom%lsm%ydim_len) then
+        iind=-1
+        jind=-1
+    end if
+  
+    self%iind = iind
+    self%jind = jind
+  
+  end subroutine wrf_hydro_nwm_jedi_geom_iter_next
 
 
 end module wrf_hydro_nwm_jedi_geometry_iter_mod

@@ -282,7 +282,15 @@ namespace wrf_hydro_nwm_jedi {
 
     // TODO(Travis) remove the hardcoded variable names
     for (int ii = 0; ii < vars_.size(); ii++) {
-      varlens[ii] = 1;
+      if (vars_[ii] == "SNICE") varlens[ii]=3;
+      else if (vars_[ii] == "SNLIQ") varlens[ii]=3;
+      else if (vars_[ii] == "SNEQV") varlens[ii]=1;
+      else if (vars_[ii] == "SNOWH") varlens[ii]=1;
+      else if (vars_[ii] == "swe") varlens[ii]=1;
+      else if (vars_[ii] == "snow_depth")  varlens[ii]=1;
+      else if (vars_[ii] == "LAI") varlens[ii]=1;
+      else
+          varlens[ii] = 0;
     }
 
     int lenvalues = std::accumulate(varlens.begin(), varlens.end(), 0);

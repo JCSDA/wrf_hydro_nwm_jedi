@@ -20,6 +20,7 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_geom_iter_delete_f90(F90iter &);
     void wrf_hydro_nwm_jedi_geom_iter_equals_f90(const F90iter &, const F90iter&, int &);
     void wrf_hydro_nwm_jedi_geom_iter_current_f90(const F90iter &, double &, double &);
+    void wrf_hydro_nwm_jedi_geom_iter_next_f90(const F90iter &);
   }
 }  // namespace wrf_hydro_nwm_jedi
 
