@@ -231,22 +231,22 @@ abstract interface
    end subroutine from_atlas_interface
 
    subroutine get_point_interface(self, geoiter, values_len, values)
-    use iso_c_binding, only : c_float, c_int
+    use iso_c_binding, only : c_double, c_int
     use wrf_hydro_nwm_jedi_geometry_iter_mod, only: wrf_hydro_nwm_jedi_geometry_iter
     import base_field
     class(base_field), intent(in) :: self
     integer(c_int),    intent(in) :: values_len
-    real(c_float),  intent(inout) :: values(values_len)
+    real(c_double),  intent(inout) :: values(values_len)
     type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
   end subroutine get_point_interface   
 
   subroutine set_point_interface(self, geoiter, values_len, values)
-    use iso_c_binding, only : c_float, c_int
+    use iso_c_binding, only : c_double, c_int
     use wrf_hydro_nwm_jedi_geometry_iter_mod, only: wrf_hydro_nwm_jedi_geometry_iter
     import base_field
     class(base_field), intent(inout) :: self
     integer(c_int),       intent(in) :: values_len
-    real(c_float),     intent(in) :: values(values_len)
+    real(c_double),     intent(in) :: values(values_len)
     type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
   end subroutine set_point_interface 
 
@@ -2754,7 +2754,7 @@ subroutine get_point(self, geoiter, values_len, values)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(inout) :: values(values_len)
+  real(kind=c_double),  intent(inout) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
   integer :: ff
   do ff=1,self%nf
@@ -2766,7 +2766,7 @@ subroutine get_point_1d(self, geoiter, values_len, values)
   implicit none
   class(field_1d), intent(in) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(inout) :: values(values_len)
+  real(kind=c_double),  intent(inout) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   call abor1_ftn("get_point_1d: no get_point interface for 1d fields")
@@ -2776,7 +2776,7 @@ subroutine get_point_2d(self, geoiter, values_len, values)
   implicit none
   class(field_2d), intent(in) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(inout) :: values(values_len)
+  real(kind=c_double),  intent(inout) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   values = self%array(geoiter%iind, geoiter%jind)
@@ -2786,7 +2786,7 @@ subroutine get_point_3d(self, geoiter, values_len, values)
   implicit none
   class(field_3d), intent(in) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(inout) :: values(values_len)
+  real(kind=c_double),  intent(inout) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   ! call abor1_ftn("get_point_3d: no get_point interface for 3d fields")
@@ -2800,7 +2800,7 @@ subroutine set_point(self, geoiter, values_len, values)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(in) :: values(values_len)
+  real(kind=c_double),  intent(in) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
   integer :: ff
   do ff=1,self%nf
@@ -2812,7 +2812,7 @@ subroutine set_point_1d(self, geoiter, values_len, values)
   implicit none
   class(field_1d), intent(inout) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(in) :: values(values_len)
+  real(kind=c_double),  intent(in) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   call abor1_ftn("set_point_1d: no set_point interface for 1d fields")
@@ -2822,7 +2822,7 @@ subroutine set_point_2d(self, geoiter, values_len, values)
   implicit none
   class(field_2d), intent(inout) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(in) :: values(values_len)
+  real(kind=c_double),  intent(in) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   self%array(geoiter%iind, geoiter%jind) = values(1)
@@ -2832,7 +2832,7 @@ subroutine set_point_3d(self, geoiter, values_len, values)
   implicit none
   class(field_3d), intent(inout) :: self
   integer(c_int),   intent(in) :: values_len
-  real(kind=c_float),  intent(in) :: values(values_len)
+  real(kind=c_double),  intent(in) :: values(values_len)
   type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
 
   ! call abor1_ftn("set_point_3d: no set_point interface for 3d fields")

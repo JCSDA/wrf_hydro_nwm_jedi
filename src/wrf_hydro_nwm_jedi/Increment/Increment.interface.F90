@@ -546,7 +546,7 @@ subroutine c_wrf_hydro_nwm_jedi_increment_getpoint(c_key_inc,c_key_iter,values, 
   integer(c_int), intent(in) :: c_key_inc
   integer(c_int), intent(in) :: c_key_iter
   integer(c_int), intent(in) :: values_len
-  real(c_float), intent(inout) :: values(values_len)
+  real(c_double), intent(inout) :: values(values_len)
 
   type(wrf_hydro_nwm_jedi_state),      pointer :: inc
   type(wrf_hydro_nwm_jedi_geometry_iter),      pointer :: iter
@@ -562,7 +562,7 @@ subroutine c_wrf_hydro_nwm_jedi_increment_setpoint(c_key_inc,c_key_iter,values, 
   integer(c_int), intent(inout) :: c_key_inc
   integer(c_int), intent(in) :: c_key_iter
   integer(c_int), intent(in) :: values_len
-  real(c_float),  intent(in) :: values(values_len)
+  real(c_double),  intent(in) :: values(values_len)
 
   type(wrf_hydro_nwm_jedi_state),      pointer :: inc
   type(wrf_hydro_nwm_jedi_geometry_iter), pointer :: iter

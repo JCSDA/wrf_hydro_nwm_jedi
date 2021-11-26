@@ -120,8 +120,8 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
       ! special case of {-1,-1} means end of the grid
       lat = self%geom%lsm%lat(self%geom%lsm%xdim_len,self%geom%lsm%ydim_len)
       lon = self%geom%lsm%lon(self%geom%lsm%xdim_len,self%geom%lsm%ydim_len)
-    elseif (self%iind < 0 .OR. self%iind > self%geom%lsm%xdim_len .OR. &
-            self%jind < 0 .OR. self%jind > self%geom%lsm%ydim_len) then
+    elseif (self%iind < 1 .OR. self%iind > self%geom%lsm%xdim_len .OR. &
+            self%jind < 1 .OR. self%jind > self%geom%lsm%ydim_len) then
       ! outside of the grid
       call abor1_ftn('wrf_hydro_nwm_jedi_geometry_iter_current: iterator out of bounds')
     else
