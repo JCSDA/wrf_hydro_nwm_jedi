@@ -64,8 +64,8 @@ namespace wrf_hydro_nwm_jedi {
         atlas::field::FieldSetImpl *);
     void wrf_hydro_nwm_jedi_increment_getpoint_f90(const F90inc &, const F90iter &, double &,
         const int &);
-    void wrf_hydro_nwm_jedi_increment_setpoint_f90( F90inc &, const F90iter &, const double &,
-        const int &);    
+    void wrf_hydro_nwm_jedi_increment_setpoint_f90(F90inc &, const F90iter &, const double &,
+        const int &);
   }
 }  // namespace wrf_hydro_nwm_jedi
 

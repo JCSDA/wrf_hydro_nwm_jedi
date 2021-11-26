@@ -144,24 +144,14 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
     iind = self%iind
     jind = self%jind
   
-    ! do while ((iind.lt.self%geom%iec).and.(jind.lt.self%geom%jec))
-  
+
       ! increment by 1
       if (iind.lt.self%geom%lsm%xdim_len) then
         iind = iind + 1
       elseif (iind.eq.self%geom%lsm%xdim_len) then
-        iind = 1 !self%geom%lsm%xdim_len
+        iind = 1
         jind = jind + 1
       end if
-  
-      ! ! skip this point if it is on land
-      ! if (self%geom%mask2d(iind,jind).lt.1) then
-      !   cycle
-      ! else
-      !   exit
-      ! endif
-  
-    ! end do
   
     if (jind > self%geom%lsm%ydim_len) then
         iind=-1
