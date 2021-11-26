@@ -150,7 +150,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
       if (iind.lt.self%geom%lsm%xdim_len) then
         iind = iind + 1
       elseif (iind.eq.self%geom%lsm%xdim_len) then
-        iind = self%geom%lsm%xdim_len
+        iind = 1 !self%geom%lsm%xdim_len
         jind = jind + 1
       end if
   
