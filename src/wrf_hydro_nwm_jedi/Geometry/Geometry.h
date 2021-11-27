@@ -57,6 +57,8 @@ namespace wrf_hydro_nwm_jedi {
     const F90geom & toFortran() const {return keyGeom_;}
     const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
+    std::vector<double> verticalCoord(std::string &) const {return {};}
+
     atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
     atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
 

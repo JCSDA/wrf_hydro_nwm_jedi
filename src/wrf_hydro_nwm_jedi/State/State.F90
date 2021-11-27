@@ -89,7 +89,6 @@ subroutine create_from_other(self, other)
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self  !< Self State object
   type(wrf_hydro_nwm_jedi_state), intent(   in) :: other !< Other State object
 
-  write(*,*) "Calling create from other"
   self = other
 end subroutine create_from_other
 
@@ -252,7 +251,6 @@ subroutine write_state_to_file(self, c_conf, f_dt)
 
   call self%fields_obj%write_fields_to_file(filename_lsm, filename_hydro, f_dt)
   call datetime_to_string(f_dt, fstring)
-  write(*,*) 'write_state_to_file f_dt to string: '//fstring
 end subroutine write_state_to_file
 
 !> Print state
