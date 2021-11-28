@@ -265,12 +265,7 @@ subroutine state_print(self, string)
   if(present(string)) then
      call self%fields_obj%print_all_fields(string)
   else
-     write(*,*) c_new_line
-     !                      "Print State (C++) ------------------------ ";
-     write(*,*) c_new_line//"Print State (Fortran) -------------------- "
      call self%fields_obj%print_all_fields()
-     write(*,*) c_new_line//"End Print State (Fortran) ---------------- "
-     write(*,*) c_new_line//c_new_line
   end if
 end subroutine state_print
 
