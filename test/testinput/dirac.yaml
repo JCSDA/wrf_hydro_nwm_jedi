@@ -7,15 +7,20 @@ initial condition:
   basename: ./INPUT/
   filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-  state variables: [SNEQV]
+  state variables: &vars [SNEQV]
 
 background error:
-  covariance model: BUMP
-  bump:
-    prefix: Data/staticb/wrf_hydro_nwm_jedi_staticb_nicas
-    verbosity: main
-    strategy: specific_univariate
-    load_nicas_local: true
+  covariance model: SABER
+  saber blocks:
+  - saber block name: BUMP_NICAS
+    saber central block: true
+    input variables: *vars
+    output variables: *vars
+    bump:
+      prefix: Data/staticb/wrf_hydro_nwm_jedi_staticb_nicas
+      verbosity: main
+      strategy: specific_univariate
+      load_nicas_local: true
 
 output dirac:
   filename_lsm: ./Data/dirac/dirac_lsm_%id%.nc
