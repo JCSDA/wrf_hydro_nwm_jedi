@@ -3,11 +3,9 @@ geometry:
 
 input variables: &input_vars ['SNEQV']
 
-date: &date 2017-01-01T00:00:00Z
-
 background:
   read_from_file: 1
-  date: *date
+  date: &date 2017-01-01T00:00:00Z
   basename: "./INPUT/"
   filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
   filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
@@ -29,16 +27,15 @@ bump:
     snow_water_equivalent: [15.0e3]
   rv:
     snow_water_equivalent: [0.0]
-
-output:
-- parameter: stddev
-  date: *date
-  filename_lsm: ./Data/staticb/stddev_lsm.nc
-  filename_hydro: ./Data/staticb/stddev_hydro.nc
-- parameter: cor_rh
-  date: *date
-  filename_lsm: ./Data/staticb/rh_lsm.nc
-  filename_hydro: ./Data/staticb/rh_hydro.nc
+  output:
+  - parameter: stddev
+    date: *date
+    filename_lsm: ./Data/staticb/stddev_lsm.nc
+    filename_hydro: ./Data/staticb/stddev_hydro.nc
+  - parameter: cor_rh
+    date: *date
+    filename_lsm: ./Data/staticb/rh_lsm.nc
+    filename_hydro: ./Data/staticb/rh_hydro.nc
 
 test:
   reference filename: testoutput/staticb.ref
