@@ -1,7 +1,7 @@
 cost function:
   cost type: '3D-Var'
 
-  analysis variables: ['SNEQV'] # , 'SNOWH']  #seg faults if snowh not in state variables
+  analysis variables: &ana_vars ['SNEQV']
   window begin: '2016-12-31T23:30:00Z'
   window length: PT1H
 
@@ -14,17 +14,23 @@ cost function:
     basename: "./INPUT/"
     filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
     filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-    state variables: ['SNEQV']  #, 'SNOWH']
+    state variables: *ana_vars
 
   background error:
-    covariance model: BUMP
-    bump:
-      prefix: Data/staticb/wrf_hydro_nwm_jedi_staticb_nicas
-      verbosity: main
-      strategy: specific_univariate
-      load_nicas_local: true
+    covariance model: SABER
+    saber blocks:
+    - saber block name: BUMP_NICAS
+      saber central block: true
+      iterative inverse: true
+      input variables: *ana_vars
+      output variables: *ana_vars
+      bump:
+        prefix: Data/staticb/wrf_hydro_nwm_jedi_staticb_nicas
+        verbosity: main
+        strategy: specific_univariate
+        load_nicas_local: true
 
-  variable change: 'Identity'
+#  variable change: 'Identity'
   observations:
   - obs error:
       covariance model: 'diagonal'
