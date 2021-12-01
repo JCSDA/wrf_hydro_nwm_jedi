@@ -60,8 +60,10 @@ final:
     departures: 'oman'
 
 output:
-  filename_lsm: ./Data/3dvar/3dvar_lsm.nc
-  filename_hydro: ./Data/3dvar/3dvar_hydro.nc
+  date: *date
+  datadir: Data/3dvar
+  exp: 3dvar
+  type: an
 
 variational:
   minimizer:
