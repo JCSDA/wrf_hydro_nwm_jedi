@@ -28,8 +28,6 @@ output dirac:
   exp: dirac_%id%
   type: an
 
-  filename_hydro: ./Data/dirac/dirac_hydro_%id%.nc
-
 dirac:
   ndir: 1
   ix: [15]
