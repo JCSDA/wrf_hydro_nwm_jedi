@@ -8,24 +8,17 @@ module wrf_hydro_nwm_jedi_state_mod
 
 use iso_c_binding, only: c_char, c_float, c_ptr, c_null_char
 use fckit_configuration_module, only: fckit_configuration
-use datetime_mod
+use datetime_mod, only: datetime, datetime_set, datetime_to_string, &
+datetime_create, datetime_diff
+use duration_mod, only: duration, duration_to_string
 use fckit_mpi_module
 use oops_variables_mod
 
 use wrf_hydro_nwm_jedi_fields_mod,   only: wrf_hydro_nwm_jedi_fields, checksame
-! use fv3jedi_constants_mod,       only: rad2deg, constoz
-use wrf_hydro_nwm_jedi_geometry_mod,only: wrf_hydro_nwm_jedi_geometry
-use wrf_hydro_nwm_jedi_util_mod,    only: error_handler, indices
-! use fv3jedi_increment_utils_mod, only: fv3jedi_increment
-! use fv3jedi_interpolation_mod,   only: field2field_interp
-! use fv3jedi_kinds_mod,           only: kind_real
-!use fv3jedi_io_gfs_mod,          only: fv3jedi_io_gfs
-!use fv3jedi_io_geos_mod,         only: fv3jedi_io_geos
-!use fv3jedi_getvalues_mod,       only: getvalues
-use netcdf
-!use wind_vt_mod, only: a2d
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_util_mod,     only: error_handler, indices
 
-!use mpp_domains_mod,             only: east, north, center
+use netcdf
 
 implicit none
 private
@@ -236,18 +229,16 @@ subroutine write_state_to_file(self, c_conf, f_dt)
   type(fckit_configuration) :: f_conf
   character(len=:), allocatable :: str
   character(len=30) :: fstring
+
+  integer, parameter :: max_string_length=800
   ! integer :: flipvert
   ! integer :: ixfull, jxfull, var
  
   f_conf = fckit_configuration(c_conf)
 
-  call f_conf%get_or_die("filename_lsm", str)
-  filename_lsm = str
-  deallocate(str)
+  filename_lsm = genfilename(f_conf, max_string_length, f_dt, "lsm")
 
-  call f_conf%get_or_die("filename_hydro", str)
-  filename_hydro = str
-  deallocate(str)
+  filename_hydro = genfilename(f_conf, max_string_length, f_dt, "hyd")
 
   call self%fields_obj%write_fields_to_file(filename_lsm, filename_hydro, f_dt)
   call datetime_to_string(f_dt, fstring)
@@ -283,6 +274,71 @@ subroutine axpy(self, scalar, other_in)
   call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
   call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
 end subroutine axpy
+
+! ------------------------------------------------------------------------------
+!> Generate filename (based on oops/qg)
+!!
+!! The configuration \p f_conf is expected to provide the following
+!! - "datadir" : the directory the filenames should be prefixed with
+!! - "exp" : experiment name
+!! - "type" : one of "fc", "an", "incr", "ens"
+!! - "member" : required only if "type == ens"
+
+function genfilename (f_conf,length,vdate,domain_type)
+  type(fckit_configuration),  intent(in) :: f_conf
+  integer,                    intent(in) :: length
+  type(datetime),             intent(in) :: vdate
+  character(len=3), optional, intent(in) :: domain_type
+
+  character(len=length)                  :: genfilename
+  character(len=length) :: fdbdir, expver, typ, validitydate, referencedate, sstep, &
+       & prefix, mmb
+  type(datetime) :: rdate
+  type(duration) :: step
+  integer lenfn
+  character(len=:), allocatable :: str
+
+  call f_conf%get_or_die("datadir", str)
+  fdbdir = str
+  call f_conf%get_or_die("exp", str)
+  expver = str
+  call f_conf%get_or_die("type", str)
+  typ = str
+ 
+  if (typ=="ens") then
+     call f_conf%get_or_die("member", str)
+     mmb = str
+     lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ) + 1 + LEN_TRIM(mmb)
+     prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(domain_type) // "." // TRIM(typ) // "." // TRIM(mmb)
+  else
+     lenfn = LEN_TRIM(fdbdir) + 1 + LEN_TRIM(expver) + 1 + LEN_TRIM(typ)
+     prefix = TRIM(fdbdir) // "/" // TRIM(expver) // "." // TRIM(domain_type) // "." // TRIM(typ)
+  endif
+
+  if (typ=="fc" .or. typ=="ens") then
+     call f_conf%get_or_die("date", str)
+     referencedate = str
+     call datetime_to_string(vdate, validitydate)
+     call datetime_create(TRIM(referencedate), rdate)
+     call datetime_diff(vdate, rdate, step)
+     call duration_to_string(step, sstep)
+     lenfn = lenfn + 1 + LEN_TRIM(referencedate) + 1 + LEN_TRIM(sstep)
+     genfilename = TRIM(prefix) // "." // TRIM(referencedate) // "." // TRIM(sstep)
+  endif
+
+  if (typ=="an" .or. typ=="incr") then
+     call datetime_to_string(vdate, validitydate)
+     lenfn = lenfn + 1 + LEN_TRIM(validitydate)
+     genfilename = TRIM(prefix) // "." // TRIM(validitydate)
+  endif
+
+  if (lenfn>length) &
+       & call abor1_ftn("fields:genfilename: filename too long")
+
+   if ( allocated(str) ) deallocate(str)
+
+end function genfilename
+
 
 
 ! subroutine get_mean_stddev(self, mean, stddev)
