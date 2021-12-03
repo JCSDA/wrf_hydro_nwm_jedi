@@ -133,7 +133,7 @@ end subroutine wrf_hydro_nwm_jedi_geometry_delete
 
 
 !> Check if the lsm geometry object is allocated/active.
-function lsm_active(self) result(is_active)
+pure function lsm_active(self) result(is_active)
   class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self  !< the full geom object
   logical :: is_active
 
@@ -147,7 +147,7 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   class(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self  !< the full geom object
   type(fckit_configuration), intent(in) :: f_conf  !< the yaml file
   integer, intent(in) :: ncid
-  
+
   integer :: ierr, dimid
   character(len=512) :: src_file_name
 
@@ -170,7 +170,7 @@ subroutine wrf_hydro_nwm_jedi_lsm_geometry_init(self, f_conf, ncid)
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "lsm_dx", self%lsm%dx)
   call error_handler(ierr, "STOP:  Problem finding DX attribute")
   ierr = nf90_get_att(ncid, NF90_GLOBAL, "lsm_dy", self%lsm%dy)
-  call error_handler(ierr, "STOP:  Problem finding DY attribute")  
+  call error_handler(ierr, "STOP:  Problem finding DY attribute")
 
   ! Dimension data
   call get_geom_dim_len(ncid, "lsm_xdim_name", self%lsm%xdim_len)
@@ -202,25 +202,40 @@ subroutine get_lsm_nn( &
   type(indices), intent(out) :: ind  !< the index pair of the nearest neighbor
 
   real,dimension(2) :: minimum
-  real, allocatable :: diff_lat(:,:), diff_lon(:,:), l2_norm(:,:)
+  real, allocatable, save :: l2_norm(:,:)
+  real :: diff_lat_ij
+  real :: diff_lon_ij
+  real :: lat_sq_ij, lon_sq_ij, lat_ij, lon_ij
+  integer :: i, j, k, dims(2)
 
   ! TODO JLM: I dont love this...
   if (.not. self%lsm_active()) return
 
-  allocate(diff_lat, source=self%lsm%lat)
-  allocate(diff_lon, source=self%lsm%lon)
-  allocate(l2_norm, source=self%lsm%lon)
+  if (.not. allocated(l2_norm)) then
+     allocate(l2_norm, mold=self%lsm%lon)
+  end if
 
-  diff_lat = diff_lat - lat
-  diff_lon = diff_lon - lon
-  l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
+  ! --- original
+  ! diff_lat = diff_lat - lat
+  ! diff_lon = diff_lon - lon
+  ! l2_norm = sqrt( diff_lon**2 + diff_lat**2 )
+
+  dims = shape(self%lsm%lat)
+  !$omp parallel do default(shared) private(i,j,lat_sq_ij,lon_sq_ij,diff_lat_ij,diff_lon_ij)
+  do j=1,dims(2)
+     do i=1,dims(1)
+        diff_lat_ij = self%lsm%lat(i,j) - lat
+        diff_lon_ij = self%lsm%lon(i,j) - lon
+        lat_sq_ij = diff_lat_ij * diff_lat_ij
+        lon_sq_ij = diff_lon_ij * diff_lon_ij
+        l2_norm(i,j) = sqrt(lat_sq_ij + lon_sq_ij)
+     end do
+  end do
+  !$omp end parallel do
+
   minimum = minloc(l2_norm)
   ind%ind_x = minimum(1)
   ind%ind_y = minimum(2)
-
-  deallocate(l2_norm)
-  deallocate(diff_lat)
-  deallocate(diff_lon)
 end subroutine get_lsm_nn
 
 
@@ -322,7 +337,7 @@ subroutine wrf_hydro_nwm_jedi_stream_geometry_init(self, f_conf, ncid)
   end if
 
   allocate(self%stream)
-  
+
   ! Hard-coded values
   self%stream%xstart = 1
 
@@ -369,7 +384,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn( &
 
   deallocate(l2_norm)
   deallocate(diff_lat)
-  deallocate(diff_lon)  
+  deallocate(diff_lon)
 end subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn
 
 
@@ -386,7 +401,7 @@ end subroutine wrf_hydro_nwm_jedi_geometry_get_stream_nn
 !   dy = self%stream%dy
 !   xdim_len = self%stream%xdim_len
 !   ydim_len = self%stream%ydim_len
-!   zdim_len = self%stream%zdim_len 
+!   zdim_len = self%stream%zdim_len
 ! end subroutine wrf_hydro_nwm_jedi_geometry_get_lsm_info
 
 
