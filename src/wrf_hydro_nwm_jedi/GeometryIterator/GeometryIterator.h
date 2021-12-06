@@ -20,7 +20,7 @@
 namespace eckit {
   class Configuration;
   namespace geometry {
-    class Point2;
+    class Point3;
   }
 }
 
@@ -34,7 +34,7 @@ namespace wrf_hydro_nwm_jedi {
 
   // Geometry class
   class GeometryIterator : public std::iterator<std::forward_iterator_tag,
-                                               eckit::geometry::Point2>,
+                                               eckit::geometry::Point3>,
                            public util::Printable,
                            private util::ObjectCounter<GeometryIterator> {
    public:
@@ -48,7 +48,7 @@ namespace wrf_hydro_nwm_jedi {
     bool operator==(const GeometryIterator &) const;
     bool operator!=(const GeometryIterator &) const;
     GeometryIterator& operator++();
-    eckit::geometry::Point2 operator*() const;
+    eckit::geometry::Point3 operator*() const;
 
     F90iter & toFortran() {return keyIter_;}
     const F90iter & toFortran() const {return keyIter_;}
