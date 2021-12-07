@@ -152,7 +152,7 @@ ecbuild_add_test(
                 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
                 Data/staticb/stddev_lsm.nc
                 Data/staticb/rh_lsm.nc
-                Data/dirac/dirac_lsm_BUMP.nc
+                Data/dirac/dirac_lsm_SABER.nc
                 Data/3dvar/3dvar_lsm.nc )
 
 ecbuild_add_test(
@@ -163,14 +163,14 @@ ecbuild_add_test(
                 Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
                 Data/staticb/stddev_hydro.nc
                 Data/staticb/rh_hydro.nc
-                Data/dirac/dirac_hydro_BUMP.nc
+                Data/dirac/dirac_hydro_SABER.nc
                 Data/3dvar/3dvar_hydro.nc )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_staticb
    TYPE         EXE
-   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_estimate_params.x
-   DEPENDS      wrf_hydro_nwm_jedi_estimate_params.x
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_error_covariance_training.x
+   DEPENDS      wrf_hydro_nwm_jedi_error_covariance_training.x
    ARGS         testinput/staticb.yaml
    MPI          1 )
 
