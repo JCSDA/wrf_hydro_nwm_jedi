@@ -37,13 +37,23 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   GetValues/LinearGetValues.interface.F90
   
   # VariableChanges
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.interface.F90
-  VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.F90
-  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.cc
-  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h
+  VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.h
+  VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
+  VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h
+  VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.interface.F90
+  VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.F90
+  VariableChange/Base/VariableChangeBase.cc
+  VariableChange/Base/VariableChangeBase.h
+  VariableChange/VariableChange.cc
+  VariableChange/VariableChange.h
+
+  # LinearVariableChange
+  LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.cc
+  LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h
+  LinearVariableChange/Base/LinearVariableChangeBase.cc
+  LinearVariableChange/Base/LinearVariableChangeBase.h
+  LinearVariableChange/LinearVariableChange.cc
+  LinearVariableChange/LinearVariableChange.h
 
   # # LinearGetValues
   #LinearGetValues/LinearGetValues.h

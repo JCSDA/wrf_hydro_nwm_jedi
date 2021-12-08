@@ -19,7 +19,7 @@
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
-#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h"
+#include "wrf_hydro_nwm_jedi/LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h"
 
 namespace wrf_hydro_nwm_jedi {
 
