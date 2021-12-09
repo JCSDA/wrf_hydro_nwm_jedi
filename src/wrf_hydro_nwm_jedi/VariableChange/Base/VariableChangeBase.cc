@@ -12,7 +12,7 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
-namespace soca {
+namespace wrf_hydro_nwm_jedi {
 
 // -----------------------------------------------------------------------------
 

@@ -54,7 +54,7 @@ void LinearVariableChange::multiply(Increment & dx,
   Log::trace() << "LinearVariableChange::multiply starting" << std::endl;
 
   // Check if the incoming state has all the variables
-  const bool hasAllFields = dx.hasFields(vars);
+  // const bool hasAllFields = dx.hasFields(vars);
 
   // If all variables already in incoming state just remove the no longer
   // needed fields

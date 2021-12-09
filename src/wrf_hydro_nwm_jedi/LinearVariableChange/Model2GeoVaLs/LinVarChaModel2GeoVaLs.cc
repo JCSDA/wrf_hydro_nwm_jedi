@@ -10,7 +10,6 @@
 
 #include "eckit/config/Configuration.h"
 
-#include "oops/interface/LinearVariableChange.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Timer.h"
@@ -19,18 +18,18 @@
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
+
 #include "wrf_hydro_nwm_jedi/LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h"
+#include "wrf_hydro_nwm_jedi/VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h"
 
 namespace wrf_hydro_nwm_jedi {
 
 // -------------------------------------------------------------------------------------------------
-static oops::LinearVariableChangeMaker<Traits,
-       oops::LinearVariableChange<Traits, LinVarChaModel2GeoVaLs> >
+static LinearVariableChangeMaker<LinVarChaModel2GeoVaLs>
   makerLinVarChaModel2GeoVaLs_("Model2GeoVaLs");
 
-static oops::LinearVariableChangeMaker<Traits,
-       oops::LinearVariableChange<Traits, LinVarChaModel2GeoVaLs> >
-  makerLinVarChaModel2GeoDef_("default");
+static LinearVariableChangeMaker<LinVarChaModel2GeoVaLs>
+         makerLinVarChaModel2GeoDef_("default");
 
 // -------------------------------------------------------------------------------------------------
 

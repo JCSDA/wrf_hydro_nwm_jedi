@@ -40,7 +40,7 @@ class LinearVariableChangeParameters :
 
 class LinearVariableChange : public util::Printable {
  public:
-  static const std::string classname() {return "soca::LinearVariableChange";}
+  static const std::string classname() {return "wrf_hydro_nwm_jedi::LinearVariableChange";}
 
   typedef LinearVariableChangeParameters Parameters_;
 

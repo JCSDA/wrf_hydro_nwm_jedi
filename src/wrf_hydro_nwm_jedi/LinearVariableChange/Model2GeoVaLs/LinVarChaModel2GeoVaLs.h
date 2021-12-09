@@ -15,7 +15,7 @@
 
 #include "oops/util/Printable.h"
 
-#include "VarChaModel2GeoVaLsFortran.h"
+#include "wrf_hydro_nwm_jedi/LinearVariableChange/Base/LinearVariableChangeBase.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 
@@ -32,10 +32,9 @@ namespace wrf_hydro_nwm_jedi {
 
 // -------------------------------------------------------------------------------------------------
 
-class LinVarChaModel2GeoVaLs: public util::Printable,
-                          private util::ObjectCounter<LinVarChaModel2GeoVaLs> {
+class LinVarChaModel2GeoVaLs: public LinearVariableChangeBase {
  public:
-  static const std::string classname() {return "wrf_hydro_nwm_jedi::LinVarChaModel2GeoVaLs";}
+  const std::string classname() {return "wrf_hydro_nwm_jedi::LinVarChaModel2GeoVaLs";}
 
   explicit LinVarChaModel2GeoVaLs(const State &,
                                   const State &,
