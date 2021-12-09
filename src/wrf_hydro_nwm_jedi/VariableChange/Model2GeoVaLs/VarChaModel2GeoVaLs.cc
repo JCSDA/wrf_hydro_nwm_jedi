@@ -28,10 +28,18 @@ static VariableChangeMaker<VarChaModel2GeoVaLs> makerVarChaDefault_("default");
 // -------------------------------------------------------------------------------------------------
 
 VarChaModel2GeoVaLs::VarChaModel2GeoVaLs(const Geometry & geom, const eckit::Configuration & conf) :
-  geom_(new Geometry(geom)) {
+  geom_(new Geometry(geom)) 
+{
+  oops::Log::trace() << "VarChaModel2GeoVaLs::VarChaModel2GeoVaLs start" << std::endl;
+  const eckit::Configuration * configc = &conf;
+  wrf_hydro_nwm_jedi_varchamodel2geovals_create_f90(keyFtnConfig_, geom_->toFortran(), &configc);
+  oops::Log::trace() << "VarChaModel2GeoVaLs::VarChaModel2GeoVaLs done" << std::endl;
 }
 
-VarChaModel2GeoVaLs::~VarChaModel2GeoVaLs() {}
+VarChaModel2GeoVaLs::~VarChaModel2GeoVaLs() {
+  wrf_hydro_nwm_jedi_varchamodel2geovals_delete_f90(keyFtnConfig_);
+  oops::Log::trace() << "ChangeFV3JEDI destructed" << std::endl;
+}
 
 void VarChaModel2GeoVaLs::changeVar(const State & xin,
                                          State & xout) const {
