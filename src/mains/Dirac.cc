@@ -5,18 +5,15 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "oops/runs/Dirac.h"
 #include "oops/runs/Run.h"
-#include "oops/runs/Variational.h"
 #include "saber/oops/instantiateCovarFactory.h"
-#include "ufo/instantiateObsFilterFactory.h"
-#include "ufo/ObsTraits.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
 
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   saber::instantiateCovarFactory<wrf_hydro_nwm_jedi::Traits>();
-  ufo::instantiateObsFilterFactory();
-  oops::Variational<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> var;
-  return run.execute(var);
+  oops::Dirac<wrf_hydro_nwm_jedi::Traits> dir;
+  return run.execute(dir);
 }

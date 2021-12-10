@@ -7,16 +7,11 @@
 
 module wrf_hydro_nwm_jedi_increment_interface_mod
 
+use atlas_module, only: atlas_fieldset
 use datetime_mod
 use duration_mod
-use iso_c_binding
+use iso_c_binding, only: c_int, c_double, c_float, c_ptr, c_char
 use oops_variables_mod,         only: oops_variables
-use fckit_configuration_module, only: fckit_configuration
-
-use datetime_mod
-use duration_mod
-use iso_c_binding, only: c_int, c_float, c_ptr, c_char
-use oops_variables_mod
 use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_increment_mod, only: &
@@ -27,15 +22,17 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      axpy_inc, &
      dot_prod, &
      schur_prod, &
-     random_normal
+     random_normal, &
+     dirac, &
+     set_atlas, &
+     from_atlas, &
+     to_atlas
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: &
      wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
-
-!use unstructured_grid_mod,     only: unstructured_grid, unstructured_grid_registry
 
 !GetValues
 use ufo_locations_mod
@@ -89,6 +86,51 @@ subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c( &
 
   call create_from_other(self, other)
 end subroutine wrf_hydro_nwm_jedi_increment_create_from_other_c
+
+
+subroutine wrf_hydro_nwm_jedi_increment_read_file_c( &
+     c_key_geom, c_key_inc, c_conf, c_dt) &
+     bind(c,name='wrf_hydro_nwm_jedi_increment_read_file_f90')
+
+  implicit none
+  integer(c_int), intent(in) :: c_key_geom !< Geometry
+  integer(c_int), intent(in) :: c_key_inc  !< Increment
+  type(c_ptr), intent(in)    :: c_conf     !< Configuration
+  type(c_ptr), intent(inout) :: c_dt       !< DateTime
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(datetime) :: f_dt
+  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+
+  write(*,*) "Key_geom from read_increment_from_file", c_key_geom
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, self)
+  call c_f_datetime(c_dt, f_dt)
+  call read_state_from_file(self, c_conf, f_dt)
+  call f_c_datetime(f_dt, c_dt)
+end subroutine wrf_hydro_nwm_jedi_increment_read_file_c
+
+
+subroutine wrf_hydro_nwm_jedi_increment_write_file_c( &
+     c_key_geom, c_key_inc, c_conf, c_dt) &
+     bind(c,name='wrf_hydro_nwm_jedi_increment_write_file_f90')
+
+  implicit none
+  integer(c_int), intent(in) :: c_key_geom !< Geometry
+  integer(c_int), intent(in) :: c_key_inc  !< Increment
+  type(c_ptr), intent(in)    :: c_conf     !< Configuration
+  type(c_ptr), intent(inout) :: c_dt       !< DateTime
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(datetime) :: fdate
+  type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, self)
+  call c_f_datetime(c_dt, fdate)
+  call write_state_to_file(self, c_conf, fdate)
+end subroutine wrf_hydro_nwm_jedi_increment_write_file_c
 
 
 subroutine wrf_hydro_nwm_jedi_increment_random_c(c_key_self) &
@@ -274,6 +316,20 @@ subroutine wrf_hydro_nwm_jedi_increment_ones_c(c_key_self) &
 end subroutine wrf_hydro_nwm_jedi_increment_ones_c
 
 
+subroutine wrf_hydro_nwm_jedi_increment_dirac_c(c_key_self, c_conf) &
+     bind(c, name='wrf_hydro_nwm_jedi_increment_dirac_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_self
+  type(c_ptr),    intent(in) :: c_conf
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: self
+  type(fckit_configuration) :: f_conf
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+  f_conf = fckit_configuration(c_conf)
+  call dirac(self, f_conf)
+end subroutine wrf_hydro_nwm_jedi_increment_dirac_c
+
+
 function wrf_hydro_nwm_jedi_increment_rms_c(c_key_inc) &
      bind(c, name='wrf_hydro_nwm_jedi_increment_rms_f90')
   implicit none
@@ -310,82 +366,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 !   call sw_increment_registry%remove(c_key_self)
 ! end subroutine sw_increment_delete_c
 
-
-! subroutine sw_increment_dirac_c(c_key_self, c_conf, c_key_geom) bind(c, name='sw_increment_dirac_f90')
-!   implicit none
-!   integer(c_int), intent(in) :: c_key_self
-!   type(c_ptr),    intent(in) :: c_conf     !< Configuration
-!   integer(c_int), intent(in) :: c_key_geom !< Geometry
-
-!   type(shallow_water_state_type),    pointer :: self
-!   type(shallow_water_geometry_type), pointer :: geom
-
-!   call sw_geom_registry%get(c_key_geom, geom)
-!   call sw_increment_registry%get(c_key_self, self)
-!   call dirac(self, c_conf, geom)
-! end subroutine sw_increment_dirac_c
-
-
-! subroutine sw_increment_ug_coord_c(c_key_inc, c_key_ug, c_key_geom) bind (c,name='sw_increment_ug_coord_f90')
-!   implicit none
-!   integer(c_int), intent(in) :: c_key_inc
-!   integer(c_int), intent(in) :: c_key_ug
-!   integer(c_int), intent(in) :: c_key_geom !< Geometry
-
-!   type(shallow_water_state_type),     pointer :: inc
-!   type(unstructured_grid),            pointer :: ug
-!   type(shallow_water_geometry_type),  pointer :: geom
-
-!   call sw_increment_registry%get(c_key_inc,inc)
-!   call unstructured_grid_registry%get(c_key_ug,ug)
-!   call sw_geom_registry%get(c_key_geom, geom)
-
-!   call ug_coord(inc, ug, geom)
-! end subroutine sw_increment_ug_coord_c
-
-
-! subroutine sw_increment_increment_to_ug_c(c_key_inc, c_key_ug, c_its) bind (c,name='sw_increment_increment_to_ug_f90')
-!   implicit none
-!   integer(c_int), intent(in) :: c_key_inc
-!   integer(c_int), intent(in) :: c_key_ug
-!   integer(c_int), intent(in) :: c_its
-
-!   type(shallow_water_state_type), pointer :: inc
-!   type(unstructured_grid),        pointer :: ug
-!   integer                                 :: its
-
-!   its = c_its+1
-
-!   call sw_increment_registry%get(c_key_inc,inc)
-!   call unstructured_grid_registry%get(c_key_ug,ug)
-
-!   call increment_to_ug(inc, ug, its)
-
-! end subroutine sw_increment_increment_to_ug_c
-
-
-! subroutine sw_increment_increment_from_ug_c(c_key_inc, c_key_ug, c_its) bind (c,name='sw_increment_increment_from_ug_f90')
-
-!   implicit none
-
-!   integer(c_int), intent(in) :: c_key_inc
-!   integer(c_int), intent(in) :: c_key_ug
-!   integer(c_int), intent(in) :: c_its
-
-!   type(shallow_water_state_type), pointer :: inc
-!   type(unstructured_grid),        pointer :: ug
-!   integer                                 :: its
-
-!   its = c_its+1
-
-!   call sw_increment_registry%get(c_key_inc,inc)
-!   call unstructured_grid_registry%get(c_key_ug,ug)
-
-!   call increment_from_ug(inc, ug, its)
-
-! end subroutine sw_increment_increment_from_ug_c
-
-
 ! subroutine sw_increment_change_resol_c(c_key_inc, c_key_rhs) bind(c, name='sw_increment_change_resol_f90')
 
 !   implicit none
@@ -400,44 +380,6 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 
 !   call change_resol(inc, rhs)
 ! end subroutine sw_increment_change_resol_c
-
-
-! subroutine sw_increment_read_file_c(c_key_geom, c_key_inc, c_conf, c_dt) bind(c, name='sw_increment_read_file_f90')
-!   implicit none
-
-!   integer(c_int), intent(   in) :: c_key_inc  !< Increment
-!   type(c_ptr),    intent(   in) :: c_conf     !< Configuration
-!   type(c_ptr),    intent(inout) :: c_dt       !< DateTime
-!   integer(c_int), intent(   in) :: c_key_geom !< Geometry
-
-!   type(shallow_water_state_type),    pointer :: inc
-!   type(datetime)                             :: fdate
-!   type(shallow_water_geometry_type), pointer :: geom
-
-!   call sw_geom_registry%get(c_key_geom, geom)
-!   call sw_increment_registry%get(c_key_inc, inc)
-!   call c_f_datetime(c_dt, fdate)
-!   call read_file(geom, inc, c_conf, fdate)
-! end subroutine sw_increment_read_file_c
-
-
-! subroutine sw_increment_write_file_c(c_key_geom, c_key_inc, c_conf, c_dt) bind(c, name='sw_increment_write_file_f90')
-!   implicit none
-
-!   integer(c_int), intent(in) :: c_key_inc  !< Increment
-!   type(c_ptr),    intent(in) :: c_conf     !< Configuration
-!   type(c_ptr),    intent(in) :: c_dt       !< DateTime
-!   integer(c_int), intent(in) :: c_key_geom !< Geometry
-
-!   type(shallow_water_state_type),    pointer :: inc
-!   type(datetime)                             :: fdate
-!   type(shallow_water_geometry_type), pointer :: geom
-
-!   call sw_geom_registry%get(c_key_geom, geom)
-!   call sw_increment_registry%get(c_key_inc, inc)
-!   call c_f_datetime(c_dt, fdate)
-!   call write_file(geom, inc, c_conf, fdate)
-! end subroutine sw_increment_write_file_c
 
 
 ! subroutine sw_increment_gpnorm_c(c_key_inc, kf, pstat) bind(c, name='sw_increment_gpnorm_f90')
@@ -481,7 +423,7 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 ! end subroutine sw_increment_getpoint_c
 
 
-! subroutine qg_fields_setpoint_c(c_key_self, c_key_geoiter, c_values) bind(c, name='sw_increment_setpoint_f90')
+! subroutine wrf_hydro_nwm_jedi_increment_setpoint_c(c_key_self, c_key_geoiter, c_values) bind(c, name='sw_increment_setpoint_f90')
 !   implicit none
 !   ! Passed variables
 !   integer(c_int), intent(in) :: c_key_self        !< Increment
@@ -498,7 +440,7 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 
 !   ! Call Fortran
 !   call setpoint(self, geoiter, c_values)
-! end subroutine qg_fields_setpoint_c
+! end subroutine wrf_hydro_nwm_jedi_increment_setpoint_c
 
 
 ! subroutine sw_increment_sizes_c(c_key_self, nx, ny, nv) bind(c, name='sw_increment_sizes_f90')
@@ -539,5 +481,58 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 !   call jnormgrad(self, geom, state, c_conf)
 ! end subroutine sw_increment_jnormgrad_c
 
+subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_set_atlas_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_inc
+  integer(c_int), intent(in) :: c_key_geom
+  type(c_ptr), value, intent(in) :: c_vars
+  type(c_ptr), intent(in), value :: c_afieldset
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: inc
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
+  type(oops_variables) :: vars
+  type(atlas_fieldset) :: afieldset
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+  vars = oops_variables(c_vars)
+  afieldset = atlas_fieldset(c_afieldset)
+  call set_atlas(inc, geom, vars, afieldset)
+end subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c
+
+subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_to_atlas_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_inc
+  integer(c_int), intent(in) :: c_key_geom
+  type(c_ptr), value, intent(in) :: c_vars
+  type(c_ptr), intent(in), value :: c_afieldset
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: inc
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
+  type(oops_variables) :: vars
+  type(atlas_fieldset) :: afieldset
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+  vars = oops_variables(c_vars)
+  afieldset = atlas_fieldset(c_afieldset)
+  call to_atlas(inc, geom, vars, afieldset)
+end subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c
+
+subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c(c_key_inc, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_from_atlas_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_inc
+  type(c_ptr), value, intent(in) :: c_vars
+  type(c_ptr), intent(in), value :: c_afieldset
+
+  type(wrf_hydro_nwm_jedi_state), pointer :: inc
+  type(oops_variables) :: vars
+  type(atlas_fieldset) :: afieldset
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
+  vars = oops_variables(c_vars)
+  afieldset = atlas_fieldset(c_afieldset)
+  call from_atlas(inc, vars, afieldset)
+end subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c
 
 end module wrf_hydro_nwm_jedi_increment_interface_mod

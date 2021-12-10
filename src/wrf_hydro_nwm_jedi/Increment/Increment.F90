@@ -5,6 +5,7 @@
 
 module wrf_hydro_nwm_jedi_increment_mod
 
+use atlas_module, only: atlas_fieldset
 use iso_c_binding, only: c_char, c_new_line
 use fckit_configuration_module, only: fckit_configuration
 use datetime_mod
@@ -38,7 +39,11 @@ public :: &
      schur_prod, &
      random_normal, &
      zeros, &
-     ones
+     ones, &
+     dirac, &
+     set_atlas, &
+     to_atlas, &
+     from_atlas
 ! create_from_other, &
 ! delete, &
 ! copy, &
@@ -175,6 +180,14 @@ subroutine ones(self)
 end subroutine ones
 
 
+subroutine dirac(self, f_conf)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(fckit_configuration) :: f_conf
+  call self%fields_obj%dirac(f_conf)
+end subroutine dirac
+
+
 subroutine schur_prod(self, rhs)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
@@ -182,5 +195,33 @@ subroutine schur_prod(self, rhs)
   call self%fields_obj%schur_prod(rhs%fields_obj)
 end subroutine schur_prod
 
+
+subroutine set_atlas(self, geom, vars, afieldset)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(inout) :: afieldset
+  call self%fields_obj%set_atlas(geom, vars, afieldset)
+end subroutine set_atlas
+
+
+subroutine to_atlas(self, geom, vars, afieldset)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(inout) :: afieldset
+  call self%fields_obj%to_atlas(geom, vars, afieldset)
+end subroutine to_atlas
+
+
+subroutine from_atlas(self, vars, afieldset)
+  implicit none
+  type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(in) :: afieldset
+  call self%fields_obj%from_atlas(vars, afieldset)
+end subroutine from_atlas
 
 end module wrf_hydro_nwm_jedi_increment_mod

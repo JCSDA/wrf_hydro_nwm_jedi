@@ -52,17 +52,17 @@ namespace wrf_hydro_nwm_jedi {
 // -------------------------------------------------------------------------------------------------
 
   class GetValues : public util::Printable, private util::ObjectCounter<GetValues> {
-  public:
+   public:
     static const std::string classname() {return "wrf_hydro_nwm_jedi::GetValues";}
-    
-    GetValues(const Geometry &, const ufo::Locations & locs,
-	      const eckit::Configuration & config);
-    virtual ~GetValues();
-    
-    void fillGeoVaLs(const State &, const util::DateTime &, const util::DateTime &,
-		     ufo::GeoVaLs &) const;
 
-  private:
+    GetValues(const Geometry &, const ufo::Locations & locs,
+              const eckit::Configuration & config);
+    virtual ~GetValues();
+
+    void fillGeoVaLs(const State &, const util::DateTime &, const util::DateTime &,
+                     ufo::GeoVaLs &) const;
+
+   private:
     void print(std::ostream &) const;
     F90getvalues keyGetValues_;
     ufo::Locations locs_;

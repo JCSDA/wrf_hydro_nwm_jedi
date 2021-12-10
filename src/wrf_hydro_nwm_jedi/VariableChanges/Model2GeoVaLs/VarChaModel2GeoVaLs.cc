@@ -9,9 +9,9 @@
 #include <string>
 
 #include "eckit/config/Configuration.h"
+#include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 #include "oops/util/Timer.h"
-#include "oops/util/abor1_cpp.h"
 
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
@@ -27,7 +27,7 @@ static oops::VariableChangeMaker<Traits, VarChaModel2GeoVaLs> makerVarChaDefault
 // -------------------------------------------------------------------------------------------------
 
 VarChaModel2GeoVaLs::VarChaModel2GeoVaLs(const Geometry & geom, const eckit::Configuration & conf) :
-  geom_(new Geometry(geom)) 
+  geom_(new Geometry(geom))
 {
   oops::Log::trace() << "VarChaModel2GeoVaLs::VarChaModel2GeoVaLs start" << std::endl;
   const eckit::Configuration * configc = &conf;
@@ -39,10 +39,13 @@ VarChaModel2GeoVaLs::~VarChaModel2GeoVaLs() {
   wrf_hydro_nwm_jedi_varchamodel2geovals_delete_f90(keyFtnConfig_);
   oops::Log::trace() << "ChangeFV3JEDI destructed" << std::endl;
 }
-void VarChaModel2GeoVaLs::changeVar(const State & xin, State & xout) const {
+void VarChaModel2GeoVaLs::changeVar(const State & xin,
+                                         State & xout) const {
   oops::Log::trace() << classname() << "VarChaModel2GeoVaLs::changeVar starting" << std::endl;
-  wrf_hydro_nwm_jedi_varchamodel2geovals_changevar_f90(keyFtnConfig_, geom_->toFortran(),
-                                   xin.toFortran(), xout.toFortran());
+  wrf_hydro_nwm_jedi_varchamodel2geovals_changevar_f90(keyFtnConfig_,
+                                                       geom_->toFortran(),
+                                                       xin.toFortran(),
+                                                       xout.toFortran());
   xout.validTime() = xin.validTime();
   oops::Log::trace() << classname() << "VarChaModel2GeoVaLs::changeVar done" << std::endl;
   }

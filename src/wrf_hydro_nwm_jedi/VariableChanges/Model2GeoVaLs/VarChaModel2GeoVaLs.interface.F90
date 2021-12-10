@@ -15,7 +15,8 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     use wrf_hydro_nwm_jedi_geometry_mod,            only: wrf_hydro_nwm_jedi_geometry
     use wrf_hydro_nwm_jedi_geometry_mod_c,          only: wrf_hydro_nwm_jedi_geometry_registry
-    use wrf_hydro_nwm_jedi_state_mod,               only: wrf_hydro_nwm_jedi_state
+    use wrf_hydro_nwm_jedi_increment_registry_mod,  only: wrf_hydro_nwm_jedi_increment_registry
+    use wrf_hydro_nwm_jedi_state_mod,               only: wrf_hydro_nwm_jedi_state, copy
     use wrf_hydro_nwm_jedi_state_interface_mod,     only: wrf_hydro_nwm_jedi_state_registry
     use wrf_hydro_nwm_jedi_varchamodel2geovals_mod, only: wrf_hydro_nwm_jedi_varchamodel2geovals
      
@@ -127,6 +128,29 @@ module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod
     
     end subroutine c_wrf_hydro_nwm_jedi_varchamodel2geovals_changevar
     
+    !-------------------------------------------------------------------------------
+!> C++ interface for linear change of variables from geovals to model
+!!
+!! Only the identity operator is need for the linear variables.
+!! \throws abor1_ftn aborts if the field name cannot be in the "getval_name*"
+!! section of the variable metadata
+    subroutine c_wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident(c_key_geom, c_key_dxin, c_key_dxout) &
+    bind(c,name='wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90')
+    
+    integer(c_int), intent(in) :: c_key_geom, c_key_dxin, c_key_dxout
+    
+    type(wrf_hydro_nwm_jedi_geometry),            pointer :: geom
+    type(wrf_hydro_nwm_jedi_state),           pointer :: dxin, dxout
+    
+    call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+    call wrf_hydro_nwm_jedi_increment_registry%get(c_key_dxin, dxin)
+    call wrf_hydro_nwm_jedi_increment_registry%get(c_key_dxout, dxout)
+  
+    ! Implementation
+    ! --------------
+    call copy(dxout, dxin)
+  
+    end subroutine c_wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident
     ! --------------------------------------------------------------------------------------------------
     
     end module wrf_hydro_nwm_jedi_varchamodel2geovals_interface_mod

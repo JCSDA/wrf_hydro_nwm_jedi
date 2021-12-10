@@ -42,6 +42,8 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLsFortran.h
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.interface.F90
   VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.F90
+  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.cc
+  VariableChanges/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h
 
   # # LinearGetValues
   #LinearGetValues/LinearGetValues.h
@@ -89,7 +91,7 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
 ecbuild_add_library( TARGET   wrf_hydro_nwm_jedi
                      SOURCES  ${wrf_hydro_nwm_jedi_src_files}
                      LIBS     ${NETCDF_LIBRARIES}
-                              eckit eckit_mpi fckit oops ioda ufo
+                              eckit eckit_mpi fckit oops saber ioda ufo
                      INSTALL_HEADERS LISTED
                      LINKER_LANGUAGE ${WRF_HYDRO_NWM_JEDI_LINKER_LANGUAGE}
                     )
