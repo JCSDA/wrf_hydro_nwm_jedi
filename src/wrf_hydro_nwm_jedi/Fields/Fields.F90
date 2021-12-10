@@ -110,7 +110,7 @@ abstract interface
      integer, dimension(2), intent(in) :: ncid_vector
    end subroutine write_file_interface
 
-   function get_value_field_interface(self, ind) result(val)
+   pure function get_value_field_interface(self, ind) result(val)
      use iso_c_binding, only : c_float
      import base_field, indices
      class(base_field), intent(in) :: self
@@ -715,7 +715,7 @@ end subroutine search_field
 !-----------------------------------------------------------------------------
 ! Get value method
 
-function get_value_1d(self, ind) result(val)
+pure function get_value_1d(self, ind) result(val)
   class(field_1d), intent(in) :: self
   type(indices), intent(in) :: ind
 
@@ -724,7 +724,7 @@ function get_value_1d(self, ind) result(val)
 end function get_value_1d
 
 
-function get_value_2d(self, ind) result(val)
+pure function get_value_2d(self, ind) result(val)
   class(field_2d), intent(in) :: self
   type(indices), intent(in) :: ind
 
@@ -733,7 +733,7 @@ function get_value_2d(self, ind) result(val)
 end function get_value_2d
 
 
-function get_value_3d(self, ind) result(val)
+pure function get_value_3d(self, ind) result(val)
   class(field_3d), intent(in) :: self
   type(indices), intent(in) :: ind
 
@@ -783,7 +783,7 @@ subroutine checksame(self, other, method)
   integer :: var
 
   if (self%nf .ne. other%nf) then
-!   write(*,*) self%nf, other,%nf 
+!   write(*,*) self%nf, other,%nf
 !   call abor1_ftn(trim(method)//"(checksame): Different number of fields")
   endif
 
