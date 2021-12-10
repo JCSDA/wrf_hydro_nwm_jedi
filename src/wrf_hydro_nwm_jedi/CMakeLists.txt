@@ -50,6 +50,9 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # LinearVariableChange
   LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.cc
   LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.h
+  LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.F90
+  LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLs.interface.F90
+  LinearVariableChange/Model2GeoVaLs/LinVarChaModel2GeoVaLsFortran.h
   LinearVariableChange/Base/LinearVariableChangeBase.cc
   LinearVariableChange/Base/LinearVariableChangeBase.h
   LinearVariableChange/LinearVariableChange.cc
