@@ -30,7 +30,12 @@ cost function:
         strategy: specific_univariate
         load_nicas_local: true
 
-#  variable change: 'Identity'
+    linear variable change:
+      linear variable changes:
+      - linear variable change name: 'default'
+        input variables: *ana_vars
+        output variables: *ana_vars    
+  
   observations:
   - obs error:
       covariance model: 'diagonal'

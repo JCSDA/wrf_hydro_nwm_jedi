@@ -48,9 +48,10 @@ LinVarChaModel2GeoVaLs::~LinVarChaModel2GeoVaLs() {
 
 void LinVarChaModel2GeoVaLs::multiply(const Increment &dxin,
                                             Increment &dxout) const {
-  wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90(geom_->toFortran(),
-                                                          dxin.toFortran(),
-                                                          dxout.toFortran());
+  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiply not implemented");                                          
+//  wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90(geom_->toFortran(),
+//                                                          dxin.toFortran(),
+//                                                          dxout.toFortran());
 }
 
 // -----------------------------------------------------------------------------
@@ -64,9 +65,10 @@ void LinVarChaModel2GeoVaLs::multiplyInverse(const Increment &,
 
 void LinVarChaModel2GeoVaLs::multiplyAD(const Increment &dxin,
                                               Increment &dxout) const {
-  wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90(geom_->toFortran(),
-                                                          dxin.toFortran(),
-                                                          dxout.toFortran());
+  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiply not implemented");                                                 
+//  wrf_hydro_nwm_jedi_model2geovals_linear_changevar_Ident_f90(geom_->toFortran(),
+//                                                          dxin.toFortran(),
+//                                                          dxout.toFortran());
 }
 
 // -----------------------------------------------------------------------------
