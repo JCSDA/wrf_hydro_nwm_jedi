@@ -112,9 +112,9 @@ integer(c_int), intent(in) :: c_key_dxm
 integer(c_int), intent(in) :: c_key_dxg
 
 type(wrf_hydro_nwm_jedi_lvc_model2geovals), pointer :: self
-type(wrf_hydro_nwm_jedi_geometry),              pointer :: geom
-type(wrf_hydro_nwm_jedi_state),         pointer :: dxm
-type(wrf_hydro_nwm_jedi_state),         pointer :: dxg
+type(wrf_hydro_nwm_jedi_geometry),          pointer :: geom
+type(wrf_hydro_nwm_jedi_state),             pointer :: dxm
+type(wrf_hydro_nwm_jedi_state),             pointer :: dxg
 
 ! Linked list
 ! -----------

@@ -14,32 +14,27 @@
 
 namespace wrf_hydro_nwm_jedi {
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-LinearVariableChangeFactory::LinearVariableChangeFactory(
-                                                     const std::string & name) {
+LinearVariableChangeFactory::LinearVariableChangeFactory(const std::string & name) {
   if (getMakers().find(name) != getMakers().end()) {
-    oops::Log::error() << name
-                  << " already registered in wrf_hydro_nwm_jedi::LinearVariableChangeFactory."
-                  << std::endl;
+    oops::Log::error() << name << " already registered in whj_jedi::LinearVariableChangeFactory."
+                       << std::endl;
     ABORT("Element already registered in wrf_hydro_nwm_jedi::LinearVariableChangeFactory.");
   }
   getMakers()[name] = this;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-LinearVariableChangeBase * LinearVariableChangeFactory::create(
-    const State & xbg, const State & xfg, const Geometry & geom,
-    const LinearVariableChangeParametersBase & params) {
-  oops::Log::trace() << "LinearVariableChangeBase::create starting"
-                     << std::endl;
+LinearVariableChangeBase * LinearVariableChangeFactory::create(const State & xbg,
+     const State & xfg, const Geometry & geom, const LinearVariableChangeParametersBase & params) {
+  oops::Log::trace() << "LinearVariableChangeBase::create starting" << std::endl;
   const std::string &id = params.name.value().value();
   typename std::map<std::string, LinearVariableChangeFactory*>::iterator
-                                                    jloc = getMakers().find(id);
+                                                                        jloc = getMakers().find(id);
   if (jloc == getMakers().end()) {
-    oops::Log::error() << id
-                      << " does not exist in wrf_hydro_nwm_jedi::LinearVariableChangeFactory."
+    oops::Log::error() << id << " does not exist in wrf_hydro_jedi::LinearVariableChangeFactory."
                        << std::endl;
     ABORT("Element does not exist in wrf_hydro_nwm_jedi::LinearVariableChangeFactory.");
   }
@@ -48,19 +43,18 @@ LinearVariableChangeBase * LinearVariableChangeFactory::create(
   return ptr;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 std::unique_ptr<LinearVariableChangeParametersBase>
 LinearVariableChangeFactory::createParameters(const std::string &name) {
   typename std::map<std::string, LinearVariableChangeFactory*>::iterator it =
       getMakers().find(name);
   if (it == getMakers().end()) {
-    throw std::runtime_error(name
-                      + " does not exist in wrf_hydro_nwm_jedi::LinearVariableChangeFactory");
+    throw std::runtime_error(name + " does not exist in wh_jedi::LinearVariableChangeFactory");
   }
   return it->second->makeParameters();
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 }  // namespace wrf_hydro_nwm_jedi

@@ -22,132 +22,95 @@ namespace wrf_hydro_nwm_jedi {
 
 // -----------------------------------------------------------------------------
 
-LinearVariableChange::LinearVariableChange(const Geometry & geom,
-                                           const Parameters_ & params)
-  : geom_(new Geometry(geom)), params_(params), linVarChas_() {}
+LinearVariableChange::LinearVariableChange(const Geometry & geom, const Parameters_ & params)
+  : geom_(new Geometry(geom)), params_(params), linearVariableChange_() {}
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 LinearVariableChange::~LinearVariableChange() {}
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 void LinearVariableChange::setTrajectory(const State & xbg, const State & xfg) {
-  Log::trace() << "LinearVariableChange::setTrajectory starting" << std::endl;
-  // Create the linear variable change(s)
-  for (const LinearVariableChangeParametersWrapper & linVarChaParWra :
-       params_.linearVariableChangesWrapper.value()) {
-    // Get parameters for this linear variable change
-    const LinearVariableChangeParametersBase & linVarChaPar =
-           linVarChaParWra.linearVariableChangeParameters;
-    // Add linear variable change to vector
-    linVarChas_.push_back(LinearVariableChangeFactory::create(xbg, xfg, *geom_,
-                          linVarChaPar));
-  }
-  Log::trace() << "LinearVariableChange::setTrajectory done" << std::endl;
+  oops::Log::trace() << "LinearVariableChange::setTrajectory starting" << std::endl;
+  // Create the variable change
+  linearVariableChange_.reset(LinearVariableChangeFactory::create(xbg, xfg, *geom_,
+             params_.linearVariableChangeParameters.value()));
+  oops::Log::trace() << "LinearVariableChange::setTrajectory done" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiply(Increment & dx,
-                                    const oops::Variables & vars) const {
-  Log::trace() << "LinearVariableChange::multiply starting" << std::endl;
-
-  // Check if the incoming state has all the variables
-  // const bool hasAllFields = dx.hasFields(vars);
-
-  // If all variables already in incoming state just remove the no longer
-  // needed fields
-  // if (hasAllFields) {
-  //   dx.updateFields(vars);
-  //   oops::Log::trace() << "VariableChange::changeVar done (identity)"
-  //                      << std::endl;
-  //   return;
-  // }
+void LinearVariableChange::multiply(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::multiply starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
-  // Call variable change(s)
-  for (icst_ it = linVarChas_.begin(); it != linVarChas_.end(); ++it) {
-    dxout.zero();
-    it->multiply(dx, dxout);
-    dx = dxout;
-  }
-
-  // Allocate any extra fields and remove fields no longer needed
-  // dx.updateFields(vars);
+  // Call variable change
+  linearVariableChange_->multiply(dx, dxout);
 
   // Copy data from temporary state
-  // dx = dxout;
+  dx = dxout;
 
-  Log::trace() << "LinearVariableChange::multiply done" << dx << std::endl;
+  oops::Log::trace() << "LinearVariableChange::multiply done" << dx << std::endl;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyInverse(Increment & dx,
-                                           const oops::Variables & vars) const {
-  Log::trace() << "LinearVariableChange::multiplyInverse starting" << vars << std::endl;
+void LinearVariableChange::multiplyInverse(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::multiplyInverse starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
-  // Call variable change(s)
-  for (ircst_ it = linVarChas_.rbegin(); it != linVarChas_.rend(); ++it) {
-    dxout.zero();
-    it->multiplyInverse(dx, dxout);
-    dx = dxout;
-  }
+  // Call variable change
+  linearVariableChange_->multiplyInverse(dx, dxout);
 
-  Log::trace() << "LinearVariableChange::multiplyInverse done" << std::endl;
+  // Copy data from temporary state
+  dx = dxout;
+
+  oops::Log::trace() << "LinearVariableChange::multiplyInverse done" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyAD(Increment & dx,
-                                           const oops::Variables & vars) const {
-  Log::trace() << "LinearVariableChange::multiplyAD starting" << std::endl;
+void LinearVariableChange::multiplyAD(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::multiplyAD starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
-  // Call variable change(s)
-  for (ircst_ it = linVarChas_.rbegin(); it != linVarChas_.rend(); ++it) {
-    dxout.zero();
-    it->multiplyAD(dx, dxout);
-    dx = dxout;
-  }
+  // Call variable change
+  linearVariableChange_->multiplyAD(dx, dxout);
 
-  Log::trace() << "LinearVariableChange::multiplyAD done" << std::endl;
+  // Copy data from temporary state
+  dx = dxout;
+
+  oops::Log::trace() << "LinearVariableChange::multiplyAD done" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyInverseAD(Increment & dx,
-                                          const oops::Variables & vars) const {
-  Log::trace() << "LinearVariableChange::multiplyInverseAD starting"
-               << std::endl;
+void LinearVariableChange::multiplyInverseAD(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::multiplyInverseAD starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
-  // Call variable change(s)
-  for (icst_ it = linVarChas_.begin(); it != linVarChas_.end(); ++it) {
-    dxout.zero();
-    it->multiplyInverseAD(dx, dxout);
-    dx = dxout;
-  }
+  // Call variable change
+  linearVariableChange_->multiplyInverseAD(dx, dxout);
 
-  Log::trace() << "LinearVariableChange::multiplyInverseAD done" << std::endl;
+  // Copy data from temporary state
+  dx = dxout;
+
+  oops::Log::trace() << "LinearVariableChange::multiplyInverseAD done" << std::endl;
 }
 
-// -----------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------
 
 void LinearVariableChange::print(std::ostream & os) const {
-  for (icst_ it = linVarChas_.begin(); it != linVarChas_.end(); ++it) {
-    os << *it;
-  }
+  os << "WRF-Hydro variable change";
 }
 
 // -----------------------------------------------------------------------------

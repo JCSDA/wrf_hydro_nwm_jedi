@@ -24,7 +24,8 @@ static VariableChangeMaker<VarChaModel2GeoVaLs> makerVarChaModel2GeoVaLs_("Model
 static VariableChangeMaker<VarChaModel2GeoVaLs> makerVarChaDefault_("default");
 // -------------------------------------------------------------------------------------------------
 
-VarChaModel2GeoVaLs::VarChaModel2GeoVaLs(const Geometry & geom, const eckit::LocalConfiguration & conf) 
+VarChaModel2GeoVaLs::VarChaModel2GeoVaLs(const Geometry & geom,
+                                         const eckit::LocalConfiguration & conf)
   : VariableChangeBase(), geom_(new Geometry(geom))
 {
   oops::Log::trace() << "VarChaModel2GeoVaLs::VarChaModel2GeoVaLs start" << std::endl;

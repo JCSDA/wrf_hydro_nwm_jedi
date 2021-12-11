@@ -13,7 +13,7 @@ use fckit_log_module,           only: fckit_log
 use datetime_mod
 
 use wrf_hydro_nwm_jedi_geometry_mod,      only: wrf_hydro_nwm_jedi_geometry
-use wrf_hydro_nwm_jedi_state_mod,         only: wrf_hydro_nwm_jedi_state
+use wrf_hydro_nwm_jedi_state_mod,         only: wrf_hydro_nwm_jedi_state, copy
 
 implicit none
 
@@ -59,10 +59,12 @@ subroutine multiply(self, geom, dxm, dxg)
 
 class(wrf_hydro_nwm_jedi_lvc_model2geovals), intent(inout) :: self
 type(wrf_hydro_nwm_jedi_geometry),           intent(inout) :: geom
-type(wrf_hydro_nwm_jedi_state),          intent(in)    :: dxm
-type(wrf_hydro_nwm_jedi_state),          intent(inout) :: dxg
+type(wrf_hydro_nwm_jedi_state),              intent(in)    :: dxm
+type(wrf_hydro_nwm_jedi_state),              intent(inout) :: dxg
 
-    call abor1_ftn("wrf_hydro_nwm_jedi_lvc_model2geovals_mod.multiply not implemented.")
+!    call abor1_ftn("wrf_hydro_nwm_jedi_lvc_model2geovals_mod.multiply not implemented.")
+    
+    call copy(dxg, dxm)
 
 end subroutine multiply
 
@@ -71,11 +73,13 @@ end subroutine multiply
 subroutine multiplyadjoint(self, geom, dxg, dxm)
 
 class(wrf_hydro_nwm_jedi_lvc_model2geovals), intent(inout) :: self
-type(wrf_hydro_nwm_jedi_geometry),               intent(inout) :: geom
-type(wrf_hydro_nwm_jedi_state),          intent(in)    :: dxg
-type(wrf_hydro_nwm_jedi_state),          intent(inout) :: dxm
+type(wrf_hydro_nwm_jedi_geometry),           intent(inout) :: geom
+type(wrf_hydro_nwm_jedi_state),              intent(in)    :: dxg
+type(wrf_hydro_nwm_jedi_state),              intent(inout) :: dxm
 
-    call abor1_ftn("wrf_hydro_nwm_jedi_lvc_model2geovals_mod.multiplyadjoint not implemented.")
+!    call abor1_ftn("wrf_hydro_nwm_jedi_lvc_model2geovals_mod.multiplyadjoint not implemented.")
+
+    call copy(dxm, dxg)
 
 end subroutine multiplyadjoint
 

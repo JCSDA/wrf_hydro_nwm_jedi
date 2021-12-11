@@ -27,27 +27,11 @@ namespace wrf_hydro_nwm_jedi {
 
 // -----------------------------------------------------------------------------
 
-class LinearVariableChangeParameters :
-  public oops::LinearVariableChangeParametersBase {
-  OOPS_CONCRETE_PARAMETERS(LinearVariableChangeParameters,
-                           oops::LinearVariableChangeParametersBase)
- public:
-  oops::RequiredParameter<std::vector<LinearVariableChangeParametersWrapper>>
-         linearVariableChangesWrapper{"linear variable changes", this};
-};
-
-// -----------------------------------------------------------------------------
-
 class LinearVariableChange : public util::Printable {
  public:
   static const std::string classname() {return "wrf_hydro_nwm_jedi::LinearVariableChange";}
 
-  typedef LinearVariableChangeParameters Parameters_;
-
-  // Vector of variable changes typedefs
-  typedef typename boost::ptr_vector<LinearVariableChangeBase> LinVarChaVec_;
-  typedef typename LinVarChaVec_::const_iterator icst_;
-  typedef typename LinVarChaVec_::const_reverse_iterator ircst_;
+  typedef LinearVariableChangeParametersWrapper Parameters_;
 
   explicit LinearVariableChange(const Geometry &, const Parameters_ &);
   ~LinearVariableChange();
@@ -63,7 +47,7 @@ class LinearVariableChange : public util::Printable {
   void print(std::ostream &) const override;
   Parameters_ params_;
   std::shared_ptr<const Geometry> geom_;
-  LinVarChaVec_ linVarChas_;
+  std::unique_ptr<LinearVariableChangeBase> linearVariableChange_;
 };
 
 // -----------------------------------------------------------------------------
