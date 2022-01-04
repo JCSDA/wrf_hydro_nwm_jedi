@@ -4,6 +4,8 @@ module wrf_hydro_nwm_jedi_util_mod
 use netcdf
 use datetime_mod
 
+use fckit_configuration_module, only: fckit_configuration
+
 implicit none
 
 public
@@ -14,9 +16,7 @@ type :: indices
    integer :: ind_x, ind_y, ind_z
 end type indices
 
-
 contains
-
   
 !> A netcdf error handler.  
 !> Check the error flag from a NetCDF function call, and print
@@ -51,5 +51,4 @@ logical function datetime_eq(dt1, dt2)
   end if
 end function datetime_eq
 
-  
 end module wrf_hydro_nwm_jedi_util_mod

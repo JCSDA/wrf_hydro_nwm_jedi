@@ -150,10 +150,10 @@ ecbuild_add_test(
    COMMAND      ${BASH_PROGRAM}
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
                 Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
-                Data/staticb/stddev_lsm.nc
-                Data/staticb/rh_lsm.nc
-                Data/dirac/dirac_lsm_SABER.nc
-                Data/3dvar/3dvar_lsm.nc )
+                Data/staticb/stddev.lsm.an.2017-01-01T00:00:00Z
+                Data/staticb/rh.lsm.an.2017-01-01T00:00:00Z
+                Data/dirac/dirac_SABER.lsm.an.2017-01-01T00:00:00Z
+                Data/3dvar/3dvar.lsm.an.2017-01-01T00:00:00Z )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_stage_hydro
@@ -161,10 +161,10 @@ ecbuild_add_test(
    COMMAND      ${BASH_PROGRAM}
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
                 Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-                Data/staticb/stddev_hydro.nc
-                Data/staticb/rh_hydro.nc
-                Data/dirac/dirac_hydro_SABER.nc
-                Data/3dvar/3dvar_hydro.nc )
+                Data/staticb/stddev.hyd.an.2017-01-01T00:00:00Z
+                Data/staticb/rh.hyd.an.2017-01-01T00:00:00Z
+                Data/dirac/dirac_SABER.hyd.an.2017-01-01T00:00:00Z
+                Data/3dvar/3dvar.hyd.an.2017-01-01T00:00:00Z )
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_staticb

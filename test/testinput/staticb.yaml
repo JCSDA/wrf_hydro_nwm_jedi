@@ -30,12 +30,14 @@ bump:
   output:
   - parameter: stddev
     date: *date
-    filename_lsm: ./Data/staticb/stddev_lsm.nc
-    filename_hydro: ./Data/staticb/stddev_hydro.nc
+    datadir: Data/staticb
+    exp: stddev
+    type: an
   - parameter: cor_rh
     date: *date
-    filename_lsm: ./Data/staticb/rh_lsm.nc
-    filename_hydro: ./Data/staticb/rh_hydro.nc
+    datadir: Data/staticb
+    exp: rh
+    type: an
 
 test:
   reference filename: testoutput/staticb.ref
