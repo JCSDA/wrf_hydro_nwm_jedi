@@ -12,11 +12,12 @@
 #include <string>
 
 #include "eckit/config/Configuration.h"
-#include "oops/base/VariableChangeBase.h"
+
 #include "VarChaModel2GeoVaLsFortran.h"
+
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
-
+#include "wrf_hydro_nwm_jedi/VariableChange/Base/VariableChangeBase.h"
 
 // Forward declarations
 namespace eckit {
@@ -27,12 +28,11 @@ namespace wrf_hydro_nwm_jedi {
 
 // -------------------------------------------------------------------------------------------------
 
-class VarChaModel2GeoVaLs: public oops::VariableChangeBase<Traits>,
-                           private util::ObjectCounter<VarChaModel2GeoVaLs> {
+class VarChaModel2GeoVaLs: public VariableChangeBase {
  public:
   static const std::string classname() {return "wrf_hydro_nwm_jedi::VarChaModel2GeoVaLs";}
 
-  explicit VarChaModel2GeoVaLs(const Geometry &, const eckit::Configuration &);
+  VarChaModel2GeoVaLs(const Geometry &, const eckit::LocalConfiguration &);
   ~VarChaModel2GeoVaLs();
   void changeVar(const State &, State &) const;
   void changeVarInverse(const State &, State &) const;

@@ -7,7 +7,6 @@
 
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
 #include "oops/util/Logger.h"
-#include "wrf_hydro_nwm_jedi/VariableChanges/Model2GeoVaLs/VarChaModel2GeoVaLs.h"
 
 namespace wrf_hydro_nwm_jedi {
 
@@ -16,14 +15,8 @@ namespace wrf_hydro_nwm_jedi {
 GetValues::GetValues(const Geometry & geom,
                      const ufo::Locations & locs,
                      const eckit::Configuration & config)
-  : locs_(locs), geom_(new Geometry(geom)), model2geovals_() {
+  : locs_(locs), geom_(new Geometry(geom)) {
   oops::Log::trace() << "GetValues::GetValues starting" << std::endl;
-
-  // // Create the variable change object
-  {
-  util::Timer timervc(classname(), "VarChaModel2GeoVaLs");
-  model2geovals_.reset(new VarChaModel2GeoVaLs(geom, config));
-  }
 
   // // Call GetValues consructor
   // Call GetValues consructor
@@ -49,29 +42,11 @@ GetValues::~GetValues() {
 
 void GetValues::fillGeoVaLs(const State & state, const util::DateTime & t1,
                             const util::DateTime & t2, ufo::GeoVaLs & geovals) const {
-  oops::Log::trace() << "GetValues::fillGeovals starting" << std::endl;
-
-  if (geovals.getVars() <= state.variables()) {
+    oops::Log::trace() << "GetValues::fillGeovals starting" << std::endl;
     util::Timer timergv(classname(), "fillGeoVaLs");
     wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_, geom_->toFortran(),
                                        state.toFortran(), t1, t2, locs_, geovals.toFortran());
-  } else {
-    // Create state with geovals variables
-    State stategeovalvars(*geom_, geovals.getVars(), state.validTime());
-
-    {
-    util::Timer timervc(classname(), "changeVar");
-    model2geovals_->changeVar(state, stategeovalvars);
-    }
-
-    // Fill GeoVaLs
-    util::Timer timergv(classname(), "fillGeoVaLs");
-    wrf_hydro_nwm_jedi_getvalues_fill_geovals_f90(keyGetValues_, geom_->toFortran(),
-                                       stategeovalvars.toFortran(), t1, t2, locs_,
-                                       geovals.toFortran());
-  }
-
-  oops::Log::trace() << "GetValues::fillGeovals done" << geovals << std::endl;
+    oops::Log::trace() << "GetValues::fillGeovals done" << geovals << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
