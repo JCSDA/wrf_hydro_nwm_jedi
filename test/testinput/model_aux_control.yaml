@@ -1,7 +1,8 @@
 geometry:
   input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
 
-model aux control: null
+model aux control:
+  dummy: true
 
 # model test:
 #   forecast length: PT6H
