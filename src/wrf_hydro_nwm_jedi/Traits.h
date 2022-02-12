@@ -17,10 +17,13 @@
 #include "wrf_hydro_nwm_jedi/GetValues/GetValues.h"
 #include "wrf_hydro_nwm_jedi/GetValues/LinearGetValues.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
+#include "wrf_hydro_nwm_jedi/LinearVariableChange/LinearVariableChange.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxControl.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxCovariance.h"
 #include "wrf_hydro_nwm_jedi/ModelAux/ModelAuxIncrement.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
+#include "wrf_hydro_nwm_jedi/VariableChange/VariableChange.h"
+
 // #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 
 
@@ -37,13 +40,15 @@ namespace wrf_hydro_nwm_jedi {
     typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
     typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
     // typedef wrf_hydro_nwm_jedi::GetValuesTraj       InterpolatorTraj;
-    typedef wrf_hydro_nwm_jedi::GetValues           GetValues;
-    typedef wrf_hydro_nwm_jedi::LinearGetValues     LinearGetValues;
-    typedef wrf_hydro_nwm_jedi::Increment           Increment;
-    typedef wrf_hydro_nwm_jedi::State               State;
-    typedef wrf_hydro_nwm_jedi::ModelAuxCovariance  ModelAuxCovariance;
-    typedef wrf_hydro_nwm_jedi::ModelAuxControl     ModelAuxControl;
-    typedef wrf_hydro_nwm_jedi::ModelAuxIncrement   ModelAuxIncrement;
+    typedef wrf_hydro_nwm_jedi::GetValues             GetValues;
+    typedef wrf_hydro_nwm_jedi::LinearGetValues       LinearGetValues;
+    typedef wrf_hydro_nwm_jedi::Increment             Increment;
+    typedef wrf_hydro_nwm_jedi::State                 State;
+    typedef wrf_hydro_nwm_jedi::ModelAuxCovariance    ModelAuxCovariance;
+    typedef wrf_hydro_nwm_jedi::ModelAuxControl       ModelAuxControl;
+    typedef wrf_hydro_nwm_jedi::ModelAuxIncrement     ModelAuxIncrement;
+    typedef wrf_hydro_nwm_jedi::LinearVariableChange  LinearVariableChange;
+    typedef wrf_hydro_nwm_jedi::VariableChange        VariableChange;
   };
 }  // namespace wrf_hydro_nwm_jedi
 

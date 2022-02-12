@@ -67,7 +67,6 @@ namespace wrf_hydro_nwm_jedi {
     F90getvalues keyGetValues_;
     ufo::Locations locs_;
     std::shared_ptr<const Geometry> geom_;
-    std::unique_ptr<VarChaModel2GeoVaLs> model2geovals_;
   };
 
   // -------------------------------------------------------------------------------------------------

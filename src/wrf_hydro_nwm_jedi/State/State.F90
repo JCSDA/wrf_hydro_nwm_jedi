@@ -17,7 +17,6 @@ use oops_variables_mod
 use wrf_hydro_nwm_jedi_fields_mod,   only: wrf_hydro_nwm_jedi_fields, checksame
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_util_mod,     only: error_handler, indices
-
 use netcdf
 
 implicit none
@@ -275,6 +274,44 @@ subroutine axpy(self, scalar, other_in)
   call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
 end subroutine axpy
 
+
+
+
+! subroutine get_mean_stddev(self, mean, stddev)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state), intent(in ) :: self
+!   real(kind=c_float),             intent(out) :: mean
+!   real(kind=c_float),             intent(out) :: stddev
+
+!   call self%fields_obj%mean_stddev())
+! end subroutine get_mean_stddev
+
+
+! subroutine rms(self, prms)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
+!   real(kind=c_float),             intent(out) :: prms
+
+!   ! call fields_rms(self%nf, self%fields_obj, prms, self%f_comm)
+! end subroutine rms
+
+
+! subroutine gpnorm(self, nf, pstat)
+!   implicit none
+!   type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
+!   integer,                         intent(in)    :: nf
+!   real(kind=c_float),              intent(inout) :: pstat(3, nf)
+
+!   ! if (nf .ne. self%nf) then
+!   !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
+!   ! endif
+
+!   ! call fields_gpnorm(nf, self%fields_obj, pstat, self%f_comm)
+! end subroutine gpnorm
+
+! ------------------------------------------------------------------------------
+! Internal module functions/subroutines
+! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 !> Generate filename (based on oops/qg)
 !!
@@ -338,40 +375,5 @@ function genfilename (f_conf,length,vdate,domain_type)
    if ( allocated(str) ) deallocate(str)
 
 end function genfilename
-
-
-
-! subroutine get_mean_stddev(self, mean, stddev)
-!   implicit none
-!   type(wrf_hydro_nwm_jedi_state), intent(in ) :: self
-!   real(kind=c_float),             intent(out) :: mean
-!   real(kind=c_float),             intent(out) :: stddev
-
-!   call self%fields_obj%mean_stddev())
-! end subroutine get_mean_stddev
-
-
-! subroutine rms(self, prms)
-!   implicit none
-!   type(wrf_hydro_nwm_jedi_state), intent(in)  :: self
-!   real(kind=c_float),             intent(out) :: prms
-
-!   ! call fields_rms(self%nf, self%fields_obj, prms, self%f_comm)
-! end subroutine rms
-
-
-! subroutine gpnorm(self, nf, pstat)
-!   implicit none
-!   type(wrf_hydro_nwm_jedi_state),  intent(in)    :: self
-!   integer,                         intent(in)    :: nf
-!   real(kind=c_float),              intent(inout) :: pstat(3, nf)
-
-!   ! if (nf .ne. self%nf) then
-!   !   call abor1_ftn("wrf_hydro_nwm_jedi_state: gpnorm | nf passed in does not match expeted nf")
-!   ! endif
-
-!   ! call fields_gpnorm(nf, self%fields_obj, pstat, self%f_comm)
-! end subroutine gpnorm
-
 
 end module wrf_hydro_nwm_jedi_state_mod

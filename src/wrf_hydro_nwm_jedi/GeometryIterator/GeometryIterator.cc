@@ -10,7 +10,7 @@
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIteratorFortran.h"
 
 #include "eckit/config/Configuration.h"
-#include "eckit/geometry/Point2.h"
+#include "eckit/geometry/Point3.h"
 
 #include "oops/util/abor1_cpp.h"
 
@@ -68,10 +68,10 @@ GeometryIterator::~GeometryIterator() {
   }
 
 // ----------------------------------------------------------------------------
-  eckit::geometry::Point2 GeometryIterator::operator*() const {
+  eckit::geometry::Point3 GeometryIterator::operator*() const {
     double lat, lon;
     wrf_hydro_nwm_jedi_geom_iter_current_f90(keyIter_, lon, lat);
-    return eckit::geometry::Point2(lon, lat);
+    return eckit::geometry::Point3(lon, lat, 0.0);
   }
 
 // ----------------------------------------------------------------------------
