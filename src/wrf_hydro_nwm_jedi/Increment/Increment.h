@@ -136,6 +136,10 @@ namespace wrf_hydro_nwm_jedi {
     F90inc & toFortran() {return keyInc_;}
     const F90inc & toFortran() const {return keyInc_;}
 
+      /// Private variable accessor functions
+      const oops::Variables & variables() const {return vars_;}
+      const util::DateTime & time() const {return time_;}
+
    private:
     oops::Variables vars_;
     util::DateTime time_;

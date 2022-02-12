@@ -29,8 +29,6 @@ cost function:
         verbosity: main
         strategy: specific_univariate
         load_nicas_local: true
-
-#  variable change: 'Identity'
   observations:
   - obs error:
       covariance model: 'diagonal'
