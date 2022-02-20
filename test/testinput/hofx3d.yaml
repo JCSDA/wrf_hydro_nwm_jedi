@@ -1,4 +1,4 @@
-# window begin: '2016-12-31T23:30:00Z'
+# window begin: '2016-12-31T23:30:00Z' 
 window begin: &date '2017-01-01T00:00:00Z'
 window length: PT1H
 
