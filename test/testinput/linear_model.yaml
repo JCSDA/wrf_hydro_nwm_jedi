@@ -38,6 +38,6 @@ linear model test:
   tolerance TL: 1e-3  # 1.0e-7  # JLM TODO
 
 model aux control: null
-model aux error: 200.0
+model aux error: null
 
 varchange: 'Identity'

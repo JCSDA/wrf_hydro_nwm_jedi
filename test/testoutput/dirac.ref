@@ -12,9 +12,9 @@ Covariance(SABER) * Increment:Print Increment (C++) --------------------
 SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
-Mean:   0.145093247
-Std Dev:   0.233098507
-RMS:   0.274566889
+Mean:   0.153685629
+Std Dev:   0.239958808
+RMS:   0.284955263
 End Print Increment (C++) ---------------- 
 
 
