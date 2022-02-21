@@ -49,6 +49,7 @@ namespace wrf_hydro_nwm_jedi {
     bool operator!=(const GeometryIterator &) const;
     GeometryIterator& operator++();
     eckit::geometry::Point3 operator*() const;
+    double getOrography() const;
 
     F90iter & toFortran() {return keyIter_;}
     const F90iter & toFortran() const {return keyIter_;}
