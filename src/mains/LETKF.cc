@@ -15,13 +15,14 @@
 #include "ufo/instantiateObsLocFactory.h"
 #include "ufo/ObsTraits.h"
 #include "wrf_hydro_nwm_jedi/Traits.h"
+#include "wrf_hydro_nwm_jedi/ObsLocalization/instantiateObsLocFactory.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
   ufo::instantiateObsLocFactory<wrf_hydro_nwm_jedi::Traits>();
   ufo::instantiateObsErrorFactory();
   ufo::instantiateObsFilterFactory();
+  wrf_hydro_nwm_jedi::instantiateObsLocFactory();
   oops::LocalEnsembleDA<wrf_hydro_nwm_jedi::Traits, ufo::ObsTraits> letkf;
   return run.execute(letkf);
 }
-
