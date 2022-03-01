@@ -26,13 +26,18 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      dirac, &
      set_atlas, &
      from_atlas, &
-     to_atlas
+     to_atlas, &
+     getpoint, &
+     setpoint
+
 use wrf_hydro_nwm_jedi_increment_registry_mod, only: &
      wrf_hydro_nwm_jedi_increment_registry
 use wrf_hydro_nwm_jedi_state_mod
 use wrf_hydro_nwm_jedi_state_interface_mod, only: wrf_hydro_nwm_jedi_state_registry
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
 use wrf_hydro_nwm_jedi_geometry_mod_c, only: wrf_hydro_nwm_jedi_geometry_registry
+use wrf_hydro_nwm_jedi_geometry_iter_mod_c, only: wrf_hydro_nwm_jedi_geometry_iter_registry
+use wrf_hydro_nwm_jedi_geometry_iter_mod, only: wrf_hydro_nwm_jedi_geometry_iter
 
 !GetValues
 use ufo_locations_mod
@@ -534,5 +539,40 @@ subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c(c_key_inc, c_vars, c_afield
   afieldset = atlas_fieldset(c_afieldset)
   call from_atlas(inc, vars, afieldset)
 end subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c
+
+!> C++ interface for wrf_hydro_nwm_jedi_increment_mod::wrf_hydro_nwm_jedi_increment::getpoint()
+subroutine c_wrf_hydro_nwm_jedi_increment_getpoint(c_key_inc,c_key_iter,values, values_len) bind(c, name='wrf_hydro_nwm_jedi_increment_getpoint_f90')
+  implicit none
+  integer(c_int), intent(in) :: c_key_inc
+  integer(c_int), intent(in) :: c_key_iter
+  integer(c_int), intent(in) :: values_len
+  real(c_double), intent(inout) :: values(values_len)
+
+  type(wrf_hydro_nwm_jedi_state),      pointer :: inc
+  type(wrf_hydro_nwm_jedi_geometry_iter),      pointer :: iter
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
+  call wrf_hydro_nwm_jedi_geometry_iter_registry%get(c_key_iter, iter)
+
+  call getpoint(inc, iter, values_len, values)
+end subroutine c_wrf_hydro_nwm_jedi_increment_getpoint
+
+!> C++ interface for wrf_hydro_nwm_jedi_increment_mod::wrf_hydro_nwm_jedi_increment::setpoint()
+subroutine c_wrf_hydro_nwm_jedi_increment_setpoint(c_key_inc,c_key_iter,values, values_len) bind(c,name='wrf_hydro_nwm_jedi_increment_setpoint_f90')
+  integer(c_int), intent(inout) :: c_key_inc
+  integer(c_int), intent(in) :: c_key_iter
+  integer(c_int), intent(in) :: values_len
+  real(c_double),  intent(in) :: values(values_len)
+
+  type(wrf_hydro_nwm_jedi_state),      pointer :: inc
+  type(wrf_hydro_nwm_jedi_geometry_iter), pointer :: iter
+
+  call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc,inc)
+  call wrf_hydro_nwm_jedi_geometry_iter_registry%get(c_key_iter,iter)
+
+  call setpoint(inc, iter, values_len, values)
+
+end subroutine c_wrf_hydro_nwm_jedi_increment_setpoint
+
 
 end module wrf_hydro_nwm_jedi_increment_interface_mod

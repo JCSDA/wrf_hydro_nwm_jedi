@@ -1,5 +1,5 @@
 Input Dirac increment:Print Increment (C++) --------------------   
-SNEQV               
+SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
 Mean:    1.38888892E-03
@@ -9,7 +9,7 @@ End Print Increment (C++) ----------------
 
 
 Covariance(SABER) * Increment:Print Increment (C++) --------------------   
-SNEQV               
+SNEQV     
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
 Mean:   0.153685629

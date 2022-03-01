@@ -14,11 +14,12 @@ use oops_variables_mod
 
 use wrf_hydro_nwm_jedi_fields_mod,    only: wrf_hydro_nwm_jedi_fields, checksame
 use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+use wrf_hydro_nwm_jedi_geometry_iter_mod, only: wrf_hydro_nwm_jedi_geometry_iter
 use wrf_hydro_nwm_jedi_util_mod,     only: error_handler
 use wrf_hydro_nwm_jedi_constants_mod, only: &
      zero_c_double, zero_c_float, one_c_double, one_c_float
 
-use iso_c_binding, only : c_float
+use iso_c_binding, only : c_float, c_double
 use wrf_hydro_nwm_jedi_state_mod, only: &
      wrf_hydro_nwm_jedi_state, create_from_other, state_print
 
@@ -43,7 +44,9 @@ public :: &
      dirac, &
      set_atlas, &
      to_atlas, &
-     from_atlas
+     from_atlas, &
+     getpoint, &
+     setpoint
 ! create_from_other, &
 ! delete, &
 ! copy, &
@@ -223,5 +226,30 @@ subroutine from_atlas(self, vars, afieldset)
   type(atlas_fieldset), intent(in) :: afieldset
   call self%fields_obj%from_atlas(vars, afieldset)
 end subroutine from_atlas
+
+! ------------------------------------------------------------------------------
+!> Get the values at a specific grid point
+
+subroutine getpoint(self, geoiter, values_len, values)
+  use iso_c_binding, only: c_double, c_int 
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),      intent(in)  :: self
+  type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter !< iterator pointing to desired gridpoint
+  !> return values for every field in a vertical column
+  integer(c_int),   intent(in) :: values_len
+  real(c_double), intent(inout) :: values(values_len)
+  call self%fields_obj%get_point(geoiter, values_len, values)
+end subroutine getpoint
+
+subroutine setpoint(self, geoiter, values_len, values)
+  use iso_c_binding, only: c_double, c_int 
+  implicit none
+  type(wrf_hydro_nwm_jedi_state),      intent(inout)  :: self
+  type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter !< iterator pointing to desired gridpoint
+  !> return values for every field in a vertical column
+  integer(c_int),   intent(in) :: values_len
+  real(c_double), intent(in) :: values(values_len)
+  call self%fields_obj%set_point(geoiter, values_len, values)
+end subroutine setpoint
 
 end module wrf_hydro_nwm_jedi_increment_mod

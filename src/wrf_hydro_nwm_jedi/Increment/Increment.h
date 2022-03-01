@@ -17,6 +17,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "oops/base/LocalIncrement.h"
 #include "oops/base/Variables.h"
 #include "oops/util/DateTime.h"
 #include "oops/util/Printable.h"
@@ -42,6 +43,7 @@ namespace ufo {
 namespace wrf_hydro_nwm_jedi {
   class Fields;
   class Geometry;
+  class GeometryIterator;
   class GetValuesTraj;
   class State;
   typedef int F90inc;
@@ -86,6 +88,10 @@ namespace wrf_hydro_nwm_jedi {
     void schur_product_with(const Increment &);
     void random();
     void dirac(const eckit::Configuration &);
+
+    /// Getpoint/Setpoint
+    oops::LocalIncrement getLocal(const GeometryIterator &) const;
+    void setLocal(const oops::LocalIncrement &, const GeometryIterator &);
 
     // ATLAS
     void setAtlas(atlas::FieldSet *) const;

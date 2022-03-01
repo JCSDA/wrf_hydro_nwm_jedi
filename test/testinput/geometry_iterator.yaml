@@ -1,0 +1,7 @@
+geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+inc variables: &model_vars ['SNEQV']  # , 'SNOWH']
+  
+increment test:
+  date: &date 2017-01-01T00:00:00Z

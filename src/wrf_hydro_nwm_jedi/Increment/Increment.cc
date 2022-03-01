@@ -13,6 +13,7 @@
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
 #include "wrf_hydro_nwm_jedi/State/State.h"
 
+#include "oops/base/LocalIncrement.h"
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
@@ -268,11 +269,45 @@ namespace wrf_hydro_nwm_jedi {
                     __FILE__, __LINE__);
   }
 
-
   void Increment::accumul(const double & zz, const State & xx) {
     oops::Log::trace() << "Increment accumul starting" << std::endl;
     wrf_hydro_nwm_jedi_increment_accumul_f90(keyInc_, zz, xx.toFortran());
     oops::Log::trace() << "Increment accumul END" << std::endl;
+  }
+
+  // -----------------------------------------------------------------------------
+  oops::LocalIncrement Increment::getLocal(
+                        const GeometryIterator & iter) const {
+                          std::vector<int> varlens(vars_.size());
+
+    // TODO(Travis) remove the hardcoded variable names
+    for (int ii = 0; ii < vars_.size(); ii++) {
+      if (vars_[ii] == "SNICE") varlens[ii]=3;
+      else if (vars_[ii] == "SNLIQ") varlens[ii]=3;
+      else if (vars_[ii] == "SNEQV") varlens[ii]=1;
+      else if (vars_[ii] == "SNOWH") varlens[ii]=1;
+      else if (vars_[ii] == "swe") varlens[ii]=1;
+      else if (vars_[ii] == "snow_depth")  varlens[ii]=1;
+      else if (vars_[ii] == "LAI") varlens[ii]=1;
+      else
+          varlens[ii] = 0;
+    }
+
+    int lenvalues = std::accumulate(varlens.begin(), varlens.end(), 0);
+    std::vector<double> values(lenvalues);
+
+    wrf_hydro_nwm_jedi_increment_getpoint_f90(keyInc_, iter.toFortran(), values[0],
+                            values.size());
+
+    return oops::LocalIncrement(vars_, values, varlens);
+  }
+
+  // -----------------------------------------------------------------------------
+  void Increment::setLocal(const oops::LocalIncrement & values,
+                             const GeometryIterator & iter) {
+    const std::vector<double> vals = values.getVals();
+    wrf_hydro_nwm_jedi_increment_setpoint_f90(keyInc_, iter.toFortran(), vals[0],
+                            vals.size());
   }
 
   // -----------------------------------------------------------------------------
