@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include "wrf_hydro_nwm_jedi/ObsLocalization/ObsLocVerticalBrasnett.h"
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "oops/base/ObsLocalizationBase.h"
 #include "ufo/instantiateObsLocFactory.h"
 #include "ufo/ObsTraits.h"
+#include "wrf_hydro_nwm_jedi/ObsLocalization/ObsLocVerticalBrasnett.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 
 namespace wrf_hydro_nwm_jedi {
 void instantiateObsLocFactory() {

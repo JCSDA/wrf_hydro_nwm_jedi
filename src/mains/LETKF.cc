@@ -14,8 +14,8 @@
 #include "ufo/instantiateObsFilterFactory.h"
 #include "ufo/instantiateObsLocFactory.h"
 #include "ufo/ObsTraits.h"
-#include "wrf_hydro_nwm_jedi/Traits.h"
 #include "wrf_hydro_nwm_jedi/ObsLocalization/instantiateObsLocFactory.h"
+#include "wrf_hydro_nwm_jedi/Traits.h"
 
 int main(int argc,  char ** argv) {
   oops::Run run(argc, argv);
