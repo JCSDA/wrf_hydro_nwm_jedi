@@ -18,7 +18,6 @@
 
 #include "eckit/mpi/Comm.h"
 
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -26,12 +25,9 @@
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 
 // forward declarations
-namespace eckit {
-  class Configuration;
+namespace wrf_hydro_nwm_jedi {
+  class GeometryIterator;
 }
-// namespace wrf_hydro_nwm_jedi {
-//   class GeometryIterator;
-// }
 namespace oops {
   class Variables;
 }
@@ -59,7 +55,7 @@ namespace wrf_hydro_nwm_jedi {
     std::vector<size_t> variableSizes(const oops::Variables &) const;
     atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
     atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
-
+    void latlon(std::vector<double> &, std::vector<double> &, const bool) const;
 
    private:
     void print(std::ostream &) const;

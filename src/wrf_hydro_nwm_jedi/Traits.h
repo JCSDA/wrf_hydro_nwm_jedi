@@ -10,6 +10,8 @@
 
 #include <string>
 
+#include "oops/generic/LocalUnstructuredInterpolator.h"
+
 #include "wrf_hydro_nwm_jedi/Covariance/Covariance.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
@@ -36,6 +38,7 @@ namespace wrf_hydro_nwm_jedi {
 
     // Interfaces that wrf_hydro_nwm_jedi has to implement
     // ---------------------------------------------------
+    typedef oops::LocalUnstructuredInterpolator<Geometry, State, Increment>  LocalInterpolator;
     typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
     typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
     typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;

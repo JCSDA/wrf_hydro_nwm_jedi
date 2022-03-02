@@ -95,7 +95,23 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
   return varSizes;
 }
 // -----------------------------------------------------------------------------
+void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
+                      const bool halo) const {
+  const atlas::functionspace::PointCloud * fspace;
 
+  fspace = atlasFunctionSpace_.get();
+
+  const auto lonlat = atlas::array::make_view<double, 2>(fspace->lonlat());
+  const size_t npts = fspace->size();
+  lats.resize(npts);
+  lons.resize(npts);
+  for (size_t jj = 0; jj < npts; ++jj) {
+    lats[jj] = lonlat(jj, 1);
+    lons[jj] = lonlat(jj, 0);
+    if (lons[jj] < 0.0) lons[jj] += 360.0;
+  }
+}
+// -----------------------------------------------------------------------------
   void Geometry::print(std::ostream & os) const {
     float dx, dy;
     int npx, npy, npz;
