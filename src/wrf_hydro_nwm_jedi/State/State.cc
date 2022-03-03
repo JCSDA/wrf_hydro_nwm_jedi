@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "atlas/field.h"
+
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
@@ -55,7 +57,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State::State 2 create from file END." << std::endl;
   }
 
-
   State::State(const Geometry & geom,
                const State & other)
     : vars_(other.vars_),
@@ -71,7 +72,6 @@ namespace wrf_hydro_nwm_jedi {
       "State::State 3 create from existing geom and state END." << std::endl;
   }
 
-
   State::State(const State & other)
     : vars_(other.vars_),
       fields_(new Fields(*other.fields_)) {
@@ -85,24 +85,6 @@ namespace wrf_hydro_nwm_jedi {
   }
 
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
-
-
-  void State::getValues(const ufo::Locations & locs,
-                        const oops::Variables & vars,
-                        ufo::GeoVaLs & geovals) const {
-    // util::abor1_cpp("State::getValues() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-  }
-
-
-  void State::getValues(const ufo::Locations & locs,
-                 const oops::Variables & vars,
-                 ufo::GeoVaLs & geovals,
-                 GetValuesTraj & traj) const {
-    // util::abor1_cpp("State::getValues() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-  }
-
 
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
@@ -189,6 +171,12 @@ namespace wrf_hydro_nwm_jedi {
     double norm = 0.0;
     norm = wrf_hydro_nwm_jedi_state_rms_f90(toFortran());
     return norm;
+  }
+
+  void State::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
+    const bool include_halo = true;
+    wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(), vars, fset.get(), include_halo);
+    wrf_hydro_nwm_jedi_state_to_atlas_f90(keyState_, fields_->geometry()->toFortran(), vars, fset.get(), include_halo);
   }
 
 }  // namespace wrf_hydro_nwm_jedi

@@ -69,15 +69,6 @@ namespace wrf_hydro_nwm_jedi {
     State & operator=(const State &);
     ~State();
 
-    // interpolate state to observations locations
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &) const;
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &,
-                   GetValuesTraj &) const;
-
     // interactions with increment
     State & operator+=(const Increment &);
 
@@ -110,6 +101,9 @@ namespace wrf_hydro_nwm_jedi {
     // validTime()
     const util::DateTime & validTime() const { return time_; }
     util::DateTime & validTime() { return time_; }
+
+    // Get values as Atlas FieldSet
+    void getFieldSet(const oops::Variables &, atlas::FieldSet &) const;
 
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}

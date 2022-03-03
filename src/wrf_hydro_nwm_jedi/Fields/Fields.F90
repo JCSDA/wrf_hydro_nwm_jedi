@@ -2563,14 +2563,25 @@ end subroutine write_to_restart_3d_float
 ! -----------------------------------------------------------------------------
 ! set_atlas
 
-subroutine set_atlas(self, geom, vars, afieldset)
+subroutine set_atlas(self, geom, vars, afieldset, opt_include_halo)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
+! include_halo argument is optional in f90 implementation so f90 consumers (e.g., increment) can
+! retain a simple interface with to_atlas. In the C++ interface, the argument is not optional.
+  logical, optional,     intent(in)    :: opt_include_halo
+
   integer :: jvar, ff
   logical :: found
+
+  logical :: include_halo
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif
 
   do jvar=1,vars%nvars()
      found = .false.
@@ -2626,14 +2637,24 @@ end subroutine set_atlas_3d
 ! -----------------------------------------------------------------------------
 ! to_atlas
 
-subroutine to_atlas(self, geom, vars, afieldset)
+subroutine to_atlas(self, geom, vars, afieldset, opt_include_halo)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
+! include_halo argument is optional in f90 implementation so f90 consumers (e.g., increment) can
+! retain a simple interface with to_atlas. In the C++ interface, the argument is not optional.
+  logical, optional,     intent(in)    :: opt_include_halo
   integer :: jvar, ff
   logical :: found
+
+  logical :: include_halo
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif
 
   do jvar=1,vars%nvars()
      found = .false.
