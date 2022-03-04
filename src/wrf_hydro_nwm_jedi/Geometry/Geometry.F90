@@ -87,13 +87,14 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 !> Set ATLAS lon/lat field
-subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset, include_halo)
   class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical,              intent(in) :: include_halo
 
   integer :: ix,iy,inode
   real(c_double), pointer :: real_ptr(:,:)
-  type(atlas_field) :: afield
+  type(atlas_field) :: afield, afield_incl_halo
 
   if (self%lsm_active()) then
     ! Create lon/lat field
@@ -109,6 +110,26 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
     end do
     call afieldset%add(afield)
     call afield%final()
+  end if
+
+  ! We have no halos, so this is just a repeat of the no-halo case, but seems to be needed
+  if (include_halo) then
+    nullify(real_ptr)
+    if (self%lsm_active()) then
+      ! Create lon/lat field
+      afield_incl_halo = atlas_field(name="lonlat_including_halo", kind=atlas_real(c_double), shape=(/2, self%lsm%xdim_len*self%lsm%ydim_len/))
+      call afield_incl_halo%data(real_ptr)
+      inode = 0
+      do iy=self%lsm%ystart,self%lsm%yend
+        do ix=self%lsm%xstart,self%lsm%xend
+          inode = inode+1
+          real_ptr(1,inode) = real(self%lsm%lon(ix,iy), c_double)
+          real_ptr(2,inode) = real(self%lsm%lat(ix,iy), c_double)
+        end do
+      end do
+      call afieldset%add(afield_incl_halo)
+      call afield%final()
+    end if
   end if
 
 end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat

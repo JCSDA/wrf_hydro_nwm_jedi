@@ -47,30 +47,36 @@ end subroutine c_wrf_hydro_nwm_jedi_geometry_setup
 
 ! ------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c(c_key_self, c_afieldset) bind(c,name='wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90')
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c(c_key_self, c_afieldset, c_include_halo) &
+  & bind(c,name='wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90')
   integer(c_int), intent(in) :: c_key_self
   type(c_ptr), intent(in), value :: c_afieldset
+  logical(c_bool), intent(in) :: c_include_halo
 
   type(wrf_hydro_nwm_jedi_geometry), pointer :: self
   type(atlas_fieldset) :: afieldset
+  logical :: include_halo
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   afieldset = atlas_fieldset(c_afieldset)
-  call wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
+  include_halo = c_include_halo
+  call wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset, include_halo)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c
 
 ! ------------------------------------------------------------------------------
 
-subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c(c_key_self, c_afunctionspace) &
+subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c(c_key_self, c_afunctionspace, c_afunctionspace_incl_halo) &
  & bind(c,name='wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90')
   integer(c_int), intent(in) :: c_key_self
   type(c_ptr), intent(in), value :: c_afunctionspace
+  type(c_ptr), intent(in), value :: c_afunctionspace_incl_halo
 
   type(wrf_hydro_nwm_jedi_geometry), pointer :: self
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   self%lsm%afunctionspace = atlas_functionspace_pointcloud(c_afunctionspace)
+  self%lsm%afunctionspace = atlas_functionspace_pointcloud(c_afunctionspace_incl_halo)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c
 

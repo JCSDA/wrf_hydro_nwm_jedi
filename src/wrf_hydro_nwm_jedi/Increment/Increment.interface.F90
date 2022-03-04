@@ -10,7 +10,7 @@ module wrf_hydro_nwm_jedi_increment_interface_mod
 use atlas_module, only: atlas_fieldset
 use datetime_mod
 use duration_mod
-use iso_c_binding, only: c_int, c_double, c_float, c_ptr, c_char
+use iso_c_binding
 use oops_variables_mod,         only: oops_variables
 use fckit_configuration_module, only: fckit_configuration
 
@@ -27,6 +27,7 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      set_atlas, &
      from_atlas, &
      to_atlas, &
+     to_atlas_ad, &
      getpoint, &
      setpoint
 
@@ -486,42 +487,52 @@ end subroutine wrf_hydro_nwm_jedi_increment_schur_c
 !   call jnormgrad(self, geom, state, c_conf)
 ! end subroutine sw_increment_jnormgrad_c
 
-subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_set_atlas_f90')
+subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset, c_include_halo) bind (c, name='wrf_hydro_nwm_jedi_increment_set_atlas_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_inc
   integer(c_int), intent(in) :: c_key_geom
   type(c_ptr), value, intent(in) :: c_vars
   type(c_ptr), intent(in), value :: c_afieldset
+  logical(c_bool), intent(in)    :: c_include_halo
 
   type(wrf_hydro_nwm_jedi_state), pointer :: inc
   type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
   type(oops_variables) :: vars
   type(atlas_fieldset) :: afieldset
+  logical :: include_halo
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
-  call set_atlas(inc, geom, vars, afieldset)
+  include_halo = c_include_halo
+
+  call set_atlas(inc, geom, vars, afieldset, include_halo)
+
 end subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c
 
-subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_to_atlas_f90')
+subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c(c_key_inc, c_key_geom, c_vars, c_afieldset, c_include_halo) bind (c, name='wrf_hydro_nwm_jedi_increment_to_atlas_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_inc
   integer(c_int), intent(in) :: c_key_geom
   type(c_ptr), value, intent(in) :: c_vars
   type(c_ptr), intent(in), value :: c_afieldset
+  logical(c_bool), intent(in)    :: c_include_halo
 
   type(wrf_hydro_nwm_jedi_state), pointer :: inc
   type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
   type(oops_variables) :: vars
   type(atlas_fieldset) :: afieldset
+  logical :: include_halo
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
-  call to_atlas(inc, geom, vars, afieldset)
+  include_halo = c_include_halo
+
+  call to_atlas(inc, geom, vars, afieldset, include_halo)
+
 end subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c
 
 subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c(c_key_inc, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_from_atlas_f90')
@@ -537,8 +548,35 @@ subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c(c_key_inc, c_vars, c_afield
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
+
   call from_atlas(inc, vars, afieldset)
+
 end subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c
+
+! --------------------------------------------------------------------------------------------------
+
+subroutine wrf_hydro_nwm_jedi_increment_to_atlas_ad_c(c_key_self, c_key_geom, c_vars, c_afieldset) &
+  & bind (c,name='wrf_hydro_nwm_jedi_increment_to_atlas_ad_f90')
+ 
+ implicit none
+ integer(c_int), intent(in) :: c_key_self
+ integer(c_int), intent(in) :: c_key_geom
+ type(c_ptr), value, intent(in) :: c_vars
+ type(c_ptr), intent(in), value :: c_afieldset
+ 
+ type(wrf_hydro_nwm_jedi_state), pointer :: self
+ type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+ type(oops_variables) :: vars
+ type(atlas_fieldset) :: afieldset
+ 
+ call wrf_hydro_nwm_jedi_increment_registry%get(c_key_self, self)
+ call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+ vars = oops_variables(c_vars)
+ afieldset = atlas_fieldset(c_afieldset)
+ 
+ call to_atlas_ad(self, geom, vars, afieldset)
+ 
+ end subroutine wrf_hydro_nwm_jedi_increment_to_atlas_ad_c
 
 !> C++ interface for wrf_hydro_nwm_jedi_increment_mod::wrf_hydro_nwm_jedi_increment::getpoint()
 subroutine c_wrf_hydro_nwm_jedi_increment_getpoint(c_key_inc,c_key_iter,values, values_len) bind(c, name='wrf_hydro_nwm_jedi_increment_getpoint_f90')

@@ -63,6 +63,8 @@ namespace wrf_hydro_nwm_jedi {
     // private util::ObjectCounter<IncrementSW> {
   {
    public:
+
+    static const std::string classname() {return "wrf_hydro_nwm_jedi::Increment";}
     // Constructor, destructor
     Increment(const Geometry &,
               const oops::Variables &,
@@ -97,6 +99,9 @@ namespace wrf_hydro_nwm_jedi {
     void setAtlas(atlas::FieldSet *) const;
     void toAtlas(atlas::FieldSet *) const;
     void fromAtlas(atlas::FieldSet *);
+    void getFieldSet(const oops::Variables &, atlas::FieldSet &) const;
+    void getFieldSetAD(const oops::Variables &, const atlas::FieldSet &);  
+
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,

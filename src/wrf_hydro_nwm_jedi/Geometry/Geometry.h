@@ -54,6 +54,8 @@ namespace wrf_hydro_nwm_jedi {
     const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
     atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
+    atlas::FunctionSpace * atlasFunctionSpaceIncludingHalo() const {
+      return atlasFunctionSpaceIncludingHalo_.get();}
     atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
     void latlon(std::vector<double> &, std::vector<double> &, const bool) const;
 
@@ -63,6 +65,7 @@ namespace wrf_hydro_nwm_jedi {
     F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
     std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpace_;
+    std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpaceIncludingHalo_;
     std::unique_ptr<atlas::FieldSet> atlasFieldSet_;
   };
 }  // namespace wrf_hydro_nwm_jedi

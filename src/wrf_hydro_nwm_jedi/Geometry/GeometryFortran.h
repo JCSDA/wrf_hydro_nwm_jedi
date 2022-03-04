@@ -23,9 +23,9 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_geometry_setup_f90(F90geom &,
                                     const eckit::Configuration * const *);
     void wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(const F90geom &,
-        atlas::field::FieldSetImpl *);
+        atlas::field::FieldSetImpl *, const bool &);
     void wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(const F90geom &,
-        atlas::functionspace::FunctionSpaceImpl *);
+        atlas::functionspace::FunctionSpaceImpl *, atlas::functionspace::FunctionSpaceImpl *);
     void wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90(const F90geom &,
         atlas::field::FieldSetImpl *);
 

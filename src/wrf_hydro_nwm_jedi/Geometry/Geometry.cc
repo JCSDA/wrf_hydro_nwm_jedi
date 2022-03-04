@@ -29,21 +29,27 @@ namespace wrf_hydro_nwm_jedi {
 
     // Set ATLAS lon/lat field
     atlasFieldSet_.reset(new atlas::FieldSet());
-    wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(keyGeom_, atlasFieldSet_->get());
-    atlas::Field atlasField = atlasFieldSet_->field("lonlat");
+    const bool include_halo = true;  // include halo so we can set up both function spaces
+    wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(keyGeom_, atlasFieldSet_->get(), include_halo);
+    const atlas::Field atlasField = atlasFieldSet_->field("lonlat");
 
     // Create ATLAS function space
     atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(atlasField));
 
+    ASSERT(include_halo);
+
+    // Create ATLAS function space with halo
+    const atlas::Field atlasFieldInclHalo = atlasFieldSet_->field("lonlat_including_halo");
+    atlasFunctionSpaceIncludingHalo_.reset(new atlas::functionspace::PointCloud(atlasFieldInclHalo));
+
     // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_->get());
+    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_, atlasFunctionSpace_->get(),
+                                                   atlasFunctionSpaceIncludingHalo_->get());
 
     // Fill ATLAS fieldset
     atlasFieldSet_.reset(new atlas::FieldSet());
     wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90(keyGeom_, atlasFieldSet_->get());
   }
-
 
   Geometry::Geometry(const Geometry & other)
     : comm_(other.comm_) {
@@ -55,7 +61,7 @@ namespace wrf_hydro_nwm_jedi {
 
     // Set ATLAS function space pointer in Fortran
     wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_.get()->get());
+        atlasFunctionSpace_.get()->get(), atlasFunctionSpaceIncludingHalo_->get());
 
     // Copy ATLAS fieldset
     atlasFieldSet_.reset(new atlas::FieldSet());
@@ -75,7 +81,6 @@ namespace wrf_hydro_nwm_jedi {
 //                    __FILE__, __LINE__);
     return GeometryIterator(*this, 1, 1);
   }
-
 
   GeometryIterator Geometry::end() const {
     float dx, dy;
