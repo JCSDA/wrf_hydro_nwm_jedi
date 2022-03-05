@@ -169,8 +169,10 @@ namespace wrf_hydro_nwm_jedi {
 
   void State::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
     const bool include_halo = true;
-    wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(), vars, fset.get(), include_halo);
-    wrf_hydro_nwm_jedi_state_to_atlas_f90(keyState_, fields_->geometry()->toFortran(), vars, fset.get(), include_halo);
+    wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(),
+                                            vars, fset.get(), include_halo);
+    wrf_hydro_nwm_jedi_state_to_atlas_f90(keyState_, fields_->geometry()->toFortran(),
+                                            vars, fset.get(), include_halo);
   }
 
 }  // namespace wrf_hydro_nwm_jedi

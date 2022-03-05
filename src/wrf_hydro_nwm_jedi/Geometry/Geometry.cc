@@ -40,10 +40,12 @@ namespace wrf_hydro_nwm_jedi {
 
     // Create ATLAS function space with halo
     const atlas::Field atlasFieldInclHalo = atlasFieldSet_->field("lonlat_including_halo");
-    atlasFunctionSpaceIncludingHalo_.reset(new atlas::functionspace::PointCloud(atlasFieldInclHalo));
+    atlasFunctionSpaceIncludingHalo_.reset
+                                (new atlas::functionspace::PointCloud(atlasFieldInclHalo));
 
     // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_, atlasFunctionSpace_->get(),
+    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
+                                                   atlasFunctionSpace_->get(),
                                                    atlasFunctionSpaceIncludingHalo_->get());
 
     // Fill ATLAS fieldset

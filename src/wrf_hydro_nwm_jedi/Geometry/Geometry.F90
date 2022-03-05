@@ -28,9 +28,9 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
-   type(atlas_functionspace_pointcloud) :: afunctionspace, afunctionspace_incl_halo
+   type(atlas_functionspace_pointcloud) :: afunctionspace
+   type(atlas_functionspace_pointcloud) :: afunctionspace_incl_halo
 end type wrf_hydro_nwm_lsm_geometry
-
 
 !> Geometry for stream channel/reach network (1D)
 type, private :: wrf_hydro_nwm_stream_geometry
@@ -38,7 +38,6 @@ type, private :: wrf_hydro_nwm_stream_geometry
    integer :: xdim_len
    real, allocatable :: lat(:), lon(:), dx(:)
 end type wrf_hydro_nwm_stream_geometry
-
 
 !> Fortran geometry object (contains specific geometry components).
 type, public :: wrf_hydro_nwm_jedi_geometry
@@ -138,6 +137,8 @@ end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat
 subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
   type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
+
+  call abor1_ftn(" ****** Fill ATLAS fieldset not implemented ****** ")
 
   ! TODO
 
