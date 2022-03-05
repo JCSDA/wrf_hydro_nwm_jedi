@@ -42,9 +42,9 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_state_ones_f90(const F90inc &);
     void wrf_hydro_nwm_jedi_state_axpy_f90(
         const F90state &, const double &, const F90state &);
-    void wrf_hydro_nwm_jedi_state_set_atlas_f90(const F90inc &, const F90geom &, 
+    void wrf_hydro_nwm_jedi_state_set_atlas_f90(const F90state &, const F90geom &, 
         const oops::Variables &, atlas::field::FieldSetImpl *, const bool &);
-    void wrf_hydro_nwm_jedi_state_to_atlas_f90(const F90inc &, const F90geom &, 
+    void wrf_hydro_nwm_jedi_state_to_atlas_f90(const F90state &, const F90geom &, 
         const oops::Variables &, atlas::field::FieldSetImpl *, const bool &);
   }
 

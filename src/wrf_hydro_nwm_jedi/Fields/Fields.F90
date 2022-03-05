@@ -6,10 +6,10 @@
 !> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
 module wrf_hydro_nwm_jedi_fields_mod
 
-use atlas_module, only: atlas_field, atlas_fieldset, atlas_real
+use atlas_module, only: atlas_field, atlas_fieldset, atlas_real, atlas_metadata
+
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding, only: &
-       c_int, c_float, c_double, c_char, c_null_char
+use iso_c_binding, only: c_int, c_float, c_double, c_char, c_null_char
 use datetime_mod
 use fckit_mpi_module
 use random_mod
@@ -203,7 +203,7 @@ abstract interface
      real(c_float)                 :: rms
    end function rms_interface
 
-   subroutine set_atlas_interface(self, geom, afieldset)
+   subroutine set_atlas_interface(self, geom, afieldset, opt_include_halo)
      use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
      use oops_variables_mod
      use atlas_module, only: atlas_fieldset
@@ -211,9 +211,10 @@ abstract interface
      class(base_field), intent(in) :: self
      type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
      type(atlas_fieldset), intent(inout) :: afieldset
+     logical, optional,    intent(in)    :: opt_include_halo
    end subroutine set_atlas_interface
 
-   subroutine to_atlas_interface(self, geom, afieldset)
+   subroutine to_atlas_interface(self, geom, afieldset, opt_include_halo)
      use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
      use oops_variables_mod
      use atlas_module, only: atlas_fieldset
@@ -221,6 +222,7 @@ abstract interface
      class(base_field), intent(in) :: self
      type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
      type(atlas_fieldset), intent(inout) :: afieldset
+     logical, optional,    intent(in)    :: opt_include_halo
    end subroutine to_atlas_interface
 
    subroutine to_atlas_ad_interface(self, geom, afieldset)
@@ -2590,19 +2592,13 @@ subroutine set_atlas(self, geom, vars, afieldset, opt_include_halo)
 
   integer :: jvar, ff
   logical :: found
-
   logical :: include_halo
-  if (present(opt_include_halo)) then
-    include_halo = opt_include_halo
-  else
-    include_halo = .false.
-  endif
 
   do jvar=1,vars%nvars()
      found = .false.
      do ff=1,self%nf
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%set_atlas(geom, afieldset)
+           call self%fields(ff)%field%set_atlas(geom, afieldset, opt_include_halo)
            found = .true.
         end if
     end do
@@ -2610,40 +2606,65 @@ subroutine set_atlas(self, geom, vars, afieldset, opt_include_halo)
   enddo
 end subroutine set_atlas
 
-subroutine set_atlas_1d(self, geom, afieldset)
+subroutine set_atlas_1d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_1d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical, optional,     intent(in)    :: opt_include_halo
 
   call abor1_ftn("set_atlas_1d: no set_atlas interface for 1d fields")
 end subroutine set_atlas_1d
 
-subroutine set_atlas_2d(self, geom, afieldset)
+subroutine set_atlas_2d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_2d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical, optional,     intent(in)    :: opt_include_halo
 
   type(atlas_field) :: afield
+  logical :: include_halo
+  
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif
 
   if (.not.afieldset%has_field(self%long_name)) then
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    if (include_halo) then
+      afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    else
+      afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    endif
     call afieldset%add(afield)
     call afield%final()
   end if
 end subroutine set_atlas_2d
 
-subroutine set_atlas_3d(self, geom, afieldset)
+subroutine set_atlas_3d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_3d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
-
+  logical, optional,     intent(in)    :: opt_include_halo
+  
   type(atlas_field) :: afield
+  logical :: include_halo
 
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif
+  
   if (.not.afieldset%has_field(self%long_name)) then
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
+    if (include_halo) then
+      afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    else
+      afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    endif
     call afieldset%add(afield)
     call afield%final()
   end if
@@ -2664,18 +2685,11 @@ subroutine to_atlas(self, geom, vars, afieldset, opt_include_halo)
   integer :: jvar, ff
   logical :: found
 
-  logical :: include_halo
-  if (present(opt_include_halo)) then
-    include_halo = opt_include_halo
-  else
-    include_halo = .false.
-  endif
-
   do jvar=1,vars%nvars()
      found = .false.
      do ff=1,self%nf
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%to_atlas(geom, afieldset)
+           call self%fields(ff)%field%to_atlas(geom, afieldset, opt_include_halo)
            found = .true.
         end if
     end do
@@ -2683,30 +2697,43 @@ subroutine to_atlas(self, geom, vars, afieldset, opt_include_halo)
   enddo
 end subroutine to_atlas
 
-subroutine to_atlas_1d(self, geom, afieldset)
+subroutine to_atlas_1d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_1d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical, optional,    intent(in)    :: opt_include_halo
 
   call abor1_ftn("to_atlas_1d: no to_atlas interface for 1d fields")
 
 end subroutine to_atlas_1d
 
-subroutine to_atlas_2d(self, geom, afieldset)
+subroutine to_atlas_2d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_2d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical, optional,    intent(in)    :: opt_include_halo
 
   integer :: ix, iy, inode
   real(c_double), pointer :: ptr(:)
   type(atlas_field) :: afield
+  logical :: include_halo
+  
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif
 
   if (afieldset%has_field(self%long_name)) then
     afield = afieldset%field(trim(self%long_name))
   else
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    if (include_halo) then
+      afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    else
+      afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    endif
     call afieldset%add(afield)
   end if
   call afield%data(ptr)
@@ -2720,19 +2747,32 @@ subroutine to_atlas_2d(self, geom, afieldset)
   call afield%final()
 end subroutine to_atlas_2d
 
-subroutine to_atlas_3d(self, geom, afieldset)
+subroutine to_atlas_3d(self, geom, afieldset, opt_include_halo)
   implicit none
   class(field_3d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical, optional,    intent(in)    :: opt_include_halo
 
   integer :: ix, iy, iz, inode
   real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
+  logical :: include_halo
+  
+  if (present(opt_include_halo)) then
+    include_halo = opt_include_halo
+  else
+    include_halo = .false.
+  endif  
 
   if (afieldset%has_field(self%long_name)) then
     afield = afieldset%field(trim(self%long_name))
   else
+    if (include_halo) then
+      afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    else
+      afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    endif
     afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
     call afieldset%add(afield)
   end if

@@ -346,7 +346,7 @@ subroutine wrf_hydro_nwm_jedi_state_set_atlas_c(c_key_self, c_key_geom, c_vars, 
  afieldset = atlas_fieldset(c_afieldset)
  include_halo = c_include_halo
  
- call self%fields_obj%set_atlas(geom, vars, afieldset, include_halo)
+ call set_atlas_state(self, geom, vars, afieldset, include_halo)
  
  end subroutine wrf_hydro_nwm_jedi_state_set_atlas_c
  
@@ -374,7 +374,7 @@ subroutine wrf_hydro_nwm_jedi_state_set_atlas_c(c_key_self, c_key_geom, c_vars, 
  afieldset = atlas_fieldset(c_afieldset)
  include_halo = c_include_halo
  
- call self%fields_obj%to_atlas(geom, vars, afieldset, include_halo)
+ call to_atlas_state(self, geom, vars, afieldset, include_halo)
  
  end subroutine wrf_hydro_nwm_jedi_state_to_atlas_c
 

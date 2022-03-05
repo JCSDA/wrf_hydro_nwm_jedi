@@ -76,7 +76,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c(c_key_s
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   self%lsm%afunctionspace = atlas_functionspace_pointcloud(c_afunctionspace)
-  self%lsm%afunctionspace = atlas_functionspace_pointcloud(c_afunctionspace_incl_halo)
+  self%lsm%afunctionspace_incl_halo = atlas_functionspace_pointcloud(c_afunctionspace_incl_halo)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_c
 
@@ -92,6 +92,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c(c_key_self, c_afiel
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   afieldset = atlas_fieldset(c_afieldset)
+  
   call wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c

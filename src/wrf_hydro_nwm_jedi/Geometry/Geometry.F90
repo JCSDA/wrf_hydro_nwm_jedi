@@ -28,7 +28,7 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    integer :: n_snow_layers
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
-   type(atlas_functionspace_pointcloud) :: afunctionspace
+   type(atlas_functionspace_pointcloud) :: afunctionspace, afunctionspace_incl_halo
 end type wrf_hydro_nwm_lsm_geometry
 
 

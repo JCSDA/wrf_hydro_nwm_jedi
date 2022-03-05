@@ -24,10 +24,10 @@ use wrf_hydro_nwm_jedi_increment_mod, only: &
      schur_prod, &
      random_normal, &
      dirac, &
-     set_atlas, &
-     from_atlas, &
-     to_atlas, &
-     to_atlas_ad, &
+     set_atlas_inc, &
+     from_atlas_inc, &
+     to_atlas_inc, &
+     to_atlas_ad_inc, &
      getpoint, &
      setpoint
 
@@ -507,7 +507,7 @@ subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c(c_key_inc, c_key_geom, c_var
   afieldset = atlas_fieldset(c_afieldset)
   include_halo = c_include_halo
 
-  call set_atlas(inc, geom, vars, afieldset, include_halo)
+  call set_atlas_inc(inc, geom, vars, afieldset, include_halo)
 
 end subroutine wrf_hydro_nwm_jedi_increment_set_atlas_c
 
@@ -531,7 +531,7 @@ subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c(c_key_inc, c_key_geom, c_vars
   afieldset = atlas_fieldset(c_afieldset)
   include_halo = c_include_halo
 
-  call to_atlas(inc, geom, vars, afieldset, include_halo)
+  call to_atlas_inc(inc, geom, vars, afieldset, include_halo)
 
 end subroutine wrf_hydro_nwm_jedi_increment_to_atlas_c
 
@@ -549,7 +549,7 @@ subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c(c_key_inc, c_vars, c_afield
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
 
-  call from_atlas(inc, vars, afieldset)
+  call from_atlas_inc(inc, vars, afieldset)
 
 end subroutine wrf_hydro_nwm_jedi_increment_from_atlas_c
 
@@ -574,7 +574,7 @@ subroutine wrf_hydro_nwm_jedi_increment_to_atlas_ad_c(c_key_self, c_key_geom, c_
  vars = oops_variables(c_vars)
  afieldset = atlas_fieldset(c_afieldset)
  
- call to_atlas_ad(self, geom, vars, afieldset)
+ call to_atlas_ad_inc(self, geom, vars, afieldset)
  
  end subroutine wrf_hydro_nwm_jedi_increment_to_atlas_ad_c
 

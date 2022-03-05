@@ -42,10 +42,10 @@ public :: &
      zeros, &
      ones, &
      dirac, &
-     set_atlas, &
-     to_atlas, &
-     from_atlas, &
-     to_atlas_ad, &
+     set_atlas_inc, &
+     to_atlas_inc, &
+     from_atlas_inc, &
+     to_atlas_ad_inc, &
      getpoint, &
      setpoint
 ! create_from_other, &
@@ -199,43 +199,42 @@ subroutine schur_prod(self, rhs)
   call self%fields_obj%schur_prod(rhs%fields_obj)
 end subroutine schur_prod
 
-
-subroutine set_atlas(self, geom, vars, afieldset, include_halo)
+subroutine set_atlas_inc(self, geom, vars, afieldset, opt_include_halo)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
-  logical :: include_halo
-  call self%fields_obj%set_atlas(geom, vars, afieldset, include_halo)
-end subroutine set_atlas
+  logical :: opt_include_halo
+  call self%fields_obj%set_atlas(geom, vars, afieldset, opt_include_halo)
+end subroutine set_atlas_inc
 
-subroutine to_atlas(self, geom, vars, afieldset, include_halo)
+subroutine to_atlas_inc(self, geom, vars, afieldset, opt_include_halo)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
-  logical :: include_halo
-  call self%fields_obj%to_atlas(geom, vars, afieldset, include_halo)
-end subroutine to_atlas
+  logical :: opt_include_halo
+  call self%fields_obj%to_atlas(geom, vars, afieldset, opt_include_halo)
+end subroutine to_atlas_inc
 
-subroutine from_atlas(self, vars, afieldset)
+subroutine from_atlas_inc(self, vars, afieldset)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(in) :: afieldset
   call self%fields_obj%from_atlas(vars, afieldset)
-end subroutine from_atlas
+end subroutine from_atlas_inc
 
-subroutine to_atlas_ad(self, geom, vars, afieldset)
+subroutine to_atlas_ad_inc(self, geom, vars, afieldset)
   implicit none
   type(wrf_hydro_nwm_jedi_state), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
   call self%fields_obj%to_atlas_ad(geom, vars, afieldset)
-end subroutine to_atlas_ad
+end subroutine to_atlas_ad_inc
 
 ! ------------------------------------------------------------------------------
 !> Get the values at a specific grid point
