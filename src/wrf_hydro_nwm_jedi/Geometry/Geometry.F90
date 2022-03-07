@@ -138,9 +138,22 @@ subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
   type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
 
-  call abor1_ftn(" ****** Fill ATLAS fieldset not implemented ****** ")
+  integer :: ix,iy,inode
+  real(c_double), pointer :: real_ptr_1(:)
+  type(atlas_field) :: afield
 
-  ! TODO
+    !   ! Fill with area
+  afield = self%lsm%afunctionspace%create_field(name='area',kind=atlas_real(c_double),levels=0)
+  call afield%data(real_ptr_1)
+  inode = 0
+  do iy=self%lsm%ystart,self%lsm%yend
+    do ix=self%lsm%xstart,self%lsm%xend
+      inode = inode+1
+      real_ptr_1(inode) = real(1.0, c_double)
+    end do
+  end do
+  call afieldset%add(afield)
+  call afield%final()
 
 end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
 

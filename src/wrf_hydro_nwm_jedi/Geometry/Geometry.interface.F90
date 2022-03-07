@@ -60,7 +60,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c(c_key_self, c_afieldse
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   afieldset = atlas_fieldset(c_afieldset)
   include_halo = c_include_halo
-  call wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset, include_halo)
+  call wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset,include_halo)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_c
 
@@ -92,7 +92,6 @@ subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c(c_key_self, c_afiel
 
   call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_self, self)
   afieldset = atlas_fieldset(c_afieldset)
-  
   call wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
 
 end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_c
