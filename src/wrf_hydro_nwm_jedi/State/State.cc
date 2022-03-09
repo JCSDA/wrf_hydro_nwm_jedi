@@ -86,6 +86,17 @@ namespace wrf_hydro_nwm_jedi {
 
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
 
+void State::getValues(const ufo::Locations & locs,
+                        const oops::Variables & vars,
+                        ufo::GeoVaLs & geovals) const {
+  }
+
+  void State::getValues(const ufo::Locations & locs,
+                 const oops::Variables & vars,
+                 ufo::GeoVaLs & geovals,
+                 GetValuesTraj & traj) const {
+  }
+
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_, string);
@@ -109,7 +120,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State write done" << std::endl;
   }
 
-
   void State::read(const eckit::Configuration & config) {
     oops::Log::trace() << "State::State read start" << std::endl;
     const eckit::Configuration * conf = &config;
@@ -123,7 +133,6 @@ namespace wrf_hydro_nwm_jedi {
     time_ = *dtp;
     oops::Log::trace() << "State read done" << std::endl;
   }
-
 
   State & State::operator=(const State & rhs) {
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
@@ -168,7 +177,7 @@ namespace wrf_hydro_nwm_jedi {
   }
 
   void State::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
-    const bool include_halo = false;
+    const bool include_halo = true;
 
     oops::Log::trace() << "State getFieldSet starting" << std::endl;
     wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(),

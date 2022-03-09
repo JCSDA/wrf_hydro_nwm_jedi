@@ -25,6 +25,9 @@
 #include "wrf_hydro_nwm_jedi/GeometryIterator/GeometryIterator.h"
 
 // forward declarations
+namespace eckit {
+  class Configuration;
+}
 namespace wrf_hydro_nwm_jedi {
   class GeometryIterator;
 }

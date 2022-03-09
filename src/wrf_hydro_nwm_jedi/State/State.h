@@ -69,6 +69,15 @@ namespace wrf_hydro_nwm_jedi {
     State & operator=(const State &);
     ~State();
 
+    // interpolate state to observations locations
+    void getValues(const ufo::Locations &,
+                   const oops::Variables &,
+                   ufo::GeoVaLs &) const;
+    void getValues(const ufo::Locations &,
+                   const oops::Variables &,
+                   ufo::GeoVaLs &,
+                   GetValuesTraj &) const;
+
     // interactions with increment
     State & operator+=(const Increment &);
 
