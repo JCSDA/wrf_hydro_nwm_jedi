@@ -18,7 +18,9 @@
 
 #include "eckit/mpi/Comm.h"
 
+#include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
+#include "oops/base/WriteParametersBase.h"
 
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"

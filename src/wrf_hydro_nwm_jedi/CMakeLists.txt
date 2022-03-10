@@ -28,17 +28,7 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   GeometryIterator/GeometryIteratorFortran.h
   GeometryIterator/GeometryIterator.interface.F90
   GeometryIterator/GeometryIterator.F90
-
-  # GetValues
-  GetValues/GetValues.h
-  GetValues/GetValues.cc
-  GetValues/GetValues.F90
-  GetValues/LinearGetValues.cc
-  GetValues/LinearGetValues.h
-  GetValues/GetValues.interface.F90
-  GetValues/LinearGetValues.interface.h
-  GetValues/LinearGetValues.interface.F90
-  
+   
   # VariableChanges
   VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.h
   VariableChange/Model2GeoVaLs/VarChaModel2GeoVaLs.cc
@@ -64,11 +54,7 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   # # LinearGetValues
   #LinearGetValues/LinearGetValues.h
   #LinearGetValues/LinearGetValues.cc
-
-  # # GetValuesTraj
-  # GetValuesTraj/GetValuesTraj.h
-  # GetValuesTraj/GetValuesTraj.cc
-  
+   
   # # Increment
   Increment/Increment.interface.F90
   Increment/Increment.h
