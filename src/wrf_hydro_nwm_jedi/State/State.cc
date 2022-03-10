@@ -178,8 +178,8 @@ void State::getValues(const ufo::Locations & locs,
 
   void State::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
     util::abor1_cpp("State::getFieldSet() needs to be implemented.",
-                     __FILE__, __LINE__);    
-    
+                     __FILE__, __LINE__);
+
     // const bool include_halo = true;
 
     // oops::Log::trace() << "State getFieldSet starting" << std::endl;
