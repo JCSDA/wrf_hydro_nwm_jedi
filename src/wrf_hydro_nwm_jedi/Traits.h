@@ -35,7 +35,6 @@ namespace wrf_hydro_nwm_jedi {
 
     // Interfaces that wrf_hydro_nwm_jedi has to implement
     // ---------------------------------------------------
-    typedef oops::LocalUnstructuredInterpolator<Geometry, State, Increment>  LocalInterpolator;
     typedef wrf_hydro_nwm_jedi::Covariance          Covariance;
     typedef wrf_hydro_nwm_jedi::Geometry            Geometry;
     typedef wrf_hydro_nwm_jedi::GeometryIterator    GeometryIterator;
@@ -46,6 +45,8 @@ namespace wrf_hydro_nwm_jedi {
     typedef wrf_hydro_nwm_jedi::ModelAuxIncrement     ModelAuxIncrement;
     typedef wrf_hydro_nwm_jedi::LinearVariableChange  LinearVariableChange;
     typedef wrf_hydro_nwm_jedi::VariableChange        VariableChange;
+
+    typedef oops::LocalUnstructuredInterpolator<Geometry, State, Increment>  LocalInterpolator;
   };
 }  // namespace wrf_hydro_nwm_jedi
 
