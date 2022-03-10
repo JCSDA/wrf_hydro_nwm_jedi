@@ -20,9 +20,6 @@
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
 
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
-
 namespace wrf_hydro_nwm_jedi {
 
 
@@ -86,16 +83,6 @@ namespace wrf_hydro_nwm_jedi {
 
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
 
-void State::getValues(const ufo::Locations & locs,
-                        const oops::Variables & vars,
-                        ufo::GeoVaLs & geovals) const {
-  }
-
-  void State::getValues(const ufo::Locations & locs,
-                 const oops::Variables & vars,
-                 ufo::GeoVaLs & geovals,
-                 GetValuesTraj & traj) const {
-  }
 
   void State::print(std::ostream & os) const {
     char *string = new char[8192];

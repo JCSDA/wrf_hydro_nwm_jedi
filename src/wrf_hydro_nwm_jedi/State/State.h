@@ -38,10 +38,7 @@ namespace eckit {
 namespace oops {
   class Variables;
 }
-namespace ufo {
-  class GeoVaLs;
-  class Locations;
-}
+
 namespace wrf_hydro_nwm_jedi {
   class Fields;
   class GetValuesTraj;
@@ -70,15 +67,6 @@ namespace wrf_hydro_nwm_jedi {
     State(const State &);
     State & operator=(const State &);
     ~State();
-
-    // interpolate state to observations locations
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &) const;
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &,
-                   GetValuesTraj &) const;
 
     // interactions with increment
     State & operator+=(const Increment &);
