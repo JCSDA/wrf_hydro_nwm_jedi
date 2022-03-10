@@ -177,14 +177,17 @@ void State::getValues(const ufo::Locations & locs,
   }
 
   void State::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
-    const bool include_halo = true;
+    util::abor1_cpp("State::getFieldSet() needs to be implemented.",
+                     __FILE__, __LINE__);    
+    
+    // const bool include_halo = true;
 
-    oops::Log::trace() << "State getFieldSet starting" << std::endl;
-    wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(),
-                                            vars, fset.get(), include_halo);
-    wrf_hydro_nwm_jedi_state_to_atlas_f90(keyState_, fields_->geometry()->toFortran(),
-                                            vars, fset.get(), include_halo);
-    oops::Log::trace() << "State getFieldSet done" << std::endl;
+    // oops::Log::trace() << "State getFieldSet starting" << std::endl;
+    // wrf_hydro_nwm_jedi_state_set_atlas_f90(keyState_, fields_->geometry()->toFortran(),
+    //                                         vars, fset.get(), include_halo);
+    // wrf_hydro_nwm_jedi_state_to_atlas_f90(keyState_, fields_->geometry()->toFortran(),
+    //                                         vars, fset.get(), include_halo);
+    // oops::Log::trace() << "State getFieldSet done" << std::endl;
   }
 
 }  // namespace wrf_hydro_nwm_jedi

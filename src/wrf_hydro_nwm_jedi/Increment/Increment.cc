@@ -330,16 +330,20 @@ namespace wrf_hydro_nwm_jedi {
   }
   // -------------------------------------------------------------------------------------------------
   void Increment::getFieldSet(const oops::Variables & vars, atlas::FieldSet & fset) const {
-  const bool include_halo = true;
-  wrf_hydro_nwm_jedi_increment_set_atlas_f90(keyInc_, fields_->geometry()->toFortran(), vars,
-                                                fset.get(), include_halo);
-  wrf_hydro_nwm_jedi_increment_to_atlas_f90(keyInc_, fields_->geometry()->toFortran(), vars,
-                                                fset.get(), include_halo);
+      util::abor1_cpp("Increment::getFieldSet() needs to be implemented.",
+                     __FILE__, __LINE__);    
+  // const bool include_halo = true;
+  // wrf_hydro_nwm_jedi_increment_set_atlas_f90(keyInc_, fields_->geometry()->toFortran(), vars,
+  //                                               fset.get(), include_halo);
+  // wrf_hydro_nwm_jedi_increment_to_atlas_f90(keyInc_, fields_->geometry()->toFortran(), vars,
+  //                                               fset.get(), include_halo);
 }
 // -------------------------------------------------------------------------------------------------
   void Increment::getFieldSetAD(const oops::Variables & vars, const atlas::FieldSet & fset) {
-  wrf_hydro_nwm_jedi_increment_to_atlas_ad_f90(keyInc_, fields_->geometry()->toFortran(), vars,
-                                                fset.get());
+      util::abor1_cpp("Increment::getFieldSetAD() needs to be implemented.",
+                     __FILE__, __LINE__);   
+  // wrf_hydro_nwm_jedi_increment_to_atlas_ad_f90(keyInc_, fields_->geometry()->toFortran(), vars,
+  //                                               fset.get());
 }
 
 }  // namespace wrf_hydro_nwm_jedi
