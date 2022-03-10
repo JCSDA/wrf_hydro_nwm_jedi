@@ -34,8 +34,8 @@ class VarChaModel2GeoVaLs: public VariableChangeBase {
 
   VarChaModel2GeoVaLs(const Geometry &, const eckit::LocalConfiguration &);
   ~VarChaModel2GeoVaLs();
-  void changeVar(const State &, State &) const;
-  void changeVarInverse(const State &, State &) const;
+  void changeVar(const State &, State &) const override;
+  void changeVarInverse(const State &, State &) const override;
 
  private:
   F90vc_M2G keyFtnConfig_;

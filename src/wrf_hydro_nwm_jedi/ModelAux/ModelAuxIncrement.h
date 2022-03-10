@@ -56,7 +56,7 @@ namespace wrf_hydro_nwm_jedi {
     double norm() const {return 0.0;}
 
     /// Serialize and deserialize
-    size_t serialSize() const {return 0;}
+    size_t serialSize() const  override {return 0;}
     void serialize(std::vector<double> &) const override {}
     void deserialize(const std::vector<double> &, size_t &) override {}
 
