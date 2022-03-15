@@ -1,13 +1,13 @@
 Initial state: 
 Print State (C++) ------------------------   
-SNEQV     
+SNEQV               
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
 Mean:    122.326637
 Std Dev:    43.0149269
 RMS:    129.669205
   
-SNOWH     
+SNOWH               
 snow_depth                                                      
 2D Field shape: (           30,           24 )
 Mean:   0.491032660
@@ -18,14 +18,14 @@ End Print State (C++) --------------------
 
 Final state: 
 Print State (C++) ------------------------   
-SNEQV     
+SNEQV               
 snow_water_equivalent                                           
 2D Field shape: (           30,           24 )
 Mean:    122.326637
 Std Dev:    43.0149269
 RMS:    129.669205
   
-SNOWH     
+SNOWH               
 snow_depth                                                      
 2D Field shape: (           30,           24 )
 Mean:   0.491032660
@@ -35,14 +35,14 @@ End Print State (C++) --------------------
 
 
 H(x): 
-Simulate nobs= 100 Min=61.7471, Max=236.716, RMS=127.052
+Simulate nobs= 100 Min=61.7471, Max=236.716, RMS=126.953
 
-Simulate nobs= 200 Min=0.278563, Max=0.845993, RMS=0.487774
+Simulate nobs= 200 Min=0.278563, Max=0.845993, RMS=0.487958
 
 End H(x)
 Perturbed H(x): 
-Simulate nobs= 100 Min=61.7471, Max=236.716, RMS=127.052
+Simulate nobs= 100 Min=61.7471, Max=236.716, RMS=126.953
 
-Simulate nobs= 200 Min=0.116914, Max=0.851767, RMS=0.50003
+Simulate nobs= 200 Min=0.116914, Max=0.851767, RMS=0.500226
 
 End Perturbed H(x)
