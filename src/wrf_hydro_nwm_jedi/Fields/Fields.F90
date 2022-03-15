@@ -54,6 +54,7 @@ public :: &
 type, abstract, public :: base_field
    character(len=32) :: short_name = "null"   !< Short name (to match file name)
    character(len=20) :: wrf_hydro_nwm_name = "null" !< Common name
+   character(len=20) :: obs_name = "null"     !< Observation name
    character(len=64) :: long_name = "null"    !< More descriptive name
    character(len=32) :: units = "null"        !< Units for the field
    integer :: ncid_index                      !< Index for restart file (1=lsm, 2=hydro)
@@ -471,6 +472,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='snow_water_equivalent', &
              wrf_hydro_nwm_name='SNEQV', &
+             obs_name='swe', &
              units='mm', &
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -485,6 +487,7 @@ subroutine create(self, geom, vars)
               short_name=vars%variable(var), &
               long_name='snow_water_equivalent', &
               wrf_hydro_nwm_name='SNEQV', &
+              obs_name='swe', &
               units='mm', &
               ncid_index=1)
          allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -499,6 +502,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='snow_depth', &
              wrf_hydro_nwm_name='SNOWH', &
+             obs_name='snow_depth', &
              units='m', &
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -513,6 +517,7 @@ subroutine create(self, geom, vars)
               short_name=vars%variable(var), &
               long_name='snow_depth', &
               wrf_hydro_nwm_name='SNOWH', &
+              obs_name='snow_depth', &
               units='m', &
               ncid_index=1)
          allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -527,6 +532,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_snow_ice', &
              wrf_hydro_nwm_name='BULK_SNICE', &
+             obs_name='snow_depth', &
              units='mm', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -541,6 +547,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_snow_liquid', &
              wrf_hydro_nwm_name='BULK_SNLIQ', &
+             obs_name='snow_depth', &
              units='mm', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -555,6 +562,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_mass_weighted_snow_temp', &
              wrf_hydro_nwm_name='BULK_SNOW_T', &
+             obs_name='snow_depth', &
              units='degK', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -568,7 +576,10 @@ subroutine create(self, geom, vars)
              ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var),&
              long_name='leaf_area', &
-             wrf_hydro_nwm_name='LAI', units='m^2m^-2', ncid_index=1)
+             wrf_hydro_nwm_name='LAI', &
+             obs_name='lai', &
+             units='m^2m^-2', &
+             ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
@@ -583,6 +594,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var),&
              long_name='snow_liquid', &
              wrf_hydro_nwm_name='SNLIQ', &
+             obs_name='snow_liquid', &
              units='liter', &
              ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
@@ -599,6 +611,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var),&
              long_name='snow_ice', &
              wrf_hydro_nwm_name='SNICE', &
+             obs_name='snow_ice', &
              units='liter', &
              ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
@@ -658,7 +671,7 @@ end subroutine fill_field_1d
 
 subroutine fill_field_2d(self, &
      xdim_len, ydim_len, &
-     short_name, long_name, wrf_hydro_nwm_name, &
+     short_name, long_name, wrf_hydro_nwm_name, obs_name, &
      units, tracer, ncid_index)
   implicit none
   class(field_2d),   intent(inout) :: self
@@ -666,6 +679,7 @@ subroutine fill_field_2d(self, &
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
+  character(len=*),  intent(in)    :: obs_name
   character(len=*),  intent(in)    :: units
   logical, optional, intent(in)    :: tracer
   integer,           intent(in)    :: ncid_index
@@ -681,6 +695,7 @@ subroutine fill_field_2d(self, &
   self%short_name   = trim(short_name)
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%obs_name     = trim(obs_name)
   self%units        = trim(units)
   self%ncid_index   = ncid_index
 end subroutine fill_field_2d
@@ -688,7 +703,7 @@ end subroutine fill_field_2d
 
 subroutine fill_field_3d(self, &
      xdim_len, ydim_len, zdim_len, &
-     short_name, long_name, wrf_hydro_nwm_name, &
+     short_name, long_name, wrf_hydro_nwm_name, obs_name, &
      units, tracer, ncid_index)
   implicit none
   class(field_3d),  intent(inout) :: self
@@ -696,6 +711,7 @@ subroutine fill_field_3d(self, &
   character(len=*), intent(in)    :: short_name
   character(len=*), intent(in)    :: long_name
   character(len=*), intent(in)    :: wrf_hydro_nwm_name
+  character(len=*), intent(in)    :: obs_name
   character(len=*), intent(in)    :: units
   logical, optional,intent(in)    :: tracer
   integer,          intent(in)    :: ncid_index
@@ -712,6 +728,7 @@ subroutine fill_field_3d(self, &
   self%short_name   = trim(short_name)
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%obs_name     = trim(obs_name)
   self%units        = trim(units)
   self%ncid_index   = ncid_index
 end subroutine fill_field_3d
@@ -2597,7 +2614,8 @@ subroutine set_atlas(self, geom, vars, afieldset, opt_include_halo)
   do jvar=1,vars%nvars()
      found = .false.
      do ff=1,self%nf
-        if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
+      if (trim(self%fields(ff)%field%obs_name)==trim(vars%variable(jvar)) &
+      .or. trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
            call self%fields(ff)%field%set_atlas(geom, afieldset, opt_include_halo)
            found = .true.
         end if
@@ -2625,7 +2643,6 @@ subroutine set_atlas_2d(self, geom, afieldset, opt_include_halo)
 
   type(atlas_field) :: afield
   logical :: include_halo
-  
   if (present(opt_include_halo)) then
     include_halo = opt_include_halo
   else
@@ -2688,7 +2705,8 @@ subroutine to_atlas(self, geom, vars, afieldset, opt_include_halo)
   do jvar=1,vars%nvars()
      found = .false.
      do ff=1,self%nf
-        if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
+        if (trim(self%fields(ff)%field%obs_name)==trim(vars%variable(jvar)) &
+        .or. trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
            call self%fields(ff)%field%to_atlas(geom, afieldset, opt_include_halo)
            found = .true.
         end if
@@ -2719,6 +2737,7 @@ subroutine to_atlas_2d(self, geom, afieldset, opt_include_halo)
   real(c_double), pointer :: ptr(:)
   type(atlas_field) :: afield
   logical :: include_halo
+  type(atlas_metadata) :: meta
   
   if (present(opt_include_halo)) then
     include_halo = opt_include_halo
@@ -2744,6 +2763,8 @@ subroutine to_atlas_2d(self, geom, afieldset, opt_include_halo)
        ptr(inode) = real(self%array(ix, iy), c_double)
     enddo
   enddo
+  meta = afield%metadata()
+  call meta%set('interp_type', 'nearest')
   call afield%final()
 end subroutine to_atlas_2d
 
@@ -2758,6 +2779,7 @@ subroutine to_atlas_3d(self, geom, afieldset, opt_include_halo)
   real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
   logical :: include_halo
+  type(atlas_metadata) :: meta
   
   if (present(opt_include_halo)) then
     include_halo = opt_include_halo
@@ -2786,6 +2808,8 @@ subroutine to_atlas_3d(self, geom, afieldset, opt_include_halo)
       enddo
     enddo
   enddo
+  meta = afield%metadata()
+  call meta%set('interp_type', 'nearest')
   call afield%final()
 end subroutine to_atlas_3d
 

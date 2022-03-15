@@ -60,10 +60,12 @@ namespace wrf_hydro_nwm_jedi {
     // Copy ATLAS function space
     atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(
                               other.atlasFunctionSpace_->lonlat()));
+    atlasFunctionSpaceIncludingHalo_.reset(new atlas::functionspace::PointCloud(
+                              other.atlasFunctionSpaceIncludingHalo_->lonlat()));
 
     // Set ATLAS function space pointer in Fortran
     wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_.get()->get(), atlasFunctionSpaceIncludingHalo_->get());
+        atlasFunctionSpace_->get(), atlasFunctionSpaceIncludingHalo_->get());
 
     // Copy ATLAS fieldset
     atlasFieldSet_.reset(new atlas::FieldSet());
@@ -104,22 +106,18 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
 // -----------------------------------------------------------------------------
 void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
                       const bool halo) const {
-    util::abor1_cpp("Geometry::latlon() needs to be implemented.",
-                     __FILE__, __LINE__);
+const atlas::functionspace::PointCloud * fspace;
+fspace = atlasFunctionSpace_.get();
 
-//  const atlas::functionspace::PointCloud * fspace;
-//
-//  fspace = atlasFunctionSpace_.get();
-//
-//  const auto lonlat = atlas::array::make_view<double, 2>(fspace->lonlat());
-//  const size_t npts = fspace->size();
-//  lats.resize(npts);
-//  lons.resize(npts);
-//  for (size_t jj = 0; jj < npts; ++jj) {
-//    lats[jj] = lonlat(jj, 1);
-//    lons[jj] = lonlat(jj, 0);
-//    if (lons[jj] < 0.0) lons[jj] += 360.0;
-//  }
+const auto lonlat = atlas::array::make_view<double, 2>(fspace->lonlat());
+const size_t npts = fspace->size();
+lats.resize(npts);
+lons.resize(npts);
+for (size_t jj = 0; jj < npts; ++jj) {
+  lats[jj] = lonlat(jj, 1);
+  lons[jj] = lonlat(jj, 0);
+  if (lons[jj] < 0.0) lons[jj] += 360.0;
+  }
 }
 // -----------------------------------------------------------------------------
   void Geometry::print(std::ostream & os) const {
