@@ -42,10 +42,10 @@ ecbuild_bundle( PROJECT crtm GIT "https://github.com/jcsda-internal/crtm.git" BR
 
 # Core JEDI repositories
 # ----------------------
-ecbuild_bundle( PROJECT oops  GIT "https://github.com/jcsda-internal/oops.git"  BRANCH develop UPDATE )
-ecbuild_bundle( PROJECT saber GIT "https://github.com/jcsda-internal/saber.git" BRANCH develop UPDATE )
-ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git"  BRANCH develop UPDATE )
-ecbuild_bundle( PROJECT ufo   GIT "https://github.com/jcsda-internal/ufo.git"   BRANCH develop UPDATE )
+ecbuild_bundle( PROJECT oops  GIT "https://github.com/jcsda-internal/oops.git"  BRANCH 914185bb86c3f91a07869977ffd4a96226a70f19 )
+ecbuild_bundle( PROJECT saber GIT "https://github.com/jcsda-internal/saber.git" BRANCH ef48c8cbfd8e9db137015c4f1320a8e09c3c4c36 )
+ecbuild_bundle( PROJECT ioda  GIT "https://github.com/jcsda-internal/ioda.git"  BRANCH cb26e591d8ddc4fc3e2bbab7c2f55c297c96fc07 )
+ecbuild_bundle( PROJECT ufo   GIT "https://github.com/jcsda-internal/ufo.git"   BRANCH ecb8af95aedb8ceb955cfb395be5f6811c182230 )
 ecbuild_bundle( PROJECT ufo-data  GIT "https://github.com/jcsda-internal/ufo-data.git"  BRANCH develop UPDATE )
 
 # This repo
