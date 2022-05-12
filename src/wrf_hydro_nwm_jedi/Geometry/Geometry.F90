@@ -363,7 +363,7 @@ subroutine get_geoval_levels(self, vars, nvars, nlevels)
         call fckit_log%debug("Found "//trim(myname)//":" &
                                    & //trim(vars%variable(ivar)))
 
-      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI")
+      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI", "snow_water_equivalent")
 
         nlevels(ivar) = 1
         call fckit_log%debug("Found "//trim(myname)//":" &
