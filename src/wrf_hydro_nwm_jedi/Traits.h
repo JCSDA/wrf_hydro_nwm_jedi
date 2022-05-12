@@ -43,7 +43,10 @@ namespace wrf_hydro_nwm_jedi {
     typedef wrf_hydro_nwm_jedi::ModelAuxIncrement     ModelAuxIncrement;
     typedef wrf_hydro_nwm_jedi::LinearVariableChange  LinearVariableChange;
     typedef wrf_hydro_nwm_jedi::VariableChange        VariableChange;
+<<<<<<< HEAD
 
+=======
+>>>>>>> f1e95fa54ec72dbbaf837868a82e2698e70b35fc
   };
 }  // namespace wrf_hydro_nwm_jedi
 
