@@ -84,6 +84,10 @@ list( APPEND wrf_hydro_nwm_jedi_src_files
   State/StateFortran.h
   State/State.F90
 
+  # ObsLocalization
+  ObsLocalization/instantiateObsLocFactory.h
+  ObsLocalization/ObsLocVerticalBrasnett.h
+
   # Utilities
   Utilities/utilities.F90
   Utilities/constants.F90	
