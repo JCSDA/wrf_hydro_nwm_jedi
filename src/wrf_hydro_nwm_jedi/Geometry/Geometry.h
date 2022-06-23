@@ -58,10 +58,10 @@ namespace wrf_hydro_nwm_jedi {
     std::vector<size_t> variableSizes(const oops::Variables &) const;
     std::vector<double> verticalCoord(std::string &) const {return {};}
 
-    atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
-    atlas::FunctionSpace * atlasFunctionSpaceIncludingHalo() const {
-      return atlasFunctionSpaceIncludingHalo_.get();}
-    atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
+    const atlas::FunctionSpace & functionSpace() const {return functionSpaceIncludingHalo_;}
+    atlas::FunctionSpace & functionSpace() {return functionSpaceIncludingHalo_;}
+    const atlas::FieldSet & extraFields() const {return extraFields_;}
+    atlas::FieldSet & extraFields() {return extraFields_;}
     void latlon(std::vector<double> &, std::vector<double> &, const bool) const;
 
    private:
@@ -69,9 +69,9 @@ namespace wrf_hydro_nwm_jedi {
     Geometry & operator=(const Geometry &);
     F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
-    std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpace_;
-    std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpaceIncludingHalo_;
-    std::unique_ptr<atlas::FieldSet> atlasFieldSet_;
+    atlas::FunctionSpace functionSpace_;
+    atlas::FunctionSpace functionSpaceIncludingHalo_;
+    atlas::FieldSet extraFields_;
   };
 }  // namespace wrf_hydro_nwm_jedi
 

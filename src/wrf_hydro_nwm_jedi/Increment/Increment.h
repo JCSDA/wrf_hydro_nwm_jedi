@@ -95,13 +95,10 @@ namespace wrf_hydro_nwm_jedi {
     oops::LocalIncrement getLocal(const GeometryIterator &) const;
     void setLocal(const oops::LocalIncrement &, const GeometryIterator &);
 
-    // ATLAS
-    void setAtlas(atlas::FieldSet *) const;
-    void toAtlas(atlas::FieldSet *) const;
-    void fromAtlas(atlas::FieldSet *);
-    void getFieldSet(const oops::Variables &, atlas::FieldSet &) const;
-    void getFieldSetAD(const oops::Variables &, const atlas::FieldSet &);
-
+    /// Accessors to the ATLAS fieldset
+    void toFieldSet(atlas::FieldSet &) const;
+    void toFieldSetAD(const atlas::FieldSet &);
+    void fromFieldSet(const atlas::FieldSet &);
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,

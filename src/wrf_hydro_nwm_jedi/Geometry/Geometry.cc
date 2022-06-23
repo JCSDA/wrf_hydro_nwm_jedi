@@ -27,30 +27,29 @@ namespace wrf_hydro_nwm_jedi {
     const eckit::Configuration * configc = &conf;
     wrf_hydro_nwm_jedi_geometry_setup_f90(keyGeom_, &configc);
 
-    // Set ATLAS lon/lat field
-    atlasFieldSet_.reset(new atlas::FieldSet());
+    // Set lon/lat field
+    atlas::FieldSet fs;
     const bool include_halo = true;  // include halo so we can set up both function spaces
-    wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(keyGeom_, atlasFieldSet_->get(), include_halo);
-    const atlas::Field atlasField = atlasFieldSet_->field("lonlat");
+    wrf_hydro_nwm_jedi_geometry_set_lonlat_f90(keyGeom_, fs.get(), include_halo);
 
-    // Create ATLAS function space
-    atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(atlasField));
+    // Create function space
+    const atlas::Field lonlatField = fs.field("lonlat");
+    functionSpace_ = atlas::functionspace::PointCloud(lonlatField);
 
     ASSERT(include_halo);
 
-    // Create ATLAS function space with halo
-    const atlas::Field atlasFieldInclHalo = atlasFieldSet_->field("lonlat_including_halo");
-    atlasFunctionSpaceIncludingHalo_.reset
-                                (new atlas::functionspace::PointCloud(atlasFieldInclHalo));
+    // Create function space with halo
+    const atlas::Field lonlatFieldInclHalo = fs.field("lonlat_including_halo");
+    functionSpaceIncludingHalo_ = atlas::functionspace::PointCloud(lonlatFieldInclHalo);
 
-    // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-                                                   atlasFunctionSpace_->get(),
-                                                   atlasFunctionSpaceIncludingHalo_->get());
+    // Set function space pointer in Fortran
+    wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(keyGeom_,
+                                                   functionSpace_->get(),
+                                                   functionSpaceIncludingHalo_->get());
 
-    // Fill ATLAS fieldset
-    atlasFieldSet_.reset(new atlas::FieldSet());
-    wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90(keyGeom_, atlasFieldSet_->get());
+    // Fill extra fields
+    extraFields_ = atlas::FieldSet();
+    wrf_hydro_nwm_jedi_geometry_fill_extra_fields_f90(keyGeom_, extraFields_.get());
   }
 
   Geometry::Geometry(const Geometry & other)
@@ -58,20 +57,18 @@ namespace wrf_hydro_nwm_jedi {
     wrf_hydro_nwm_jedi_geometry_clone_f90(keyGeom_, other.keyGeom_);
 
     // Copy ATLAS function space
-    atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(
-                              other.atlasFunctionSpace_->lonlat()));
-    atlasFunctionSpaceIncludingHalo_.reset(new atlas::functionspace::PointCloud(
-                              other.atlasFunctionSpaceIncludingHalo_->lonlat()));
+    functionSpace_ = atlas::functionspace::PointCloud(other.functionSpace_.lonlat());
+    functionSpaceIncludingHalo_ = atlas::functionspace::PointCloud(
+                                         other.functionSpaceIncludingHalo_.lonlat());
 
     // Set ATLAS function space pointer in Fortran
     wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_->get(), atlasFunctionSpaceIncludingHalo_->get());
+        functionSpace_.get(), functionSpaceIncludingHalo_.get());
 
     // Copy ATLAS fieldset
-    atlasFieldSet_.reset(new atlas::FieldSet());
-    for (int jfield = 0; jfield < other.atlasFieldSet_->size(); ++jfield) {
-      atlas::Field atlasField = other.atlasFieldSet_->field(jfield);
-      atlasFieldSet_->add(atlasField);
+    extraFields_ = atlas::FieldSet();
+    for (auto & field : other.extraFields_) {
+      extraFields_->add(field);
     }
   }
 
@@ -106,8 +103,8 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
 // -----------------------------------------------------------------------------
 void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
                       const bool halo) const {
-const atlas::functionspace::PointCloud * fspace;
-fspace = atlasFunctionSpace_.get();
+const atlas::FunctionSpace * fspace;
+fspace = &functionSpace_;
 
 const auto lonlat = atlas::array::make_view<double, 2>(fspace->lonlat());
 const size_t npts = fspace->size();

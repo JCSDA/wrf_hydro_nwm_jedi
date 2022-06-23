@@ -4,7 +4,7 @@ module wrf_hydro_nwm_jedi_geometry_mod
 
 use iso_c_binding, only: c_double
 
-use atlas_module, only: atlas_field, atlas_fieldset, atlas_real, atlas_functionspace_pointcloud
+use atlas_module, only: atlas_field, atlas_fieldset, atlas_integer, atlas_real, atlas_functionspace_pointcloud
 use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
@@ -14,8 +14,7 @@ implicit none
 private
 
 ! For doxygen purposes, this public statement is just a summary for the code reader?
-public :: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat, wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset, get_lsm_nn, get_geoval_levels
-
+public :: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_lonlat, wrf_hydro_nwm_jedi_geometry_fill_extra_fields, get_lsm_nn, get_geoval_levels
 
 ! General:
 !   The dims are generically named: 1=x, 2=y, 3=z
@@ -86,7 +85,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 !> Set ATLAS lon/lat field
-subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset, include_halo)
+subroutine wrf_hydro_nwm_jedi_geometry_set_lonlat(self, afieldset, include_halo)
   class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
   logical,              intent(in) :: include_halo
@@ -131,10 +130,10 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset, include
     end if
   end if
 
-end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat
+end subroutine wrf_hydro_nwm_jedi_geometry_set_lonlat
 
 !> Fill ATLAS fieldset
-subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
+subroutine wrf_hydro_nwm_jedi_geometry_fill_extra_fields(self, afieldset)
   type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
 
@@ -155,7 +154,7 @@ subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
   call afieldset%add(afield)
   call afield%final()
 
-end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
+end subroutine wrf_hydro_nwm_jedi_geometry_fill_extra_fields
 
 !> Clone the geometry object
 subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
