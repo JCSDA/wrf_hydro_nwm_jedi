@@ -101,8 +101,9 @@ namespace wrf_hydro_nwm_jedi {
     const util::DateTime & validTime() const { return time_; }
     util::DateTime & validTime() { return time_; }
 
-    // Get values as Atlas FieldSet
-    void getFieldSet(const oops::Variables &, atlas::FieldSet &) const;
+    // Accessors to the ATLAS fieldset
+    void toFieldSet(atlas::FieldSet &) const;
+    void fromFieldSet(const atlas::FieldSet &);
 
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}
