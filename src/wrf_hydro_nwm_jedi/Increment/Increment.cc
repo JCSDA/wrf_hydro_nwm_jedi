@@ -316,17 +316,15 @@ namespace wrf_hydro_nwm_jedi {
   /// Convert to/from ATLAS fieldset
   // -----------------------------------------------------------------------------
   void Increment::toFieldSet(atlas::FieldSet & fset) const {
-    wrf_hydro_nwm_jedi_increment_to_fieldset_f90(keyInc_, fields_->geometry()->toFortran(),
-                                               vars_, fset.get());
+    wrf_hydro_nwm_jedi_increment_to_fieldset_f90(keyInc_, fields_->geometry()->toFortran(), vars_, fset.get());
   }
   // -----------------------------------------------------------------------------
-  void Increment::toFieldSetAD(atlas::FieldSet & fset) const {
-    wrf_hydro_nwm_jedi_increment_to_atlas_f90(keyInc_, fields_->geometry()->toFortran(),
-                                              vars_, fset.get());
+  void Increment::toFieldSetAD(const atlas::FieldSet & fset) {
+    wrf_hydro_nwm_jedi_increment_to_fieldset_ad_f90(keyInc_, fields_->geometry()->toFortran(), vars_, fset.get());
   }
   // -----------------------------------------------------------------------------
-    void Increment::fromFieldSet(atlas::FieldSet & fset) {
-    wrf_hydro_nwm_jedi_increment_from_fieldset_f90(keyInc_, vars_, fset.get());
+    void Increment::fromFieldSet(const atlas::FieldSet & fset) {
+    wrf_hydro_nwm_jedi_increment_from_fieldset_f90(keyInc_, fields_->geometry()->toFortran(), vars_, fset.get());
   }
 
 }  // namespace wrf_hydro_nwm_jedi

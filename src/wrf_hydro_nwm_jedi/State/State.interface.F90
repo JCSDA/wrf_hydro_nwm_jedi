@@ -325,7 +325,7 @@ end function wrf_hydro_nwm_jedi_state_rms_c
 ! --------------------------------------------------------------------------------------------------
 
 subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c(c_key_self, c_key_geom, c_vars, c_afieldset) &
-  & bind (c,name='wrf_hydro_nwm_jedi_state_to_fieldset_atlas_f90')
+  & bind (c,name='wrf_hydro_nwm_jedi_state_to_fieldset_f90')
  
  implicit none
  integer(c_int), intent(in) :: c_key_self
@@ -343,7 +343,7 @@ subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c(c_key_self, c_key_geom, c_vars
  vars = oops_variables(c_vars)
  afieldset = atlas_fieldset(c_afieldset)
  
- call to_fieldset(self, geom, vars, afieldset)
+ call to_fieldset_state(self, geom, vars, afieldset)
  
  end subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c
  
@@ -368,7 +368,7 @@ subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c(c_key_self, c_key_geom, c_vars
  vars = oops_variables(c_vars)
  afieldset = atlas_fieldset(c_afieldset)
  
- call from_fieldset(self, geom, vars, afieldset)
+ call from_fieldset_state(self, geom, vars, afieldset)
  
  end subroutine wrf_hydro_nwm_jedi_state_from_fieldset_c
 

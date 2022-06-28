@@ -524,25 +524,28 @@ subroutine wrf_hydro_nwm_jedi_increment_to_fieldset_ad_c(c_key_inc, c_key_geom, 
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
 
-  call to_fieldset_ad_inc(inc, geom, vars, afieldset, include_halo)
+  call to_fieldset_ad_inc(inc, geom, vars, afieldset)
 
 end subroutine wrf_hydro_nwm_jedi_increment_to_fieldset_ad_c
 
-subroutine wrf_hydro_nwm_jedi_increment_from_fieldset_c(c_key_inc, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_from_fieldset_f90')
+subroutine wrf_hydro_nwm_jedi_increment_from_fieldset_c(c_key_inc, c_key_geom, c_vars, c_afieldset) bind (c, name='wrf_hydro_nwm_jedi_increment_from_fieldset_f90')
   implicit none
   integer(c_int), intent(in) :: c_key_inc
+  integer(c_int), intent(in) :: c_key_geom
   type(c_ptr), value, intent(in) :: c_vars
   type(c_ptr), intent(in), value :: c_afieldset
 
   type(wrf_hydro_nwm_jedi_state), pointer :: inc
+  type(wrf_hydro_nwm_jedi_geometry), pointer :: geom
   type(oops_variables) :: vars
   type(atlas_fieldset) :: afieldset
 
   call wrf_hydro_nwm_jedi_increment_registry%get(c_key_inc, inc)
+  call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
   vars = oops_variables(c_vars)
   afieldset = atlas_fieldset(c_afieldset)
 
-  call from_fieldset_inc(inc, vars, afieldset)
+  call from_fieldset_inc(inc, geom, vars, afieldset)
 
 end subroutine wrf_hydro_nwm_jedi_increment_from_fieldset_c
 

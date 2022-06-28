@@ -78,7 +78,7 @@ type, abstract, public :: base_field
    procedure (rms_interface), deferred :: rms
    procedure (add_incr_interface), pass(self), deferred :: add_incr
    procedure (scalar_mult_interface), pass(self), deferred :: scalar_mult
-   procedure (to_field_interface), deferred :: to_field
+   procedure (to_fieldset_interface), deferred :: to_fieldset
    procedure (from_fieldset_interface), deferred :: from_fieldset
    procedure (to_fieldset_ad_interface), deferred :: to_fieldset_ad
    procedure (get_point_interface), deferred :: get_point
@@ -211,24 +211,26 @@ abstract interface
      class(base_field), intent(in) :: self
      type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
      type(atlas_fieldset), intent(inout) :: afieldset
-     end subroutine to_fieldset_interface
+   end subroutine to_fieldset_interface
 
    subroutine from_fieldset_interface(self, geom, afieldset)
     use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
     use oops_variables_mod
     use atlas_module, only: atlas_fieldset
     import base_field
-    class(base_field), intent(in) :: self
+    class(base_field), intent(inout) :: self
     type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
-    type(atlas_fieldset), intent(inout) :: afieldset
+    type(atlas_fieldset), intent(in) :: afieldset
   end subroutine from_fieldset_interface
 
-   subroutine to_fieldset_ad_interface(self, afieldset)
+   subroutine to_fieldset_ad_interface(self, geom, afieldset)
+     use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
      use oops_variables_mod
      use atlas_module, only: atlas_fieldset
      import base_field
-     class(base_field), intent(inout) :: self
-     type(atlas_fieldset), intent(in) :: afieldset
+     class(base_field), intent(in) :: self
+     type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+     type(atlas_fieldset), intent(inout) :: afieldset
    end subroutine to_fieldset_ad_interface
 
    subroutine get_point_interface(self, geoiter, values_len, values)
@@ -2610,7 +2612,6 @@ subroutine to_fieldset_1d(self, geom, afieldset)
   class(field_1d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
-  logical, optional,    intent(in)    :: opt_include_halo
 
   call abor1_ftn("to_fieldset_1d: no to_fieldset interface for 1d fields")
 
@@ -2684,9 +2685,9 @@ subroutine to_fieldset_3d(self, geom, afieldset)
 end subroutine to_fieldset_3d
 
 ! -----------------------------------------------------------------------------
-! from_fieldset
+! to_fieldset_ad
 
-subroutine from_fieldset(self, geom, vars, afieldset)
+subroutine to_fieldset_ad(self, geom, vars, afieldset)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
@@ -2699,25 +2700,25 @@ subroutine from_fieldset(self, geom, vars, afieldset)
      found = .false.
      do ff=1,self%nf
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%from_fieldset(geom, afieldset)
+           call self%fields(ff)%field%to_fieldset_ad(geom, afieldset)
            found = .true.
         end if
     end do
     if (.not.found) call abor1_ftn("from_fieldset: field "//trim(vars%variable(jvar))//" not found")
   enddo
-end subroutine from_fieldset
+end subroutine to_fieldset_ad
 
-subroutine from_fieldset_1d(self, geom, afieldset)
+subroutine to_fieldset_ad_1d(self, geom, afieldset)
   implicit none
   class(field_1d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
 
-  call abor1_ftn("from_fieldset_1d: no from_fieldset interface for 1d fields")
+  call abor1_ftn("to_fieldset_ad_1d: no to_fieldset_ad interface for 1d fields")
 
-end subroutine from_fieldset_1d
+end subroutine to_fieldset_ad_1d
 
-subroutine from_fieldset_2d(self, geom, afieldset)
+subroutine to_fieldset_ad_2d(self, geom, afieldset)
   implicit none
   class(field_2d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
@@ -2727,7 +2728,7 @@ subroutine from_fieldset_2d(self, geom, afieldset)
   real(c_double), pointer :: ptr(:)
   type(atlas_field) :: afield
 
-  call abor1_ftn("from_fieldset_2d: no from_fieldset interface for 2d fields")
+  call abor1_ftn("to_fieldset_ad_2d: no to_fieldset_ad interface for 2d fields")
 
   ! if (afieldset%has_field(self%long_name)) then
   !   afield = afieldset%field(trim(self%long_name))
@@ -2744,9 +2745,9 @@ subroutine from_fieldset_2d(self, geom, afieldset)
   !   enddo
   ! enddo
   ! call afield%final()
-end subroutine from_fieldset_2d
+end subroutine to_fieldset_ad_2d
 
-subroutine from_fieldset_3d(self, geom, afieldset)
+subroutine to_fieldset_ad_3d(self, geom, afieldset)
   implicit none
   class(field_3d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
@@ -2756,7 +2757,7 @@ subroutine from_fieldset_3d(self, geom, afieldset)
   real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
 
-  call abor1_ftn("from_fieldset_3d: no from_fieldset interface for 3d fields")
+  call abor1_ftn("to_fieldset_ad_3d: no to_fieldset_ad interface for 3d fields")
 
   ! if (afieldset%has_field(self%long_name)) then
   !   afield = afieldset%field(trim(self%long_name))
@@ -2775,44 +2776,47 @@ subroutine from_fieldset_3d(self, geom, afieldset)
   !   enddo
   ! enddo
   ! call afield%final()
-end subroutine from_fieldset_3d
+end subroutine to_fieldset_ad_3d
 
 ! -----------------------------------------------------------------------------
-! to_fieldset_ad
+! from_fieldset
 
-subroutine to_fieldset_ad(self, vars, afieldset)
+subroutine from_fieldset(self, geom, vars, afieldset)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(in) :: afieldset
   integer :: jvar, ff
   logical :: found
 
   do jvar=1,vars%nvars()
-    write(*,*) "to_fieldset_ad_variable ", trim(vars%variable(jvar))
+    write(*,*) "from_fieldset_variable ", trim(vars%variable(jvar))
      found = .false.
      do ff=1,self%nf
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%to_fieldset_ad(afieldset)
+           call self%fields(ff)%field%from_fieldset(geom, afieldset)
            found = .true.
         end if
     end do
-    if (.not.found) call abor1_ftn("to_fieldset_ad: field "//trim(vars%variable(jvar))//" not found")
+    if (.not.found) call abor1_ftn("from_fieldset: field "//trim(vars%variable(jvar))//" not found")
   enddo
-end subroutine to_fieldset_ad
+end subroutine from_fieldset
 
-subroutine to_fieldset_ad_1d(self, afieldset)
+subroutine from_fieldset_1d(self, geom, afieldset)
   implicit none
   class(field_1d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
-  call abor1_ftn("to_fieldset_ad_1d: no to_fieldset_ad interface for 1d fields")
+  call abor1_ftn("from_fieldset: no from_fieldset interface for 1d fields")
 
-end subroutine to_fieldset_ad_1d
+end subroutine from_fieldset_1d
 
-subroutine to_fieldset_ad_2d(self, afieldset)
+subroutine from_fieldset_2d(self, geom, afieldset)
   implicit none
   class(field_2d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
   integer :: ix, iy, inode
@@ -2829,11 +2833,12 @@ subroutine to_fieldset_ad_2d(self, afieldset)
     enddo
   enddo
   call afield%final()
-end subroutine to_fieldset_ad_2d
+end subroutine from_fieldset_2d
 
-subroutine to_fieldset_ad_3d(self, afieldset)
+subroutine from_fieldset_3d(self, geom, afieldset)
   implicit none
   class(field_3d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
   integer :: ix, iy, iz, inode
@@ -2852,7 +2857,7 @@ subroutine to_fieldset_ad_3d(self, afieldset)
     enddo
   enddo
   call afield%final()
-end subroutine to_fieldset_ad_3d
+end subroutine from_fieldset_3d
 
 ! -----------------------------------------------------------------------------
 ! get_point

@@ -9,7 +9,7 @@ use iso_c_binding
 
 use atlas_module, only: atlas_fieldset, atlas_functionspace_pointcloud
 use fckit_configuration_module, only: fckit_configuration
-use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat, wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
+use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_lonlat, wrf_hydro_nwm_jedi_geometry_fill_extra_fields
 
 use oops_variables_mod,          only: oops_variables
 

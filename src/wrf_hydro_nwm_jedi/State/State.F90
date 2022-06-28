@@ -37,8 +37,8 @@ public :: &
      change_resol, &
      state_print, &
      axpy, &
-     to_atlas_state, &
-     set_atlas_state 
+     to_fieldset_state, &
+     from_fieldset_state 
      ! get_mean_stddev, &
      ! rms !&
      ! gpnorm, &
@@ -277,27 +277,25 @@ subroutine axpy(self, scalar, other_in)
   call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
 end subroutine axpy
 
-subroutine set_atlas_state(self, geom, vars, afieldset, opt_include_halo)
+subroutine to_fieldset_state(self, geom, vars, afieldset)
   implicit none
   class(wrf_hydro_nwm_jedi_state), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
-  logical, optional,     intent(in)    :: opt_include_halo
 
-  call self%fields_obj%set_atlas(geom, vars, afieldset, opt_include_halo)
-end subroutine set_atlas_state
+  call self%fields_obj%to_fieldset(geom, vars, afieldset)
+end subroutine to_fieldset_state
 
-subroutine to_atlas_state(self, geom, vars, afieldset, opt_include_halo)
+subroutine from_fieldset_state(self, geom, vars, afieldset)
   implicit none
-  class(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  class(wrf_hydro_nwm_jedi_state), intent(inout) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
-  type(atlas_fieldset), intent(inout) :: afieldset
-  logical, optional,     intent(in)    :: opt_include_halo
+  type(atlas_fieldset), intent(in) :: afieldset
 
-  call self%fields_obj%to_atlas(geom, vars, afieldset, opt_include_halo)
-end subroutine to_atlas_state
+  call self%fields_obj%from_fieldset(geom, vars, afieldset)
+end subroutine from_fieldset_state
 
 
 

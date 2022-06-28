@@ -44,8 +44,8 @@ namespace wrf_hydro_nwm_jedi {
 
     // Set function space pointer in Fortran
     wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(keyGeom_,
-                                                   functionSpace_->get(),
-                                                   functionSpaceIncludingHalo_->get());
+                                                   functionSpace_.get(),
+                                                   functionSpaceIncludingHalo_.get());
 
     // Fill extra fields
     extraFields_ = atlas::FieldSet();
@@ -62,7 +62,7 @@ namespace wrf_hydro_nwm_jedi {
                                          other.functionSpaceIncludingHalo_.lonlat());
 
     // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
+    wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(keyGeom_,
         functionSpace_.get(), functionSpaceIncludingHalo_.get());
 
     // Copy ATLAS fieldset
