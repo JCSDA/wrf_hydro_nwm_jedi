@@ -28,8 +28,9 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(const F90geom &,
                                                     atlas::functionspace::FunctionSpaceImpl *,
                                                     atlas::functionspace::FunctionSpaceImpl *);
-    void wrf_hydro_nwm_jedi_geometry_fill_extra_fields_f90(const F90geom &, atlas::field::FieldSetImpl *);
-  
+    void wrf_hydro_nwm_jedi_geometry_fill_extra_fields_f90(const F90geom &,
+                                                    atlas::field::FieldSetImpl *);
+
     void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &);
     void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &);
     void wrf_hydro_nwm_jedi_geometry_info_f90(F90geom, float *, float *, int *, int *, int *);

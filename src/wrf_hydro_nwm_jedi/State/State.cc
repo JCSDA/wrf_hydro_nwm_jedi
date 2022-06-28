@@ -164,11 +164,13 @@ namespace wrf_hydro_nwm_jedi {
   }
 
   void State::toFieldSet(atlas::FieldSet & fset) const {
-  wrf_hydro_nwm_jedi_state_to_fieldset_f90(keyState_, fields_->geometry()->toFortran(), vars_, fset.get());
+  wrf_hydro_nwm_jedi_state_to_fieldset_f90(keyState_, fields_->geometry()->toFortran(),
+                                                                     vars_, fset.get());
   }
 
   void State::fromFieldSet(const atlas::FieldSet & fset) {
-  wrf_hydro_nwm_jedi_state_from_fieldset_f90(keyState_, fields_->geometry()->toFortran(), vars_, fset.get());
+  wrf_hydro_nwm_jedi_state_from_fieldset_f90(keyState_, fields_->geometry()->toFortran(),
+                                                                      vars_, fset.get());
   }
 
 }  // namespace wrf_hydro_nwm_jedi
