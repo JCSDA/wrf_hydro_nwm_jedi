@@ -31,80 +31,80 @@ LinearVariableChange::~LinearVariableChange() {}
 
 // -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::setTrajectory(const State & xbg, const State & xfg) {
-  oops::Log::trace() << "LinearVariableChange::setTrajectory starting" << std::endl;
+void LinearVariableChange::changeVarTraj(const State & xfg, const oops::Variables & vars) {
+  oops::Log::trace() << "LinearVariableChange::changeVarTraj starting" << std::endl;
   // Create the variable change
-  linearVariableChange_.reset(LinearVariableChangeFactory::create(xbg, xfg, *geom_,
+  linearVariableChange_.reset(LinearVariableChangeFactory::create(xfg, xfg, *geom_,
              params_.linearVariableChangeParameters.value()));
-  oops::Log::trace() << "LinearVariableChange::setTrajectory done" << std::endl;
+  oops::Log::trace() << "LinearVariableChange::changeVarTraj done" << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiply(Increment & dx, const oops::Variables & vars) const {
-  oops::Log::trace() << "LinearVariableChange::multiply starting" << std::endl;
+void LinearVariableChange::changeVarTL(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::changeVarTL starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
   // Call variable change
-  linearVariableChange_->multiply(dx, dxout);
+  linearVariableChange_->changeVarTL(dx, dxout);
 
   // Copy data from temporary state
   dx = dxout;
 
-  oops::Log::trace() << "LinearVariableChange::multiply done" << dx << std::endl;
+  oops::Log::trace() << "LinearVariableChange::changeVarTL done" << dx << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyInverse(Increment & dx, const oops::Variables & vars) const {
-  oops::Log::trace() << "LinearVariableChange::multiplyInverse starting" << std::endl;
+void LinearVariableChange::changeVarInverseTL(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::changeVarInverseTL starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
   // Call variable change
-  linearVariableChange_->multiplyInverse(dx, dxout);
+  linearVariableChange_->changeVarInverseTL(dx, dxout);
 
   // Copy data from temporary state
   dx = dxout;
 
-  oops::Log::trace() << "LinearVariableChange::multiplyInverse done" << std::endl;
+  oops::Log::trace() << "LinearVariableChange::changeVarInverseTL done" << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyAD(Increment & dx, const oops::Variables & vars) const {
-  oops::Log::trace() << "LinearVariableChange::multiplyAD starting" << std::endl;
+void LinearVariableChange::changeVarAD(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::changeVarAD starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
   // Call variable change
-  linearVariableChange_->multiplyAD(dx, dxout);
+  linearVariableChange_->changeVarAD(dx, dxout);
 
   // Copy data from temporary state
   dx = dxout;
 
-  oops::Log::trace() << "LinearVariableChange::multiplyAD done" << std::endl;
+  oops::Log::trace() << "LinearVariableChange::changeVarAD done" << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
 
-void LinearVariableChange::multiplyInverseAD(Increment & dx, const oops::Variables & vars) const {
-  oops::Log::trace() << "LinearVariableChange::multiplyInverseAD starting" << std::endl;
+void LinearVariableChange::changeVarInverseAD(Increment & dx, const oops::Variables & vars) const {
+  oops::Log::trace() << "LinearVariableChange::changeVarInverseAD starting" << std::endl;
 
   // Create output state
   Increment dxout(*dx.geometry(), vars, dx.time());
 
   // Call variable change
-  linearVariableChange_->multiplyInverseAD(dx, dxout);
+  linearVariableChange_->changeVarInverseAD(dx, dxout);
 
   // Copy data from temporary state
   dx = dxout;
 
-  oops::Log::trace() << "LinearVariableChange::multiplyInverseAD done" << std::endl;
+  oops::Log::trace() << "LinearVariableChange::changeVarInverseAD done" << std::endl;
 }
 
 // -------------------------------------------------------------------------------------------------
