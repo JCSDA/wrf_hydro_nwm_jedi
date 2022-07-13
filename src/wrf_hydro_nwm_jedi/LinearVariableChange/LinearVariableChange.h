@@ -36,7 +36,7 @@ class LinearVariableChange : public util::Printable {
   explicit LinearVariableChange(const Geometry &, const Parameters_ &);
   ~LinearVariableChange();
 
-  void changeVarTraj(const State &, const State &);
+  void changeVarTraj(const State &, const oops::Variables &);
 
   void changeVarTL(Increment &, const oops::Variables &) const;
   void changeVarInverseTL(Increment &, const oops::Variables &) const;

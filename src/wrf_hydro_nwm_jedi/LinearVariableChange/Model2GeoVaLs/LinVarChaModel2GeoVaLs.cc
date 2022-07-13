@@ -54,7 +54,7 @@ LinVarChaModel2GeoVaLs::~LinVarChaModel2GeoVaLs() {
 
 // -----------------------------------------------------------------------------
 
-void LinVarChaModel2GeoVaLs::multiply(const Increment &dxin,
+void LinVarChaModel2GeoVaLs::changeVarTL(const Increment &dxin,
                                             Increment &dxout) const {
 //  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiply not implemented");
   wrf_hydro_nwm_jedi_lvc_model2geovals_multiply_f90(keyFtnConfig_, geom_->toFortran(),
@@ -64,14 +64,14 @@ void LinVarChaModel2GeoVaLs::multiply(const Increment &dxin,
 
 // -----------------------------------------------------------------------------
 
-void LinVarChaModel2GeoVaLs::multiplyInverse(const Increment &,
+void LinVarChaModel2GeoVaLs::changeVarInverseTL(const Increment &,
                                                 Increment &) const {
   util::abor1_cpp("LinVarChaModel2GeoVaLs::multiplyInverse not implemented");
 }
 
 // -----------------------------------------------------------------------------
 
-void LinVarChaModel2GeoVaLs::multiplyAD(const Increment &dxin,
+void LinVarChaModel2GeoVaLs::changeVarAD(const Increment &dxin,
                                               Increment &dxout) const {
 //  util::abor1_cpp("LinVarChaModel2GeoVaLs::multiplyAD not implemented");
   wrf_hydro_nwm_jedi_lvc_model2geovals_multiplyadjoint_f90(keyFtnConfig_, geom_->toFortran(),
@@ -81,7 +81,7 @@ void LinVarChaModel2GeoVaLs::multiplyAD(const Increment &dxin,
 
 // -----------------------------------------------------------------------------
 
-void LinVarChaModel2GeoVaLs::multiplyInverseAD(const Increment &,
+void LinVarChaModel2GeoVaLs::changeVarInverseAD(const Increment &,
                                                   Increment &) const {
   util::abor1_cpp("LinVarChaModel2GeoVaLs::multiplyInverseAD not implemented");
 }
