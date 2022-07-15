@@ -10,8 +10,15 @@ module wrf_hydro_nwm_jedi_state_interface_mod
 !use fv3jedi_kinds_mod
 use datetime_mod
 use duration_mod
-use iso_c_binding, only: c_int, c_float, c_ptr, c_char, c_double
+! iso
+use iso_c_binding
+! atlas
+use atlas_module, only: atlas_fieldset
+
+!oops
 use oops_variables_mod
+
+! fckit
 use fckit_configuration_module, only: fckit_configuration
 
 use wrf_hydro_nwm_jedi_state_mod
@@ -315,57 +322,55 @@ function wrf_hydro_nwm_jedi_state_rms_c(c_key_state) &
 end function wrf_hydro_nwm_jedi_state_rms_c
 
 
-! subroutine wrf_hydro_nwm_jedi_state_getvalues_notraj_c(c_key_geom, c_key_state,c_key_loc,c_vars,c_key_gom) bind(c,name='wrf_hydro_nwm_jedi_state_getvalues_notraj_f90')
-! implicit none
-! integer(c_int), intent(in) :: c_key_state !< State to be interpolated
-! integer(c_int), intent(in) :: c_key_loc   !< List of requested locations
-! type(c_ptr), value, intent(in) :: c_vars  !< List of requested variables
-! integer(c_int), intent(in) :: c_key_gom   !< Interpolated values
-! integer(c_int), intent(in) :: c_key_geom  !< Geometry
-! type(wrf_hydro_nwm_jedi_state), pointer :: state
-! type(ufo_locs),  pointer :: locs
-! type(ufo_geovals),  pointer :: gom
-! type(oops_variables) :: vars
-! type(fv3jedi_geom),  pointer :: geom
+! --------------------------------------------------------------------------------------------------
 
-! vars = oops_variables(c_vars)
-
-! call fv3jedi_geom_registry%get(c_key_geom, geom)
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
-! call ufo_locs_registry%get(c_key_loc, locs)
-! call ufo_geovals_registry%get(c_key_gom, gom)
-
-! call getvalues(geom, state, locs, vars, gom)
-! end subroutine wrf_hydro_nwm_jedi_state_getvalues_notraj_c
-
-
-! subroutine wrf_hydro_nwm_jedi_state_getvalues_c(c_key_geom, c_key_state,c_key_loc,c_vars,c_key_gom,c_key_traj) bind(c,name='wrf_hydro_nwm_jedi_state_getvalues_f90')
-! implicit none
-! integer(c_int), intent(in)     :: c_key_state  !< State to be interpolated
-! integer(c_int), intent(in)     :: c_key_loc  !< List of requested locations
-! type(c_ptr), value, intent(in) :: c_vars     !< List of requested variables
-! integer(c_int), intent(in)     :: c_key_gom  !< Interpolated values
-! integer(c_int), intent(in)     :: c_key_traj !< Trajectory for interpolation/transforms
-! integer(c_int), intent(in)     :: c_key_geom  !< Geometry
-
-! type(wrf_hydro_nwm_jedi_state), pointer :: state
-! type(ufo_locs),  pointer :: locs
-! type(ufo_geovals),  pointer :: gom
-! type(oops_variables) :: vars
-! type(fv3jedi_getvalues_traj), pointer :: traj
-! type(fv3jedi_geom),  pointer :: geom
-
-! vars = oops_variables(c_vars)
-
-! call wrf_hydro_nwm_jedi_state_registry%get(c_key_state, state)
-! call fv3jedi_geom_registry%get(c_key_geom, geom)
-! call ufo_locs_registry%get(c_key_loc, locs)
-! call ufo_geovals_registry%get(c_key_gom, gom)
-! call fv3jedi_getvalues_traj_registry%get(c_key_traj, traj)
-
-! call getvalues(geom, state, locs, vars, gom, traj)
-! end subroutine wrf_hydro_nwm_jedi_state_getvalues_c
-
+subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c(c_key_self, c_key_geom, c_vars, c_afieldset) &
+  & bind (c,name='wrf_hydro_nwm_jedi_state_to_fieldset_f90')
+ 
+ implicit none
+ integer(c_int), intent(in) :: c_key_self
+ integer(c_int), intent(in) :: c_key_geom
+ type(c_ptr), value, intent(in) :: c_vars
+ type(c_ptr), intent(in), value :: c_afieldset
+ 
+ type(wrf_hydro_nwm_jedi_state), pointer :: self
+ type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+ type(oops_variables) :: vars
+ type(atlas_fieldset) :: afieldset
+ 
+ call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+ call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+ vars = oops_variables(c_vars)
+ afieldset = atlas_fieldset(c_afieldset)
+ 
+ call to_fieldset_state(self, geom, vars, afieldset)
+ 
+ end subroutine wrf_hydro_nwm_jedi_state_to_fieldset_c
+ 
+ ! --------------------------------------------------------------------------------------------------
+ 
+ subroutine wrf_hydro_nwm_jedi_state_from_fieldset_c(c_key_self, c_key_geom, c_vars, c_afieldset) &
+  & bind (c,name='wrf_hydro_nwm_jedi_state_from_fieldset_f90')
+ 
+ implicit none
+ integer(c_int), intent(in) :: c_key_self
+ integer(c_int), intent(in) :: c_key_geom
+ type(c_ptr), value, intent(in) :: c_vars
+ type(c_ptr), intent(in), value :: c_afieldset
+ 
+ type(wrf_hydro_nwm_jedi_state), pointer :: self
+ type(wrf_hydro_nwm_jedi_geometry),  pointer :: geom
+ type(oops_variables) :: vars
+ type(atlas_fieldset) :: afieldset
+ 
+ call wrf_hydro_nwm_jedi_state_registry%get(c_key_self, self)
+ call wrf_hydro_nwm_jedi_geometry_registry%get(c_key_geom, geom)
+ vars = oops_variables(c_vars)
+ afieldset = atlas_fieldset(c_afieldset)
+ 
+ call from_fieldset_state(self, geom, vars, afieldset)
+ 
+ end subroutine wrf_hydro_nwm_jedi_state_from_fieldset_c
 
 subroutine wrf_hydro_nwm_jedi_state_sizes_c(c_key_self, nx, ny, nf) &
      bind(c,name='wrf_hydro_nwm_jedi_state_sizes_f90')

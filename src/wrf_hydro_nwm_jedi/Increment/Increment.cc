@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "atlas/field.h"
+
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
@@ -313,18 +315,19 @@ namespace wrf_hydro_nwm_jedi {
   // -----------------------------------------------------------------------------
   /// Convert to/from ATLAS fieldset
   // -----------------------------------------------------------------------------
-  void Increment::setAtlas(atlas::FieldSet * afieldset) const {
-    wrf_hydro_nwm_jedi_increment_set_atlas_f90(keyInc_, fields_->geometry()->toFortran(),
-                                               vars_, afieldset->get());
+  void Increment::toFieldSet(atlas::FieldSet & fset) const {
+    wrf_hydro_nwm_jedi_increment_to_fieldset_f90(keyInc_, fields_->geometry()->toFortran(),
+                                vars_, fset.get());
   }
   // -----------------------------------------------------------------------------
-  void Increment::toAtlas(atlas::FieldSet * afieldset) const {
-    wrf_hydro_nwm_jedi_increment_to_atlas_f90(keyInc_, fields_->geometry()->toFortran(),
-                                              vars_, afieldset->get());
+  void Increment::toFieldSetAD(const atlas::FieldSet & fset) {
+    wrf_hydro_nwm_jedi_increment_to_fieldset_ad_f90(keyInc_, fields_->geometry()->toFortran(),
+                            vars_, fset.get());
   }
   // -----------------------------------------------------------------------------
-  void Increment::fromAtlas(atlas::FieldSet * afieldset) {
-    wrf_hydro_nwm_jedi_increment_from_atlas_f90(keyInc_, vars_, afieldset->get());
+    void Increment::fromFieldSet(const atlas::FieldSet & fset) {
+    wrf_hydro_nwm_jedi_increment_from_fieldset_f90(keyInc_, fields_->geometry()->toFortran(),
+                            vars_, fset.get());
   }
 
 }  // namespace wrf_hydro_nwm_jedi

@@ -10,9 +10,9 @@ ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_hofx.x
                         SOURCES HofX.cc
                         LIBS    wrf_hydro_nwm_jedi )
 
-# ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_letkf.x
-#                        SOURCES LETKF.cc
-#                        LIBS    wrf_hydro_nwm_jedi )
+ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_letkf.x
+                       SOURCES LETKF.cc
+                       LIBS    wrf_hydro_nwm_jedi )
 
 ecbuild_add_executable( TARGET  wrf_hydro_nwm_jedi_error_covariance_training.x
                         SOURCES ErrorCovarianceTraining.cc

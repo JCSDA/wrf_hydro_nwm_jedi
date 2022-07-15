@@ -56,12 +56,12 @@ namespace wrf_hydro_nwm_jedi {
     void wrf_hydro_nwm_jedi_increment_copy_f90(const F90inc &, const F90inc &);
     /* void wrf_hydro_nwm_jedi_geometry_clone_f90(F90geom &, const F90geom &); */
     /* void wrf_hydro_nwm_jedi_geometry_delete_f90(F90geom &); */
-    void wrf_hydro_nwm_jedi_increment_set_atlas_f90(const F90inc &, const F90geom &,
-        const oops::Variables &, atlas::field::FieldSetImpl *);
-    void wrf_hydro_nwm_jedi_increment_to_atlas_f90(const F90inc &, const F90geom &,
-        const oops::Variables &, atlas::field::FieldSetImpl *);
-    void wrf_hydro_nwm_jedi_increment_from_atlas_f90(const F90inc &, const oops::Variables &,
-        atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_increment_to_fieldset_f90(const F90inc &, const F90geom &,
+                const oops::Variables &, atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_increment_to_fieldset_ad_f90(const F90inc &, const F90geom &,
+                const oops::Variables &, const atlas::field::FieldSetImpl *);
+    void wrf_hydro_nwm_jedi_increment_from_fieldset_f90(const F90inc &, const F90geom &,
+                const oops::Variables &, const atlas::field::FieldSetImpl *);
     void wrf_hydro_nwm_jedi_increment_getpoint_f90(const F90inc &, const F90iter &, double &,
         const int &);
     void wrf_hydro_nwm_jedi_increment_setpoint_f90(F90inc &, const F90iter &, const double &,

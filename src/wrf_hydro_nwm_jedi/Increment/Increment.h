@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
@@ -63,6 +64,7 @@ namespace wrf_hydro_nwm_jedi {
     // private util::ObjectCounter<IncrementSW> {
   {
    public:
+    static const std::string classname() {return "wrf_hydro_nwm_jedi::Increment";}
     // Constructor, destructor
     Increment(const Geometry &,
               const oops::Variables &,
@@ -93,10 +95,10 @@ namespace wrf_hydro_nwm_jedi {
     oops::LocalIncrement getLocal(const GeometryIterator &) const;
     void setLocal(const oops::LocalIncrement &, const GeometryIterator &);
 
-    // ATLAS
-    void setAtlas(atlas::FieldSet *) const;
-    void toAtlas(atlas::FieldSet *) const;
-    void fromAtlas(atlas::FieldSet *);
+    /// Accessors to the ATLAS fieldset
+    void toFieldSet(atlas::FieldSet &) const;
+    void toFieldSetAD(const atlas::FieldSet &);
+    void fromFieldSet(const atlas::FieldSet &);
 
     // Interpolate increment to observation location
     void getValuesTL(const ufo::Locations &,

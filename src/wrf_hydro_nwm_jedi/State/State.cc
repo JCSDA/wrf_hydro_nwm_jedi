@@ -5,6 +5,8 @@
  * which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
  */
 
+#include "atlas/field.h"
+
 #include "wrf_hydro_nwm_jedi/Fields/Fields.h"
 #include "wrf_hydro_nwm_jedi/Geometry/Geometry.h"
 #include "wrf_hydro_nwm_jedi/Increment/Increment.h"
@@ -17,9 +19,6 @@
 #include "oops/base/Variables.h"
 #include "oops/util/abor1_cpp.h"
 #include "oops/util/Logger.h"
-
-#include "ufo/GeoVaLs.h"
-#include "ufo/Locations.h"
 
 namespace wrf_hydro_nwm_jedi {
 
@@ -55,7 +54,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State::State 2 create from file END." << std::endl;
   }
 
-
   State::State(const Geometry & geom,
                const State & other)
     : vars_(other.vars_),
@@ -70,7 +68,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() <<
       "State::State 3 create from existing geom and state END." << std::endl;
   }
-
 
   State::State(const State & other)
     : vars_(other.vars_),
@@ -87,23 +84,6 @@ namespace wrf_hydro_nwm_jedi {
   State::~State() { wrf_hydro_nwm_jedi_state_delete_f90(keyState_); }
 
 
-  void State::getValues(const ufo::Locations & locs,
-                        const oops::Variables & vars,
-                        ufo::GeoVaLs & geovals) const {
-    // util::abor1_cpp("State::getValues() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-  }
-
-
-  void State::getValues(const ufo::Locations & locs,
-                 const oops::Variables & vars,
-                 ufo::GeoVaLs & geovals,
-                 GetValuesTraj & traj) const {
-    // util::abor1_cpp("State::getValues() needs to be implemented.",
-    //                 __FILE__, __LINE__);
-  }
-
-
   void State::print(std::ostream & os) const {
     char *string = new char[8192];
     wrf_hydro_nwm_jedi_state_print_f90(keyState_, string);
@@ -113,12 +93,6 @@ namespace wrf_hydro_nwm_jedi {
     delete[] string;
   }
 
-
-  // void State::write(const eckit::Configuration & config) const {
-  //   const util::DateTime * dtp = &time_;
-  //   const eckit::Configuration * conf = &config;
-  //   wrf_hydro_nwm_jedi_state_write_file_f90(
-  //   fields_->geometry()->toFortran(), keyState_, &conf, &dtp);
   void State::write(const eckit::Configuration & config) {  // const {
     oops::Log::trace() << "State::State write start" << std::endl;
     const eckit::Configuration * conf = &config;
@@ -133,7 +107,6 @@ namespace wrf_hydro_nwm_jedi {
     oops::Log::trace() << "State write done" << std::endl;
   }
 
-
   void State::read(const eckit::Configuration & config) {
     oops::Log::trace() << "State::State read start" << std::endl;
     const eckit::Configuration * conf = &config;
@@ -147,7 +120,6 @@ namespace wrf_hydro_nwm_jedi {
     time_ = *dtp;
     oops::Log::trace() << "State read done" << std::endl;
   }
-
 
   State & State::operator=(const State & rhs) {
     wrf_hydro_nwm_jedi_state_copy_f90(keyState_, rhs.keyState_);
@@ -189,6 +161,16 @@ namespace wrf_hydro_nwm_jedi {
     double norm = 0.0;
     norm = wrf_hydro_nwm_jedi_state_rms_f90(toFortran());
     return norm;
+  }
+
+  void State::toFieldSet(atlas::FieldSet & fset) const {
+  wrf_hydro_nwm_jedi_state_to_fieldset_f90(keyState_, fields_->geometry()->toFortran(),
+                                                                     vars_, fset.get());
+  }
+
+  void State::fromFieldSet(const atlas::FieldSet & fset) {
+  wrf_hydro_nwm_jedi_state_from_fieldset_f90(keyState_, fields_->geometry()->toFortran(),
+                                                                      vars_, fset.get());
   }
 
 }  // namespace wrf_hydro_nwm_jedi

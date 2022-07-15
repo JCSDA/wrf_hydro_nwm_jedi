@@ -6,6 +6,7 @@
 !> State (a fields/variable manager) for wrf_hydro_nwm - jedi.
 module wrf_hydro_nwm_jedi_state_mod
 
+use atlas_module, only: atlas_fieldset
 use iso_c_binding, only: c_char, c_float, c_ptr, c_null_char
 use fckit_configuration_module, only: fckit_configuration
 use datetime_mod, only: datetime, datetime_set, datetime_to_string, &
@@ -35,7 +36,9 @@ public :: &
      write_state_to_file, &
      change_resol, &
      state_print, &
-     axpy
+     axpy, &
+     to_fieldset_state, &
+     from_fieldset_state 
      ! get_mean_stddev, &
      ! rms !&
      ! gpnorm, &
@@ -273,6 +276,27 @@ subroutine axpy(self, scalar, other_in)
   call other%fields_obj%scalar_mult(scalar)  ! = scalar * other
   call self%fields_obj%add_increment(other%fields_obj)  ! = self + (scalar*other)
 end subroutine axpy
+
+subroutine to_fieldset_state(self, geom, vars, afieldset)
+  implicit none
+  class(wrf_hydro_nwm_jedi_state), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  call self%fields_obj%to_fieldset(geom, vars, afieldset)
+end subroutine to_fieldset_state
+
+subroutine from_fieldset_state(self, geom, vars, afieldset)
+  implicit none
+  class(wrf_hydro_nwm_jedi_state), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(in) :: afieldset
+
+  call self%fields_obj%from_fieldset(geom, vars, afieldset)
+end subroutine from_fieldset_state
+
 
 
 

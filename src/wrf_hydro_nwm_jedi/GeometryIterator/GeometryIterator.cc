@@ -68,11 +68,20 @@ GeometryIterator::~GeometryIterator() {
   }
 
 // ----------------------------------------------------------------------------
+
   eckit::geometry::Point3 GeometryIterator::operator*() const {
     double lat, lon;
     wrf_hydro_nwm_jedi_geom_iter_current_f90(keyIter_, lon, lat);
     return eckit::geometry::Point3(lon, lat, 0.0);
   }
+
+// -----------------------------------------------------------------------------
+
+double GeometryIterator::getOrography() const {
+  double orography;
+  wrf_hydro_nwm_jedi_geom_iter_orography_f90(keyIter_, orography);
+  return orography;
+}
 
 // ----------------------------------------------------------------------------
 

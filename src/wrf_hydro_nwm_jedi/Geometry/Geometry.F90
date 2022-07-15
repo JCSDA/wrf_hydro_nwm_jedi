@@ -4,7 +4,7 @@ module wrf_hydro_nwm_jedi_geometry_mod
 
 use iso_c_binding, only: c_double
 
-use atlas_module, only: atlas_field, atlas_fieldset, atlas_real, atlas_functionspace_pointcloud
+use atlas_module, only: atlas_field, atlas_fieldset, atlas_integer, atlas_real, atlas_functionspace_pointcloud
 use fckit_configuration_module, only: fckit_configuration
 use wrf_hydro_nwm_jedi_util_mod, only: error_handler, indices
 use netcdf
@@ -14,8 +14,7 @@ implicit none
 private
 
 ! For doxygen purposes, this public statement is just a summary for the code reader?
-public :: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat, wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset, get_lsm_nn, get_geoval_levels
-
+public :: wrf_hydro_nwm_jedi_geometry, wrf_hydro_nwm_jedi_geometry_set_lonlat, wrf_hydro_nwm_jedi_geometry_fill_extra_fields, get_lsm_nn, get_geoval_levels
 
 ! General:
 !   The dims are generically named: 1=x, 2=y, 3=z
@@ -29,8 +28,8 @@ type, private :: wrf_hydro_nwm_lsm_geometry
    real    :: dx, dy
    real, allocatable :: lat(:,:), lon(:,:), sfc_elev(:,:)
    type(atlas_functionspace_pointcloud) :: afunctionspace
+   type(atlas_functionspace_pointcloud) :: afunctionspace_incl_halo
 end type wrf_hydro_nwm_lsm_geometry
-
 
 !> Geometry for stream channel/reach network (1D)
 type, private :: wrf_hydro_nwm_stream_geometry
@@ -38,7 +37,6 @@ type, private :: wrf_hydro_nwm_stream_geometry
    integer :: xdim_len
    real, allocatable :: lat(:), lon(:), dx(:)
 end type wrf_hydro_nwm_stream_geometry
-
 
 !> Fortran geometry object (contains specific geometry components).
 type, public :: wrf_hydro_nwm_jedi_geometry
@@ -87,13 +85,14 @@ subroutine wrf_hydro_nwm_jedi_geometry_init(self, f_conf)
 end subroutine wrf_hydro_nwm_jedi_geometry_init
 
 !> Set ATLAS lon/lat field
-subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
+subroutine wrf_hydro_nwm_jedi_geometry_set_lonlat(self, afieldset, include_halo)
   class(wrf_hydro_nwm_jedi_geometry), intent(in) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
+  logical,              intent(in) :: include_halo
 
   integer :: ix,iy,inode
   real(c_double), pointer :: real_ptr(:,:)
-  type(atlas_field) :: afield
+  type(atlas_field) :: afield, afield_incl_halo
 
   if (self%lsm_active()) then
     ! Create lon/lat field
@@ -111,16 +110,51 @@ subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat(self, afieldset)
     call afield%final()
   end if
 
-end subroutine wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat
+  ! We have no halos, so this is just a repeat of the no-halo case, but seems to be needed
+  if (include_halo) then
+    nullify(real_ptr)
+    if (self%lsm_active()) then
+      ! Create lon/lat field
+      afield_incl_halo = atlas_field(name="lonlat_including_halo", kind=atlas_real(c_double), shape=(/2, self%lsm%xdim_len*self%lsm%ydim_len/))
+      call afield_incl_halo%data(real_ptr)
+      inode = 0
+      do iy=self%lsm%ystart,self%lsm%yend
+        do ix=self%lsm%xstart,self%lsm%xend
+          inode = inode+1
+          real_ptr(1,inode) = real(self%lsm%lon(ix,iy), c_double)
+          real_ptr(2,inode) = real(self%lsm%lat(ix,iy), c_double)
+        end do
+      end do
+      call afieldset%add(afield_incl_halo)
+      call afield%final()
+    end if
+  end if
+
+end subroutine wrf_hydro_nwm_jedi_geometry_set_lonlat
 
 !> Fill ATLAS fieldset
-subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset(self, afieldset)
+subroutine wrf_hydro_nwm_jedi_geometry_fill_extra_fields(self, afieldset)
   type(wrf_hydro_nwm_jedi_geometry), intent(inout) :: self
   type(atlas_fieldset), intent(inout) :: afieldset
 
-  ! TODO
+  integer :: ix,iy,inode
+  real(c_double), pointer :: real_ptr_1(:)
+  type(atlas_field) :: afield
 
-end subroutine wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset
+    !   ! Fill with area
+  afield = self%lsm%afunctionspace%create_field(name='area',kind=atlas_real(c_double),levels=0)
+  call afield%data(real_ptr_1)
+  inode = 0
+  do iy=self%lsm%ystart,self%lsm%yend
+    do ix=self%lsm%xstart,self%lsm%xend
+      inode = inode+1
+      real_ptr_1(inode) = real(1.0, c_double)
+    end do
+  end do
+  call afieldset%add(afield)
+  call afield%final()
+
+end subroutine wrf_hydro_nwm_jedi_geometry_fill_extra_fields
 
 !> Clone the geometry object
 subroutine wrf_hydro_nwm_jedi_geometry_clone(self, other)
@@ -328,7 +362,7 @@ subroutine get_geoval_levels(self, vars, nvars, nlevels)
         call fckit_log%debug("Found "//trim(myname)//":" &
                                    & //trim(vars%variable(ivar)))
 
-      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI")
+      case ( "SNEQV", "SNOWH", "swe", "snow_depth", "LAI", "snow_water_equivalent")
 
         nlevels(ivar) = 1
         call fckit_log%debug("Found "//trim(myname)//":" &

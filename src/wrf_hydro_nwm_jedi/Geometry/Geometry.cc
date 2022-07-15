@@ -27,41 +27,48 @@ namespace wrf_hydro_nwm_jedi {
     const eckit::Configuration * configc = &conf;
     wrf_hydro_nwm_jedi_geometry_setup_f90(keyGeom_, &configc);
 
-    // Set ATLAS lon/lat field
-    atlasFieldSet_.reset(new atlas::FieldSet());
-    wrf_hydro_nwm_jedi_geometry_set_atlas_lonlat_f90(keyGeom_, atlasFieldSet_->get());
-    atlas::Field atlasField = atlasFieldSet_->field("lonlat");
+    // Set lon/lat field
+    atlas::FieldSet fs;
+    const bool include_halo = true;  // include halo so we can set up both function spaces
+    wrf_hydro_nwm_jedi_geometry_set_lonlat_f90(keyGeom_, fs.get(), include_halo);
 
-    // Create ATLAS function space
-    atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(atlasField));
+    // Create function space
+    const atlas::Field lonlatField = fs.field("lonlat");
+    functionSpace_ = atlas::functionspace::PointCloud(lonlatField);
 
-    // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_->get());
+    ASSERT(include_halo);
 
-    // Fill ATLAS fieldset
-    atlasFieldSet_.reset(new atlas::FieldSet());
-    wrf_hydro_nwm_jedi_geometry_fill_atlas_fieldset_f90(keyGeom_, atlasFieldSet_->get());
+    // Create function space with halo
+    const atlas::Field lonlatFieldInclHalo = fs.field("lonlat_including_halo");
+    functionSpaceIncludingHalo_ = atlas::functionspace::PointCloud(lonlatFieldInclHalo);
+
+    // Set function space pointer in Fortran
+    wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(keyGeom_,
+                                                   functionSpace_.get(),
+                                                   functionSpaceIncludingHalo_.get());
+
+    // Fill extra fields
+    extraFields_ = atlas::FieldSet();
+    wrf_hydro_nwm_jedi_geometry_fill_extra_fields_f90(keyGeom_, extraFields_.get());
   }
-
 
   Geometry::Geometry(const Geometry & other)
     : comm_(other.comm_) {
     wrf_hydro_nwm_jedi_geometry_clone_f90(keyGeom_, other.keyGeom_);
 
     // Copy ATLAS function space
-    atlasFunctionSpace_.reset(new atlas::functionspace::PointCloud(
-                              other.atlasFunctionSpace_->lonlat()));
+    functionSpace_ = atlas::functionspace::PointCloud(other.functionSpace_.lonlat());
+    functionSpaceIncludingHalo_ = atlas::functionspace::PointCloud(
+                                         other.functionSpaceIncludingHalo_.lonlat());
 
     // Set ATLAS function space pointer in Fortran
-    wrf_hydro_nwm_jedi_geometry_set_atlas_functionspace_pointer_f90(keyGeom_,
-        atlasFunctionSpace_.get()->get());
+    wrf_hydro_nwm_jedi_geometry_set_functionspace_pointer_f90(keyGeom_,
+        functionSpace_.get(), functionSpaceIncludingHalo_.get());
 
     // Copy ATLAS fieldset
-    atlasFieldSet_.reset(new atlas::FieldSet());
-    for (int jfield = 0; jfield < other.atlasFieldSet_->size(); ++jfield) {
-      atlas::Field atlasField = other.atlasFieldSet_->field(jfield);
-      atlasFieldSet_->add(atlasField);
+    extraFields_ = atlas::FieldSet();
+    for (auto & field : other.extraFields_) {
+      extraFields_->add(field);
     }
   }
 
@@ -75,7 +82,6 @@ namespace wrf_hydro_nwm_jedi {
 //                    __FILE__, __LINE__);
     return GeometryIterator(*this, 1, 1);
   }
-
 
   GeometryIterator Geometry::end() const {
     float dx, dy;
@@ -95,7 +101,22 @@ std::vector<size_t> Geometry::variableSizes(const oops::Variables &
   return varSizes;
 }
 // -----------------------------------------------------------------------------
+void Geometry::latlon(std::vector<double> & lats, std::vector<double> & lons,
+                      const bool halo) const {
+const atlas::FunctionSpace * fspace;
+fspace = &functionSpace_;
 
+const auto lonlat = atlas::array::make_view<double, 2>(fspace->lonlat());
+const size_t npts = fspace->size();
+lats.resize(npts);
+lons.resize(npts);
+for (size_t jj = 0; jj < npts; ++jj) {
+  lats[jj] = lonlat(jj, 1);
+  lons[jj] = lonlat(jj, 0);
+  if (lons[jj] < 0.0) lons[jj] += 360.0;
+  }
+}
+// -----------------------------------------------------------------------------
   void Geometry::print(std::ostream & os) const {
     float dx, dy;
     int npx, npy, npz;

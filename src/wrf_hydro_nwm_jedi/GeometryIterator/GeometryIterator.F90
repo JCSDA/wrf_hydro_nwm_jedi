@@ -43,6 +43,9 @@ module wrf_hydro_nwm_jedi_geometry_iter_mod
     
       !> \copybrief wrf_hydro_nwm_jedi_geom_iter_current \see wrf_hydro_nwm_jedi_geom_iter_current
       procedure :: current => wrf_hydro_nwm_jedi_geometry_iter_current
+
+      !> \copybrief wrf_hydro_nwm_jedi_geom_iter_next \see wrf_hydro_nwm_jedi_geom_iter_next
+      procedure :: orog => wrf_hydro_nwm_jedi_geometry_iter_orography      
     
       !> \copybrief wrf_hydro_nwm_jedi_geom_iter_next \see wrf_hydro_nwm_jedi_geom_iter_next
       procedure :: next => wrf_hydro_nwm_jedi_geom_iter_next
@@ -131,6 +134,29 @@ subroutine wrf_hydro_nwm_jedi_geometry_iter_equals(self, other, equals)
     endif
   
   end subroutine wrf_hydro_nwm_jedi_geometry_iter_current  
+
+! ------------------------------------------------------------------------------
+  !> Get geometry iterator current surface elevation
+  subroutine wrf_hydro_nwm_jedi_geometry_iter_orography(self, oro)
+
+    ! Passed variables
+    class(wrf_hydro_nwm_jedi_geometry_iter), intent( in) :: self
+    real(kind_real),    intent(out) :: oro  !< Orography
+
+    ! Check iindex/jindex
+    if (self%iind == -1 .AND. self%jind == -1) then
+      ! special case of {-1,-1} means end of the grid
+      oro = self%geom%lsm%sfc_elev(self%geom%lsm%xdim_len,self%geom%lsm%ydim_len)
+    elseif (self%iind < 1 .OR. self%iind > self%geom%lsm%xdim_len .OR. &
+        self%jind < 1 .OR. self%jind > self%geom%lsm%ydim_len) then
+  ! outside of the grid
+      call abor1_ftn('wrf_hydro_nwm_jedi_geom_iter_orography: iterator out of bounds')
+    else
+      ! inside of the grid
+      oro = self%geom%lsm%sfc_elev(self%iind,self%jind)
+    endif
+
+  end subroutine wrf_hydro_nwm_jedi_geometry_iter_orography
 
 ! ------------------------------------------------------------------------------
 !> Update geometry iterator to next point

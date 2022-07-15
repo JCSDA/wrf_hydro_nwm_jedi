@@ -6,10 +6,10 @@
 !> Fields (model states) implementation for wrf_hydro_nwm - jedi integration
 module wrf_hydro_nwm_jedi_fields_mod
 
-use atlas_module, only: atlas_field, atlas_fieldset, atlas_real
+use atlas_module, only: atlas_field, atlas_fieldset, atlas_real, atlas_metadata
+
 use fckit_configuration_module, only: fckit_configuration
-use iso_c_binding, only: &
-       c_int, c_float, c_double, c_char, c_null_char
+use iso_c_binding, only: c_int, c_float, c_double, c_char, c_null_char
 use datetime_mod
 use fckit_mpi_module
 use random_mod
@@ -54,6 +54,7 @@ public :: &
 type, abstract, public :: base_field
    character(len=32) :: short_name = "null"   !< Short name (to match file name)
    character(len=20) :: wrf_hydro_nwm_name = "null" !< Common name
+   character(len=20) :: interp_type = "null"  !< Interpolation type (should be nearest)
    character(len=64) :: long_name = "null"    !< More descriptive name
    character(len=32) :: units = "null"        !< Units for the field
    integer :: ncid_index                      !< Index for restart file (1=lsm, 2=hydro)
@@ -77,9 +78,9 @@ type, abstract, public :: base_field
    procedure (rms_interface), deferred :: rms
    procedure (add_incr_interface), pass(self), deferred :: add_incr
    procedure (scalar_mult_interface), pass(self), deferred :: scalar_mult
-   procedure (set_atlas_interface), deferred :: set_atlas
-   procedure (to_atlas_interface), deferred :: to_atlas
-   procedure (from_atlas_interface), deferred :: from_atlas
+   procedure (to_fieldset_interface), deferred :: to_fieldset
+   procedure (from_fieldset_interface), deferred :: from_fieldset
+   procedure (to_fieldset_ad_interface), deferred :: to_fieldset_ad
    procedure (get_point_interface), deferred :: get_point
    procedure (set_point_interface), deferred :: set_point
    ! OVERLOADED OPERATORS
@@ -202,7 +203,7 @@ abstract interface
      real(c_float)                 :: rms
    end function rms_interface
 
-   subroutine set_atlas_interface(self, geom, afieldset)
+   subroutine to_fieldset_interface(self, geom, afieldset)
      use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
      use oops_variables_mod
      use atlas_module, only: atlas_fieldset
@@ -210,9 +211,19 @@ abstract interface
      class(base_field), intent(in) :: self
      type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
      type(atlas_fieldset), intent(inout) :: afieldset
-   end subroutine set_atlas_interface
+   end subroutine to_fieldset_interface
 
-   subroutine to_atlas_interface(self, geom, afieldset)
+   subroutine from_fieldset_interface(self, geom, afieldset)
+    use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
+    use oops_variables_mod
+    use atlas_module, only: atlas_fieldset
+    import base_field
+    class(base_field), intent(inout) :: self
+    type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+    type(atlas_fieldset), intent(in) :: afieldset
+  end subroutine from_fieldset_interface
+
+   subroutine to_fieldset_ad_interface(self, geom, afieldset)
      use wrf_hydro_nwm_jedi_geometry_mod, only: wrf_hydro_nwm_jedi_geometry
      use oops_variables_mod
      use atlas_module, only: atlas_fieldset
@@ -220,15 +231,7 @@ abstract interface
      class(base_field), intent(in) :: self
      type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
      type(atlas_fieldset), intent(inout) :: afieldset
-   end subroutine to_atlas_interface
-
-   subroutine from_atlas_interface(self, afieldset)
-     use oops_variables_mod
-     use atlas_module, only: atlas_fieldset
-     import base_field
-     class(base_field), intent(inout) :: self
-     type(atlas_fieldset), intent(in) :: afieldset
-   end subroutine from_atlas_interface
+   end subroutine to_fieldset_ad_interface
 
    subroutine get_point_interface(self, geoiter, values_len, values)
     use iso_c_binding, only : c_double, c_int
@@ -238,7 +241,7 @@ abstract interface
     integer(c_int),    intent(in) :: values_len
     real(c_double),  intent(inout) :: values(values_len)
     type(wrf_hydro_nwm_jedi_geometry_iter),  intent(in) :: geoiter
-  end subroutine get_point_interface   
+  end subroutine get_point_interface
 
   subroutine set_point_interface(self, geoiter, values_len, values)
     use iso_c_binding, only : c_double, c_int
@@ -286,9 +289,9 @@ type, public :: wrf_hydro_nwm_jedi_fields
    procedure :: rms
    procedure :: dot_prod
    procedure :: schur_prod
-   procedure :: set_atlas
-   procedure :: to_atlas
-   procedure :: from_atlas
+   procedure :: to_fieldset
+   procedure :: from_fieldset
+   procedure :: to_fieldset_ad
    procedure :: get_point
    procedure :: set_point
    ! procedure :: allocate_field
@@ -326,9 +329,9 @@ type, private, extends(base_field) :: field_1d
    procedure, pass(self) :: schur_prod => schur_prod_1d
    procedure, pass(self) :: rms => rms_1d
    procedure :: scalar_mult => scalar_mult_1d
-   procedure, pass(self) :: set_atlas => set_atlas_1d
-   procedure, pass(self) :: to_atlas => to_atlas_1d
-   procedure, pass(self) :: from_atlas => from_atlas_1d
+   procedure, pass(self) :: to_fieldset => to_fieldset_1d
+   procedure, pass(self) :: from_fieldset => from_fieldset_1d
+   procedure, pass(self) :: to_fieldset_ad => to_fieldset_ad_1d
    procedure, pass(self) :: get_point => get_point_1d
    procedure, pass(self) :: set_point => set_point_1d
    ! Destructor
@@ -359,9 +362,9 @@ type, private, extends(base_field) :: field_2d
    procedure :: set_random_normal => set_random_normal_2d
    procedure :: dot_prod => dot_prod_2d
    procedure, pass(self) :: schur_prod => schur_prod_2d
-   procedure, pass(self) :: set_atlas => set_atlas_2d
-   procedure, pass(self) :: to_atlas => to_atlas_2d
-   procedure, pass(self) :: from_atlas => from_atlas_2d
+   procedure, pass(self) :: to_fieldset => to_fieldset_2d
+   procedure, pass(self) :: from_fieldset => from_fieldset_2d   
+   procedure, pass(self) :: to_fieldset_ad => to_fieldset_ad_2d
    procedure, pass(self) :: get_point => get_point_2d
    procedure, pass(self) :: set_point => set_point_2d
    ! Destructor
@@ -392,9 +395,9 @@ type, private, extends(base_field) :: field_3d
    procedure :: set_random_normal => set_random_normal_3d
    procedure :: dot_prod => dot_prod_3d
    procedure, pass(self) :: schur_prod => schur_prod_3d
-   procedure, pass(self) :: set_atlas => set_atlas_3d
-   procedure, pass(self) :: to_atlas => to_atlas_3d
-   procedure, pass(self) :: from_atlas => from_atlas_3d
+   procedure, pass(self) :: to_fieldset => to_fieldset_3d
+   procedure, pass(self) :: from_fieldset => from_fieldset_3d
+   procedure, pass(self) :: to_fieldset_ad => to_fieldset_ad_3d
    procedure, pass(self) :: get_point => get_point_3d
    procedure, pass(self) :: set_point => set_point_3d
    ! Destructor
@@ -454,24 +457,26 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='snow_water_equivalent', &
              wrf_hydro_nwm_name='SNEQV', &
+             interp_type='nearest', &            
              units='mm', &
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
-
-      case("swe")
-         vcount = vcount + 1
-         allocate(tmp_2d_field)
-         call tmp_2d_field%fill( &
-              xdim_len=geom%lsm%xdim_len, &
-              ydim_len=geom%lsm%ydim_len, &
-              short_name=vars%variable(var), &
-              long_name='snow_water_equivalent', &
-              wrf_hydro_nwm_name='SNEQV', &
-              units='mm', &
-              ncid_index=1)
-         allocate(self%fields(vcount)%field, source=tmp_2d_field)
-         deallocate(tmp_2d_field)
+      
+      case("snow_water_equivalent")
+        vcount = vcount + 1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill( &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
+             short_name=vars%variable(var), &
+             long_name='snow_water_equivalent', &
+             wrf_hydro_nwm_name='SNEQV', &
+             interp_type='nearest', &            
+             units='mm', &
+             ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
+        deallocate(tmp_2d_field)  
 
      case("SNOWH")
         vcount = vcount + 1
@@ -482,24 +487,26 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='snow_depth', &
              wrf_hydro_nwm_name='SNOWH', &
+             interp_type='nearest', &   
              units='m', &
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
       case("snow_depth")
-         vcount = vcount + 1
-         allocate(tmp_2d_field)
-         call tmp_2d_field%fill( &
-              xdim_len=geom%lsm%xdim_len, &
-              ydim_len=geom%lsm%ydim_len, &
-              short_name=vars%variable(var), &
-              long_name='snow_depth', &
-              wrf_hydro_nwm_name='SNOWH', &
-              units='m', &
-              ncid_index=1)
-         allocate(self%fields(vcount)%field, source=tmp_2d_field)
-         deallocate(tmp_2d_field)
+        vcount = vcount + 1
+        allocate(tmp_2d_field)
+        call tmp_2d_field%fill( &
+             xdim_len=geom%lsm%xdim_len, &
+             ydim_len=geom%lsm%ydim_len, &
+             short_name=vars%variable(var), &
+             long_name='snow_depth', &
+             wrf_hydro_nwm_name='SNOWH', &
+             interp_type='nearest', &   
+             units='m', &
+             ncid_index=1)
+        allocate(self%fields(vcount)%field, source=tmp_2d_field)
+        deallocate(tmp_2d_field)
 
      case("BULK_SNICE")
         vcount = vcount + 1
@@ -510,6 +517,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_snow_ice', &
              wrf_hydro_nwm_name='BULK_SNICE', &
+             interp_type='nearest', &   
              units='mm', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -524,6 +532,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_snow_liquid', &
              wrf_hydro_nwm_name='BULK_SNLIQ', &
+             interp_type='nearest', &   
              units='mm', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -538,6 +547,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var), &
              long_name='bulk_mass_weighted_snow_temp', &
              wrf_hydro_nwm_name='BULK_SNOW_T', &
+             interp_type='nearest', &   
              units='degK', &  ! TODO JLM CHECK
              ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
@@ -551,7 +561,10 @@ subroutine create(self, geom, vars)
              ydim_len=geom%lsm%ydim_len, &
              short_name=vars%variable(var),&
              long_name='leaf_area', &
-             wrf_hydro_nwm_name='LAI', units='m^2m^-2', ncid_index=1)
+             wrf_hydro_nwm_name='LAI', &
+             interp_type='nearest', &   
+             units='m^2m^-2', &
+             ncid_index=1)
         allocate(self%fields(vcount)%field, source=tmp_2d_field)
         deallocate(tmp_2d_field)
 
@@ -566,6 +579,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var),&
              long_name='snow_liquid', &
              wrf_hydro_nwm_name='SNLIQ', &
+             interp_type='nearest', &   
              units='liter', &
              ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
@@ -582,6 +596,7 @@ subroutine create(self, geom, vars)
              short_name=vars%variable(var),&
              long_name='snow_ice', &
              wrf_hydro_nwm_name='SNICE', &
+             interp_type='nearest', &   
              units='liter', &
              ncid_index=1) !> @todo: unit invented
         allocate(self%fields(vcount)%field, source=tmp_3d_field)
@@ -641,7 +656,7 @@ end subroutine fill_field_1d
 
 subroutine fill_field_2d(self, &
      xdim_len, ydim_len, &
-     short_name, long_name, wrf_hydro_nwm_name, &
+     short_name, long_name, wrf_hydro_nwm_name, interp_type, &
      units, tracer, ncid_index)
   implicit none
   class(field_2d),   intent(inout) :: self
@@ -649,6 +664,7 @@ subroutine fill_field_2d(self, &
   character(len=*),  intent(in)    :: short_name
   character(len=*),  intent(in)    :: long_name
   character(len=*),  intent(in)    :: wrf_hydro_nwm_name
+  character(len=*),  intent(in)    :: interp_type
   character(len=*),  intent(in)    :: units
   logical, optional, intent(in)    :: tracer
   integer,           intent(in)    :: ncid_index
@@ -664,6 +680,7 @@ subroutine fill_field_2d(self, &
   self%short_name   = trim(short_name)
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%interp_type  = trim(interp_type)
   self%units        = trim(units)
   self%ncid_index   = ncid_index
 end subroutine fill_field_2d
@@ -671,7 +688,7 @@ end subroutine fill_field_2d
 
 subroutine fill_field_3d(self, &
      xdim_len, ydim_len, zdim_len, &
-     short_name, long_name, wrf_hydro_nwm_name, &
+     short_name, long_name, wrf_hydro_nwm_name, interp_type, &
      units, tracer, ncid_index)
   implicit none
   class(field_3d),  intent(inout) :: self
@@ -679,6 +696,7 @@ subroutine fill_field_3d(self, &
   character(len=*), intent(in)    :: short_name
   character(len=*), intent(in)    :: long_name
   character(len=*), intent(in)    :: wrf_hydro_nwm_name
+  character(len=*), intent(in)    :: interp_type
   character(len=*), intent(in)    :: units
   logical, optional,intent(in)    :: tracer
   integer,          intent(in)    :: ncid_index
@@ -695,6 +713,7 @@ subroutine fill_field_3d(self, &
   self%short_name   = trim(short_name)
   self%long_name    = trim(long_name)
   self%wrf_hydro_nwm_name = trim(wrf_hydro_nwm_name)
+  self%interp_type   = trim(interp_type)
   self%units        = trim(units)
   self%ncid_index   = ncid_index
 end subroutine fill_field_3d
@@ -718,7 +737,7 @@ subroutine search_field(self, long_name, field_pointer, pass_wrf_hydro_name)
   if(.not.present(pass_wrf_hydro_name)) then
      !Mapping between wrf_hydro variable name and obs name
      select case (long_name)
-     case ("swe")
+     case ("snow_water_equivalent")
         wrf_hydro_nwm_name = "SNEQV"
      case ("snow_depth")
         wrf_hydro_nwm_name = "SNOWH"
@@ -2561,103 +2580,44 @@ end subroutine write_to_restart_3d_float
 ! end subroutine pointer_field_array
 
 ! -----------------------------------------------------------------------------
-! set_atlas
+! to_fieldset
 
-subroutine set_atlas(self, geom, vars, afieldset)
+subroutine to_fieldset(self, geom, vars, afieldset)
   implicit none
   class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
   type(atlas_fieldset), intent(inout) :: afieldset
+! include_halo argument is optional in f90 implementation so f90 consumers (e.g., increment) can
+! retain a simple interface with to_fielset. In the C++ interface, the argument is not optional.
   integer :: jvar, ff
   logical :: found
 
   do jvar=1,vars%nvars()
+    write(*,*) "to_fieldset_variable ", trim(vars%variable(jvar))
      found = .false.
      do ff=1,self%nf
+      write(*,*) "to_fieldset_shortname ", trim(self%fields(ff)%field%short_name)
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%set_atlas(geom, afieldset)
+           call self%fields(ff)%field%to_fieldset(geom, afieldset)
            found = .true.
         end if
     end do
-    if (.not.found) call abor1_ftn("set_atlas: field "//trim(vars%variable(jvar))//" not found")
+    if (.not.found) call abor1_ftn("to_fieldset: field "//trim(vars%variable(jvar))//" not found")
   enddo
-end subroutine set_atlas
+end subroutine to_fieldset
 
-subroutine set_atlas_1d(self, geom, afieldset)
+subroutine to_fieldset_1d(self, geom, afieldset)
   implicit none
   class(field_1d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(inout) :: afieldset
 
-  call abor1_ftn("set_atlas_1d: no set_atlas interface for 1d fields")
-end subroutine set_atlas_1d
+  call abor1_ftn("to_fieldset_1d: no to_fieldset interface for 1d fields")
 
-subroutine set_atlas_2d(self, geom, afieldset)
-  implicit none
-  class(field_2d), intent(in) :: self
-  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
-  type(atlas_fieldset), intent(inout) :: afieldset
+end subroutine to_fieldset_1d
 
-  type(atlas_field) :: afield
-
-  if (.not.afieldset%has_field(self%long_name)) then
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
-    call afieldset%add(afield)
-    call afield%final()
-  end if
-end subroutine set_atlas_2d
-
-subroutine set_atlas_3d(self, geom, afieldset)
-  implicit none
-  class(field_3d), intent(in) :: self
-  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
-  type(atlas_fieldset), intent(inout) :: afieldset
-
-  type(atlas_field) :: afield
-
-  if (.not.afieldset%has_field(self%long_name)) then
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
-    call afieldset%add(afield)
-    call afield%final()
-  end if
-end subroutine set_atlas_3d
-
-! -----------------------------------------------------------------------------
-! to_atlas
-
-subroutine to_atlas(self, geom, vars, afieldset)
-  implicit none
-  class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
-  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
-  type(oops_variables), intent(in) :: vars
-  type(atlas_fieldset), intent(inout) :: afieldset
-  integer :: jvar, ff
-  logical :: found
-
-  do jvar=1,vars%nvars()
-     found = .false.
-     do ff=1,self%nf
-        if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%to_atlas(geom, afieldset)
-           found = .true.
-        end if
-    end do
-    if (.not.found) call abor1_ftn("to_atlas: field "//trim(vars%variable(jvar))//" not found")
-  enddo
-end subroutine to_atlas
-
-subroutine to_atlas_1d(self, geom, afieldset)
-  implicit none
-  class(field_1d), intent(in) :: self
-  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
-  type(atlas_fieldset), intent(inout) :: afieldset
-
-  call abor1_ftn("to_atlas_1d: no to_atlas interface for 1d fields")
-
-end subroutine to_atlas_1d
-
-subroutine to_atlas_2d(self, geom, afieldset)
+subroutine to_fieldset_2d(self, geom, afieldset)
   implicit none
   class(field_2d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
@@ -2666,11 +2626,15 @@ subroutine to_atlas_2d(self, geom, afieldset)
   integer :: ix, iy, inode
   real(c_double), pointer :: ptr(:)
   type(atlas_field) :: afield
-
+  type(atlas_metadata) :: meta
+  
   if (afieldset%has_field(self%long_name)) then
+    write(*,*) "has field"
     afield = afieldset%field(trim(self%long_name))
   else
-    afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+
+    write(*,*) "call afieldset"
     call afieldset%add(afield)
   end if
   call afield%data(ptr)
@@ -2681,10 +2645,12 @@ subroutine to_atlas_2d(self, geom, afieldset)
        ptr(inode) = real(self%array(ix, iy), c_double)
     enddo
   enddo
+  meta = afield%metadata()
+  call meta%set('interp_type', trim(self%interp_type))
   call afield%final()
-end subroutine to_atlas_2d
+end subroutine to_fieldset_2d
 
-subroutine to_atlas_3d(self, geom, afieldset)
+subroutine to_fieldset_3d(self, geom, afieldset)
   implicit none
   class(field_3d), intent(in) :: self
   type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
@@ -2693,14 +2659,17 @@ subroutine to_atlas_3d(self, geom, afieldset)
   integer :: ix, iy, iz, inode
   real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
-
+  type(atlas_metadata) :: meta
+  
   if (afieldset%has_field(self%long_name)) then
     afield = afieldset%field(trim(self%long_name))
   else
+    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
     afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
     call afieldset%add(afield)
   end if
   call afield%data(ptr)
+
   do iz=1, self%zdim_len
     inode = 0
     do iy=1, self%ydim_len
@@ -2710,17 +2679,20 @@ subroutine to_atlas_3d(self, geom, afieldset)
       enddo
     enddo
   enddo
+  meta = afield%metadata()
+  call meta%set('interp_type', 'nearest')
   call afield%final()
-end subroutine to_atlas_3d
+end subroutine to_fieldset_3d
 
 ! -----------------------------------------------------------------------------
-! from_atlas
+! to_fieldset_ad
 
-subroutine from_atlas(self, vars, afieldset)
+subroutine to_fieldset_ad(self, geom, vars, afieldset)
   implicit none
-  class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
+  class(wrf_hydro_nwm_jedi_fields), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(oops_variables), intent(in) :: vars
-  type(atlas_fieldset), intent(in) :: afieldset
+  type(atlas_fieldset), intent(inout) :: afieldset
   integer :: jvar, ff
   logical :: found
 
@@ -2728,26 +2700,123 @@ subroutine from_atlas(self, vars, afieldset)
      found = .false.
      do ff=1,self%nf
         if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
-           call self%fields(ff)%field%from_atlas(afieldset)
+           call self%fields(ff)%field%to_fieldset_ad(geom, afieldset)
            found = .true.
         end if
     end do
-    if (.not.found) call abor1_ftn("from_atlas: field "//trim(vars%variable(jvar))//" not found")
+    if (.not.found) call abor1_ftn("from_fieldset: field "//trim(vars%variable(jvar))//" not found")
   enddo
-end subroutine from_atlas
+end subroutine to_fieldset_ad
 
-subroutine from_atlas_1d(self, afieldset)
+subroutine to_fieldset_ad_1d(self, geom, afieldset)
+  implicit none
+  class(field_1d), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  call abor1_ftn("to_fieldset_ad_1d: no to_fieldset_ad interface for 1d fields")
+
+end subroutine to_fieldset_ad_1d
+
+subroutine to_fieldset_ad_2d(self, geom, afieldset)
+  implicit none
+  class(field_2d), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  integer :: ix, iy, inode
+  real(c_double), pointer :: ptr(:)
+  type(atlas_field) :: afield
+
+  call abor1_ftn("to_fieldset_ad_2d: no to_fieldset_ad interface for 2d fields")
+
+  ! if (afieldset%has_field(self%long_name)) then
+  !   afield = afieldset%field(trim(self%long_name))
+  ! else
+  !   afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+  !   call afieldset%add(afield)
+  ! end if
+  ! call afield%data(ptr)
+  ! inode = 0
+  ! do iy=1, self%ydim_len
+  !   do ix=1, self%xdim_len
+  !      inode = inode+1
+  !      ptr(inode) = real(self%array(ix, iy), c_double)
+  !   enddo
+  ! enddo
+  ! call afield%final()
+end subroutine to_fieldset_ad_2d
+
+subroutine to_fieldset_ad_3d(self, geom, afieldset)
+  implicit none
+  class(field_3d), intent(in) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(atlas_fieldset), intent(inout) :: afieldset
+
+  integer :: ix, iy, iz, inode
+  real(c_double), pointer :: ptr(:,:)
+  type(atlas_field) :: afield
+
+  call abor1_ftn("to_fieldset_ad_3d: no to_fieldset_ad interface for 3d fields")
+
+  ! if (afieldset%has_field(self%long_name)) then
+  !   afield = afieldset%field(trim(self%long_name))
+  ! else
+  !   afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
+  !   call afieldset%add(afield)
+  ! end if
+  ! call afield%data(ptr)
+  ! do iz=1, self%zdim_len
+  !   inode = 0
+  !   do iy=1, self%ydim_len
+  !     do ix=1, self%xdim_len
+  !        inode = inode+1
+  !        ptr(iz, inode) = real(self%array(ix, iy, iz), c_double)
+  !     enddo
+  !   enddo
+  ! enddo
+  ! call afield%final()
+end subroutine to_fieldset_ad_3d
+
+! -----------------------------------------------------------------------------
+! from_fieldset
+
+subroutine from_fieldset(self, geom, vars, afieldset)
+  implicit none
+  class(wrf_hydro_nwm_jedi_fields), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
+  type(oops_variables), intent(in) :: vars
+  type(atlas_fieldset), intent(in) :: afieldset
+  integer :: jvar, ff
+  logical :: found
+
+  do jvar=1,vars%nvars()
+    write(*,*) "from_fieldset_variable ", trim(vars%variable(jvar))
+     found = .false.
+     do ff=1,self%nf
+        if (trim(self%fields(ff)%field%short_name)==trim(vars%variable(jvar))) then
+           call self%fields(ff)%field%from_fieldset(geom, afieldset)
+           found = .true.
+        end if
+    end do
+    if (.not.found) call abor1_ftn("from_fieldset: field "//trim(vars%variable(jvar))//" not found")
+  enddo
+end subroutine from_fieldset
+
+subroutine from_fieldset_1d(self, geom, afieldset)
   implicit none
   class(field_1d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
-  call abor1_ftn("from_atlas_1d: no from_atlas interface for 1d fields")
+  call abor1_ftn("from_fieldset: no from_fieldset interface for 1d fields")
 
-end subroutine from_atlas_1d
+end subroutine from_fieldset_1d
 
-subroutine from_atlas_2d(self, afieldset)
+subroutine from_fieldset_2d(self, geom, afieldset)
   implicit none
   class(field_2d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
   integer :: ix, iy, inode
@@ -2764,11 +2833,12 @@ subroutine from_atlas_2d(self, afieldset)
     enddo
   enddo
   call afield%final()
-end subroutine from_atlas_2d
+end subroutine from_fieldset_2d
 
-subroutine from_atlas_3d(self, afieldset)
+subroutine from_fieldset_3d(self, geom, afieldset)
   implicit none
   class(field_3d), intent(inout) :: self
+  type(wrf_hydro_nwm_jedi_geometry), intent(in) :: geom
   type(atlas_fieldset), intent(in) :: afieldset
 
   integer :: ix, iy, iz, inode
@@ -2787,7 +2857,7 @@ subroutine from_atlas_3d(self, afieldset)
     enddo
   enddo
   call afield%final()
-end subroutine from_atlas_3d
+end subroutine from_fieldset_3d
 
 ! -----------------------------------------------------------------------------
 ! get_point

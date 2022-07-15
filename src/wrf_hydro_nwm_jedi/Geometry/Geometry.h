@@ -18,7 +18,6 @@
 
 #include "eckit/mpi/Comm.h"
 
-#include "oops/base/Variables.h"
 #include "oops/util/ObjectCounter.h"
 #include "oops/util/Printable.h"
 
@@ -29,9 +28,9 @@
 namespace eckit {
   class Configuration;
 }
-// namespace wrf_hydro_nwm_jedi {
-//   class GeometryIterator;
-// }
+namespace wrf_hydro_nwm_jedi {
+  class GeometryIterator;
+}
 namespace oops {
   class Variables;
 }
@@ -57,17 +56,22 @@ namespace wrf_hydro_nwm_jedi {
     const F90geom & toFortran() const {return keyGeom_;}
     const eckit::mpi::Comm & getComm() const {return comm_;}
     std::vector<size_t> variableSizes(const oops::Variables &) const;
-    atlas::FunctionSpace * atlasFunctionSpace() const {return atlasFunctionSpace_.get();}
-    atlas::FieldSet * atlasFieldSet() const {return atlasFieldSet_.get();}
+    std::vector<double> verticalCoord(std::string &) const {return {};}
 
+    const atlas::FunctionSpace & functionSpace() const {return functionSpaceIncludingHalo_;}
+    atlas::FunctionSpace & functionSpace() {return functionSpaceIncludingHalo_;}
+    const atlas::FieldSet & extraFields() const {return extraFields_;}
+    atlas::FieldSet & extraFields() {return extraFields_;}
+    void latlon(std::vector<double> &, std::vector<double> &, const bool) const;
 
    private:
     void print(std::ostream &) const;
     Geometry & operator=(const Geometry &);
     F90geom keyGeom_;
     const eckit::mpi::Comm & comm_;
-    std::unique_ptr<atlas::functionspace::PointCloud> atlasFunctionSpace_;
-    std::unique_ptr<atlas::FieldSet> atlasFieldSet_;
+    atlas::FunctionSpace functionSpace_;
+    atlas::FunctionSpace functionSpaceIncludingHalo_;
+    atlas::FieldSet extraFields_;
   };
 }  // namespace wrf_hydro_nwm_jedi
 

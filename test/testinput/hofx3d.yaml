@@ -1,5 +1,5 @@
-# window begin: '2016-12-31T23:30:00Z' 
-window begin: &date '2017-01-01T00:00:00Z'
+window begin: &date '2016-12-31T23:30:00Z' 
+#window begin: &date '2017-01-01T00:00:00Z'
 window length: PT1H
 
 geometry:
@@ -14,24 +14,25 @@ state:
   filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
 
 observations:
-- obs space:
-    name: 'Simulate'
-    simulated variables: ['swe']
-    obsdatain:
-      obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
-    obsdataout:
-      obsfile: 'Data/hofx/hofx3d.swe.nc'
-  obs operator:
-      name: 'Identity'
-- obs space:
-    name: 'Simulate'
-    simulated variables: ['snow_depth']
-    obsdatain:
-      obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
-    obsdataout:
-      obsfile: 'Data/hofx/hofx3d.snow_depth.nc'
-  obs operator:
-      name: 'Identity'
+  observers:
+  - obs space:
+      name: 'Simulate'
+      simulated variables: ['snow_water_equivalent']
+      obsdatain:
+        obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
+      obsdataout:
+        obsfile: 'Data/hofx/hofx3d.swe.nc'
+    obs operator:
+        name: 'Identity'
+  - obs space:
+      name: 'Simulate'
+      simulated variables: ['snow_depth']
+      obsdatain:
+        obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
+      obsdataout:
+        obsfile: 'Data/hofx/hofx3d.snow_depth.nc'
+    obs operator:
+        name: 'Identity'
 
 test:
   reference filename: testoutput/hofx3d_identity.ref

@@ -18,7 +18,9 @@
 
 #include "eckit/mpi/Comm.h"
 
+#include "oops/base/ParameterTraitsVariables.h"
 #include "oops/base/Variables.h"
+#include "oops/base/WriteParametersBase.h"
 
 #include "oops/util/DateTime.h"
 #include "oops/util/ObjectCounter.h"
@@ -36,10 +38,7 @@ namespace eckit {
 namespace oops {
   class Variables;
 }
-namespace ufo {
-  class GeoVaLs;
-  class Locations;
-}
+
 namespace wrf_hydro_nwm_jedi {
   class Fields;
   class GetValuesTraj;
@@ -68,15 +67,6 @@ namespace wrf_hydro_nwm_jedi {
     State(const State &);
     State & operator=(const State &);
     ~State();
-
-    // interpolate state to observations locations
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &) const;
-    void getValues(const ufo::Locations &,
-                   const oops::Variables &,
-                   ufo::GeoVaLs &,
-                   GetValuesTraj &) const;
 
     // interactions with increment
     State & operator+=(const Increment &);
@@ -110,6 +100,10 @@ namespace wrf_hydro_nwm_jedi {
     // validTime()
     const util::DateTime & validTime() const { return time_; }
     util::DateTime & validTime() { return time_; }
+
+    // Accessors to the ATLAS fieldset
+    void toFieldSet(atlas::FieldSet &) const;
+    void fromFieldSet(const atlas::FieldSet &);
 
     /* F90state & toFortran() {return keyState_;} */
     const F90state & toFortran() const {return keyState_;}
