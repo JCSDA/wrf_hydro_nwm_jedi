@@ -8,14 +8,14 @@ background:
   members:
     - date: &date 2017-01-01T00:00:00Z
       read_from_file: 1
-      filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
+      filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem0001
       filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-      state variables: ['SNEQV']
+      state variables: ['SNOWH']
     - date: 2017-01-01T00:00:00Z
       read_from_file: 1
-      filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+      filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem002
       filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
-      state variables: ['SNEQV']  
+      state variables: ['SNOWH']  
 
 observations:
   observers:
@@ -34,8 +34,8 @@ observations:
         covariance model: 'diagonal'
     obs localizations:
     - localization method: Horizontal SOAR
-      lengthscale: 2500000e3
-      soar horizontal decay: 0.0000821
+      lengthscale: 250e3
+      soar horizontal decay: 0.000021
       max nobs: 50
     - localization method: Vertical Brasnett
       vertical lengthscale: 500 
