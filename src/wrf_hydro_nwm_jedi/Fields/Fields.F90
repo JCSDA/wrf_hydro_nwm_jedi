@@ -2624,7 +2624,7 @@ subroutine to_fieldset_2d(self, geom, afieldset)
   type(atlas_fieldset), intent(inout) :: afieldset
 
   integer :: ix, iy, inode
-  real(c_double), pointer :: ptr(:)
+  real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
   type(atlas_metadata) :: meta
   
@@ -2632,7 +2632,7 @@ subroutine to_fieldset_2d(self, geom, afieldset)
     write(*,*) "has field"
     afield = afieldset%field(trim(self%long_name))
   else
-    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=1)
 
     write(*,*) "call afieldset"
     call afieldset%add(afield)
@@ -2642,7 +2642,7 @@ subroutine to_fieldset_2d(self, geom, afieldset)
   do iy=1, self%ydim_len
     do ix=1, self%xdim_len
        inode = inode+1
-       ptr(inode) = real(self%array(ix, iy), c_double)
+       ptr(1,inode) = real(self%array(ix, iy), c_double)
     enddo
   enddo
   meta = afield%metadata()
@@ -2664,7 +2664,7 @@ subroutine to_fieldset_3d(self, geom, afieldset)
   if (afieldset%has_field(self%long_name)) then
     afield = afieldset%field(trim(self%long_name))
   else
-    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=0)
+    afield = geom%lsm%afunctionspace_incl_halo%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
     afield = geom%lsm%afunctionspace%create_field(name=self%long_name,kind=atlas_real(c_double),levels=self%zdim_len)
     call afieldset%add(afield)
   end if
@@ -2725,7 +2725,7 @@ subroutine to_fieldset_ad_2d(self, geom, afieldset)
   type(atlas_fieldset), intent(inout) :: afieldset
 
   integer :: ix, iy, inode
-  real(c_double), pointer :: ptr(:)
+  real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
 
   call abor1_ftn("to_fieldset_ad_2d: no to_fieldset_ad interface for 2d fields")
@@ -2820,7 +2820,7 @@ subroutine from_fieldset_2d(self, geom, afieldset)
   type(atlas_fieldset), intent(in) :: afieldset
 
   integer :: ix, iy, inode
-  real(c_double), pointer :: ptr(:)
+  real(c_double), pointer :: ptr(:,:)
   type(atlas_field) :: afield
 
   afield = afieldset%field(trim(self%long_name))
@@ -2829,7 +2829,7 @@ subroutine from_fieldset_2d(self, geom, afieldset)
   do iy=1, self%ydim_len
     do ix=1, self%xdim_len
        inode = inode+1
-       self%array(ix, iy) = real(ptr(inode), c_float)
+       self%array(ix, iy) = real(ptr(1,inode), c_float)
     enddo
   enddo
   call afield%final()
