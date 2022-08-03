@@ -18,6 +18,7 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   testinput/3dvar.yaml
   testinput/makeobs.yaml
   testinput/geometry_iterator.yaml
+  testinput/letkf_oi.yaml
   testoutput/make_obs_3d.ref
   testoutput/hofx3d_identity.ref
   testoutput/staticb.ref
@@ -27,9 +28,13 @@ list( APPEND wrf_hydro_nwm_jedi_test_input
   Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
   Data/wrf_hydro_nwm_files/nwm_osse_ioda.nc
   Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem001
+  Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem002
   Data/wrf_hydro_nwm_files/RESTART.2019040100_DOMAIN1_BULK
   Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
   Data/wrf_hydro_nwm_files/RESTART.2017010100_sneqv_plus5_DOMAIN1
+  Data/letkf_obs/ctest_letkf_oi_depth_out.nc
+  Data/letkf_obs/ctest_letkf_oi_swe_out.nc
   )
 
 #list( APPEND wrf_hydro_nwm_jedi_test_input_cp
@@ -46,6 +51,8 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/hofx)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/staticb)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/dirac)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/3dvar)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/ioda_obs)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs)
 foreach(FILENAME ${wrf_hydro_nwm_jedi_test_input})
   execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
     ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
@@ -190,3 +197,38 @@ ecbuild_add_test(
    DEPENDS      wrf_hydro_nwm_jedi_var.x
    ARGS         testinput/3dvar.yaml
    MPI          1 )
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_letkf_lsm_files_1
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem001
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.1.2017-01-01T00:00:00Z.PT0S)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_letkf_lsm_files_2
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem002
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.2.2017-01-01T00:00:00Z.PT0S)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_letkf_hydro_files
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.1.2017-01-01T00:00:00Z.PT0S
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.2.2017-01-01T00:00:00Z.PT0S)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_letkf_oi
+   TYPE         EXE
+   COMMAND      ${CMAKE_BINARY_DIR}/bin/wrf_hydro_nwm_jedi_letkf.x
+   DEPENDS      wrf_hydro_nwm_jedi_letkf.x
+   TEST_DEPENDS test_wrf_hydro_jedi_stage_letkf_lsm_files_1
+                test_wrf_hydro_jedi_stage_letkf_lsm_files_2
+                test_wrf_hydro_jedi_stage_letkf_hydro_files
+   ARGS         testinput/letkf_oi.yaml)
