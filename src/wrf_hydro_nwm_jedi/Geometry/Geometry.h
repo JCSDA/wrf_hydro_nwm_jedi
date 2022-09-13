@@ -49,6 +49,8 @@ namespace wrf_hydro_nwm_jedi {
     Geometry(const Geometry &);
     ~Geometry();
 
+    bool levelsAreTopDown() const {return true;}
+
     // These are needed for the GeometryIterator Interface
     GeometryIterator begin() const;
     GeometryIterator end() const;
