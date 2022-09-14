@@ -201,6 +201,10 @@ namespace wrf_hydro_nwm_jedi {
     delete[] string;
   }
 
+  std::vector<double> Increment::rmsByLevel(const std::string &) const {
+    util::abor1_cpp("rmsByLevel not implemented");
+    return {};
+  }
 
   // const util::DateTime & time() const {return time_;}
   // util::DateTime & time() {return time_;}

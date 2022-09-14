@@ -91,6 +91,8 @@ namespace wrf_hydro_nwm_jedi {
     void random();
     void dirac(const eckit::Configuration &);
 
+    std::vector<double> rmsByLevel(const std::string &) const;
+
     /// Getpoint/Setpoint
     oops::LocalIncrement getLocal(const GeometryIterator &) const;
     void setLocal(const oops::LocalIncrement &, const GeometryIterator &);
