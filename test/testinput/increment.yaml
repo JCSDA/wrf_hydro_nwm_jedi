@@ -6,3 +6,5 @@ inc variables: &model_vars ['SNEQV']  # , 'SNOWH']
 increment test:
   date: &date 2017-01-01T00:00:00Z
   tolerance: 4e-7
+  skip atlas: 1
+  skip rms by level test: 1
