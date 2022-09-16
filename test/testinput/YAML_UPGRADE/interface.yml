@@ -1,0 +1,42 @@
+# Tests used by:
+#   - TestGeometry
+#   ? TestState
+#   - TestModel
+#   - TestInterface
+
+# + needed for TestGeometry
+Geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+# + needed for TestState
+StateTest:
+  norm-file: 0.0
+  tolerance: 1.0e-12
+  date: 2018-04-15T00:00:00Z
+  StateGenerate:
+    filename_lsm: RESTART
+    filename_hydro: HYDRO_RST
+  StateFile:
+    filename_lsm: RESTART
+    filename_hydro: HYDRO_RST
+  norm-gen: 0.0
+
+# + needed for TestModel  
+Model:
+  name: WRF_HYDRO_NWM_JEDI
+
+ModelBias:
+
+State:
+
+ModelTest:
+  fclength:  P1D
+  finalnorm: 0.0
+  tolerance: 1e-12
+  testreforecast: true
+
+# + needed for TestInterface
+Variables:
+  variables: ['SNEQV', 'qlink1']
+
+TestDate: 2018-04-15T00:00:00Z

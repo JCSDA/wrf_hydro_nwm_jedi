@@ -1,0 +1,71 @@
+geometry:
+  input_file: Data/wrf_hydro_nwm_files/geometry_nwm_long_range_snow.nc
+
+model:
+  name: 'WRF_HYDRO_NWM_JEDI'
+  tstep: PT1H
+  model variables: &model_vars ['SNEQV', 'SNOWH']
+
+initial condition:
+  read_from_file: 1
+  date: &date 2017-01-01T00:00:00Z
+  #date: &date 2016-12-31T23:30:00Z
+  basename: "./INPUT/"
+  filename_lsm: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+  filename_hydro: ./Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+  state variables: *model_vars 
+
+forecast length: PT1H
+window begin: *date
+window length: PT30M
+
+observations:
+  observers:
+    - obs space:
+        name: 'Simulate'
+        simulated variables: ['snow_water_equivalent']
+        obsdatain:
+          engine:
+            type: GenRandom
+            nobs: 20
+            lat1: 38.84555
+            lat2: 39.07063
+            lon1: -106.78723
+            lon2: -106.45606
+            random seed: 29837
+            obs errors: [10.0]
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: 'Data/make_obs/make_obs_3d.swe.nc'
+      obs operator:
+        name: 'Identity'
+      obs error:
+        covariance model: diagonal
+    - obs space:
+        name: 'Simulate'
+        simulated variables: ['snow_depth']
+        obsdatain:
+          engine:
+            type: GenRandom
+            nobs: 20
+            lat1: 38.84555
+            lat2: 39.07063
+            lon1: -106.78723
+            lon2: -106.45606
+            random seed: 29837
+            obs errors: [.04]
+        obsdataout:
+          engine:
+            type: H5File
+            obsfile: 'Data/make_obs/make_obs_3d.snow_depth.nc'
+      obs operator:
+        name: 'Identity'
+      obs error:
+        covariance model: diagonal
+make obs: true
+obs perturbations: true
+
+test:
+  reference filename: testoutput/make_obs_3d.ref
+  test output filename: testoutput/make_obs_3d.log.out
