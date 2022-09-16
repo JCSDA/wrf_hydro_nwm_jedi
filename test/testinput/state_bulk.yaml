@@ -14,8 +14,3 @@ state test:
     state variables: ['BULK_SNLIQ']
 
   
-  # state generate:
-  #   model_filename: ./Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
-  #   # model_filename: RESTART
-  #   date: '2017-01-01T00:00:00Z'
-  #   state variables: ['SNEQV']

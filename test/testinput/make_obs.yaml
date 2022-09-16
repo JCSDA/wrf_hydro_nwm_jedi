@@ -24,17 +24,20 @@ observations:
     - obs space:
         name: 'Simulate'
         simulated variables: ['swe']
-        generate:
-          random:
+        obsdatain:
+          engine:
+            type: GenRandom
             nobs: 100
             lat1: 38.84555
             lat2: 39.07063
             lon1: -106.78723
             lon2: -106.45606
             random seed: 29837
-          obs errors: [.0001]
+            obs errors: [.0001]
         obsdataout:
-          obsfile: 'Data/make_obs/make_obs_3d.swe.nc'
+          engine:
+            type: H5File
+            obsfile: 'Data/make_obs/make_obs_3d.swe.nc'
       obs operator:
         name: 'Identity'
       obs error:
@@ -42,17 +45,20 @@ observations:
     - obs space:
         name: 'Simulate'
         simulated variables: ['snow_depth']
-        generate:
-          random:
+        obsdatain:
+          engine:
+            type: GenRandom
             nobs: 200
             lat1: 38.84555
             lat2: 39.07063
             lon1: -106.78723
             lon2: -106.45606
             random seed: 29837
-          obs errors: [.08]
+            obs errors: [.08]
         obsdataout:
-          obsfile: 'Data/make_obs/make_obs_3d.snow_depth.nc'
+          engine:
+            type: H5File
+            obsfile: 'Data/make_obs/make_obs_3d.snow_depth.nc'
       obs operator:
         name: 'Identity'
       obs error:

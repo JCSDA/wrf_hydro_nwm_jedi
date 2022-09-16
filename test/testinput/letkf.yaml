@@ -23,9 +23,13 @@ observations:
     distribution: InefficientDistribution
     simulated variables: ['swe']
     obsdatain:
-      obsfile: './Data/make_obs/make_obs_3d.swe_0000.nc'
+      engine:
+        type: H5File
+        obsfile: './Data/make_obs/make_obs_3d.swe_0000.nc'
     obsdataout:
-      obsfile: './Data/letkf/make_obs_3d.swe.nc'
+      engine:
+        type: H5File
+        obsfile: './Data/letkf/make_obs_3d.swe.nc'
   obs operator:
       name: 'Identity'    
   obs error:
