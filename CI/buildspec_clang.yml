@@ -98,7 +98,10 @@ phases:
 
       # configure and build
       - cd /build_container
-      - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/wrf_hydro_nwm-bundle
+      - source /etc/profile.d/z10_spack_environment.sh
+      # for jedi-cmake
+      - export jedi_cmake_ROOT=/opt/view
+      - ecbuild -Wno-dev -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCDASH_OVERRIDE_SITE=CodeBuild -DCDASH_OVERRIDE_SYSTEM_NAME=ClangContainer -DCDASH_OVERRIDE_GIT_BRANCH=$CODEBUILD_GIT_BRANCH -DCTEST_UPDATE_VERSION_ONLY=FALSE /jcsda/wrf_hydro_nwm-bundle
       - cd wrf_hydro_nwm_jedi
       - cp ../DartConfiguration.tcl .
       - sed -i 's/wrf_hydro_nwm-bundle/wrf_hydro_nwm-bundle\/wrf_hydro_nwm_jedi/' DartConfiguration.tcl
