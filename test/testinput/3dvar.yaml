@@ -36,9 +36,13 @@ cost function:
       name: 'Identity'
     obs space:
       obsdatain:
-        obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
+        engine:
+          type: H5File
+          obsfile: 'Data/make_obs/make_obs_3d.swe_0000.nc'
       obsdataout:
-        obsfile: 'Data/3dvar/3dvar.swe.nc'
+        engine:
+          type: H5File
+          obsfile: 'Data/3dvar/3dvar.swe.nc'
       name: 'Simulate'
       simulated variables: ['swe']
   # - obs error:
@@ -46,10 +50,14 @@ cost function:
   #   obs operator:
   #     name: 'Identity'
   #   obs space:
-  #     obsdatain:
-  #       obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
-  #     obsdataout:
-  #       obsfile: 'Data/3dvar/3dvar.snow_depth.nc'
+#       obsdatain:
+#         engine:
+#           type: H5File
+#           obsfile: 'Data/make_obs/make_obs_3d.snow_depth_0000.nc'
+#       obsdataout:
+#         engine:
+#           type: H5File
+#           obsfile: 'Data/3dvar/3dvar.snow_depth.nc'
   #     name: 'Simulate'
   #     simulated variables: ['snow_depth']
 
