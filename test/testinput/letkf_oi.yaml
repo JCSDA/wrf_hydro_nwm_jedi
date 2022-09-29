@@ -25,7 +25,7 @@ observations:
         name: InefficientDistribution
       simulated variables: ['snow_depth']
       obsdatain:
-        obsfile: './Data/ioda_obs/ctest_letkf_oi_depth_out.nc'
+        obsfile: './Data/letkf_obs/ctest_letkf_oi_depth_out.nc'
       obsdataout:
         obsfile: './Data/letkf_obs/letkf_oi_swe.nc'
     obs operator:
