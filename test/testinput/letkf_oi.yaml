@@ -45,6 +45,9 @@ observations:
       vertical lengthscale: 500
 
 driver:
+  save posterior mean: true
+  save posterior mean increment: true
+  update obs config with geometry info: false
 
 local ensemble DA:
   solver: LETKF
@@ -58,3 +61,9 @@ output:
   date: *date
   exp: letkf
   type: ens
+
+output increment:
+  datadir: 'Data/letkf_obs'
+  date: *date
+  exp: letkf.increment
+  type: an
