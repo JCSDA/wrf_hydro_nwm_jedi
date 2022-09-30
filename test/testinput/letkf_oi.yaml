@@ -25,9 +25,13 @@ observations:
         name: InefficientDistribution
       simulated variables: ['snow_depth']
       obsdatain:
-        obsfile: './Data/letkf_obs/ctest_letkf_oi_depth_out.nc'
+        engine:
+          type: H5File
+          obsfile: ./Data/letkf_obs/ctest_letkf_oi_depth_out.nc
       obsdataout:
-        obsfile: './Data/letkf_obs/letkf_oi_swe.nc'
+        engine:
+          type: H5File
+          obsfile: ./Data/letkf_obs/letkf_oi_depth.nc
     obs operator:
         name: 'Identity'
     obs error:
@@ -41,6 +45,9 @@ observations:
       vertical lengthscale: 500
 
 driver:
+  save posterior mean: true
+  save posterior mean increment: true
+  update obs config with geometry info: false
 
 local ensemble DA:
   solver: LETKF
@@ -53,4 +60,10 @@ output:
   datadir: 'Data/letkf_obs'
   date: *date
   exp: letkf
-  type: 'ens'
+  type: ens
+
+output increment:
+  datadir: 'Data/letkf_obs'
+  date: *date
+  exp: letkf.increment
+  type: an

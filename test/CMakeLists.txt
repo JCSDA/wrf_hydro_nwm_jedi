@@ -204,7 +204,7 @@ ecbuild_add_test(
    COMMAND      ${BASH_PROGRAM}
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
                 ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem001
-                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.1.2017-01-01T00:00:00Z.PT0S)
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.0.2017-01-01T00:00:00Z.PT0S)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_stage_letkf_lsm_files_2
@@ -212,7 +212,23 @@ ecbuild_add_test(
    COMMAND      ${BASH_PROGRAM}
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
                 ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem002
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.1.2017-01-01T00:00:00Z.PT0S)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_letkf_lsm_files_3
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1_mem002
                 ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.lsm.ens.2.2017-01-01T00:00:00Z.PT0S)
+
+ecbuild_add_test(
+   TARGET       test_wrf_hydro_jedi_stage_letkf_increment_file
+   TYPE         SCRIPT
+   COMMAND      ${BASH_PROGRAM}
+   ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/Data/wrf_hydro_nwm_files/RESTART.2017010100_DOMAIN1
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.increment.lsm.an.2017-01-01T00:00:00Z)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_stage_letkf_hydro_files
@@ -220,8 +236,10 @@ ecbuild_add_test(
    COMMAND      ${BASH_PROGRAM}
    ARGS         ${CMAKE_CURRENT_BINARY_DIR}/cp_file.sh
                 Data/wrf_hydro_nwm_files/HYDRO_RST.2017-01-01_00:00_DOMAIN1
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.0.2017-01-01T00:00:00Z.PT0S
                 ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.1.2017-01-01T00:00:00Z.PT0S
-                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.2.2017-01-01T00:00:00Z.PT0S)
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.hyd.ens.2.2017-01-01T00:00:00Z.PT0S
+                ${CMAKE_CURRENT_BINARY_DIR}/Data/letkf_obs/letkf.increment.hyd.an.2017-01-01T00:00:00Z)
 
 ecbuild_add_test(
    TARGET       test_wrf_hydro_jedi_letkf_oi
@@ -230,5 +248,7 @@ ecbuild_add_test(
    DEPENDS      wrf_hydro_nwm_jedi_letkf.x
    TEST_DEPENDS test_wrf_hydro_jedi_stage_letkf_lsm_files_1
                 test_wrf_hydro_jedi_stage_letkf_lsm_files_2
+                test_wrf_hydro_jedi_stage_letkf_lsm_files_3
                 test_wrf_hydro_jedi_stage_letkf_hydro_files
+                test_wrf_hydro_jedi_stage_letkf_increment_file
    ARGS         testinput/letkf_oi.yaml)
